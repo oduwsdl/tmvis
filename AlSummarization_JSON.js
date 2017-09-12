@@ -14,6 +14,13 @@
 *   summarization returned.
 */
 
+/**************************************
+* AlSummarization_JSON
+* using the existing code and tweeking it to the code that returns the JSON Alone
+
+* Maheedhar Gunnam <mgunn001@odu.edu>
+*/
+
 var http = require('http')
 var express = require('express')
 var url = require('url')
@@ -103,6 +110,10 @@ function main () {
 
   startLocalAssetServer()
 
+
+
+//to-do : the place where the client server communication is getting set, got to change it to command promt one
+
   var endpoint = new PublicEndpoint()
 
   // Initialize the server based and perform the "respond" call back when a client attempts to interact with the script
@@ -112,6 +123,7 @@ function main () {
 
   /* Notification server for status updates of long-running processes */
   var notificationServerInstance = http.createServer()
+
   var bayeux = new faye.NodeAdapter({'mount': '/', 'timeout': 45})
 
   // TODO: send an initial notification by the server to faye to state that
@@ -192,6 +204,7 @@ function PublicEndpoint () {
   * @param request  The request object from the client representing query information
   * @param response Currently active HTTP response to the client used to return information to the client based on the request
   */
+  // this is method that gets hit when the client makes a request
   this.respondToClient = function (request, response) {
     response.clientId = Math.random() * 101 | 0  // Associate a simple random integer to the user for logging (this is not scalable with the implemented method)
 
@@ -213,6 +226,7 @@ function PublicEndpoint () {
     }
 
     var query = url.parse(request.url, true).query
+    console.log("---ByMahee: QUery URL from client = "+ query)
     /******************************
        IMAGE PARAMETER - allows binary image data to be returned from service
     **************************** */
@@ -250,6 +264,7 @@ function PublicEndpoint () {
       console.log('URI-R valid, using query parameter.')
     }
 
+    // ByMahee --- Actually URI is being set here
     uriR = query['URI-R']
 
     var access = theEndPoint.validAccessParameters[0] // Not specified? access=interface
@@ -791,6 +806,8 @@ $(document).ready(function () {
 }
 
 TimeMap.prototype.calculateSimhashes = function (callback) {
+  console.log("--- By Mahee - For my understanding")
+  console.log("Inside CalculateSimhashes")
   var theTimeMap = this
   var arrayOfSetSimhashFunctions = []
   var bar = new ProgressBar('  Simhashing [:bar] :percent :etas', {
