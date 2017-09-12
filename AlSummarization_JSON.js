@@ -226,7 +226,7 @@ function PublicEndpoint () {
     }
 
     var query = url.parse(request.url, true).query
-    console.log("---ByMahee: QUery URL from client = "+ query)
+    console.log("---ByMahee: Query URL from client = "+ query)
     /******************************
        IMAGE PARAMETER - allows binary image data to be returned from service
     **************************** */
@@ -266,6 +266,7 @@ function PublicEndpoint () {
 
     // ByMahee --- Actually URI is being set here
     uriR = query['URI-R']
+    console.log("--ByMahee: uriR = "+uriR)
 
     var access = theEndPoint.validAccessParameters[0] // Not specified? access=interface
     // Override the default access parameter if the user has supplied a value
@@ -323,6 +324,7 @@ function PublicEndpoint () {
       response.end()
     }
 
+    // ByMahee -- setting the  incoming data from request into response Object
     response.thumbnails = [] // Carry the original query parameters over to the eventual response
     response.thumbnails['access'] = access
     response.thumbnails['strategy'] = strategy
@@ -342,10 +344,12 @@ function PublicEndpoint () {
       cacheFile.path += '.json'
       console.log('Checking if a cache file exists for ' + query['URI-R'] + '...')
       cacheFile.readFileContents(
-        function success (data) { // A cache file has been previously generated using the alSummarization strategy
+        function success (data) {
+          // A cache file has been previously generated using the alSummarization strategy
           processWithFileContents(data, response)
         },
         function failed () {
+          //ByMahee -- calling the core function responsible for AlSummarization, if the cached file doesn't exist
           getTimemapGodFunctionForAlSummarization(query['URI-R'], response)
         }
 
@@ -574,7 +578,10 @@ Memento.prototype.setSimhash = function () {
 * @param uri The URI-R in-question
 */
 function getTimemapGodFunctionForAlSummarization (uri, response) {
+  console.log("--ByMahee -- Inside function : getTimemapGodFunctionForAlSummarization")
+  console.log("--ByMahee -- Applying AlSummarization on given URI-R = "+ uri)
   // TODO: remove TM host and path references, they reside in the TM obj
+  // ByMahee -- right now hitting only organization : web.archive.org
   var timemapHost = 'web.archive.org'
   var timemapPath = '/web/timemap/link/' + uri
   var options = {
@@ -586,7 +593,6 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
 
   console.log('Path: ' + options.host + '/' + options.path)
   var buffer = '' // An out-of-scope string to save the Timemap string, TODO: better documentation
-
   var t
   var retStr = ''
   var metadata = ''
@@ -595,7 +601,11 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     // TODO: define how this is different from the getTimemap() parent function (i.e., some name clarification is needed)
     // TODO: abstract this method to its callback form. Currently, this is reaching and populating the timemap out of scope and can't be simply isolated (I tried)
     function fetchTimemap (callback) {
+
       var req = http.request(options, function (res) {
+        console.log("--ByMahee-- Inside the http request call back success, request is made on the following obect:")
+        console.log(options);
+        console.log("----------------");
         res.setEncoding('utf8')
 
         res.on('data', function (data) {
@@ -606,9 +616,17 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
 
           if (buffer.length > 100) {  // Magic number = arbitrary
             console.log('Timemap acquired for ' + uri + ' from ' + timemapHost + timemapPath)
+            console.log("-----------ByMahee--------")
+            console.log(buffer)
+            console.log("-----------ByMahee--------")
+
             t = new TimeMap(buffer)
             t.originalURI = uri // Need this for a filename for caching
             t.createMementos()
+
+            console.log("-- ByMahee -- Mementos are created by this point, following is the whole timeMap Object")
+            console.log(t);
+            console.log("---------------------------------------------------")
 
             if (t.mementos.length === 0) {
               response.write('There were no mementos for ' + uri + ' :(')
@@ -650,17 +668,23 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
 
       req.end()
     },
-   // TODO: remove this function from callback hell
-  function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP
-  function (callback) {t.calculateSimhashes(callback);},
-  function (callback) {t.saveSimhashesToCache(callback);},
-  function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
-  // function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
-  // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet
-  function (callback) {t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);},
-  function (callback) {t.writeJSONToCache(callback);},
-  function (callback) {t.printMementoInformation(response, callback);},
-  function (callback) {t.createScreenshotsForMementos(callback)}],
+
+
+    //ByMahee -- commented out the following to build step by step
+    /* **
+    // TODO: remove this function from callback hell
+    function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP
+    function (callback) {t.calculateSimhashes(callback);},
+    function (callback) {t.saveSimhashesToCache(callback);},
+    function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
+    // function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
+    // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet
+    function (callback) {t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);},
+    function (callback) {t.writeJSONToCache(callback);},
+    function (callback) {t.printMementoInformation(response, callback);},
+    function (callback) {t.createScreenshotsForMementos(callback)}
+    */
+  ],
   function (err, result) {
     if (err) {
       console.log('ERROR!')
