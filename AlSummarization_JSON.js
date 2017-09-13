@@ -522,13 +522,14 @@ Memento.prototype.setSimhash = function () {
 
       res.on('end', function (d) {
         var md5hash = md5(thatmemento.originalURI) // URI-R cannot be passed in the raw
-        console.log("--- By Mahee - For my understanding")
+        console.log("-- By Mahee -- Inside On response end of http request of setSimhash")
+        /*** ByMahee -- commented the following block as the client and server doesn't have to be in publish and subscribe mode
         console.log(thatmemento)
         console.log(thatmemento.fayeClient)
         thatmemento.fayeClient.publish('/' + md5hash, {
           'uriM': thatmemento.uri
         })
-
+        */
         if (buffer2.indexOf('Got an HTTP 302 response at crawl time') === -1 && thatmemento.simhash != '00000000') {
 
           var sh = simhash((buffer2).split('')).join('')
@@ -565,6 +566,7 @@ Memento.prototype.setSimhash = function () {
     req.on('error', function (err) {
       console.log('Error generating Simhash in Request')
       console.log(err)
+      console.log("-- By Mahee -- Inside On request error of http request of setSimhash")
       reject(Error('Network Error'))
     })
 
@@ -673,9 +675,10 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     //ByMahee -- commented out the following to build step by step
     /* **
     // TODO: remove this function from callback hell
-    function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP
+    function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP */
     function (callback) {t.calculateSimhashes(callback);},
-    function (callback) {t.saveSimhashesToCache(callback);},
+    function (callback) {t.saveSimhashesToCache(callback);}
+    /*
     function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
     // function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
     // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet
@@ -843,8 +846,8 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
 
 
   var client = new faye.Client(notificationServer)
-  console.log("--- By Mahee for understanding -- ")
-  console.log(client)
+//  console.log("--- By Mahee for understanding -- ")
+//  console.log(client)
   for (var m = 0; m < this.mementos.length; m++) {
     // Allow the Promise async access to browser-based client communication
     this.mementos[m].fayeClient = client
@@ -861,9 +864,13 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
     console.log('An error occurred in generating the SimHash for a URI-M')
     console.log(err)
   }).then(function () {
+
+
+    /** --ByMahee--  commented the following block to disable to publish to the client
     client.publish('/' + md5(theTimeMap.originalURI), {
       'uriM': 'done'
     })
+    ***/
 
     // Remove fayeClients from all mementos so they can be converted to JSON
     for (var m = 0; m < theTimeMap.mementos.length; m++) {
@@ -902,6 +909,10 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
   }
 
   console.log('Done getting simhashes from array')
+  console.log('-- ByMahee -- In function SaveSimhashesToCache -- SSimhash is as follows')
+  console.log(strToWrite)
+  console.log("-------------------------------------------------------------------------")
+
   var cacheFile = new SimhashCacheFile(this.originalURI)
   cacheFile.replaceContentWith(strToWrite)
 
