@@ -1464,5 +1464,6 @@ function getHexString (onesAndZeros) {
 ********************************* */
 
 exports.main = main
+console.log("Inside the Branch CLI_JSON")
 main()
 // test commit into Branch CLI_JSON
