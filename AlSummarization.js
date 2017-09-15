@@ -1307,8 +1307,13 @@ process.on('SIGINT', function () {
 
 // Useful Functions
 function checkBin (n) {
-  return /^[01]{1, 64}$/.test(n)
+
+//  return /^[01]{1, 64}$/.test(n)
+// ByMahee -- the above statement is being changed to the following as we are checking 4 bits at a time
+ console.log("Inside Check Binary")
+ return /^[01]{1,4}$/.test(n)
 }
+
 
 function checkDec (n) {
   return /^[0-9]{1, 64}$/.test(n)

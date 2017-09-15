@@ -503,11 +503,11 @@ Memento.prototype.setSimhash = function () {
     var memento = this // Potentially unused? The 'this' reference will be relative to the promise here
     var mOptions = url.parse(thaturi)
     console.log('Starting a simhash: ' + mOptions.host + mOptions.path)
-
     var req = http.request({
-        'host': mOptions.host,
-        'path': mOptions.path,
-        'headers': {'User-Agent': 'ArchiveThumbnails instance - Contact @machawk1'}
+      'host': mOptions.host,
+      'path': mOptions.path,
+      'port':80,
+      'headers': {'User-Agent': 'ArchiveThumbnails instance - Contact @machawk1'}
     }, function (res) {
       // var hd = new memwatch.HeapDiff()
 
@@ -529,10 +529,17 @@ Memento.prototype.setSimhash = function () {
         thatmemento.fayeClient.publish('/' + md5hash, {
           'uriM': thatmemento.uri
         })
-        */
+
+        console.log("ByMahe -- here is the buffer content of " +mOptions.host+mOptions.path+":")
+        console.log(buffer2)
+        console.log("========================================================")
+          */
+
         if (buffer2.indexOf('Got an HTTP 302 response at crawl time') === -1 && thatmemento.simhash != '00000000') {
 
           var sh = simhash((buffer2).split('')).join('')
+          console.log("ByMahee -- computed simhash for "+mOptions.host+mOptions.path+" -> "+ sh)
+
           var retStr = getHexString(sh)
 
           if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302) {
@@ -546,7 +553,7 @@ Memento.prototype.setSimhash = function () {
           buffer2 = ''
           buffer2 = null
 
-          console.log(retStr + ' - ' + mOptions.host + mOptions.path)
+          console.log("Hex Code for Simhash:"+retStr + ' & URI-R:' + mOptions.host + mOptions.path)
 
           thatmemento.simhash = retStr
 
@@ -639,7 +646,8 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
             console.log('Fetching HTML for ' + t.mementos.length + ' mementos.')
 
             var m1 = url.parse(t.mementos[0].uri)
-            var m2 = url.parse(t.mementos[1].uri)
+            //ByMahee-- change the below to t.mementos[1].uri
+            var m2 = url.parse(t.mementos[0].uri)
             var endpoints = [
               {'host': m1.host, 'path': m1.path},
               {'host': m2.host, 'path': m2.path}
@@ -909,7 +917,7 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
   }
 
   console.log('Done getting simhashes from array')
-  console.log('-- ByMahee -- In function SaveSimhashesToCache -- SSimhash is as follows')
+  console.log('-- ByMahee -- In function SaveSimhashesToCache -- Simhash for URI and DateTime is as follows:')
   console.log(strToWrite)
   console.log("-------------------------------------------------------------------------")
 
@@ -1359,7 +1367,11 @@ process.on('SIGINT', function () {
 
 // Useful Functions
 function checkBin (n) {
-  return /^[01]{1, 64}$/.test(n)
+
+//  return /^[01]{1, 64}$/.test(n)
+// ByMahee -- the above statement is being changed to the following as we are checking 4 bits at a time
+ //console.log("Inside Check Binary")
+ return /^[01]{1,4}$/.test(n)
 }
 
 function checkDec (n) {
