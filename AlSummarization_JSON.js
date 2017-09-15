@@ -502,7 +502,7 @@ Memento.prototype.setSimhash = function () {
     var buffer2 = ''
     var memento = this // Potentially unused? The 'this' reference will be relative to the promise here
     var mOptions = url.parse(thaturi)
-    console.log('Starting a simhash: ' + mOptions.host + mOptions.path)
+  //  console.log('Starting a simhash: ' + mOptions.host + mOptions.path)
     var req = http.request({
       'host': mOptions.host,
       'path': mOptions.path,
@@ -522,7 +522,7 @@ Memento.prototype.setSimhash = function () {
 
       res.on('end', function (d) {
         var md5hash = md5(thatmemento.originalURI) // URI-R cannot be passed in the raw
-        console.log("-- By Mahee -- Inside On response end of http request of setSimhash")
+        // console.log("-- By Mahee -- Inside On response end of http request of setSimhash")
         /*** ByMahee -- commented the following block as the client and server doesn't have to be in publish and subscribe mode
         console.log(thatmemento)
         console.log(thatmemento.fayeClient)
@@ -538,7 +538,7 @@ Memento.prototype.setSimhash = function () {
         if (buffer2.indexOf('Got an HTTP 302 response at crawl time') === -1 && thatmemento.simhash != '00000000') {
 
           var sh = simhash((buffer2).split('')).join('')
-          console.log("ByMahee -- computed simhash for "+mOptions.host+mOptions.path+" -> "+ sh)
+        //  console.log("ByMahee -- computed simhash for "+mOptions.host+mOptions.path+" -> "+ sh)
 
           var retStr = getHexString(sh)
 
@@ -553,7 +553,7 @@ Memento.prototype.setSimhash = function () {
           buffer2 = ''
           buffer2 = null
 
-          console.log("Hex Code for Simhash:"+retStr + ' & URI-R:' + mOptions.host + mOptions.path)
+        //  console.log("Hex Code for Simhash:"+retStr + ' & URI-R:' + mOptions.host + mOptions.path)
 
           thatmemento.simhash = retStr
 
@@ -573,7 +573,7 @@ Memento.prototype.setSimhash = function () {
     req.on('error', function (err) {
       console.log('Error generating Simhash in Request')
       console.log(err)
-      console.log("-- By Mahee -- Inside On request error of http request of setSimhash")
+    //  console.log("-- By Mahee -- Inside On request error of http request of setSimhash")
       reject(Error('Network Error'))
     })
 
@@ -612,9 +612,9 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     function fetchTimemap (callback) {
 
       var req = http.request(options, function (res) {
-        console.log("--ByMahee-- Inside the http request call back success, request is made on the following obect:")
-        console.log(options);
-        console.log("----------------");
+        // console.log("--ByMahee-- Inside the http request call back success, request is made on the following obect:")
+        // console.log(options);
+        // console.log("----------------");
         res.setEncoding('utf8')
 
         res.on('data', function (data) {
@@ -625,9 +625,9 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
 
           if (buffer.length > 100) {  // Magic number = arbitrary
             console.log('Timemap acquired for ' + uri + ' from ' + timemapHost + timemapPath)
-            console.log("-----------ByMahee--------")
-            console.log(buffer)
-            console.log("-----------ByMahee--------")
+            // console.log("-----------ByMahee--------")
+            // console.log(buffer)
+            // console.log("-----------ByMahee--------")
 
             t = new TimeMap(buffer)
             t.originalURI = uri // Need this for a filename for caching
@@ -680,15 +680,15 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     },
 
 
-    //ByMahee -- commented out the following to build step by step
+    //ByMahee -- commented out some of the methods called to build step by step
     /* **
     // TODO: remove this function from callback hell
     function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP */
     function (callback) {t.calculateSimhashes(callback);},
-    function (callback) {t.saveSimhashesToCache(callback);}
-    /*
+    function (callback) {t.saveSimhashesToCache(callback);},
     function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
-    // function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
+
+    /*// function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
     // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet
     function (callback) {t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);},
     function (callback) {t.writeJSONToCache(callback);},
@@ -841,8 +841,8 @@ $(document).ready(function () {
 }
 
 TimeMap.prototype.calculateSimhashes = function (callback) {
-  console.log("--- By Mahee - For my understanding")
-  console.log("Inside CalculateSimhashes")
+  //console.log("--- By Mahee - For my understanding")
+  //console.log("Inside CalculateSimhashes")
   var theTimeMap = this
   var arrayOfSetSimhashFunctions = []
   var bar = new ProgressBar('  Simhashing [:bar] :percent :etas', {
@@ -1219,7 +1219,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
   var lastSignificantMementoIndexBasedOnHamming = 0
   var copyOfMementos = [this.mementos[0]]
 
-  console.log('Calculate hamming distance of ' + this.mementos.length + ' mementos')
+  //console.log('Calculate hamming distance of ' + this.mementos.length + ' mementos')
   for (var m = 0; m < this.mementos.length; m++) {
     // console.log("Analyzing memento "+m+"/"+this.mementos.length+": "+this.mementos[m].uri)
     // console.log("...with SimHash: "+this.mementos[m].simhash)
@@ -1233,14 +1233,14 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
       // console.log("Getting hamming basis")
       this.mementos[m].hammingBasis = this.mementos[lastSignificantMementoIndexBasedOnHamming].datetime
 
-      console.log('Comparing hamming distances (simhash,uri) = ' + this.mementos[m].hammingDistance + '\n' +
-        ' > testing: ' + this.mementos[m].simhash + ' ' + this.mementos[m].uri + '\n' +
-        ' > pivot:   ' + this.mementos[lastSignificantMementoIndexBasedOnHamming].simhash + ' ' + this.mementos[lastSignificantMementoIndexBasedOnHamming].uri)
+      // console.log('Comparing hamming distances (simhash,uri) = ' + this.mementos[m].hammingDistance + '\n' +
+      //   ' > testing: ' + this.mementos[m].simhash + ' ' + this.mementos[m].uri + '\n' +
+      //   ' > pivot:   ' + this.mementos[lastSignificantMementoIndexBasedOnHamming].simhash + ' ' + this.mementos[lastSignificantMementoIndexBasedOnHamming].uri)
 
       if (this.mementos[m].hammingDistance >= HAMMING_DISTANCE_THRESHOLD) { // Filter the mementos if hamming distance is too small
         lastSignificantMementoIndexBasedOnHamming = m
 
-        // copyOfMementos.push(t.mementos[m]) // Only push mementos that pass threshold requirements
+         copyOfMementos.push(this.mementos[m]) // Only push mementos that pass threshold requirements
       }
 
       // console.log(t.mementos[m].uri+" hammed!")
@@ -1249,8 +1249,15 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
     }
   }
 
-  console.log((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
+  //console.log((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
   copyOfMementos = null
+
+
+  console.log("------------ByMahee-- After the hamming distance is calculated, here is how the mementos with additional details look like ------------------")
+//  console.log(JSON.stringify(this.mementos))
+  console.log(this.mementos)
+  console.log("----------------------------------------------------------------------------------------------------------------------------------------------")
+
 
   if (callback) { callback('') }
 }
