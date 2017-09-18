@@ -108,9 +108,11 @@ function main () {
     }
   }
 
- startLocalAssetServer()
+  var endpoint = new CLIEndpoint()
+  endpoint.headStart()
 
-
+/** -- ByMahee -- the following code lines are commented to disable the client-server version and to rather have a CLI
+// startLocalAssetServer()
 
 //to-do : the place where the client server communication is getting set, got to change it to command promt one
   var endpoint = new PublicEndpoint()
@@ -120,7 +122,7 @@ function main () {
   app.get('/*', endpoint.respondToClient)
   app.listen(thumbnailServicePort)
 
-  /* Notification server for status updates of long-running processes */
+  //Notification server for status updates of long-running processes
   var notificationServerInstance = http.createServer()
 
   var bayeux = new faye.NodeAdapter({'mount': '/', 'timeout': 45})
@@ -148,7 +150,7 @@ function main () {
   // TODO: react accordingly if port listening failed, don't simply assume the service was started.
   console.log('* ' + ('Thumbnails service started on Port ' + thumbnailServicePort).red)
   console.log('* ' + ('Notification service started on Port ' + notificationServerPort).red)
-  console.log('> Try ' + thumbnailServer + '?URI-R=http://matkelly.com in your web browser for sample execution.')
+  console.log('> Try ' + thumbnailServer + '?URI-R=http://matkelly.com in your web browser for sample execution.') */
 }
 
 
@@ -173,15 +175,9 @@ function startLocalAssetServer () {
 /**
 * Setup the public-facing attributes of the service
 */
-function PublicEndpoint () {
+function CLIEndpoint () {
   var theEndPoint = this
-  /**
-  * Default form to enter URI-R if one is not supplied in the query string
-  */
-  this.getHTMLSubmissionForm = function () {
-    var baseInterfaceHTML = fs.readFileSync(__dirname + '/base.html')
-    return baseInterfaceHTML
-  }
+
 
   // Parameters supplied for means of access:
   this.validAccessParameters = ['interface', 'wayback', 'embed']
@@ -198,34 +194,22 @@ function PublicEndpoint () {
   }
 
 
-  /**
-  * Handle an HTTP request and respond appropriately
-  * @param request  The request object from the client representing query information
-  * @param response Currently active HTTP response to the client used to return information to the client based on the request
-  */
-  // this is method that gets hit when the client makes a request
-  this.respondToClient = function (request, response) {
-    response.clientId = Math.random() * 101 | 0  // Associate a simple random integer to the user for logging (this is not scalable with the implemented method)
-
-    var headers = {}
-
-    // IE8 does not allow domains to be specified, just the *
-    // headers['Access-Control-Allow-Origin'] = req.headers.origin
-    headers['Access-Control-Allow-Origin'] = '*'
-    headers['Access-Control-Allow-Methods'] = 'GET'
-    headers['Access-Control-Allow-Credentials'] = false
-    headers['Access-Control-Max-Age'] = '86400'  // 24 hours
-    headers['Access-Control-Allow-Headers'] = 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Accept-Datetime'
-
-    if (request.method !== 'GET') {
-      console.log('Bad method ' + request.method + ' sent from client. Try HTTP GET')
-      response.writeHead(405, headers)
-      response.end()
-      return
+  // this is method this.respondToClient, modified for CLI
+  this.headStart = function () {
+      var headers = {}
+      var response ={}
+    var URIRFromCLI = ""
+    if (process.argv.length <= 2) {
+        console.log('No Argument was passed.. Trying with URI-R = http://www.cs.odu.edu/~mweigle/Research/')
+        URIRFromCLI = '/?URI-R=http://www.cs.odu.edu/~mweigle/Research/'
+    }else{
+        URIRFromCLI = '/?URI-R='+process.argv[2]
     }
-    console.log("request.url contains:" + request.url)
-    var query = url.parse(request.url, true).query
-    console.log("---ByMahee: Query URL from client = "+ JSON.stringify(query))
+
+    console.log('URI-R From CLI: ' + URIRFromCLI)
+
+    var query = url.parse(URIRFromCLI, true).query
+    console.log("--- ByMahee: Query URL from client = "+ JSON.stringify(query))
     /******************************
        IMAGE PARAMETER - allows binary image data to be returned from service
     **************************** */
@@ -233,11 +217,8 @@ function PublicEndpoint () {
       // Return image data here
       var fileExtension = query.img.substr('-3') // Is this correct to use a string and not an int!?
       console.log('fetching ' + query.img + ' content')
-
       var img = fs.readFileSync(__dirname + '/' + query.img)
-      response.writeHead(200, {'Content-Type': 'image/' + fileExtension })
-      response.end(img, 'binary')
-
+      console.log("200, {'Content-Type': 'image/'" + fileExtension +'}')
       return
     }
 
@@ -249,17 +230,7 @@ function PublicEndpoint () {
       return (uri.substr(0, 5) === '/http')
     }
 
-    if (!query['URI-R'] && // a URI-R was not passed via the query string...
-        request._parsedUrl && !isARESTStyleURI(request._parsedUrl.pathname.substr(0, 5))) { // ...or the REST-style specification
-      console.log('No URI-R sent with request. ' + request.url + ' was sent. Try ' + thumbnailServer + '/?URI-R=http://matkelly.com')
-      response.writeHead(400, headers)
-      response.write(theEndPoint.getHTMLSubmissionForm())
-      response.end()
-      return
-    } else if (request._parsedUrl && !query['URI-R']) {
-      // Populate query['URI-R'] with REST-style URI and proceed like nothing happened
-      query['URI-R'] = request._parsedUrl.pathname.substr(1)
-    } else if (query['URI-R']) { // URI-R is specied as a query parameter
+    if (query['URI-R']) { // URI-R is specied as a query parameter
       console.log('URI-R valid, using query parameter.')
     }
 
@@ -276,9 +247,6 @@ function PublicEndpoint () {
 
     if (!theEndPoint.isAValidAccessParameter(access)) { // A bad access parameter was passed in
       console.log('Bad access query parameter: ' + access)
-      response.writeHead(501, headers)
-      response.write('The access parameter was incorrect. Try one of ' + theEndPoint.validAccessParameters.join(',') + ' or omit it entirely from the query string\r\n')
-      response.end()
       return
     }
 
@@ -309,18 +277,15 @@ function PublicEndpoint () {
 
     headers['Content-Type'] = 'text/html' // application/json
 
-    response.writeHead(200, headers)
-    console.log(query)
-    console.log('New client request (' + response.clientId + ')\r\n> URI-R: ' + query['URI-R'] + '\r\n> Access: ' + access + '\r\n> Strategy: ' + strategy)
+    console.log('New client request URI-R: ' + query['URI-R'] + '\r\n> Access: ' + access + '\r\n> Strategy: ' + strategy)
 
     if (!validator.isURL(uriR)) { // Return "invalid URL"
-      returnJSONError('Invalid URI')
+      consoleLogJSONError('Invalid URI')
       return
     }
 
-    function returnJSONError (str) {
-      response.write('{"Error": "' + str + '"}')
-      response.end()
+    function consoleLogJSONError (str) {
+      console.log('{"Error": "' + str + '"}')
     }
 
     // ByMahee -- setting the  incoming data from request into response Object
@@ -408,6 +373,10 @@ function PublicEndpoint () {
     }
   }
 }
+
+
+
+
 
 /**
 * Delete all derived data including caching and screenshot - namely for testing
@@ -661,8 +630,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
         console.log('problem with request: ' + e.message)
         console.log(e)
         if (e.message === 'connect ETIMEDOUT') { // Error experienced when IA went down on 20141211
-          response.write('Hmm, the connection timed out. Internet Archive might be down.')
-          response.end()
+          console.log('Hmm, the connection timed out. Internet Archive might be down.')
         }
       })
 
@@ -683,9 +651,11 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     /* **
     // TODO: remove this function from callback hell
     function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP */
-    function (callback) {t.calculateSimhashes(callback);},
-    function (callback) {t.saveSimhashesToCache(callback);},
-    function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
+
+  // -- ByMahee -- Uncomment one by one for CLI_JSON
+  //function (callback) {t.calculateSimhashes(callback);},
+  //  function (callback) {t.saveSimhashesToCache(callback);},
+  //  function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
 
     /*// function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
     // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet
