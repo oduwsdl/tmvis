@@ -108,12 +108,11 @@ function main () {
     }
   }
 
-  startLocalAssetServer()
+ startLocalAssetServer()
 
 
 
 //to-do : the place where the client server communication is getting set, got to change it to command promt one
-
   var endpoint = new PublicEndpoint()
 
   // Initialize the server based and perform the "respond" call back when a client attempts to interact with the script
@@ -1464,6 +1463,5 @@ function getHexString (onesAndZeros) {
 ********************************* */
 
 exports.main = main
-console.log("Inside the Branch CLI_JSON")
 main()
 // test commit into Branch CLI_JSON
