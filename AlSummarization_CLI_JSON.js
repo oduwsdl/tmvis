@@ -22,7 +22,7 @@
 */
 
 var http = require('http')
-var express = require('express')
+//var express = require('express')
 var url = require('url')
 var connect = require('connect')
 var serveStatic = require('serve-static')
@@ -56,12 +56,12 @@ var colors = require('colors')
 var im = require('imagemagick')
 var rimraf = require('rimraf')
 
-var faye = require('faye') // For status-based notifications to client
+//var faye = require('faye') // For status-based notifications to client
 
 // Faye's will not allow a URI-* as the channel name, hash it for Faye
 var md5 = require('md5')
 
-var app = express()
+//var app = express()
 
 var host = 'http://localhost' // Format: scheme://hostname
 
@@ -80,6 +80,10 @@ var nukeSystemData = argv.clean ? argv.clean : false
 var uriR = ''
 
 var HAMMING_DISTANCE_THRESHOLD = 4
+
+
+
+
 
 /* *******************************
    TODO: reorder functions (main first) to be more maintainable 20141205
@@ -155,24 +159,6 @@ function main () {
 
 
 /**
-* Create access point for resources local to the interface to be queried. This differs
-*  from handling requests from clients.
-*/
-function startLocalAssetServer () {
-  connect().use(
-    serveStatic(
-      __dirname,
-      {'setHeaders': function (res,path) {
-          res.setHeader('Access-Control-Allow-Origin', '*')
-        }
-      }
-    )
-  ).listen(localAssetServerPort)
-  console.log('* ' + ('Local resource (css, js, etc.) server listening on Port ' + localAssetServerPort + '...').red)
-}
-
-
-/**
 * Setup the public-facing attributes of the service
 */
 function CLIEndpoint () {
@@ -196,9 +182,19 @@ function CLIEndpoint () {
 
   // this is method this.respondToClient, modified for CLI
   this.headStart = function () {
-      var headers = {}
-      var response ={}
+    var headers = {}
+    var response ={}
     var URIRFromCLI = ""
+
+    // if (process.argv.length <= 2) {
+    //     console.log("No Arguments given");
+    //     process.exit(-1);
+    // }else{
+    //   var param = process.argv[2];
+    //   console.log('Param: ' + param);
+    //   process.exit(-1);
+    // }
+
     if (process.argv.length <= 2) {
         console.log('No Argument was passed.. Trying with URI-R = http://www.cs.odu.edu/~mweigle/Research/')
         URIRFromCLI = '/?URI-R=http://www.cs.odu.edu/~mweigle/Research/'
@@ -557,10 +553,15 @@ Memento.prototype.setSimhash = function () {
 function getTimemapGodFunctionForAlSummarization (uri, response) {
   console.log("--ByMahee -- Inside function : getTimemapGodFunctionForAlSummarization")
   console.log("--ByMahee -- Applying AlSummarization on given URI-R = "+ uri)
+
   // TODO: remove TM host and path references, they reside in the TM obj
-  // ByMahee -- right now hitting only organization : web.archive.org
+  /* ByMahee -- right now hitting only organization : web.archive.org , changing the following Host and Path to http://wayback.archive-it.org
   var timemapHost = 'web.archive.org'
-  var timemapPath = '/web/timemap/link/' + uri
+  var timemapPath = '/web/timemap/link/' + uri */
+  var timemapHost = 'wayback.archive-it.org'
+  var timemapPath = '/1068/timemap/link/' + uri
+
+
   var options = {
     'host': timemapHost,
     'path': timemapPath,
@@ -600,7 +601,6 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
             t = new TimeMap(buffer)
             t.originalURI = uri // Need this for a filename for caching
             t.createMementos()
-
             console.log("-- ByMahee -- Mementos are created by this point, following is the whole timeMap Object")
             console.log(t);
             console.log("---------------------------------------------------")
@@ -612,14 +612,6 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
             }
 
             console.log('Fetching HTML for ' + t.mementos.length + ' mementos.')
-
-            var m1 = url.parse(t.mementos[0].uri)
-            //ByMahee-- change the below to t.mementos[1].uri
-            var m2 = url.parse(t.mementos[0].uri)
-            var endpoints = [
-              {'host': m1.host, 'path': m1.path},
-              {'host': m2.host, 'path': m2.path}
-            ]
 
             callback('')
           }
@@ -653,9 +645,9 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP */
 
   // -- ByMahee -- Uncomment one by one for CLI_JSON
-  //function (callback) {t.calculateSimhashes(callback);},
-  //  function (callback) {t.saveSimhashesToCache(callback);},
-  //  function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
+  function (callback) {t.calculateSimhashes(callback);},
+  function (callback) {t.saveSimhashesToCache(callback);},
+  function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
 
     /*// function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
     // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet
@@ -707,14 +699,6 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     }
   }
 } /* End God Function */
-
-
-
-
-
-
-
-
 
 /*****************************************
    // SUPPLEMENTAL TIMEMAP FUNCTIONALITY
@@ -821,13 +805,16 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
     'total': this.mementos.length
   })
 
-
-  var client = new faye.Client(notificationServer)
+// -- ByMahee -- Ignoring for CLI_JSON
+//  var client = new faye.Client(notificationServer)
 //  console.log("--- By Mahee for understanding -- ")
 //  console.log(client)
-  for (var m = 0; m < this.mementos.length; m++) {
+/* commented the below line purposefully to check whether memento fetching isn't working beacuse there are many request made parallely at a time. */
+ for (var m = 0; m < this.mementos.length; m++) {
+//  for (var m = 0; m < 5; m++) {
+
     // Allow the Promise async access to browser-based client communication
-    this.mementos[m].fayeClient = client
+    //this.mementos[m].fayeClient = client
     this.mementos[m].originalURI = this.originalURI  // The Promise needs the original URI for Faye publication. Scope creep!
 
     arrayOfSetSimhashFunctions.push(this.mementos[m].setSimhash())
@@ -1343,7 +1330,6 @@ process.on('SIGINT', function () {
 
 // Useful Functions
 function checkBin (n) {
-
 //  return /^[01]{1, 64}$/.test(n)
 // ByMahee -- the above statement is being changed to the following as we are checking 4 bits at a time
  //console.log("Inside Check Binary")
