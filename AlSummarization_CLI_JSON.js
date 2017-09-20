@@ -581,7 +581,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     function fetchTimemap (callback) {
 
       var req = http.request(options, function (res) {
-        // console.log("--ByMahee-- Inside the http request call back success, request is made on the following obect:")
+         console.log("--ByMahee-- Inside the http request call back success, request is made on the following obect:")
         // console.log(options);
         // console.log("----------------");
         res.setEncoding('utf8')
@@ -592,8 +592,10 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
 
         res.on('end', function (d) {
 
-          if (buffer.length > 100) {  // Magic number = arbitrary
-            console.log('Timemap acquired for ' + uri + ' from ' + timemapHost + timemapPath)
+          //console.log("Data Response from fetchTimeMap:" + buffer)
+
+          if (buffer.length > 100) {  // Magic number = arbitrary, has be quantified for correctness
+            //console.log('Timemap acquired for ' + uri + ' from ' + timemapHost + timemapPath)
             // console.log("-----------ByMahee--------")
             // console.log(buffer)
             // console.log("-----------ByMahee--------")
@@ -614,6 +616,9 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
             console.log('Fetching HTML for ' + t.mementos.length + ' mementos.')
 
             callback('')
+          }else{
+            console.log('The page you requested has not been archived in Archive-It.')
+             process.exit(-1)
           }
         })
       })
