@@ -485,9 +485,10 @@ Memento.prototype.setSimhash = function () {
       }
 
       res.on('end', function (d) {
-        var md5hash = md5(thatmemento.originalURI) // URI-R cannot be passed in the raw
-        // console.log("-- By Mahee -- Inside On response end of http request of setSimhash")
+
         /*** ByMahee -- commented the following block as the client and server doesn't have to be in publish and subscribe mode
+        //var md5hash = md5(thatmemento.originalURI) // URI-R cannot be passed in the raw
+        // console.log("-- By Mahee -- Inside On response end of http request of setSimhash")
         console.log(thatmemento)
         console.log(thatmemento.fayeClient)
         thatmemento.fayeClient.publish('/' + md5hash, {
@@ -861,6 +862,7 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
 
     // console.timeEnd('simhashing')
     console.log(mementosRemoved + ' mementos removed due to Wayback "soft 3xxs"')
+
     if (callback) {
       callback('')
     }
