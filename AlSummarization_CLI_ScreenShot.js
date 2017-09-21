@@ -52,30 +52,6 @@ var rimraf = require('rimraf')
 // Faye's will not allow a URI-* as the channel name, hash it for Faye
 var md5 = require('md5')
 
-//var app = express()
-
-var host = 'http://localhost' // Format: scheme://hostname
-
-/* Custom ports if specified on command-line */
-var thumbnailServicePort = argv.p ? argv.p : 15421
-var localAssetServerPort = argv.ap ? argv.a : 1338
-var notificationServerPort = argv.ap ? argv.n : 15422
-
-/* Derived host access points */
-var localAssetServer = host + ':' + localAssetServerPort + '/'
-var thumbnailServer = host + ':' + thumbnailServicePort + '/'
-var notificationServer = host + ':' + notificationServerPort + '/'
-
-// Fresh system for testing (NOT IMPLEMENTED)
-var nukeSystemData = argv.clean ? argv.clean : false
-var uriR = ''
-
-var HAMMING_DISTANCE_THRESHOLD = 4
-
-
-
-
-
 /* *******************************
    TODO: reorder functions (main first) to be more maintainable 20141205
 ****************************** */
@@ -85,24 +61,8 @@ var HAMMING_DISTANCE_THRESHOLD = 4
 */
 function main () {
   console.log(('*******************************\r\n' +
-               'THUMBNAIL SUMMARIZATION SERVICE\r\n' +
+               'THUMBNAIL SUMMARIZATION MEMENTO SCREENSHOT SERVICE\r\n' +
                '*******************************').blue)
-
-  console.log("--By Mahee - for understanding")
-  if (nukeSystemData) {
-    var resp = prompt('Delete all derived data (y/N)? ')
-    if (resp === 'y') {
-      console.log('Deleting all dervived data.')
-      nukeSystemData = false
-      // TODO: figure out why the flow does not continue after the
-      //       nukeSystemData conditional
-      cleanSystemData(main)
-      console.log('Derived data deleted.')
-    } else {
-      console.log('No derived data modified.')
-    }
-  }
-
   var endpoint = new CLIEndpoint()
   endpoint.headStart()
 }
