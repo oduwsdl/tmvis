@@ -562,7 +562,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     'method': 'GET'
   }
 
-  console.log('Path: ' + options.host + '/' + options.path)
+  console.log('Path: ' + options.host + options.path)
   var buffer = '' // An out-of-scope string to save the Timemap string, TODO: better documentation
   var t
   var retStr = ''

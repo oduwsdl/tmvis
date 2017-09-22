@@ -46,7 +46,7 @@ function TimeMap(str){
 			/* This conditional branch is just to have the 'id_' to be added at the end of timestamp,
 			* So that using the Memento URI the original content is retrived
 			*/
-			if(rel.indexOf("memento") > -1){//isA memento
+			if(rel.indexOf("memento") > -1){//is A memento
 					uri = uri.replace("/http:","id_/http:");
 			}
 

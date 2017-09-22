@@ -474,7 +474,7 @@ Memento.prototype.setSimhash = function () {
         buffer2 += data.toString()
       })
 
-      if (res.statusCode !== 200) {
+      if (res.statusCode !== 200) { // setting the simhash to be '0000000' for all the mementos which has a status of non 200
         thatmemento.simhash = Memento.prototype.simhashIndicatorForHTTP302
       }
 
@@ -482,17 +482,10 @@ Memento.prototype.setSimhash = function () {
 
         /*** ByMahee -- commented the following block as the client and server doesn't have to be in publish and subscribe mode
         //var md5hash = md5(thatmemento.originalURI) // URI-R cannot be passed in the raw
-        // console.log("-- By Mahee -- Inside On response end of http request of setSimhash")
-        console.log(thatmemento)
-        console.log(thatmemento.fayeClient)
-        thatmemento.fayeClient.publish('/' + md5hash, {
-          'uriM': thatmemento.uri
-        })
-
+        console.log("-- By Mahee -- Inside On response end of http request of setSimhash")
         console.log("ByMahe -- here is the buffer content of " +mOptions.host+mOptions.path+":")
         console.log(buffer2)
-        console.log("========================================================")
-          */
+        console.log("========================================================")  */
 
         if (buffer2.indexOf('Got an HTTP 302 response at crawl time') === -1 && thatmemento.simhash != '00000000') {
 
@@ -552,10 +545,11 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
   // TODO: remove TM host and path references, they reside in the TM obj
   /* ByMahee -- right now hitting only organization : web.archive.org , changing the following Host and Path to http://wayback.archive-it.org
   var timemapHost = 'web.archive.org'
-  var timemapPath = '/web/timemap/link/' + uri */
+  var timemapPath = '/web/timemap/link/' + uri
+  */
+
   var timemapHost = 'wayback.archive-it.org'
   var timemapPath = '/1068/timemap/link/' + uri
-
 
   var options = {
     'host': timemapHost,
@@ -564,7 +558,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     'method': 'GET'
   }
 
-  console.log('Path: ' + options.host + '/' + options.path)
+  console.log('Path: ' + options.host + options.path)
   var buffer = '' // An out-of-scope string to save the Timemap string, TODO: better documentation
   var t
   var retStr = ''
@@ -586,7 +580,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
 
         res.on('end', function (d) {
 
-          //console.log("Data Response from fetchTimeMap:" + buffer)
+        //  console.log("Data Response from fetchTimeMap:" + buffer)
 
           if (buffer.length > 100) {  // Magic number = arbitrary, has be quantified for correctness
             //console.log('Timemap acquired for ' + uri + ' from ' + timemapHost + timemapPath)
@@ -602,8 +596,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
             console.log("---------------------------------------------------")
 
             if (t.mementos.length === 0) {
-              response.write('There were no mementos for ' + uri + ' :(')
-              response.end()
+            console.log('There were no mementos for ' + uri + ' :(')
               return
             }
 
@@ -846,7 +839,11 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
 
     // Remove all mementos whose payload body was a Wayback soft 302
     for (var i = theTimemap.mementos.length - 1; i >= 0; i--) {
-      if (theTimemap.mementos[i].simhash === 'isA302DeleteMe') {
+      /* if (theTimemap.mementos[i].simhash === 'isA302DeleteMe') { //this was the original conetent of the code,
+       * according to my understanding 'theTimemap.mementos[i].simhash' has to be checked with 'Memento.prototype.simhashIndicatorForHTTP302',
+       * doing the same: just changed the above condition as to follow
+      */
+      if(theTimemap.mementos[i].simhash === Memento.prototype.simhashIndicatorForHTTP302){
         theTimemap.mementos.splice(i, 1)
         mementosRemoved++
       }
@@ -854,7 +851,6 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
 
     // console.timeEnd('simhashing')
     console.log(mementosRemoved + ' mementos removed due to Wayback "soft 3xxs"')
-
     if (callback) {
       callback('')
     }
@@ -1221,8 +1217,14 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
 * @param callback The next procedure to execution when this process concludes
 */
 TimeMap.prototype.setupWithURIR = function (response, uriR, callback) {
+
+  /* ByMahee -- right now hitting only organization : web.archive.org , changing the following Host and Path to http://wayback.archive-it.org
+  var timemapHost = 'wayback.archive-it.org'
+  var timemapPath = '/1068/timemap/link/' + uriR */
+
   var timemapHost = 'web.archive.org'
   var timemapPath = '/web/timemap/link/' + uriR
+
   var options = {
     'host': timemapHost,
     'path': timemapPath,
