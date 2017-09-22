@@ -5,7 +5,10 @@
 * @param rel The representation of the resource in the parent timemap (this likely doesn't belong here)
 */
 function Memento(uri,datetime,rel){
+	//a little variation to be added to craw timestamp+id_ so as to get just the original content to compute simhash on
+	//this.uri = uri;
 	this.uri = uri;
+	//console.log("inside building Memento, uri ->  "+uri)
 	this.datetime = datetime;
 	this.rel = rel;
 };
@@ -35,15 +38,19 @@ function TimeMap(str){
 			if(rels){rel = rels[0].substring(5,rels[0].length - 1);}
 			if(dts){dt = dts[0].substring(10,dts[0].length - 1);}
 
-
-			var foundMementoObject = new Memento(uri,dt,rel); //could be a timegate or timemap as well
-
-
 			if(!rel){
 				console.log("rel was undefined");
 				console.log(mementoEntry);
 				return;
 			}
+			/* This conditional branch is just to have the 'id_' to be added at the end of timestamp,
+			* So that using the Memento URI the original content is retrived
+			*/
+			if(rel.indexOf("memento") > -1){//isA memento
+					uri = uri.replace("/http:","id_/http:");
+			}
+
+			var foundMementoObject = new Memento(uri,dt,rel); //could be a timegate or timemap as well
 
 
 			if(rel.indexOf("memento") > -1){//isA memento

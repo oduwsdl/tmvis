@@ -4,20 +4,14 @@
 *  An implementation for Ahmed AlSum's ECIR 2014 paper:
 *   "Thumbnail Summarization Techniques for Web Archives"
 *  Mat Kelly <mkelly@cs.odu.edu>
+******************************************
+* AlSummarization_OPT_CLI_JSON
+* using the existing code and tweeking it to the code that returns the JSON Alone,
+*  And some code to be added to optimize the process of selecting which memento to
+*  be considered for simhash generation
+*  Run this with:
+*    > node AlSummarization_OPT_CLI_JSON.js URI-R
 *
-******************************* */
-/* Run this with:
-*  > node AlSummarization.js
-*  Then visit a URI in your browser or curl it, e.g.,
-*  > curl localhost:15421/?URI-R=http://matkelly.com
-*  A user interface will be returned. If curling, useful info about the
-*   summarization returned.
-*/
-
-/**************************************
-* AlSummarization_JSON
-* using the existing code and tweeking it to the code that returns the JSON Alone
-
 * Maheedhar Gunnam <mgunn001@odu.edu>
 */
 
@@ -580,7 +574,6 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     // TODO: define how this is different from the getTimemap() parent function (i.e., some name clarification is needed)
     // TODO: abstract this method to its callback form. Currently, this is reaching and populating the timemap out of scope and can't be simply isolated (I tried)
     function fetchTimemap (callback) {
-
       var req = http.request(options, function (res) {
          console.log("--ByMahee-- Inside the http request call back success, request is made on the following obect:")
         // console.log(options);
@@ -633,8 +626,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
       })
 
       req.on('socket', function (socket) { // Slow connection is slow
-        /*
-        socket.setTimeout(3000)
+        /*socket.setTimeout(3000)
         socket.on('timeout', function () {
           console.log("The server took too long to respond and we're only getting older so we aborted.")
           req.abort()
@@ -651,9 +643,9 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP */
 
   // -- ByMahee -- Uncomment one by one for CLI_JSON
-  function (callback) {t.calculateSimhashes(callback);},
-  function (callback) {t.saveSimhashesToCache(callback);},
-  function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
+ function (callback) {t.calculateSimhashes(callback);},
+ function (callback) {t.saveSimhashesToCache(callback);},
+ function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
 
     /*// function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
     // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet

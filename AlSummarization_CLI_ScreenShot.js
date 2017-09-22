@@ -1,5 +1,5 @@
 'use strict'
-/* ********************************
+/* ************************************
 *  AlSummarization
 *  An implementation for Ahmed AlSum's ECIR 2014 paper:
 *   "Thumbnail Summarization Techniques for Web Archives"
@@ -7,8 +7,10 @@
 *
 /**************************************
 * Runs with node AlSummarization_CLI_ScreenShot.js URI-R
-* using the existing code and tweeking it to the code that captures the screenshot of the URI-R passed and saves it in screenshots folder
-
+* using the existing code and tweeking it to the code that captures the screenshot of the URI-M passed as System Argument and saves it in screenshots folder.
+*  Run this with:
+*    > node AlSummarization_CLI_ScreenShot.js URI-M
+*
 * Maheedhar Gunnam <mgunn001@odu.edu>
 */
 

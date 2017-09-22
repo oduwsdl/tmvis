@@ -1,23 +1,15 @@
 'use strict'
-/* ********************************
+/* **********************************
 *  AlSummarization
 *  An implementation for Ahmed AlSum's ECIR 2014 paper:
 *   "Thumbnail Summarization Techniques for Web Archives"
 *  Mat Kelly <mkelly@cs.odu.edu>
 *
-******************************* */
-/* Run this with:
-*  > node AlSummarization.js
-*  Then visit a URI in your browser or curl it, e.g.,
-*  > curl localhost:15421/?URI-R=http://matkelly.com
-*  A user interface will be returned. If curling, useful info about the
-*   summarization returned.
-*/
-
-/**************************************
-* AlSummarization_JSON
-* using the existing code and tweeking it to the code that returns the JSON Alone
-
+*************************************
+* AlSummarization_CLI_JSON
+* using the existing code and tweeking it to the code that returns the JSON with Simhash Alone
+*  Run this with:
+*    > node AlSummarization_CLI_JSON.js URI-R
 * Maheedhar Gunnam <mgunn001@odu.edu>
 */
 
