@@ -408,11 +408,10 @@ Memento.prototype.simhashIndicatorForHTTP302 = '00000000'
 /**
 * Fetch URI-M HTML contents and generate a Simhash
 */
-Memento.prototype.setSimhash = function () {
+Memento.prototype.setSimhash = function (callback) {
   // Retain the URI-R for reference in the promise (this context lost with async)
   var thaturi = this.uri
   var thatmemento = this
-  return (new Promise(function (resolve, reject) {
     var buffer2 = ''
     var memento = this // Potentially unused? The 'this' reference will be relative to the promise here
     var mOptions = url.parse(thaturi)
@@ -446,7 +445,7 @@ Memento.prototype.setSimhash = function () {
         if (buffer2.indexOf('Got an HTTP 302 response at crawl time') === -1 && thatmemento.simhash != '00000000') {
 
           var sh = simhash((buffer2).split('')).join('')
-        //  console.log("ByMahee -- computed simhash for "+mOptions.host+mOptions.path+" -> "+ sh)
+         console.log("ByMahee -- computed simhash for "+mOptions.host+mOptions.path+" -> "+ sh)
 
           var retStr = getHexString(sh)
 
@@ -455,7 +454,8 @@ Memento.prototype.setSimhash = function () {
             retStr = Memento.prototype.simhashIndicatorForHTTP302
 
             // Gateway timeout from the archives, remove from consideration
-            resolve('isA302DeleteMe')
+            // resolve('isA302DeleteMe')
+            callback()
           }
 
           buffer2 = ''
@@ -464,29 +464,28 @@ Memento.prototype.setSimhash = function () {
         //  console.log("Hex Code for Simhash:"+retStr + ' & URI-R:' + mOptions.host + mOptions.path)
 
           thatmemento.simhash = retStr
-
-          resolve(retStr)
+          callback()
+        //  resolve(retStr)
         } else {
           // We need to delete this memento, it's a duplicate and a "soft 302" from archive.org
-          resolve('isA302DeleteMe')
+          callback()
+         //callback('isA302DeleteMe')
         }
       })
 
       res.on('error', function (err) {
         console.log('Error generating Simhash in Response')
-        reject(Error('Network Error'))
       })
     })
 
     req.on('error', function (err) {
       console.log('Error generating Simhash in Request')
       console.log(err)
+      callback()
     //  console.log("-- By Mahee -- Inside On request error of http request of setSimhash")
-      reject(Error('Network Error'))
     })
 
     req.end()
-  }))
 }
 
 /**
@@ -593,9 +592,9 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP */
 
   // -- ByMahee -- Uncomment one by one for CLI_JSON
- function (callback) {t.calculateSimhashes(callback);},
- function (callback) {t.saveSimhashesToCache(callback);},
- function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
+  function (callback) {t.calculateSimhashes(callback);},
+  function (callback) {t.saveSimhashesToCache(callback);},
+  function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
 
     /*// function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
     // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet
@@ -758,59 +757,48 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
 //  console.log("--- By Mahee for understanding -- ")
 //  console.log(client)
 /* commented the below line purposefully to check whether memento fetching isn't working beacuse there are many request made parallely at a time. */
- for (var m = 0; m < this.mementos.length; m++) {
-//  for (var m = 0; m < 5; m++) {
+//  for (var m = 0; m < this.mementos.length; m++) {
+// //  for (var m = 0; m < 5; m++) {
+//     arrayOfSetSimhashFunctions.push(this.mementos[m].setSimhash())
+//     bar.tick(1)
+//   }
 
-    // Allow the Promise async access to browser-based client communication
-    //this.mementos[m].fayeClient = client
-    this.mementos[m].originalURI = this.originalURI  // The Promise needs the original URI for Faye publication. Scope creep!
-
-    arrayOfSetSimhashFunctions.push(this.mementos[m].setSimhash())
-    bar.tick(1)
-  }
-  var theTimemap = this
-
-  return Promise.all(
-    arrayOfSetSimhashFunctions
-  ).catch(function (err) {
-    console.log('An error occurred in generating the SimHash for a URI-M')
-    console.log(err)
-  }).then(function () {
-
-
-    /** --ByMahee--  commented the following block to disable to publish to the client
-    client.publish('/' + md5(theTimeMap.originalURI), {
-      'uriM': 'done'
-    })
-    ***/
-
-    // Remove fayeClients from all mementos so they can be converted to JSON
-    for (var m = 0; m < theTimeMap.mementos.length; m++) {
-      delete theTimeMap.mementos[m].fayeClient
-      // Delete theTimeMap.mementos[m].originalURI
-    }
-
-    console.log('Checking if there are mementos to remove')
-    var mementosRemoved = 0
-    console.log('About to go into loop of ## mementos: ' + (theTimemap.mementos.length - 1))
-
-    // Remove all mementos whose payload body was a Wayback soft 302
-    for (var i = theTimemap.mementos.length - 1; i >= 0; i--) {
-      /* if (theTimemap.mementos[i].simhash === 'isA302DeleteMe') { //this was the original conetent of the code,
-       * according to my understanding 'theTimemap.mementos[i].simhash' has to be checked with 'Memento.prototype.simhashIndicatorForHTTP302',
-       * doing the same: just changed the above condition as to follow
-      */
-      if(theTimemap.mementos[i].simhash === Memento.prototype.simhashIndicatorForHTTP302){
-        theTimemap.mementos.splice(i, 1)
-        mementosRemoved++
+  // the way to get a damper, just 10 requests at a time.
+  async.eachLimit(this.mementos,10, function(curMemento, callback){
+    curMemento.setSimhash(callback)
+  //  console.log(curMemento)
+  }, function(err) {
+    //  console.log("length of arrayOfSetSimhashFunctions: -> " + arrayOfSetSimhashFunctions.length);
+      if(err){
+        console.log("Inside async Each Limit")
+        console.log(err)
+        return
       }
-    }
 
-    // console.timeEnd('simhashing')
-    console.log(mementosRemoved + ' mementos removed due to Wayback "soft 3xxs"')
-    if (callback) {
-      callback('')
-    }
+    //  console.log("After all the resquests are resolved, theTimemap -> "+  theTimeMap)
+
+      console.log('Checking if there are mementos to remove')
+      var mementosRemoved = 0
+      console.log('About to go into loop of ## mementos: ' + (theTimeMap.mementos.length - 1))
+
+      // Remove all mementos whose payload body was a Wayback soft 302
+      for (var i = theTimeMap.mementos.length - 1; i >= 0; i--) {
+
+        /* if (theTimemap.mementos[i].simhash === 'isA302DeleteMe') { //this was the original conetent of the code,
+         * according to my understanding 'theTimemap.mementos[i].simhash' has to be checked with 'Memento.prototype.simhashIndicatorForHTTP302',
+         * doing the same: just changed the above condition as to follow
+        */
+
+        if(theTimeMap.mementos[i].simhash === Memento.prototype.simhashIndicatorForHTTP302){
+          theTimeMap.mementos.splice(i, 1)
+          mementosRemoved++
+        }
+      }
+      // console.timeEnd('simhashing')
+      console.log(mementosRemoved + ' mementos removed due to Wayback "soft 3xxs"')
+      if (callback) {
+        callback('')
+      }
   })
 }
 

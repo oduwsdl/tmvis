@@ -12,8 +12,7 @@
 *  > curl localhost:15421/?URI-R=http://matkelly.com
 *  A user interface will be returned. If curling, useful info about the
 *   summarization returned.
-*/
-
+*
 /**************************************
 * AlSummarization_JSON
 * using the existing code and tweeking it to the code that returns the JSON Alone
