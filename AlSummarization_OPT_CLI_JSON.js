@@ -500,9 +500,10 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
 
   // TODO: remove TM host and path references, they reside in the TM obj
   /* ByMahee -- right now hitting only organization : web.archive.org , changing the following Host and Path to http://wayback.archive-it.org
-  var timemapHost = 'web.archive.org'
-  var timemapPath = '/web/timemap/link/' + uri
-  */
+*/
+
+  // var timemapHost = 'web.archive.org'
+  // var timemapPath = '/web/timemap/link/' + uri
 
   var timemapHost = 'wayback.archive-it.org'
   var timemapPath = '/1068/timemap/link/' + uri
@@ -1174,12 +1175,13 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
 */
 TimeMap.prototype.setupWithURIR = function (response, uriR, callback) {
 
-  /* ByMahee -- right now hitting only organization : web.archive.org , changing the following Host and Path to http://wayback.archive-it.org
-  var timemapHost = 'wayback.archive-it.org'
-  var timemapPath = '/1068/timemap/link/' + uriR */
+  /* ByMahee -- right now hitting only organization : web.archive.org , changing the following Host and Path to http://wayback.archive-it.org. One of the following 2 statement sets to be used */
 
-  var timemapHost = 'web.archive.org'
-  var timemapPath = '/web/timemap/link/' + uriR
+  var timemapHost = 'wayback.archive-it.org'
+  var timemapPath = '/1068/timemap/link/' + uriR
+
+  // var timemapHost = 'web.archive.org'
+  // var timemapPath = '/web/timemap/link/' + uriR
 
   var options = {
     'host': timemapHost,

@@ -551,6 +551,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
   /* ByMahee -- right now hitting only organization : web.archive.org , changing the following Host and Path to http://wayback.archive-it.org
   var timemapHost = 'web.archive.org'
   var timemapPath = '/web/timemap/link/' + uri */
+
   var timemapHost = 'wayback.archive-it.org'
   var timemapPath = '/1068/timemap/link/' + uri
 

@@ -55,10 +55,10 @@ function TimeMap(str){
 
 			if(rel.indexOf("memento") > -1){//isA memento
 
-				/* --ByMahee-- following If Branch Just for testing, to get more understanding on error connect ECONNREFUSED, to be deleted
-				if(this.mementos.length > 20){
-					return;
-				} */
+				/* --ByMahee-- following If Branch Just for testing, to get more understanding on error connect ECONNREFUSED, to be deleted*/
+				// if(this.mementos.length > 9){
+				// 	return;
+				// }
 
 				this.mementos.push(foundMementoObject);
 
