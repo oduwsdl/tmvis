@@ -7,10 +7,11 @@
 ******************************************
 * AlSummarization_OPT_CLI_JSON
 * using the existing code and tweeking it to the code that returns the JSON Alone,
-*  And some code to be added to optimize the process of selecting which memento to
-*  be considered for simhash generation
+* And some code to be added to optimize the process of selecting which memento to
+* be considered for simhash generation.
+* OPT in the file name stands for optimization, Where id_ is appended at the end to return only the original content
 *  Run this with:
-*    > node AlSummarization_OPT_CLI_JSON.js URI-R
+*   > node AlSummarization_OPT_CLI_JSON.js URI-R
 *
 * Maheedhar Gunnam <mgunn001@odu.edu>
 */
@@ -75,10 +76,6 @@ var uriR = ''
 
 var HAMMING_DISTANCE_THRESHOLD = 4
 
-
-
-
-
 /* *******************************
    TODO: reorder functions (main first) to be more maintainable 20141205
 ****************************** */
@@ -108,47 +105,6 @@ function main () {
 
   var endpoint = new CLIEndpoint()
   endpoint.headStart()
-
-/** -- ByMahee -- the following code lines are commented to disable the client-server version and to rather have a CLI
-// startLocalAssetServer()
-
-//to-do : the place where the client server communication is getting set, got to change it to command promt one
-  var endpoint = new PublicEndpoint()
-
-  // Initialize the server based and perform the "respond" call back when a client attempts to interact with the script
-  // http.createServer(respond).listen(thumbnailServicePort)
-  app.get('/*', endpoint.respondToClient)
-  app.listen(thumbnailServicePort)
-
-  //Notification server for status updates of long-running processes
-  var notificationServerInstance = http.createServer()
-
-  var bayeux = new faye.NodeAdapter({'mount': '/', 'timeout': 45})
-
-  // TODO: send an initial notification by the server to faye to state that
-  //       processing has not started
-
-  bayeux.on('handshake', function (clientId) {
-    console.log('FAYE - handshake initiated ' + clientId)
-  })
-
-  bayeux.on('subscribe', function (clientId, channelId) {
-    console.log('FAYE - client subscribed - ' + clientId + ' ' + channelId)
-  })
-
-  bayeux.on('publish', function (clientId, channelId, data) {
-    console.log('FAYE - client published - ' + clientId + ' ' + channelId + ' ' + data)
-  })
-
-  bayeux.attach(notificationServerInstance)
-  notificationServerInstance.listen(notificationServerPort)
-
-  // console.log("FAYE - server started")
-
-  // TODO: react accordingly if port listening failed, don't simply assume the service was started.
-  console.log('* ' + ('Thumbnails service started on Port ' + thumbnailServicePort).red)
-  console.log('* ' + ('Notification service started on Port ' + notificationServerPort).red)
-  console.log('> Try ' + thumbnailServer + '?URI-R=http://matkelly.com in your web browser for sample execution.') */
 }
 
 
@@ -486,7 +442,7 @@ Memento.prototype.setSimhash = function () {
         console.log("ByMahe -- here is the buffer content of " +mOptions.host+mOptions.path+":")
         console.log(buffer2)
         console.log("========================================================")  */
-
+        //console.log("Buffer Length ("+mOptions.host + mOptions.path +"):-> "+ buffer2.length)
         if (buffer2.indexOf('Got an HTTP 302 response at crawl time') === -1 && thatmemento.simhash != '00000000') {
 
           var sh = simhash((buffer2).split('')).join('')
