@@ -160,9 +160,7 @@ function CLIEndpoint () {
           console.log('t=' + (new Date()).getTime() + ' ' + 'Screenshot created for ' + urim)
         }
       })
-
     }
-
   }
 }
 

@@ -253,13 +253,20 @@ function CLIEndpoint () {
       var cacheFile = new SimhashCacheFile(uriR)
       cacheFile.path += '.json'
       console.log('Checking if a cache file exists for ' + query['URI-R'] + '...')
+    //  console.log('cacheFile: '+JSON.stringify(cacheFile))
       cacheFile.readFileContents(
         function success (data) {
           // A cache file has been previously generated using the alSummarization strategy
+
+          // ByMahee -- ToDo: We can even add a prompt from user asking whether he would want to recompute hashes here
+          console.log("**ByMahee** -- readFileContents : Inside Success ReadFile Content,processWithFileContents is called next ")
+          //ByMahee -- UnComment Following Line(UCF)
           processWithFileContents(data, response)
         },
         function failed () {
           //ByMahee -- calling the core function responsible for AlSummarization, if the cached file doesn't exist
+          console.log("**ByMahee** -- readFileContents : Inside Failed ReadFile Content, getTimemapGodFunctionForAlSummarization is called next ")
+          //ByMahee -- UCF
           getTimemapGodFunctionForAlSummarization(query['URI-R'], response)
         }
 
@@ -353,24 +360,19 @@ function cleanSystemData (cb) {
 * @param response handler to client's browser interface
 */
 function processWithFileContents (fileContents, response) {
+
   var t = createMementosFromJSONFile(fileContents)
-  t.printMementoInformation(response, null, false)
-  console.log('There were ' + t.mementos.length + ' mementos')
+  /* ByMahee -- unnessessary for the current need
+  t.printMementoInformation(response, null, false) */
+  console.log(JSON.stringify(t));
+  //console.log('There were ' + t.mementos.length + ' mementos')
   t.calculateHammingDistancesWithOnlineFiltering()
+
+  /* ByMahee -- unnessessary
   t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI()
   t.createScreenshotsForMementos(function () {
     console.log('Done creating screenshots')
-  })
-
-  // Currently a race condition in that the below code will publish before the
-  //  client side code in the above t.printMementoInformation subscribes.
-  //  Fake latency fixes this but is suboptimal
-  setTimeout(function () {
-    var client = new faye.Client(notificationServer)
-    client.publish('/' + md5(t.mementos[0].originalURI), {
-      'uriM': 'done'
-    })
-  }, 2000)
+  }) */
 }
 
 /**
@@ -594,13 +596,14 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
   // -- ByMahee -- Uncomment one by one for CLI_JSON
   function (callback) {t.calculateSimhashes(callback);},
   function (callback) {t.saveSimhashesToCache(callback);},
+  function (callback) {t.writeJSONToCache(callback);},
   function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
 
     /*// function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
     // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet
-    function (callback) {t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);},
-    function (callback) {t.writeJSONToCache(callback);},
-    function (callback) {t.printMementoInformation(response, callback);},
+    function (callback) {t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);}, */
+    //function (callback) {t.writeJSONToCache(callback);},
+  /*  function (callback) {t.printMementoInformation(response, callback);},
     function (callback) {t.createScreenshotsForMementos(callback)}
     */
   ],
