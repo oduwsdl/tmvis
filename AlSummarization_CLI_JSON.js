@@ -646,7 +646,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
   // -- ByMahee -- Uncomment one by one for CLI_JSON
   function (callback) {t.calculateSimhashes(callback);},
   function (callback) {t.saveSimhashesToCache(callback);},
-  function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
+//  function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
 
     /*// function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
     // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet
@@ -784,8 +784,8 @@ $(document).ready(function () {
 <p id="dataState">${stateInformationString}</p>
 </body>
 </html>`
-  response.write(respString)
-  response.end()
+//  response.write(respString)
+//  response.end()
 
   if (callback) {
     callback('')

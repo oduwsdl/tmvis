@@ -56,6 +56,8 @@ var rimraf = require('rimraf')
 // Faye's will not allow a URI-* as the channel name, hash it for Faye
 var md5 = require('md5')
 
+var prompt = require('prompt')
+
 //var app = express()
 
 var host = 'http://localhost' // Format: scheme://hostname
@@ -259,13 +261,34 @@ function CLIEndpoint () {
           // A cache file has been previously generated using the alSummarization strategy
 
           // ByMahee -- ToDo: We can even add a prompt from user asking whether he would want to recompute hashes here
-          console.log("**ByMahee** -- readFileContents : Inside Success ReadFile Content,processWithFileContents is called next ")
+          console.log("**ByMahee** -- readFileContents : Inside Success ReadFile Content, processWithFileContents is called next ")
+
+
+          prompt.start();
+          var property = {
+            name: 'yesno',
+            message: 'A previously cached file with the simhashes exist, Do you to Compute a new one ? Type Yes to compute, No continue',
+            validator: /Y[es]*|N[o]?/,
+            warning: 'Must respond Yes or No',
+            default: 'No'
+          };
+
+          prompt.get(property, function (err, result) {
+            if(result.yesno == "Yes"){
+              console.log("Responded to compute latest simhahes, Proceeding....");
+              getTimemapGodFunctionForAlSummarization(query['URI-R'], response)
+            }else{
+              console.log("Responded to continue with the exisitng cached simhashes file. Proceeding..");
+              processWithFileContents(data, response)
+            }
+          });
+
           //ByMahee -- UnComment Following Line(UCF)
-          processWithFileContents(data, response)
+         //  processWithFileContents(data, response)
         },
         function failed () {
           //ByMahee -- calling the core function responsible for AlSummarization, if the cached file doesn't exist
-          console.log("**ByMahee** -- readFileContents : Inside Failed ReadFile Content, getTimemapGodFunctionForAlSummarization is called next ")
+          console.log("**ByMahee** -- readFileContents : Inside Failed ReadFile Content (meaning file doesn't exist), getTimemapGodFunctionForAlSummarization is called next ")
           //ByMahee -- UCF
           getTimemapGodFunctionForAlSummarization(query['URI-R'], response)
         }
@@ -364,9 +387,13 @@ function processWithFileContents (fileContents, response) {
   var t = createMementosFromJSONFile(fileContents)
   /* ByMahee -- unnessessary for the current need
   t.printMementoInformation(response, null, false) */
+  console.log("Existing file contents are as follows:")
+  console.log("**************************************************************************************************");
   console.log(JSON.stringify(t));
+  /* the follow colde block calling calculateHammingDistancesWithOnlineFiltering is commented as the AlSummarization_OPT_CLI_JSON.js
+  is meant to calculate only Simhashes, Hamming Distance is calculated wuth AlSummarization_Hamming_CLI_JSON.js */
   //console.log('There were ' + t.mementos.length + ' mementos')
-  t.calculateHammingDistancesWithOnlineFiltering()
+ //  t.calculateHammingDistancesWithOnlineFiltering()
 
   /* ByMahee -- unnessessary
   t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI()
@@ -597,7 +624,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
   function (callback) {t.calculateSimhashes(callback);},
   function (callback) {t.saveSimhashesToCache(callback);},
   function (callback) {t.writeJSONToCache(callback);},
-  function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
+//  function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
 
     /*// function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
     // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet
