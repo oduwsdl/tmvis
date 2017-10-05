@@ -55,11 +55,30 @@ function TimeMap(str){
 
 			if(rel.indexOf("memento") > -1){//isA memento
 
-				/* --ByMahee-- following If Branch Just for testing, to get more understanding on error connect ECONNREFUSED, to be deleted*/
+				//--ByMahee-- following If Branch Just for testing, to get more understanding on error connect ECONNREFUSED, to be deleted*/
 				// if(this.mementos.length > 9){
 				// 	return;
 				// }
 
+				// to be deleted  immedietly, following block for investigation on Simhahes conflicts on id_, just pushing the mementos of interest
+				  // toproceedFlag = 0
+				  // if(uri.search("20160404195045id_") > 0 ){
+				  //    toproceedFlag = 1
+				  // }else if(uri.search("20160404201837id_") > 0 ){
+				  //    toproceedFlag = 1
+				  // }else if (uri.search("20160704195513id_") > 0 ){
+				  //      toproceedFlag = 1
+				  // }else if (uri.search("20160704201540id_") > 0 ){
+				  //    toproceedFlag = 1
+				  // }
+					//
+					// if(toproceedFlag == 1){
+					// 	this.mementos.push(foundMementoObject);
+					// }else{
+					//
+					// }
+
+         // un comment this line when above block is deleted/commented
 				this.mementos.push(foundMementoObject);
 
 			}else if(rel.indexOf("timegate") > -1){

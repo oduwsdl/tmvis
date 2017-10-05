@@ -390,16 +390,7 @@ function processWithFileContents (fileContents, response) {
   console.log("Existing file contents are as follows:")
   console.log("**************************************************************************************************");
   console.log(JSON.stringify(t));
-  /* the follow colde block calling calculateHammingDistancesWithOnlineFiltering is commented as the AlSummarization_OPT_CLI_JSON.js
-  is meant to calculate only Simhashes, Hamming Distance is calculated wuth AlSummarization_Hamming_CLI_JSON.js */
-  //console.log('There were ' + t.mementos.length + ' mementos')
- //  t.calculateHammingDistancesWithOnlineFiltering()
 
-  /* ByMahee -- unnessessary
-  t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI()
-  t.createScreenshotsForMementos(function () {
-    console.log('Done creating screenshots')
-  }) */
 }
 
 /**
@@ -621,9 +612,9 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP */
 
   // -- ByMahee -- Uncomment one by one for CLI_JSON
-  function (callback) {t.calculateSimhashes(callback);},
-  function (callback) {t.saveSimhashesToCache(callback);},
-  function (callback) {t.writeJSONToCache(callback);},
+    function (callback) {t.calculateSimhashes(callback);},
+    function (callback) {t.saveSimhashesToCache(callback);},
+    function (callback) {t.writeJSONToCache(callback);},
 //  function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
 
     /*// function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n

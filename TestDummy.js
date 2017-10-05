@@ -56,6 +56,8 @@ var rimraf = require('rimraf')
 // Faye's will not allow a URI-* as the channel name, hash it for Faye
 var md5 = require('md5')
 
+var prompt = require('prompt')
+
 //var app = express()
 
 var host = 'http://localhost' // Format: scheme://hostname
@@ -150,16 +152,10 @@ function CLIEndpoint () {
         URIRFromCLI = '/?URI-R=http://www.cs.odu.edu/~mweigle/Research/'
     }else{
         URIRFromCLI = '/?URI-R='+process.argv[2]
-        if(process.argv.length <= 3){
-          console.log("Using the default Hamming Distance as 4, as the value isn't proper")
-        }else{
-          HAMMING_DISTANCE_THRESHOLD = parseInt(process.argv[3])
-        }
-
     }
 
     console.log('URI-R From CLI: ' + URIRFromCLI)
-    console.log('Hamming Distance Threshold From CLI: ' + HAMMING_DISTANCE_THRESHOLD)
+
     var query = url.parse(URIRFromCLI, true).query
     console.log("--- ByMahee: Query URL from client = "+ JSON.stringify(query))
     /******************************
@@ -260,21 +256,7 @@ function CLIEndpoint () {
       cacheFile.path += '.json'
       console.log('Checking if a cache file exists for ' + query['URI-R'] + '...')
     //  console.log('cacheFile: '+JSON.stringify(cacheFile))
-      cacheFile.readFileContents(
-        function success (data) {
-          // A cache file has been previously generated using the alSummarization strategy
-          console.log("**ByMahee** -- readFileContents : Inside Success ReadFile Content,processWithFileContents is called next ")
-          //ByMahee -- UnComment Following Line(UCF)
-          processWithFileContents(data, response)
-        },
-        function failed () {
-          /*ByMahee -- commented as finding the Hamming Distance is needed to be seperated
-          console.log("**ByMahee** -- readFileContents : Inside Failed ReadFile Content, getTimemapGodFunctionForAlSummarization is called next ")
-          getTimemapGodFunctionForAlSummarization(query['URI-R'], response) */
-          console.log("Looked for Simahashed Cache File, Couldn't find it... Try after generating SimhashCaches using the CLI Command: node AlSummarization_OPT_CLI_JSON.js URI-R");
-        }
-
-      )
+        getTimemapGodFunctionForAlSummarization(query['URI-R'], response);
     } else if (strategy === 'random') {
       t.setupWithURIR(response, query['URI-R'], function selectRandomMementosFromTheTimeMap () {
         var numberOfMementosToSelect = 16 // TODO: remove magic number
@@ -368,9 +350,13 @@ function processWithFileContents (fileContents, response) {
   var t = createMementosFromJSONFile(fileContents)
   /* ByMahee -- unnessessary for the current need
   t.printMementoInformation(response, null, false) */
-  //console.log(JSON.stringify(t));
+  console.log("Existing file contents are as follows:")
+  console.log("**************************************************************************************************");
+  console.log(JSON.stringify(t));
+  /* the follow colde block calling calculateHammingDistancesWithOnlineFiltering is commented as the AlSummarization_OPT_CLI_JSON.js
+  is meant to calculate only Simhashes, Hamming Distance is calculated wuth AlSummarization_Hamming_CLI_JSON.js */
   //console.log('There were ' + t.mementos.length + ' mementos')
-  t.calculateHammingDistancesWithOnlineFiltering()
+ //  t.calculateHammingDistancesWithOnlineFiltering()
 
   /* ByMahee -- unnessessary
   t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI()
@@ -417,11 +403,31 @@ Memento.prototype.simhashIndicatorForHTTP302 = '00000000'
 Memento.prototype.setSimhash = function (callback) {
   // Retain the URI-R for reference in the promise (this context lost with async)
   var thaturi = this.uri
+
+// following block for investigation on Simhahes comnflicts on id_
+// console.log(thaturi);
+//   var toproceedFlag = 0
+//   console.log("search string ->"+thaturi.search("wayback"));
+//   if(thaturi.search("20160404195045id_") > 0 ){
+//      toproceedFlag = 1
+//   }else if(thaturi.search("20160404201837id_") > 0 ){
+//      toproceedFlag = 1
+//   }else if (thaturi.search("20160704195513id_") > 0 ){
+//        toproceedFlag = 1
+//   }else if (thaturi.search("20160704201540id_") > 0 ){
+//      toproceedFlag = 1
+//   }
+//   console.log("proceedFlat->"+toproceedFlag);
+//   if(toproceedFlag == 0){
+//       callback()
+//   }
+
   var thatmemento = this
     var buffer2 = ''
     var memento = this // Potentially unused? The 'this' reference will be relative to the promise here
     var mOptions = url.parse(thaturi)
-    console.log('Starting a simhash: ' + mOptions.host + mOptions.path)
+
+    console.log('Starting a simhash: ' + mOptions.host +"------------"+ mOptions.path)
     var req = http.request({
       'host': mOptions.host,
       'path': mOptions.path,
@@ -454,6 +460,8 @@ Memento.prototype.setSimhash = function (callback) {
          console.log("ByMahee -- computed simhash for "+mOptions.host+mOptions.path+" -> "+ sh)
 
           var retStr = getHexString(sh)
+          console.log(retStr);
+
 
           if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302) {
             // Normalize so not undefined
@@ -597,15 +605,16 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     // TODO: remove this function from callback hell
     function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP */
 
-  // -- ByMahee -- Uncomment one by one for CLI_JSON
-  function (callback) {t.calculateSimhashes(callback);},
-  function (callback) {t.saveSimhashesToCache(callback);},
-  function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
+    function (callback) {t.calculateSimhashes(callback);},
+  //  function (callback) {t.saveSimhashesToCache(callback);},
+  //  function (callback) {t.writeJSONToCache(callback);},
+
+//  function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
 
     /*// function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
     // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet
     function (callback) {t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);}, */
-  //function (callback) {t.writeJSONToCache(callback);},
+    //function (callback) {t.writeJSONToCache(callback);},
   /*  function (callback) {t.printMementoInformation(response, callback);},
     function (callback) {t.createScreenshotsForMementos(callback)}
     */
@@ -758,16 +767,8 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
     'total': this.mementos.length
   })
 
-// -- ByMahee -- Ignoring for CLI_JSON
-//  var client = new faye.Client(notificationServer)
-//  console.log("--- By Mahee for understanding -- ")
-//  console.log(client)
-/* commented the below line purposefully to check whether memento fetching isn't working beacuse there are many request made parallely at a time. */
-//  for (var m = 0; m < this.mementos.length; m++) {
-// //  for (var m = 0; m < 5; m++) {
-//     arrayOfSetSimhashFunctions.push(this.mementos[m].setSimhash())
-//     bar.tick(1)
-//   }
+
+
 
   // the way to get a damper, just 10 requests at a time.
   async.eachLimit(this.mementos,10, function(curMemento, callback){
