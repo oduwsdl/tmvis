@@ -18,6 +18,8 @@
     "simhash": "*",
     "moment": "*",
     "progress": "*",
+    "memwatch-next": "*",
+
     "node-phantom": "*",
     "validator": "*",
     "underscore": "*",
@@ -28,9 +30,18 @@
     "minimist": "*",
     "rimraf": "*",
     "faye": "*",
-    "md5": "*"
+    "md5": "*",
+    "blueimp-md5": "*",
+    "line-reader": "*",
+    "sync-request": "*",
+    "gm": "*",
+    "phridge": "*",
+    "phantom": "*"
   },
   "main": "index",
+  "engines": {
+    "node": ">= 0.10.0 <= 0.10.40"
+  },
   "scripts": {
     "test": "standard"
   },

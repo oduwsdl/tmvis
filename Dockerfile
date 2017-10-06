@@ -2,7 +2,7 @@ FROM       ubuntu:latest
 MAINTAINER Mat Kelly <mkelly@cs.odu.edu>
 
 RUN        apt-get update && \
-           apt-get install -y git curl nano nodejs npm phantomjs imagemagick
+           apt-get install -y git curl nano nodejs=0.10.25~dfsg2-2ubuntu1 npm phantomjs imagemagick
 RUN        ln -s /usr/bin/nodejs  /usr/bin/node
 
 ADD        . /app
