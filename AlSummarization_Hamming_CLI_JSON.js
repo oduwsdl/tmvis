@@ -426,7 +426,7 @@ Memento.prototype.setSimhash = function (callback) {
       'host': mOptions.host,
       'path': mOptions.path,
       'port':80,
-      'headers': {'User-Agent': 'ArchiveThumbnails instance - Contact @machawk1'}
+      'headers': {'User-Agent': 'TimeMap Summarization instance - Contact (@WebSciDL)Twitter, (@maheedhargunnam)Twitter'}
     }, function (res) {
       // var hd = new memwatch.HeapDiff()
 
