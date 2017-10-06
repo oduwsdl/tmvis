@@ -1,9 +1,10 @@
 var fs = require("fs");
+
 function SimhashCacheFile(forUri, isDebugMode){
 		//operation = "replace","append","read"
 		this.isDebugMode = isDebugMode
 		//TODO, check if it already exists
-		this.path = "./cache/simhashes_"+forUri.replace(/[^a-z0-9]/gi, '').toLowerCase();
+		this.path = './cache/simhashes_' + forUri.replace(/[^a-z0-9]/gi, '').toLowerCase();
 
 		this.replaceContentWith = function(str){
 			this.ConsoleLogIfRequired("in replaceContentWith()");
@@ -24,9 +25,33 @@ function SimhashCacheFile(forUri, isDebugMode){
 			fs.unlink(this.path,function(){})
 		};
 
-		this.readFileContents = function(callbackSuccess,callbackFail){
+		this.readFileContentsSync = function(callbackSuccess, callbackFail){
+            try {
+             console.log('checking for file ' + this.path);
+				var x = fs.readFileSync(this.path, 'utf-8');
+				return x;
+            }catch(e) {
+              // No file by that name
+              //console.log('There was no cache file at ' + this.path);
+              return null;
+            }
+
+			/*
 			fs.readFile(this.path,"utf-8",function(err,data){
 				if(err){
+					//The cache file hasn't been created
+					callbackFail();
+					return;
+				}
+
+				callbackSuccess(data);
+			});
+			*/
+		};
+
+		this.readFileContents = function(callbackSuccess, callbackFail) {
+			fs.readFile(this.path, 'utf-8', function(err,data){
+				if(err) {
 					//The cache file hasn't been created
 					callbackFail();
 					return;
@@ -37,7 +62,12 @@ function SimhashCacheFile(forUri, isDebugMode){
 		};
 
 		this.writeFileContentsAsJSON = function(str){
-			fs.writeFile(this.path+".json",str,function(err){if(err){throw error;}});
+		    console.log('JSON written out as filename '+ this.path + '.json');
+			fs.writeFile(this.path + '.json', str, function(err) {
+			  if(err) {
+			    throw error;
+			  }
+			});
 		};
 
 		this.exists = function(){

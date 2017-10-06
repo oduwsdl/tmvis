@@ -30,6 +30,8 @@ var moment = require('moment')
 var ProgressBar = require('progress')
 var phantom = require('node-phantom')
 
+var memwatch = require('memwatch-next');
+
 var fs = require('fs')
 var path = require('path')
 var validator = require('validator')
@@ -1174,6 +1176,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
       this.mementos[m].hammingDistance = getHamming(this.mementos[m].simhash, this.mementos[lastSignificantMementoIndexBasedOnHamming].simhash)
       // console.log("Getting hamming basis")
       this.mementos[m].hammingBasis = this.mementos[lastSignificantMementoIndexBasedOnHamming].datetime
+
 
       console.log('Comparing hamming distances (simhash,uri) = ' + this.mementos[m].hammingDistance + '\n' +
         ' > testing: ' + this.mementos[m].simhash + ' ' + this.mementos[m].uri + '\n' +
