@@ -14,10 +14,12 @@
     "step": "*",
     "futures": "*",
     "es6-promise": "*",
+    "syncprompt": "*",
     "simhash": "*",
     "moment": "*",
     "progress": "*",
     "memwatch-next": "*",
+
     "node-phantom": "*",
     "validator": "*",
     "underscore": "*",
@@ -26,9 +28,9 @@
     "imagemagick": "*",
     "async": "*",
     "minimist": "*",
-    "sync-prompt": "*",
     "rimraf": "*",
     "faye": "*",
+    "md5": "*",
     "blueimp-md5": "*",
     "line-reader": "*",
     "sync-request": "*",
@@ -41,13 +43,14 @@
     "node": ">= 0.10.0 <= 0.10.40"
   },
   "scripts": {
-    "test": "make test"
+    "test": "standard"
   },
   "devDependencies": {
     "chai": "^3.2.0",
     "jscs": "^1.13.1",
     "mocha": "0.3.x",
     "mocha-jscs": "^1.2.0",
-    "should": "^7.0.2"
+    "should": "^7.0.2",
+    "standard" :"*"
   }
 }
