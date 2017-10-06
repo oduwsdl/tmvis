@@ -13,6 +13,13 @@
 *  Run this with:
 *   > node AlSummarization_OPT_CLI_JSON.js URI-R
 *
+* Updated
+*  > node AlSummarization_OPT_CLI_JSON.js URI-R [--debug] [--hdt 4] [--ia || --ait || -ma] [--oes]
+*  hdt -> Hamming Distance Threshold
+*  ia -> Internet Archive
+*  ait -> Archive IT
+*  ma -> Memento Agrregator
+*  oes -> Override Existing Simhashes
 * Maheedhar Gunnam <mgunn001@odu.edu>
 */
 
@@ -60,24 +67,15 @@ var prompt = require('prompt')
 
 //var app = express()
 
-var host = 'http://localhost' // Format: scheme://hostname
-
-/* Custom ports if specified on command-line */
-var thumbnailServicePort = argv.p ? argv.p : 15421
-var localAssetServerPort = argv.ap ? argv.a : 1338
-var notificationServerPort = argv.ap ? argv.n : 15422
-
-/* Derived host access points */
-var localAssetServer = host + ':' + localAssetServerPort + '/'
-var thumbnailServer = host + ':' + thumbnailServicePort + '/'
-var notificationServer = host + ':' + notificationServerPort + '/'
-
-// Fresh system for testing (NOT IMPLEMENTED)
-var nukeSystemData = argv.clean ? argv.clean : false
 var uriR = ''
+var isDebugMode = argv.debug? argv.debug: false;
+var HAMMING_DISTANCE_THRESHOLD = argv.hdt?  argv.hdt: 4
+var isToOverrideCachedSimHash = argv.oes? argv.oes: false
+// by default the prime src is gonna be Archive-It
+var primeSrc = argv.ait? 1: (argv.ia ? 2:(argv.ma?3:1))
 
-var HAMMING_DISTANCE_THRESHOLD = 4
-
+ConsoleLogIfRequired("primeSrc:"+primeSrc)
+//return
 /* *******************************
    TODO: reorder functions (main first) to be more maintainable 20141205
 ****************************** */
@@ -86,24 +84,11 @@ var HAMMING_DISTANCE_THRESHOLD = 4
 * Start the application by initializing server instances
 */
 function main () {
-  console.log(('*******************************\r\n' +
+
+  ConsoleLogIfRequired(('*******************************\r\n' +
                'THUMBNAIL SUMMARIZATION SERVICE\r\n' +
                '*******************************').blue)
-
-  console.log("--By Mahee - for understanding")
-  if (nukeSystemData) {
-    var resp = prompt('Delete all derived data (y/N)? ')
-    if (resp === 'y') {
-      console.log('Deleting all dervived data.')
-      nukeSystemData = false
-      // TODO: figure out why the flow does not continue after the
-      //       nukeSystemData conditional
-      cleanSystemData(main)
-      console.log('Derived data deleted.')
-    } else {
-      console.log('No derived data modified.')
-    }
-  }
+  ConsoleLogIfRequired("--By Mahee - for understanding")
 
   var endpoint = new CLIEndpoint()
   endpoint.headStart()
@@ -139,34 +124,39 @@ function CLIEndpoint () {
     var URIRFromCLI = ""
 
     // if (process.argv.length <= 2) {
-    //     console.log("No Arguments given");
+    //     ConsoleLogIfRequired("No Arguments given");
     //     process.exit(-1);
     // }else{
     //   var param = process.argv[2];
-    //   console.log('Param: ' + param);
+    //   ConsoleLogIfRequired('Param: ' + param);
     //   process.exit(-1);
     // }
+    ConsoleLogIfRequired("argv:"+ JSON.stringify(argv))
+    ConsoleLogIfRequired("argv url :"+ argv["_"][0])
+    ConsoleLogIfRequired("argv length:"+ argv.length)
+    ConsoleLogIfRequired("isDebugMode:"+isDebugMode)
+    ConsoleLogIfRequired("argv->ia:"+ argv.ia)
 
     if (process.argv.length <= 2) {
-        console.log('No Argument was passed.. Trying with URI-R = http://www.cs.odu.edu/~mweigle/Research/')
+        ConsoleLogIfRequired('No Argument was passed.. Trying with URI-R = http://www.cs.odu.edu/~mweigle/Research/')
         URIRFromCLI = '/?URI-R=http://www.cs.odu.edu/~mweigle/Research/'
     }else{
         URIRFromCLI = '/?URI-R='+process.argv[2]
     }
 
-    console.log('URI-R From CLI: ' + URIRFromCLI)
+    ConsoleLogIfRequired('URI-R From CLI: ' + URIRFromCLI)
 
     var query = url.parse(URIRFromCLI, true).query
-    console.log("--- ByMahee: Query URL from client = "+ JSON.stringify(query))
+    ConsoleLogIfRequired("--- ByMahee: Query URL from client = "+ JSON.stringify(query))
     /******************************
        IMAGE PARAMETER - allows binary image data to be returned from service
     **************************** */
     if (query.img) {
       // Return image data here
       var fileExtension = query.img.substr('-3') // Is this correct to use a string and not an int!?
-      console.log('fetching ' + query.img + ' content')
+      ConsoleLogIfRequired('fetching ' + query.img + ' content')
       var img = fs.readFileSync(__dirname + '/' + query.img)
-      console.log("200, {'Content-Type': 'image/'" + fileExtension +'}')
+      ConsoleLogIfRequired("200, {'Content-Type': 'image/'" + fileExtension +'}')
       return
     }
 
@@ -179,12 +169,12 @@ function CLIEndpoint () {
     }
 
     if (query['URI-R']) { // URI-R is specied as a query parameter
-      console.log('URI-R valid, using query parameter.')
+      ConsoleLogIfRequired('URI-R valid, using query parameter.')
     }
 
     // ByMahee --- Actually URI is being set here
     uriR = query['URI-R']
-    console.log("--ByMahee: uriR = "+uriR)
+    ConsoleLogIfRequired("--ByMahee: uriR = "+uriR)
 
     var access = theEndPoint.validAccessParameters[0] // Not specified? access=interface
     // Override the default access parameter if the user has supplied a value
@@ -194,7 +184,7 @@ function CLIEndpoint () {
     }
 
     if (!theEndPoint.isAValidAccessParameter(access)) { // A bad access parameter was passed in
-      console.log('Bad access query parameter: ' + access)
+      ConsoleLogIfRequired('Bad access query parameter: ' + access)
       return
     }
 
@@ -209,7 +199,7 @@ function CLIEndpoint () {
     }
 
     if (!theEndPoint.isAValidStrategyParameter(strategy)) { // A bad strategy parameter was passed in
-      console.log('Bad strategy query parameter: ' + strategy)
+      ConsoleLogIfRequired('Bad strategy query parameter: ' + strategy)
       response.writeHead(501, headers)
       response.write('The strategy parameter was incorrect. Try one of ' + theEndPoint.validStrategyParameters.join(',') + ' or omit it entirely from the query string\r\n')
       response.end()
@@ -225,7 +215,7 @@ function CLIEndpoint () {
 
     headers['Content-Type'] = 'text/html' // application/json
 
-    console.log('New client request URI-R: ' + query['URI-R'] + '\r\n> Access: ' + access + '\r\n> Strategy: ' + strategy)
+    ConsoleLogIfRequired('New client request URI-R: ' + query['URI-R'] + '\r\n> Access: ' + access + '\r\n> Strategy: ' + strategy)
 
     if (!validator.isURL(uriR)) { // Return "invalid URL"
       consoleLogJSONError('Invalid URI')
@@ -233,7 +223,7 @@ function CLIEndpoint () {
     }
 
     function consoleLogJSONError (str) {
-      console.log('{"Error": "' + str + '"}')
+      ConsoleLogIfRequired('{"Error": "' + str + '"}')
     }
 
     // ByMahee -- setting the  incoming data from request into response Object
@@ -252,43 +242,30 @@ function CLIEndpoint () {
 
     // TODO: optimize this out of the conditional so the functions needed for each strategy are self-contained (and possibly OOP-ified)
     if (strategy === 'alSummarization') {
-      var cacheFile = new SimhashCacheFile(uriR)
+      var cacheFile = new SimhashCacheFile(uriR,isDebugMode)
       cacheFile.path += '.json'
-      console.log('Checking if a cache file exists for ' + query['URI-R'] + '...')
-    //  console.log('cacheFile: '+JSON.stringify(cacheFile))
+      ConsoleLogIfRequired('Checking if a cache file exists for ' + query['URI-R'] + '...')
+    //  ConsoleLogIfRequired('cacheFile: '+JSON.stringify(cacheFile))
       cacheFile.readFileContents(
         function success (data) {
           // A cache file has been previously generated using the alSummarization strategy
 
           // ByMahee -- ToDo: We can even add a prompt from user asking whether he would want to recompute hashes here
-          console.log("**ByMahee** -- readFileContents : Inside Success ReadFile Content, processWithFileContents is called next ")
+          ConsoleLogIfRequired("**ByMahee** -- readFileContents : Inside Success ReadFile Content, processWithFileContents is called next ")
 
-
-          prompt.start();
-          var property = {
-            name: 'yesno',
-            message: 'A previously cached file with the simhashes exist, Do you to Compute a new one ? Type Yes to compute, No continue',
-            validator: /Y[es]*|N[o]?/,
-            warning: 'Must respond Yes or No',
-            default: 'No'
-          };
-
-          prompt.get(property, function (err, result) {
-            if(result.yesno == "Yes"){
-              console.log("Responded to compute latest simhahes, Proceeding....");
+            if(isToOverrideCachedSimHash){
+              ConsoleLogIfRequired("Responded to compute latest simhahes, Proceeding....");
               getTimemapGodFunctionForAlSummarization(query['URI-R'], response)
             }else{
-              console.log("Responded to continue with the exisitng cached simhashes file. Proceeding..");
+              ConsoleLogIfRequired("Responded to continue with the exisitng cached simhashes file. Proceeding..");
               processWithFileContents(data, response)
             }
-          });
-
           //ByMahee -- UnComment Following Line(UCF)
          //  processWithFileContents(data, response)
         },
         function failed () {
           //ByMahee -- calling the core function responsible for AlSummarization, if the cached file doesn't exist
-          console.log("**ByMahee** -- readFileContents : Inside Failed ReadFile Content (meaning file doesn't exist), getTimemapGodFunctionForAlSummarization is called next ")
+          ConsoleLogIfRequired("**ByMahee** -- readFileContents : Inside Failed ReadFile Content (meaning file doesn't exist), getTimemapGodFunctionForAlSummarization is called next ")
           //ByMahee -- UCF
           getTimemapGodFunctionForAlSummarization(query['URI-R'], response)
         }
@@ -341,7 +318,7 @@ function CLIEndpoint () {
         t.printMementoInformation(response, function () {
           t.createScreenshotsForMementos(
             function () {
-              console.log('Done creating screenshots')
+              ConsoleLogIfRequired('Done creating screenshots')
             }
           )
         })
@@ -366,10 +343,10 @@ function cleanSystemData (cb) {
       if (err) {
         throw err
       }
-      console.log('Deleted contents of ./' + e + '/')
+      ConsoleLogIfRequired('Deleted contents of ./' + e + '/')
     })
 
-    console.log(e)
+    ConsoleLogIfRequired(e)
   })
 
   if (cb) {
@@ -387,8 +364,8 @@ function processWithFileContents (fileContents, response) {
   var t = createMementosFromJSONFile(fileContents)
   /* ByMahee -- unnessessary for the current need
   t.printMementoInformation(response, null, false) */
-  console.log("Existing file contents are as follows:")
-  console.log("**************************************************************************************************");
+  ConsoleLogIfRequired("Existing file contents are as follows:")
+  ConsoleLogIfRequired("**************************************************************************************************");
   console.log(JSON.stringify(t));
 
 }
@@ -435,7 +412,7 @@ Memento.prototype.setSimhash = function (callback) {
     var buffer2 = ''
     var memento = this // Potentially unused? The 'this' reference will be relative to the promise here
     var mOptions = url.parse(thaturi)
-    console.log('Starting a simhash: ' + mOptions.host + mOptions.path)
+    ConsoleLogIfRequired('Starting a simhash: ' + mOptions.host + mOptions.path)
     var req = http.request({
       'host': mOptions.host,
       'path': mOptions.path,
@@ -457,15 +434,15 @@ Memento.prototype.setSimhash = function (callback) {
 
         /*** ByMahee -- commented the following block as the client and server doesn't have to be in publish and subscribe mode
         //var md5hash = md5(thatmemento.originalURI) // URI-R cannot be passed in the raw
-        console.log("-- By Mahee -- Inside On response end of http request of setSimhash")
-        console.log("ByMahe -- here is the buffer content of " +mOptions.host+mOptions.path+":")
-        console.log(buffer2)
-        console.log("========================================================")  */
-        //console.log("Buffer Length ("+mOptions.host + mOptions.path +"):-> "+ buffer2.length)
+        ConsoleLogIfRequired("-- By Mahee -- Inside On response end of http request of setSimhash")
+        ConsoleLogIfRequired("ByMahe -- here is the buffer content of " +mOptions.host+mOptions.path+":")
+        ConsoleLogIfRequired(buffer2)
+        ConsoleLogIfRequired("========================================================")  */
+        //ConsoleLogIfRequired("Buffer Length ("+mOptions.host + mOptions.path +"):-> "+ buffer2.length)
         if (buffer2.indexOf('Got an HTTP 302 response at crawl time') === -1 && thatmemento.simhash != '00000000') {
 
           var sh = simhash((buffer2).split('')).join('')
-         console.log("ByMahee -- computed simhash for "+mOptions.host+mOptions.path+" -> "+ sh)
+         ConsoleLogIfRequired("ByMahee -- computed simhash for "+mOptions.host+mOptions.path+" -> "+ sh)
 
           var retStr = getHexString(sh)
 
@@ -481,7 +458,7 @@ Memento.prototype.setSimhash = function (callback) {
           buffer2 = ''
           buffer2 = null
 
-        //  console.log("Hex Code for Simhash:"+retStr + ' & URI-R:' + mOptions.host + mOptions.path)
+        //  ConsoleLogIfRequired("Hex Code for Simhash:"+retStr + ' & URI-R:' + mOptions.host + mOptions.path)
 
           thatmemento.simhash = retStr
           callback()
@@ -494,15 +471,15 @@ Memento.prototype.setSimhash = function (callback) {
       })
 
       res.on('error', function (err) {
-        console.log('Error generating Simhash in Response')
+        ConsoleLogIfRequired('Error generating Simhash in Response')
       })
     })
 
     req.on('error', function (err) {
-      console.log('Error generating Simhash in Request')
-      console.log(err)
+      ConsoleLogIfRequired('Error generating Simhash in Request')
+      ConsoleLogIfRequired(err)
       callback()
-    //  console.log("-- By Mahee -- Inside On request error of http request of setSimhash")
+    //  ConsoleLogIfRequired("-- By Mahee -- Inside On request error of http request of setSimhash")
     })
 
     req.end()
@@ -514,8 +491,8 @@ Memento.prototype.setSimhash = function (callback) {
 * @param uri The URI-R in-question
 */
 function getTimemapGodFunctionForAlSummarization (uri, response) {
-  console.log("--ByMahee -- Inside function : getTimemapGodFunctionForAlSummarization")
-  console.log("--ByMahee -- Applying AlSummarization on given URI-R = "+ uri)
+  ConsoleLogIfRequired("--ByMahee -- Inside function : getTimemapGodFunctionForAlSummarization")
+  ConsoleLogIfRequired("--ByMahee -- Applying AlSummarization on given URI-R = "+ uri)
 
   // TODO: remove TM host and path references, they reside in the TM obj
   /* ByMahee -- right now hitting only organization : web.archive.org , changing the following Host and Path to http://wayback.archive-it.org
@@ -527,6 +504,15 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
   var timemapHost = 'wayback.archive-it.org'
   var timemapPath = '/1068/timemap/link/' + uri
 
+  if(primeSrc == 2 ){
+      timemapHost = 'web.archive.org'
+      timemapPath = '/web/timemap/link/' + uri
+  }else if(primeSrc == 3){ // must contain the Host and Path for Memento Aggregator
+    ConsoleLogIfRequired("Haven't given the Memgators Host and Path yet")
+    return
+  }
+
+
   var options = {
     'host': timemapHost,
     'path': timemapPath,
@@ -534,20 +520,20 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     'method': 'GET'
   }
 
-  console.log('Path: ' + options.host + options.path)
+  ConsoleLogIfRequired('Path: ' + options.host + options.path)
   var buffer = '' // An out-of-scope string to save the Timemap string, TODO: better documentation
   var t
   var retStr = ''
   var metadata = ''
-  console.log('Starting many asynchronous operationsX...')
+  ConsoleLogIfRequired('Starting many asynchronous operationsX...')
   async.series([
     // TODO: define how this is different from the getTimemap() parent function (i.e., some name clarification is needed)
     // TODO: abstract this method to its callback form. Currently, this is reaching and populating the timemap out of scope and can't be simply isolated (I tried)
     function fetchTimemap (callback) {
       var req = http.request(options, function (res) {
-         console.log("--ByMahee-- Inside the http request call back success, request is made on the following obect:")
-        // console.log(options);
-        // console.log("----------------");
+         ConsoleLogIfRequired("--ByMahee-- Inside the http request call back success, request is made on the following obect:")
+        // ConsoleLogIfRequired(options);
+        // ConsoleLogIfRequired("----------------");
         res.setEncoding('utf8')
 
         res.on('data', function (data) {
@@ -556,48 +542,48 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
 
         res.on('end', function (d) {
 
-        //  console.log("Data Response from fetchTimeMap:" + buffer)
+        //  ConsoleLogIfRequired("Data Response from fetchTimeMap:" + buffer)
 
           if (buffer.length > 100) {  // Magic number = arbitrary, has be quantified for correctness
-            //console.log('Timemap acquired for ' + uri + ' from ' + timemapHost + timemapPath)
-            // console.log("-----------ByMahee--------")
-            // console.log(buffer)
-            // console.log("-----------ByMahee--------")
+            //ConsoleLogIfRequired('Timemap acquired for ' + uri + ' from ' + timemapHost + timemapPath)
+            // ConsoleLogIfRequired("-----------ByMahee--------")
+            // ConsoleLogIfRequired(buffer)
+            // ConsoleLogIfRequired("-----------ByMahee--------")
 
             t = new TimeMap(buffer)
             t.originalURI = uri // Need this for a filename for caching
             t.createMementos()
-            console.log("-- ByMahee -- Mementos are created by this point, following is the whole timeMap Object")
-            console.log(t);
-            console.log("---------------------------------------------------")
+            ConsoleLogIfRequired("-- ByMahee -- Mementos are created by this point, following is the whole timeMap Object")
+            ConsoleLogIfRequired(t);
+            ConsoleLogIfRequired("---------------------------------------------------")
 
             if (t.mementos.length === 0) {
-            console.log('There were no mementos for ' + uri + ' :(')
+            ConsoleLogIfRequired('There were no mementos for ' + uri + ' :(')
               return
             }
 
-            console.log('Fetching HTML for ' + t.mementos.length + ' mementos.')
+            ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
 
             callback('')
           }else{
-            console.log('The page you requested has not been archived in Archive-It.')
+            ConsoleLogIfRequired('The page you requested has not been archived in Archive-It.')
              process.exit(-1)
           }
         })
       })
 
       req.on('error', function (e) { // Houston...
-        console.log('problem with request: ' + e.message)
-        console.log(e)
+        ConsoleLogIfRequired('problem with request: ' + e.message)
+        ConsoleLogIfRequired(e)
         if (e.message === 'connect ETIMEDOUT') { // Error experienced when IA went down on 20141211
-          console.log('Hmm, the connection timed out. Internet Archive might be down.')
+          ConsoleLogIfRequired('Hmm, the connection timed out. Internet Archive might be down.')
         }
       })
 
       req.on('socket', function (socket) { // Slow connection is slow
         /*socket.setTimeout(3000)
         socket.on('timeout', function () {
-          console.log("The server took too long to respond and we're only getting older so we aborted.")
+          ConsoleLogIfRequired("The server took too long to respond and we're only getting older so we aborted.")
           req.abort()
         }) */
       })
@@ -627,10 +613,10 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
   ],
   function (err, result) {
     if (err) {
-      console.log('ERROR!')
-      console.log(err)
+      ConsoleLogIfRequired('ERROR!')
+      ConsoleLogIfRequired(err)
     } else {
-      console.log('There were no errors executing the callback chain')
+      ConsoleLogIfRequired('There were no errors executing the callback chain')
     }
   })
 
@@ -660,7 +646,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
         var diff = (parseInt(newerDate) - parseInt(olderDate))
         return diff
       }catch (e) {
-        console.log(e.message)
+        ConsoleLogIfRequired(e.message)
       }
     } else {
       throw new Exception('Both mementos in comparison do not have encoded datetimes in the URIs:\r\n\t' + newerMemento.uri + '\r\n\t' + olderMemento.uri)
@@ -677,7 +663,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
  * @param callback The function to call once this function has completed executed, invoked by caller
  */
 TimeMap.prototype.printMementoInformation = function (response, callback, dataReady) {
-  console.log('About to print memento information')
+  ConsoleLogIfRequired('About to print memento information')
   var CRLF = '\r\n'
   var TAB = '\t'
   var stateInformationString = ''
@@ -688,7 +674,7 @@ TimeMap.prototype.printMementoInformation = function (response, callback, dataRe
   }
 
 
-  var cacheFilePathWithoutDotSlash = (new SimhashCacheFile(uriR)).path.substr(2)
+  var cacheFilePathWithoutDotSlash = (new SimhashCacheFile(uriR,isDebugMode)).path.substr(2)
 
   var metadata = {
     'url': uriR,
@@ -762,8 +748,8 @@ $(document).ready(function () {
 }
 
 TimeMap.prototype.calculateSimhashes = function (callback) {
-  //console.log("--- By Mahee - For my understanding")
-  //console.log("Inside CalculateSimhashes")
+  //ConsoleLogIfRequired("--- By Mahee - For my understanding")
+  //ConsoleLogIfRequired("Inside CalculateSimhashes")
   var theTimeMap = this
   var arrayOfSetSimhashFunctions = []
   var bar = new ProgressBar('  Simhashing [:bar] :percent :etas', {
@@ -775,8 +761,8 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
 
 // -- ByMahee -- Ignoring for CLI_JSON
 //  var client = new faye.Client(notificationServer)
-//  console.log("--- By Mahee for understanding -- ")
-//  console.log(client)
+//  ConsoleLogIfRequired("--- By Mahee for understanding -- ")
+//  ConsoleLogIfRequired(client)
 /* commented the below line purposefully to check whether memento fetching isn't working beacuse there are many request made parallely at a time. */
 //  for (var m = 0; m < this.mementos.length; m++) {
 // //  for (var m = 0; m < 5; m++) {
@@ -787,20 +773,20 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
   // the way to get a damper, just 10 requests at a time.
   async.eachLimit(this.mementos,10, function(curMemento, callback){
     curMemento.setSimhash(callback)
-  //  console.log(curMemento)
+  //  ConsoleLogIfRequired(curMemento)
   }, function(err) {
-    //  console.log("length of arrayOfSetSimhashFunctions: -> " + arrayOfSetSimhashFunctions.length);
+    //  ConsoleLogIfRequired("length of arrayOfSetSimhashFunctions: -> " + arrayOfSetSimhashFunctions.length);
       if(err){
-        console.log("Inside async Each Limit")
-        console.log(err)
+        ConsoleLogIfRequired("Inside async Each Limit")
+        ConsoleLogIfRequired(err)
         return
       }
 
-    //  console.log("After all the resquests are resolved, theTimemap -> "+  theTimeMap)
+    //  ConsoleLogIfRequired("After all the resquests are resolved, theTimemap -> "+  theTimeMap)
 
-      console.log('Checking if there are mementos to remove')
+      ConsoleLogIfRequired('Checking if there are mementos to remove')
       var mementosRemoved = 0
-      console.log('About to go into loop of ## mementos: ' + (theTimeMap.mementos.length - 1))
+      ConsoleLogIfRequired('About to go into loop of ## mementos: ' + (theTimeMap.mementos.length - 1))
 
       // Remove all mementos whose payload body was a Wayback soft 302
       for (var i = theTimeMap.mementos.length - 1; i >= 0; i--) {
@@ -816,7 +802,7 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
         }
       }
       // console.timeEnd('simhashing')
-      console.log(mementosRemoved + ' mementos removed due to Wayback "soft 3xxs"')
+      ConsoleLogIfRequired(mementosRemoved + ' mementos removed due to Wayback "soft 3xxs"')
       if (callback) {
         callback('')
       }
@@ -833,12 +819,12 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
     }
   }
 
-  console.log('Done getting simhashes from array')
-  console.log('-- ByMahee -- In function SaveSimhashesToCache -- Simhash for URI and DateTime is as follows:')
-  console.log(strToWrite)
-  console.log("-------------------------------------------------------------------------")
+  ConsoleLogIfRequired('Done getting simhashes from array')
+  ConsoleLogIfRequired('-- ByMahee -- In function SaveSimhashesToCache -- Simhash for URI and DateTime is as follows:')
+  ConsoleLogIfRequired(strToWrite)
+  ConsoleLogIfRequired("-------------------------------------------------------------------------")
 
-  var cacheFile = new SimhashCacheFile(this.originalURI)
+  var cacheFile = new SimhashCacheFile(this.originalURI,isDebugMode)
   cacheFile.replaceContentWith(strToWrite)
 
 
@@ -848,8 +834,9 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
 }
 
 TimeMap.prototype.writeJSONToCache = function (callback) {
-  var cacheFile = new SimhashCacheFile(this.originalURI)
+  var cacheFile = new SimhashCacheFile(this.originalURI,isDebugMode)
   cacheFile.writeFileContentsAsJSON(JSON.stringify(this.mementos))
+  console.log(JSON.stringify(this.mementos));
   if (callback) {
     callback('')
   }
@@ -864,9 +851,9 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
   // Assuming foreach is faster than for-i, this can be executed out-of-order
   this.mementos.forEach(function (memento,m) {
     var uri = memento.uri
-    // console.log("Hamming distance = "+memento.hammingDistance)
+    // ConsoleLogIfRequired("Hamming distance = "+memento.hammingDistance)
     if (memento.hammingDistance < HAMMING_DISTANCE_THRESHOLD  && memento.hammingDistance >= 0) {
-      // console.log(memento.uri+" is below the hamming distance threshold of "+HAMMING_DISTANCE_THRESHOLD)
+      // ConsoleLogIfRequired(memento.uri+" is below the hamming distance threshold of "+HAMMING_DISTANCE_THRESHOLD)
       memento.screenshotURI = null
     } else {
       var filename = 'alSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
@@ -874,7 +861,7 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
     }
   })
 
-  console.log('done with supplyChosenMementosBasedOnHammingDistanceAScreenshotURI, calling back')
+  ConsoleLogIfRequired('done with supplyChosenMementosBasedOnHammingDistanceAScreenshotURI, calling back')
   if (callback) {
     callback('')
   }
@@ -896,7 +883,7 @@ TimeMap.prototype.supplySelectedMementosAScreenshotURI = function (strategy,call
     }
   }
 
-  console.log('Done creating filenames for ' + ii + ' mementos')
+  ConsoleLogIfRequired('Done creating filenames for ' + ii + ' mementos')
 
   if (callback) {
     callback('')
@@ -911,7 +898,7 @@ TimeMap.prototype.supplySelectedMementosAScreenshotURI = function (strategy,call
 TimeMap.prototype.supplyChosenMementosBasedOnUniformRandomness = function (callback, numberOfMementosToChoose) {
   var _this = this
   if (numberOfMementosToChoose > this.mementos.length) {
-    console.log('Number to choose is greater than number existing.')
+    ConsoleLogIfRequired('Number to choose is greater than number existing.')
     return
   }
 
@@ -942,9 +929,9 @@ TimeMap.prototype.supplyChosenMementosBasedOnUniformRandomness = function (callb
 */
 TimeMap.prototype.supplyChosenMementosBasedOnTemporalInterval = function (callback, numberOfMementosToChoose) {
   var _this = this
-  console.log('OriginalURI is ' + _this.originalURI)
+  ConsoleLogIfRequired('OriginalURI is ' + _this.originalURI)
   if (numberOfMementosToChoose > this.mementos.length) {
-    console.log('Number to choose is greater than number existing.')
+    ConsoleLogIfRequired('Number to choose is greater than number existing.')
     return
   }
 
@@ -958,10 +945,10 @@ TimeMap.prototype.supplyChosenMementosBasedOnTemporalInterval = function (callba
     if (thisYYYYMM !== lastMonthRecorded) {
       this.mementos[i].selected = true
       lastMonthRecorded = thisYYYYMM
-      console.log(this.mementos[i].datetime + ' accepted')
+      ConsoleLogIfRequired(this.mementos[i].datetime + ' accepted')
       selectedIndexes.push(i)
     } else {
-      console.log(this.mementos[i].datetime + ' rejected (same month as previous selected)')
+      ConsoleLogIfRequired(this.mementos[i].datetime + ' rejected (same month as previous selected)')
     }
   }
 
@@ -969,14 +956,14 @@ TimeMap.prototype.supplyChosenMementosBasedOnTemporalInterval = function (callba
     return el.selected !== null
   })
 
-  console.log('We are going to choose ' + numberOfMementosToChoose + ' --- ' + selectedIndexes)
+  ConsoleLogIfRequired('We are going to choose ' + numberOfMementosToChoose + ' --- ' + selectedIndexes)
   // Prune based on numberOfMementosToChoose
   while (selectedIndexes.length > numberOfMementosToChoose) {
     var mementoIToRemove = Math.floor(Math.random() * selectedIndexes.length)
-    console.log(selectedIndexes.length + ' is too many mementos, removing index ' + mementoIToRemove)
-    console.log(this.mementos[mementoIToRemove].datetime + ' was ' + this.mementos[mementoIToRemove].selected)
+    ConsoleLogIfRequired(selectedIndexes.length + ' is too many mementos, removing index ' + mementoIToRemove)
+    ConsoleLogIfRequired(this.mementos[mementoIToRemove].datetime + ' was ' + this.mementos[mementoIToRemove].selected)
     delete this.mementos[selectedIndexes[mementoIToRemove]].selected
-    console.log('Now it is ' + this.mementos[mementoIToRemove].selected)
+    ConsoleLogIfRequired('Now it is ' + this.mementos[mementoIToRemove].selected)
     selectedIndexes.splice(mementoIToRemove, 1)
   }
 
@@ -984,7 +971,7 @@ TimeMap.prototype.supplyChosenMementosBasedOnTemporalInterval = function (callba
     return el.selected
   })
 
-  console.log(beforeOK.length + ' --> ' + monthlyOK.length + ' passed the monthly test')
+  ConsoleLogIfRequired(beforeOK.length + ' --> ' + monthlyOK.length + ' passed the monthly test')
 
   setTimeout(function () {
     var client = new faye.Client(notificationServer)
@@ -1006,7 +993,7 @@ TimeMap.prototype.supplyChosenMementosBasedOnTemporalInterval = function (callba
 TimeMap.prototype.supplyChosenMementosBasedOnInterval = function (callback, skipFactor, initialIndex, numberOfMementosToChoose) {
   var _this = this
   if (numberOfMementosToChoose > this.mementos.length) {
-    console.log('Number to choose is greater than number existing.')
+    ConsoleLogIfRequired('Number to choose is greater than number existing.')
     return
   }
 
@@ -1043,7 +1030,7 @@ TimeMap.prototype.supplyChosenMementosBasedOnInterval = function (callback, skip
 *                     function means a screenshot should be generated for it.
 */
 TimeMap.prototype.createScreenshotsForMementos = function (callback, withCriteria) {
-  console.log('Creating screenshots...')
+  ConsoleLogIfRequired('Creating screenshots...')
 
   function hasScreenshot (e) {
     return e.screenshotURI !== null
@@ -1062,8 +1049,8 @@ TimeMap.prototype.createScreenshotsForMementos = function (callback, withCriteri
     self.createScreenshotForMemento,            // Create a screenshot
     function doneCreatingScreenshots (err) {      // When finished, check for errors
       if (err) {
-        console.log('Error creating screenshot')
-        console.log(err)
+        ConsoleLogIfRequired('Error creating screenshot')
+        ConsoleLogIfRequired(err)
       }
 
       callback('')
@@ -1080,15 +1067,15 @@ TimeMap.prototype.createScreenshotForMemento = function (memento, callback) {
     fs.openSync(
       path.join(__dirname + '/screenshots/' + memento.screenshotURI),
       'r', function (e, r) {
-        console.log(e)
-        console.log(r)
+        ConsoleLogIfRequired(e)
+        ConsoleLogIfRequired(r)
       })
 
-    console.log(memento.screenshotURI + ' already exists...continuing')
+    ConsoleLogIfRequired(memento.screenshotURI + ' already exists...continuing')
     callback()
     return
   }catch (e) {
-    console.log((new Date()).getTime() + ' ' + memento.screenshotURI + ' does not exist...generating')
+    ConsoleLogIfRequired((new Date()).getTime() + ' ' + memento.screenshotURI + ' does not exist...generating')
   }
 
   var options = {
@@ -1104,11 +1091,11 @@ TimeMap.prototype.createScreenshotForMemento = function (memento, callback) {
 
   }
 
-  console.log('About to start screenshot generation process for ' + uri)
+  ConsoleLogIfRequired('About to start screenshot generation process for ' + uri)
   webshot(uri, 'screenshots/' + filename, options, function (err) {
     if (err) {
-      console.log('Error creating a screenshot for ' + uri)
-      console.log(err)
+      ConsoleLogIfRequired('Error creating a screenshot for ' + uri)
+      ConsoleLogIfRequired(err)
       callback('Screenshot failed!')
     } else {
       fs.chmodSync('./screenshots/' + filename, '755')
@@ -1116,13 +1103,13 @@ TimeMap.prototype.createScreenshotForMemento = function (memento, callback) {
             './screenshots/' + (filename.replace('.png', '_200.png'))],
         function (err, stdout) {
           if (err) {
-            console.log('We could not downscale ./screenshots/' + filename + ' :(')
+            ConsoleLogIfRequired('We could not downscale ./screenshots/' + filename + ' :(')
           }
 
-          console.log('Successfully scaled ' + filename + ' to 200 pixels', stdout)
+          ConsoleLogIfRequired('Successfully scaled ' + filename + ' to 200 pixels', stdout)
         })
 
-      console.log('t=' + (new Date()).getTime() + ' ' + 'Screenshot created for ' + uri)
+      ConsoleLogIfRequired('t=' + (new Date()).getTime() + ' ' + 'Screenshot created for ' + uri)
       callback()
     }
   })
@@ -1135,21 +1122,21 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
   var lastSignificantMementoIndexBasedOnHamming = 0
   var copyOfMementos = [this.mementos[0]]
 
-  //console.log('Calculate hamming distance of ' + this.mementos.length + ' mementos')
+  //ConsoleLogIfRequired('Calculate hamming distance of ' + this.mementos.length + ' mementos')
   for (var m = 0; m < this.mementos.length; m++) {
-    // console.log("Analyzing memento "+m+"/"+this.mementos.length+": "+this.mementos[m].uri)
-    // console.log("...with SimHash: "+this.mementos[m].simhash)
+    // ConsoleLogIfRequired("Analyzing memento "+m+"/"+this.mementos.length+": "+this.mementos[m].uri)
+    // ConsoleLogIfRequired("...with SimHash: "+this.mementos[m].simhash)
     if (m > 0) {
       if ((this.mementos[m].simhash.match(/0/g) || []).length === 32) {
-        console.log('0s, returning')
+        ConsoleLogIfRequired('0s, returning')
         continue
       }
-      // console.log("Calculating hamming distance")
+      // ConsoleLogIfRequired("Calculating hamming distance")
       this.mementos[m].hammingDistance = getHamming(this.mementos[m].simhash, this.mementos[lastSignificantMementoIndexBasedOnHamming].simhash)
-      // console.log("Getting hamming basis")
+      // ConsoleLogIfRequired("Getting hamming basis")
       this.mementos[m].hammingBasis = this.mementos[lastSignificantMementoIndexBasedOnHamming].datetime
 
-      // console.log('Comparing hamming distances (simhash,uri) = ' + this.mementos[m].hammingDistance + '\n' +
+      // ConsoleLogIfRequired('Comparing hamming distances (simhash,uri) = ' + this.mementos[m].hammingDistance + '\n' +
       //   ' > testing: ' + this.mementos[m].simhash + ' ' + this.mementos[m].uri + '\n' +
       //   ' > pivot:   ' + this.mementos[lastSignificantMementoIndexBasedOnHamming].simhash + ' ' + this.mementos[lastSignificantMementoIndexBasedOnHamming].uri)
 
@@ -1159,20 +1146,20 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
          copyOfMementos.push(this.mementos[m]) // Only push mementos that pass threshold requirements
       }
 
-      // console.log(t.mementos[m].uri+" hammed!")
+      // ConsoleLogIfRequired(t.mementos[m].uri+" hammed!")
     } else if (m === 0) {
-      console.log('m==0, continuing')
+      ConsoleLogIfRequired('m==0, continuing')
     }
   }
 
-  //console.log((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
+  //ConsoleLogIfRequired((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
   copyOfMementos = null
 
 
-  console.log("------------ByMahee-- After the hamming distance is calculated, here is how the mementos with additional details look like ------------------")
-  console.log(JSON.stringify(this.mementos))
-  //console.log(this.mementos)
-  console.log("----------------------------------------------------------------------------------------------------------------------------------------------")
+  ConsoleLogIfRequired("------------ByMahee-- After the hamming distance is calculated, here is how the mementos with additional details look like ------------------")
+  ConsoleLogIfRequired(JSON.stringify(this.mementos))
+  //ConsoleLogIfRequired(this.mementos)
+  ConsoleLogIfRequired("----------------------------------------------------------------------------------------------------------------------------------------------")
 
 
   if (callback) { callback('') }
@@ -1186,9 +1173,17 @@ TimeMap.prototype.setupWithURIR = function (response, uriR, callback) {
 
   /* ByMahee -- right now hitting only organization : web.archive.org , changing the following Host and Path to http://wayback.archive-it.org. One of the following 2 statement sets to be used */
 
+
   var timemapHost = 'wayback.archive-it.org'
   var timemapPath = '/1068/timemap/link/' + uriR
 
+  if(primeSrc == 2 ){
+      timemapHost = 'web.archive.org'
+      timemapPath = '/web/timemap/link/' + uriR
+  }else if(primeSrc == 3){ // must contain the Host and Path for Memento Aggregator
+    ConsoleLogIfRequired("Haven't given the Memgators Host and Path yet")
+    return
+  }
   // var timemapHost = 'web.archive.org'
   // var timemapPath = '/web/timemap/link/' + uriR
 
@@ -1201,8 +1196,8 @@ TimeMap.prototype.setupWithURIR = function (response, uriR, callback) {
 
   var buffer = ''
   var retStr = ''
-  console.log('Starting many asynchronous operations...')
-  console.log('Timemap output here')
+  ConsoleLogIfRequired('Starting many asynchronous operations...')
+  ConsoleLogIfRequired('Timemap output here')
   var tmInstance = this
 
   var req = http.request(options, function (res) {
@@ -1214,7 +1209,7 @@ TimeMap.prototype.setupWithURIR = function (response, uriR, callback) {
 
     res.on('end', function () {
       if (buffer.length > 100) {
-        console.log('X Timemap acquired for ' + uriR + ' from ' + timemapHost + timemapPath)
+        ConsoleLogIfRequired('X Timemap acquired for ' + uriR + ' from ' + timemapHost + timemapPath)
         tmInstance.str = buffer
         tmInstance.originalURI = uriR // Need this for a filename for caching
         tmInstance.createMementos()
@@ -1231,8 +1226,8 @@ TimeMap.prototype.setupWithURIR = function (response, uriR, callback) {
   })
 
   req.on('error', function (e) { // Houston...
-    console.log('problem with request: ' + e.message)
-    console.log(e)
+    ConsoleLogIfRequired('problem with request: ' + e.message)
+    ConsoleLogIfRequired(e)
     if (e.message === 'connect ETIMEDOUT') { // Error experienced when IA went down on 20141211
       response.write('Hmm, the connection timed out. Internet Archive might be down.')
       response.end()
@@ -1250,13 +1245,13 @@ TimeMap.prototype.setupWithURIR = function (response, uriR, callback) {
 
 function getHamming (str1, str2) {
   if (str1.length !== str2.length) {
-    console.log('Oh noes! Hamming went awry! The lengths are not equal!')
-    console.log(str1 + ' ' + str2 + ' ' + str1.length + ' ' + str2.length)
+    ConsoleLogIfRequired('Oh noes! Hamming went awry! The lengths are not equal!')
+    ConsoleLogIfRequired(str1 + ' ' + str2 + ' ' + str1.length + ' ' + str2.length)
 
     // ^Throw "Unequal lengths when both strings must be equal to calculate hamming distance."
 
     // Resilience instead of crashing
-    console.log('Unequal lengths when both strings must be equal to calculate hamming distance.')
+    ConsoleLogIfRequired('Unequal lengths when both strings must be equal to calculate hamming distance.')
     return 0
   } else if (str1 === str2) {
     return 0
@@ -1291,7 +1286,7 @@ TODO: break these out into a separate file
 
 // Graceful exit
 process.on('SIGINT', function () {
-  console.log('\nGracefully shutting down from SIGINT (Ctrl-C)')
+  ConsoleLogIfRequired('\nGracefully shutting down from SIGINT (Ctrl-C)')
   process.exit()
 })
 
@@ -1299,7 +1294,7 @@ process.on('SIGINT', function () {
 function checkBin (n) {
 //  return /^[01]{1, 64}$/.test(n)
 // ByMahee -- the above statement is being changed to the following as we are checking 4 bits at a time
- //console.log("Inside Check Binary")
+ //ConsoleLogIfRequired("Inside Check Binary")
  return /^[01]{1,4}$/.test(n)
 }
 
@@ -1379,6 +1374,13 @@ function getHexString (onesAndZeros) {
   }
 
   return str
+}
+
+
+function ConsoleLogIfRequired(msg){
+  if(isDebugMode){
+    console.log(msg);
+  }
 }
 
 /* *********************************
