@@ -61,7 +61,7 @@ function TimeMap(str){
 				// }
 
 				// to be deleted  immedietly, following block for investigation on Simhahes conflicts on id_, just pushing the mementos of interest
-				  // toproceedFlag = 0
+				 // toproceedFlag = 0
 				  // if(uri.search("20160404195045id_") > 0 ){
 				  //    toproceedFlag = 1
 				  // }else if(uri.search("20160404201837id_") > 0 ){
@@ -71,7 +71,10 @@ function TimeMap(str){
 				  // }else if (uri.search("20160704201540id_") > 0 ){
 				  //    toproceedFlag = 1
 				  // }
-					//
+					// if(uri.search("20160404201837id_") > 0 ){
+				  //    toproceedFlag = 1
+				  // }
+
 					// if(toproceedFlag == 1){
 					// 	this.mementos.push(foundMementoObject);
 					// }else{

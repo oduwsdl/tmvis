@@ -11,8 +11,8 @@
 * be considered for simhash generation.
 * OPT in the file name stands for optimization, Where id_ is appended at the end to return only the original content
 *  Run this with:
-*   > node AlSummarization_OPT_CLI_JSON.js URI-R
-*
+*   > node AlSummarization_Hamming_CLI_JSON.js URI-R
+* eg: node AlSummarization_Hamming_CLI_JSON.js http://4genderjustice.org/
 * Maheedhar Gunnam <mgunn001@odu.edu>
 */
 

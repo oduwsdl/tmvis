@@ -15,6 +15,7 @@
 *
 * Updated
 *  > node AlSummarization_OPT_CLI_JSON.js URI-R [--debug] [--hdt 4] [--ia || --ait || -ma] [--oes]
+ex: node AlSummarization_OPT_CLI_JSON.js http://4genderjustice.org/ --hdt 4 --oes
 *  hdt -> Hamming Distance Threshold
 *  ia -> Internet Archive
 *  ait -> Archive IT
@@ -64,7 +65,7 @@ var rimraf = require('rimraf')
 var md5 = require('md5')
 
 var prompt = require('prompt')
-
+var zlib = require('zlib')
 //var app = express()
 
 var uriR = ''
@@ -421,16 +422,30 @@ Memento.prototype.setSimhash = function (callback) {
     }, function (res) {
       // var hd = new memwatch.HeapDiff()
 
-      res.setEncoding('utf8')
-      res.on('data', function (data) {
-        buffer2 += data.toString()
-      })
-
       if (res.statusCode !== 200) { // setting the simhash to be '0000000' for all the mementos which has a status of non 200
         thatmemento.simhash = Memento.prototype.simhashIndicatorForHTTP302
       }
 
-      res.on('end', function (d) {
+      var outputBuffer;
+      // res.setEncoding('utf8')
+      if( res.headers['content-encoding'] == 'gzip' ) {
+         var gzip = zlib.createGunzip();
+         res.pipe(gzip);
+         outputBuffer = gzip;
+       } else {
+         outputBuffer = res;
+       }
+
+      outputBuffer.setEncoding('utf8')
+      //res.setEncoding('utf8')
+
+
+      outputBuffer.on('data', function (data) {
+        buffer2 += data.toString()
+      })
+
+
+      outputBuffer.on('end', function (d) {
 
         /*** ByMahee -- commented the following block as the client and server doesn't have to be in publish and subscribe mode
         //var md5hash = md5(thatmemento.originalURI) // URI-R cannot be passed in the raw
@@ -470,7 +485,7 @@ Memento.prototype.setSimhash = function (callback) {
         }
       })
 
-      res.on('error', function (err) {
+      outputBuffer.on('error', function (err) {
         ConsoleLogIfRequired('Error generating Simhash in Response')
       })
     })

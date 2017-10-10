@@ -1,10 +1,13 @@
 var fs = require("fs");
 
 function SimhashCacheFile(forUri, isDebugMode){
+
 		//operation = "replace","append","read"
 		this.isDebugMode = isDebugMode
 		//TODO, check if it already exists
 		this.path = './cache/simhashes_' + forUri.replace(/[^a-z0-9]/gi, '').toLowerCase();
+
+console.log('path is now ' + this.path);
 
 		this.replaceContentWith = function(str){
 			this.ConsoleLogIfRequired("in replaceContentWith()");
@@ -71,8 +74,14 @@ function SimhashCacheFile(forUri, isDebugMode){
 		};
 
 		this.exists = function(){
-			this.ConsoleLogIfRequired("This is not the right thing to do. exists() is async and requires a callback. Change flow of caller");
-			//fs.exists(this.path,function(){this.ConsoleLogIfRequired("The cache file at });
+		  try {
+		    console.log('Checking if ' + this.path + ' exists');
+			fs.statSync(this.path);
+		  } catch(err) {
+			if(err.code == 'ENOENT') return false;
+		  }
+		  return true;
+
 		}
    this.ConsoleLogIfRequired= function (msg){
 	   if(this.isDebugMode){
@@ -82,8 +91,6 @@ function SimhashCacheFile(forUri, isDebugMode){
 
 
 }
-
-
 
 module.exports = {
 	SimhashCacheFile : SimhashCacheFile

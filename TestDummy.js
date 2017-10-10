@@ -57,7 +57,7 @@ var rimraf = require('rimraf')
 var md5 = require('md5')
 
 var prompt = require('prompt')
-
+var zlib = require('zlib')
 //var app = express()
 
 var host = 'http://localhost' // Format: scheme://hostname
@@ -426,7 +426,7 @@ Memento.prototype.setSimhash = function (callback) {
     var buffer2 = ''
     var memento = this // Potentially unused? The 'this' reference will be relative to the promise here
     var mOptions = url.parse(thaturi)
-
+    var contentEncodeType = "undefined"
     console.log('Starting a simhash: ' + mOptions.host +"------------"+ mOptions.path)
     var req = http.request({
       'host': mOptions.host,
@@ -435,24 +435,37 @@ Memento.prototype.setSimhash = function (callback) {
       'headers': {'User-Agent': 'ArchiveThumbnails instance - Contact @machawk1'}
     }, function (res) {
       // var hd = new memwatch.HeapDiff()
-
-      res.setEncoding('utf8')
-      res.on('data', function (data) {
-        buffer2 += data.toString()
-      })
+      console.log("************************* respose Headers:"+res.headers['content-encoding'] +'*********************************')
 
       if (res.statusCode !== 200) { // setting the simhash to be '0000000' for all the mementos which has a status of non 200
         thatmemento.simhash = Memento.prototype.simhashIndicatorForHTTP302
+        callback()
       }
 
-      res.on('end', function (d) {
+      var outputBuffer;
+      // res.setEncoding('utf8')
+      if( res.headers['content-encoding'] == 'gzip' ) {
+         var gzip = zlib.createGunzip();
+         res.pipe(gzip);
+         outputBuffer = gzip;
+       } else {
+         outputBuffer = res;
+       }
+
+      outputBuffer.setEncoding('utf8')
+      outputBuffer.on('data', function (data) {
+        buffer2 += data.toString()
+      })
+
+
+      outputBuffer.on('end', function (d) {
 
         /*** ByMahee -- commented the following block as the client and server doesn't have to be in publish and subscribe mode
         //var md5hash = md5(thatmemento.originalURI) // URI-R cannot be passed in the raw
-        console.log("-- By Mahee -- Inside On response end of http request of setSimhash")
+        console.log("-- By Mahee -- Inside On response end of http request of setSimhash") */
         console.log("ByMahe -- here is the buffer content of " +mOptions.host+mOptions.path+":")
         console.log(buffer2)
-        console.log("========================================================")  */
+        console.log("========================================================")
         //console.log("Buffer Length ("+mOptions.host + mOptions.path +"):-> "+ buffer2.length)
         if (buffer2.indexOf('Got an HTTP 302 response at crawl time') === -1 && thatmemento.simhash != '00000000') {
 
@@ -487,7 +500,7 @@ Memento.prototype.setSimhash = function (callback) {
         }
       })
 
-      res.on('error', function (err) {
+      outputBuffer.on('error', function (err) {
         console.log('Error generating Simhash in Response')
       })
     })
