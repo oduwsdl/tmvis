@@ -15,12 +15,12 @@
 *
 * Updated
 *  > node AlSummarization_OPT_CLI_JSON.js URI-R [--debug] [--hdt 4] [--ia || --ait || -ma] [--oes]
-ex: node AlSummarization_OPT_CLI_JSON.js http://4genderjustice.org/ --hdt 4 --oes
-*  hdt -> Hamming Distance Threshold
+*  ex: node AlSummarization_OPT_CLI_JSON.js http://4genderjustice.org/ --oes
 *  ia -> Internet Archive
 *  ait -> Archive IT
 *  ma -> Memento Agrregator
 *  oes -> Override Existing Simhashes
+* debug -> to get the debugging comments on the screen
 * Maheedhar Gunnam <mgunn001@odu.edu>
 */
 
@@ -70,7 +70,7 @@ var zlib = require('zlib')
 
 var uriR = ''
 var isDebugMode = argv.debug? argv.debug: false;
-var HAMMING_DISTANCE_THRESHOLD = argv.hdt?  argv.hdt: 4
+// var HAMMING_DISTANCE_THRESHOLD = argv.hdt?  argv.hdt: 4
 var isToOverrideCachedSimHash = argv.oes? argv.oes: false
 // by default the prime src is gonna be Archive-It
 var primeSrc = argv.ait? 1: (argv.ia ? 2:(argv.ma?3:1))
