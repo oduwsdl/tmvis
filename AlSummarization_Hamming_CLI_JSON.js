@@ -1119,11 +1119,41 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
 
   var lastSignificantMementoIndexBasedOnHamming = 0
   var copyOfMementos = [this.mementos[0]]
-
+  var month_names_short= ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  var  mementoJObjArrForTimeline=[];
   //console.log('Calculate hamming distance of ' + this.mementos.length + ' mementos')
   for (var m = 0; m < this.mementos.length; m++) {
     // console.log("Analyzing memento "+m+"/"+this.mementos.length+": "+this.mementos[m].uri)
     // console.log("...with SimHash: "+this.mementos[m].simhash)
+
+    /* following lines of code is to make the JSON Object for Timeline */
+     var mementoJObj_ForTimeline ={}
+     var dt =  new Date(this.mementos[m]["datetime"].split(",")[1])
+     var date = dt.getDate()
+     var month = dt.getMonth() + 1
+     if(date <10){
+       date = "0"+date
+     }
+
+     if(month < 10){
+       month = "0"+month
+     }
+     //leave as it is if id_ is the one required
+     var curMementoURI = this.mementos[m]["uri"];
+     curMementoURI = curMementoURI.replace("id_/http::","/http:");
+     var eventDisplayDate = dt.getUTCFullYear()+"-"+ month+"-"+date+", "+ this.mementos[m]["datetime"].split(" ")[4]
+     mementoJObj_ForTimeline["timestamp"] = Number(dt)/1000
+     mementoJObj_ForTimeline["event_html"] = "<img src='http://www.cs.odu.edu/~mgunnam/TimeMapSummarization/photos/alSum_httpwaybackarchiveitorg106820150701215641http4genderjusticeorg.png' width='300px' />"
+     mementoJObj_ForTimeline["event_date"] =  month_names_short[ parseInt(month)]+". "+date +", "+ dt.getUTCFullYear()
+     mementoJObj_ForTimeline["event_display_date"] = eventDisplayDate
+     mementoJObj_ForTimeline["event_description"] = ""
+     mementoJObj_ForTimeline["event_link"] = curMementoURI
+
+    if(m == 0){
+       mementoJObj_ForTimeline["event_series"] = "Thumbnails"
+       mementoJObjArrForTimeline.push(mementoJObj_ForTimeline)
+    }
+
     if (m > 0) {
       if ((this.mementos[m].simhash.match(/0/g) || []).length === 32) {
         console.log('0s, returning')
@@ -1140,11 +1170,16 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
 
       if (this.mementos[m].hammingDistance >= HAMMING_DISTANCE_THRESHOLD) { // Filter the mementos if hamming distance is too small
         lastSignificantMementoIndexBasedOnHamming = m
-
-         copyOfMementos.push(this.mementos[m]) // Only push mementos that pass threshold requirements
+        copyOfMementos.push(this.mementos[m]) // Only push mementos that pass threshold requirements
       }
 
-      // console.log(t.mementos[m].uri+" hammed!")
+     if(this.mementos[m].hammingDistance < HAMMING_DISTANCE_THRESHOLD ){
+       mementoJObj_ForTimeline["event_series"] = "Non-Thumbnail Mementos"
+     }else{
+         mementoJObj_ForTimeline["event_series"] = "Thumbnails"
+     }
+     mementoJObjArrForTimeline.push(mementoJObj_ForTimeline)
+
     } else if (m === 0) {
       console.log('m==0, continuing')
     }
@@ -1153,11 +1188,12 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
   //console.log((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
   copyOfMementos = null
 
-
   console.log("------------ByMahee-- After the hamming distance is calculated, here is how the mementos with additional details look like ------------------")
   console.log(JSON.stringify(this.mementos))
   //console.log(this.mementos)
-  console.log("----------------------------------------------------------------------------------------------------------------------------------------------")
+  console.log("-------------------------------------------- Json Array for TimeLine ----------------------------------------------------------")
+  console.log(JSON.stringify(mementoJObjArrForTimeline))
+  console.log("--------------------------------------------------------------------------------------------------------------------------------")
 
 
   if (callback) { callback('') }
