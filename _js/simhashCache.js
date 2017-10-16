@@ -1,23 +1,26 @@
 var fs = require("fs");
 
-function SimhashCacheFile(forUri) {
-		//operation = "replace","append","read"
+function SimhashCacheFile(forUri, isDebugMode){
 
+		//operation = "replace","append","read"
+		this.isDebugMode = isDebugMode
 		//TODO, check if it already exists
 		this.path = './cache/simhashes_' + forUri.replace(/[^a-z0-9]/gi, '').toLowerCase();
 
 console.log('path is now ' + this.path);
 
 		this.replaceContentWith = function(str){
-			console.log(' - DELETING old cache file.');
+			this.ConsoleLogIfRequired("in replaceContentWith()");
+			this.ConsoleLogIfRequired("> deleting old cache file");
 			this.deleteCacheFile();
-            console.log(' - WRITING new cache file...');
+			this.ConsoleLogIfRequired("> done deleting cache file, writing new contents");
 			this.writeFileContents(str);
+			this.ConsoleLogIfRequired("> done writing new contents to cache");
 		};
 
 		this.writeFileContents = function(str){
-			fs.appendFileSync(this.path, str);
-			console.log(' - WRITING new cache file complete.');
+			fs.appendFileSync(this.path,str);
+			this.ConsoleLogIfRequired("Wrote simhash to "+this.path);
 		};
 
 		this.deleteCacheFile = function(){
@@ -35,7 +38,7 @@ console.log('path is now ' + this.path);
               //console.log('There was no cache file at ' + this.path);
               return null;
             }
-			
+
 			/*
 			fs.readFile(this.path,"utf-8",function(err,data){
 				if(err){
@@ -48,7 +51,7 @@ console.log('path is now ' + this.path);
 			});
 			*/
 		};
-		
+
 		this.readFileContents = function(callbackSuccess, callbackFail) {
 			fs.readFile(this.path, 'utf-8', function(err,data){
 				if(err) {
@@ -78,10 +81,16 @@ console.log('path is now ' + this.path);
 			if(err.code == 'ENOENT') return false;
 		  }
 		  return true;
+
 		}
+   this.ConsoleLogIfRequired= function (msg){
+	   if(this.isDebugMode){
+	     console.log(msg);
+	   }
+	 }
+
 
 }
-
 
 module.exports = {
 	SimhashCacheFile : SimhashCacheFile

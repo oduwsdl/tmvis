@@ -931,6 +931,7 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
 TimeMap.prototype.writeJSONToCache = function (callback) {
   var cacheFile = new SimhashCacheFile(this.originalURI)
   cacheFile.writeFileContentsAsJSON(JSON.stringify(this.mementos))
+  console.log(JSON.stringify(this.mementos));
   if (callback) {
     callback('')
   }
