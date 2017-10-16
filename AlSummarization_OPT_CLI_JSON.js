@@ -14,13 +14,14 @@
 *   > node AlSummarization_OPT_CLI_JSON.js URI-R
 *
 * Updated
-*  > node AlSummarization_OPT_CLI_JSON.js URI-R [--debug] [--hdt 4] [--ia || --ait || -ma] [--oes]
+*  > node AlSummarization_OPT_CLI_JSON.js URI-R [--debug] [--hdt 4] [--ia || --ait || -ma] [--oes] [--ci 1068]
 *  ex: node AlSummarization_OPT_CLI_JSON.js http://4genderjustice.org/ --oes
 *  ia -> Internet Archive
 *  ait -> Archive IT
 *  ma -> Memento Agrregator
 *  oes -> Override Existing Simhashes
 * debug -> to get the debugging comments on the screen
+* ci -> Collection Identifier, incase of ait
 * Maheedhar Gunnam <mgunn001@odu.edu>
 */
 
@@ -75,7 +76,10 @@ var isToOverrideCachedSimHash = argv.oes? argv.oes: false
 // by default the prime src is gonna be Archive-It
 var primeSrc = argv.ait? 1: (argv.ia ? 2:(argv.ma?3:1))
 
+var collectionIdentifier = argv.ci?  argv.ci: 'all'
+
 ConsoleLogIfRequired("primeSrc:"+primeSrc)
+ConsoleLogIfRequired("collectionIdentifier for Archive-It :"+collectionIdentifier)
 //return
 /* *******************************
    TODO: reorder functions (main first) to be more maintainable 20141205
@@ -517,7 +521,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
   // var timemapPath = '/web/timemap/link/' + uri
 
   var timemapHost = 'wayback.archive-it.org'
-  var timemapPath = '/1068/timemap/link/' + uri
+  var timemapPath = '/'+collectionIdentifier+'/timemap/link/' + uri
 
   if(primeSrc == 2 ){
       timemapHost = 'web.archive.org'
@@ -1190,7 +1194,7 @@ TimeMap.prototype.setupWithURIR = function (response, uriR, callback) {
 
 
   var timemapHost = 'wayback.archive-it.org'
-  var timemapPath = '/1068/timemap/link/' + uriR
+  var timemapPath = '/'+collectionIdentifier+'/timemap/link/' + uriR
 
   if(primeSrc == 2 ){
       timemapHost = 'web.archive.org'

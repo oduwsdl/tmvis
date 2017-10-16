@@ -46,7 +46,7 @@ var mementoFramework = require('./_js/mementoFramework.js')
 var Memento = mementoFramework.Memento
 var TimeMap = mementoFramework.TimeMap
 var SimhashCacheFile = require('./_js/simhashCache.js').SimhashCacheFile
-
+var captureScreenShot = require('./AlSummarization_ScreenShot.js').CaptureScreenShot
 var colors = require('colors')
 var im = require('imagemagick')
 var rimraf = require('rimraf')
@@ -105,6 +105,7 @@ function main () {
 
   var endpoint = new CLIEndpoint()
   endpoint.headStart()
+
 }
 
 
@@ -372,11 +373,10 @@ function processWithFileContents (fileContents, response) {
   //console.log('There were ' + t.mementos.length + ' mementos')
   t.calculateHammingDistancesWithOnlineFiltering()
 
-  /* ByMahee -- unnessessary
   t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI()
   t.createScreenshotsForMementos(function () {
     console.log('Done creating screenshots')
-  }) */
+  })
 }
 
 /**
@@ -603,12 +603,12 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
   function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
 
     /*// function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
-    // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet
-    function (callback) {t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);}, */
+    // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet  */
+    function (callback) {t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);},
   //function (callback) {t.writeJSONToCache(callback);},
-  /*  function (callback) {t.printMementoInformation(response, callback);},
+  /*  function (callback) {t.printMementoInformation(response, callback);}, */
     function (callback) {t.createScreenshotsForMementos(callback)}
-    */
+
   ],
   function (err, result) {
     if (err) {
@@ -846,20 +846,69 @@ TimeMap.prototype.writeJSONToCache = function (callback) {
 * @param callback The next procedure to execution when this process concludes
 */
 TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = function (callback) {
+
+
+  var month_names_short= ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  var  mementoJObjArrForTimeline=[];
+
   // Assuming foreach is faster than for-i, this can be executed out-of-order
   this.mementos.forEach(function (memento,m) {
+
     var uri = memento.uri
+    // need to have the following line, id_ isnot needed for screen shot
+    uri = uri.replace("id_/http:","/http:");
+
+     var mementoJObj_ForTimeline ={}
+     var dt =  new Date(memento["datetime"].split(",")[1])
+     var date = dt.getDate()
+     var month = dt.getMonth() + 1
+     if(date <10){
+       date = "0"+date
+     }
+
+     if(month < 10){
+       month = "0"+month
+     }
+
+
+
     // console.log("Hamming distance = "+memento.hammingDistance)
     if (memento.hammingDistance < HAMMING_DISTANCE_THRESHOLD  && memento.hammingDistance >= 0) {
       // console.log(memento.uri+" is below the hamming distance threshold of "+HAMMING_DISTANCE_THRESHOLD)
       memento.screenshotURI = null
+        mementoJObj_ForTimeline["event_series"] = "Non-Thumbnail Mementos"
+
     } else {
-      var filename = 'alSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       memento.screenshotURI = filename
+      mementoJObj_ForTimeline["event_series"] = "Thumbnails"
+
+
     }
+
+    var eventDisplayDate = dt.getUTCFullYear()+"-"+ month+"-"+date+", "+ memento["datetime"].split(" ")[4]
+    mementoJObj_ForTimeline["timestamp"] = Number(dt)/1000
+    if(memento.screenshotURI == null || memento.screenshotURI==''){
+      mementoJObj_ForTimeline["event_html"] = "<img src='http://www.cs.odu.edu/~mgunnam/TimeMapSummarization/photos/notcaptured.png' width='300px' />"
+    }else{
+      mementoJObj_ForTimeline["event_html"] = "<img src='http://www.cs.odu.edu/~mgunnam/TimeMapSummarization/photos/"+memento.screenshotURI +"' width='300px' />"
+    }
+
+    mementoJObj_ForTimeline["event_date"] =  month_names_short[ parseInt(month)]+". "+date +", "+ dt.getUTCFullYear()
+    mementoJObj_ForTimeline["event_display_date"] = eventDisplayDate
+    mementoJObj_ForTimeline["event_description"] = ""
+    mementoJObj_ForTimeline["event_link"] = uri
+    mementoJObjArrForTimeline.push(mementoJObj_ForTimeline)
   })
 
   console.log('done with supplyChosenMementosBasedOnHammingDistanceAScreenshotURI, calling back')
+
+  console.log("--------------------- Json Array for TimeLine from supplyChosenMementosBasedOnHammingDistanceAScreenshotURI--------------------------------------")
+  console.log(JSON.stringify(mementoJObjArrForTimeline))
+  console.log("--------------------------------------------------------------------------------------------------------------------------------")
+
+
+  console.log();
   if (callback) {
     callback('')
   }
@@ -1057,7 +1106,12 @@ TimeMap.prototype.createScreenshotsForMementos = function (callback, withCriteri
 }
 
 TimeMap.prototype.createScreenshotForMemento = function (memento, callback) {
+
   var uri = memento.uri
+  // need to have the following line, id_ isnot needed for screen shot
+  uri = uri.replace("id_/http:","/http:");
+
+
 
   var filename = memento.screenshotURI
 
@@ -1119,8 +1173,10 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
 
   var lastSignificantMementoIndexBasedOnHamming = 0
   var copyOfMementos = [this.mementos[0]]
+
   var month_names_short= ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
   var  mementoJObjArrForTimeline=[];
+
   //console.log('Calculate hamming distance of ' + this.mementos.length + ' mementos')
   for (var m = 0; m < this.mementos.length; m++) {
     // console.log("Analyzing memento "+m+"/"+this.mementos.length+": "+this.mementos[m].uri)
@@ -1179,6 +1235,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
          mementoJObj_ForTimeline["event_series"] = "Thumbnails"
      }
      mementoJObjArrForTimeline.push(mementoJObj_ForTimeline)
+
 
     } else if (m === 0) {
       console.log('m==0, continuing')
@@ -1401,6 +1458,11 @@ function getHexString (onesAndZeros) {
 
   return str
 }
+
+
+
+
+
 
 /* *********************************
     end UTILITY FUNCTIONS

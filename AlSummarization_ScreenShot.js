@@ -58,12 +58,12 @@ var md5 = require('md5')
 /**
 * Start the application by initializing server instances
 */
-function main () {
+function captureScreenShot (uriToCapture) {
   console.log(('*******************************\r\n' +
                'THUMBNAIL SUMMARIZATION MEMENTO SCREENSHOT SERVICE\r\n' +
                '*******************************').blue)
   var endpoint = new CLIEndpoint()
-  endpoint.headStart()
+  endpoint.headStart(uriToCapture)
 }
 
 
@@ -71,21 +71,22 @@ function main () {
 * Setup the public-facing attributes of the service
 */
 function CLIEndpoint () {
-  var theEndPoint = this
 
 
   // this is method this.respondToClient, modified for CLI
-  this.headStart = function () {
+  this.headStart = function (uriToCapture) {
 
-    var URIMFromCLI = ""
+    var URIMFromCLI = uriToCapture;
+
+    //
+    // if (process.argv.length <= 2) {
+    //     console.log('No Argument was passed.. please pass full URI-M')
+    //     return
+    // }else{
+    //     URIMFromCLI = process.argv[2]
+    // }
 
 
-    if (process.argv.length <= 2) {
-        console.log('No Argument was passed.. please pass full URI-M')
-        return
-    }else{
-        URIMFromCLI = process.argv[2]
-    }
 
     console.log('URI-M From CLI: ' + URIMFromCLI)
 
@@ -162,6 +163,6 @@ function CLIEndpoint () {
 }
 
 
-exports.main = main
-main()
-// test commit into Branch CLI_JSON
+module.exports.captureScreenShot = {
+  CaptureScreenShot : captureScreenShot
+}
