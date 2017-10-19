@@ -849,8 +849,8 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
 
 
   var month_names_short= ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  var  mementoJObjArrForTimeline=[];
-
+  var mementoJObjArrForTimeline=[];
+  var mementoJObjArrFor_Grid_Slider =[];
   // Assuming foreach is faster than for-i, this can be executed out-of-order
   this.mementos.forEach(function (memento,m) {
 
@@ -859,6 +859,7 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
     uri = uri.replace("id_/http:","/http:");
 
      var mementoJObj_ForTimeline ={}
+     var mementoJObj_ForGrid_Slider={}
      var dt =  new Date(memento["datetime"].split(",")[1])
      var date = dt.getDate()
      var month = dt.getMonth() + 1
