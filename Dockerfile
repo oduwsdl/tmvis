@@ -1,15 +1,22 @@
-FROM       ubuntu:latest
-MAINTAINER Mat Kelly <mkelly@cs.odu.edu>
+FROM    ubuntu:16.04
+LABEL   maintainer="Mat Kelly <mkelly@cs.odu.edu>"
 
-RUN        apt-get update && \
-           apt-get install -y git curl nano nodejs=0.10.25~dfsg2-2ubuntu1 npm phantomjs imagemagick
-RUN        ln -s /usr/bin/nodejs  /usr/bin/node
+EXPOSE  15421 15422 1338
+WORKDIR /app
 
-ADD        . /app
-WORKDIR    /app
+RUN     apt-get update && apt-get install -y \
+          curl \
+          git \
+          imagemagick \
+          nano \
+          nodejs \
+          npm \
+          phantomjs \
+        && rm -rf /var/lib/apt/lists/* \
+        && ln -s /usr/bin/nodejs /usr/bin/node
 
-RUN        npm install
+COPY    ./package.json /app/
+RUN     npm install
+COPY    . /app
 
-EXPOSE     15421 15422 1338
-
-CMD        ["node", "AlSummarization.js"]
+CMD     ["node", "AlSummarization.js"]
