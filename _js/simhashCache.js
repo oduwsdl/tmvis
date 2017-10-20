@@ -6,8 +6,8 @@ function SimhashCacheFile(forUri, isDebugMode){
 		this.isDebugMode = isDebugMode
 		//TODO, check if it already exists
 		this.path = './cache/simhashes_' + forUri.replace(/[^a-z0-9]/gi, '').toLowerCase();
-
-console.log('path is now ' + this.path);
+		this.timemapSumJsonPath= './cache/timemapsumjson_'+forUri.replace(/[^a-z0-9]/gi, '').toLowerCase();
+		console.log('path is now ' + this.path);
 
 		this.replaceContentWith = function(str){
 			this.ConsoleLogIfRequired("in replaceContentWith()");
@@ -72,6 +72,18 @@ console.log('path is now ' + this.path);
 			  }
 			});
 		};
+
+
+		this.writeThumbSumJSONOPContentToFile = function(str){
+		    console.log('ThumbSumJSON written out as filename '+ this.timemapSumJsonPath + '.json');
+			fs.writeFile(this.timemapSumJsonPath + '.json', str, function(err) {
+			  if(err) {
+			    throw error;
+			  }
+			});
+		};
+
+
 
 		this.exists = function(){
 		  try {

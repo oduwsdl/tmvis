@@ -626,10 +626,10 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     // TODO: remove this function from callback hell
     function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP */
 
-  // -- ByMahee -- Uncomment one by one for CLI_JSON
+    // -- ByMahee -- Uncomment one by one for CLI_JSON
     function (callback) {t.calculateSimhashes(callback);},
     function (callback) {t.saveSimhashesToCache(callback);},
-    function (callback) {t.writeJSONToCache(callback);},
+
     function (callback) {
         if(isToComputeBoth){
           t.calculateHammingDistancesWithOnlineFiltering(callback);
@@ -646,6 +646,8 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
           callback('')
         }
     },
+    //function (callback) {t.writeJSONToCache(callback)},
+    function (callback) {t.writeThumbSumJSONOPToCache(callback)},
     function (callback) {
         if(isToComputeBoth){
           t.createScreenshotsForMementos(callback);
@@ -654,6 +656,9 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
           callback('')
         }
     }
+
+
+
 
     /*// function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
     // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet
@@ -893,6 +898,67 @@ TimeMap.prototype.writeJSONToCache = function (callback) {
     callback('')
   }
 }
+
+
+/**
+* Converts the JsonOutput from the current formate to the format required for timemap plugin
+* and saves in a json file
+*/
+TimeMap.prototype.writeThumbSumJSONOPToCache = function (callback) {
+
+  var month_names_short= ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  var mementoJObjArrForTimeline=[];
+  var mementoJObjArrFor_Grid_Slider =[];
+  // Assuming foreach is faster than for-i, this can be executed out-of-order
+  this.mementos.forEach(function (memento,m) {
+
+    var uri = memento.uri
+    // need to have the following line, id_ isnot needed for screen shot
+    uri = uri.replace("id_/http:","/http:");
+
+     var mementoJObj_ForTimeline ={}
+     var mementoJObj_ForGrid_Slider={}
+     var dt =  new Date(memento["datetime"].split(",")[1])
+     var date = dt.getDate()
+     var month = dt.getMonth() + 1
+     if(date <10){
+       date = "0"+date
+     }
+
+     if(month < 10){
+       month = "0"+month
+     }
+
+    var eventDisplayDate = dt.getUTCFullYear()+"-"+ month+"-"+date+", "+ memento["datetime"].split(" ")[4]
+    mementoJObj_ForTimeline["timestamp"] = Number(dt)/1000
+    if(memento.screenshotURI == null || memento.screenshotURI==''){
+      mementoJObj_ForTimeline["event_series"] = "Non-Thumbnail Mementos"
+      mementoJObj_ForTimeline["event_html"] = "<img src='http://www.cs.odu.edu/~mgunnam/TimeMapSummarization/photos/notcaptured.png' width='300px' />"
+    }else{
+      var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      mementoJObj_ForTimeline["event_series"] = "Thumbnails"
+      mementoJObj_ForTimeline["event_html"] = "<img src='http://www.cs.odu.edu/~mgunnam/TimeMapSummarization/photos/"+memento.screenshotURI +"' width='300px' />"
+    }
+
+    mementoJObj_ForTimeline["event_date"] =  month_names_short[ parseInt(month)]+". "+date +", "+ dt.getUTCFullYear()
+    mementoJObj_ForTimeline["event_display_date"] = eventDisplayDate
+    mementoJObj_ForTimeline["event_description"] = ""
+    mementoJObj_ForTimeline["event_link"] = uri
+    mementoJObjArrForTimeline.push(mementoJObj_ForTimeline)
+  })
+
+  var cacheFile = new SimhashCacheFile(this.originalURI,isDebugMode)
+  cacheFile.writeThumbSumJSONOPContentToFile(JSON.stringify(mementoJObjArrForTimeline))
+  ConsoleLogIfRequired("--------------------- Json Array for TimeLine from  writeThumbSumJSONOPToCache------------------------------")
+  ConsoleLogIfRequired(JSON.stringify(mementoJObjArrForTimeline))
+  ConsoleLogIfRequired("------------------------------------------------------------------------------------------------------------")
+  if (callback) {
+    callback('')
+  }
+}
+
+
+
 
 /**
 * Converts the target URI to a safe semantic filename and attaches to relevant memento.
