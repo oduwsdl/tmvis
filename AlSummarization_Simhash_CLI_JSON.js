@@ -5,27 +5,23 @@
 *   "Thumbnail Summarization Techniques for Web Archives"
 *  Mat Kelly <mkelly@cs.odu.edu>
 ******************************************
-* AlSummarization_OPT_CLI_JSON
+* AlSummarization_Simhash_CLI_JSON
 * using the existing code and tweeking it to the code that returns the JSON Alone,
 * And some code to be added to optimize the process of selecting which memento to
 * be considered for simhash generation.
 * OPT in the file name stands for optimization, Where id_ is appended at the end to return only the original content
 *  Run this with:
-*   > node AlSummarization_OPT_CLI_JSON.js URI-R
+*   > node AlSummarization_Simhash_CLI_JSON.js URI-R
 *
 * Updated
-*  > node AlSummarization_OPT_CLI_JSON.js URI-R [--debug] [--hdt 4] [--ia || --ait || -mg] [--oes] [--ci 1068] [--os || --s&h]
-*  ex: node AlSummarization_OPT_CLI_JSON.js http://4genderjustice.org/ --oes --debug --ci 1068
-* debug -> Run in debug mode
-* hdt -> Hamming Distance Threshold
-* ia -> Internet Archive
-* ait -> Archive IT
-* mg -> Memegator
-* oes -> Override Existing Simhashes
-* debug -> to get the debugging comments on the scree
+*  > node AlSummarization_Simhash_CLI_JSON.js URI-R [--debug] [--hdt 4] [--ia || --ait || -ma] [--oes] [--ci 1068]
+*  ex: node AlSummarization_Simhash_CLI_JSON.js http://4genderjustice.org/ --oes --ci 1068
+*  ia -> Internet Archive
+*  ait -> Archive IT
+*  ma -> Memento Agrregator
+*  oes -> Override Existing Simhashes
+* debug -> to get the debugging comments on the screen
 * ci -> Collection Identifier, incase of ait
-* os -> Only Simhash
-* s&h -> Both Simhash and Hamming Distance
 * Maheedhar Gunnam <mgunn001@odu.edu>
 */
 
@@ -74,15 +70,15 @@ var zlib = require('zlib')
 //var app = express()
 
 var uriR = ''
-var isDebugMode = argv.debug? argv.debug: false
-var HAMMING_DISTANCE_THRESHOLD = argv.hdt?  argv.hdt: 4
+var isDebugMode = argv.debug? argv.debug: false;
+// var HAMMING_DISTANCE_THRESHOLD = argv.hdt?  argv.hdt: 4
 var isToOverrideCachedSimHash = argv.oes? argv.oes: false
 // by default the prime src is gonna be Archive-It
-var primeSrc = argv.ait? 1: (argv.ia ? 2:(argv.mg?3:1))
-var isToComputeBoth = argv.os? false: true // By default computes both simhash and hamming distance
+var primeSrc = argv.ait? 1: (argv.ia ? 2:(argv.ma?3:1))
+
 var collectionIdentifier = argv.ci?  argv.ci: 'all'
 
-ConsoleLogIfRequired("Primary source: ( ait -> 1, ia ->2 & mg -> 3)"+primeSrc)
+ConsoleLogIfRequired("primeSrc:"+primeSrc)
 ConsoleLogIfRequired("collectionIdentifier for Archive-It :"+collectionIdentifier)
 //return
 /* *******************************
@@ -144,6 +140,7 @@ function CLIEndpoint () {
     ConsoleLogIfRequired("argv url :"+ argv["_"][0])
     ConsoleLogIfRequired("argv length:"+ argv.length)
     ConsoleLogIfRequired("isDebugMode:"+isDebugMode)
+    ConsoleLogIfRequired("argv->ia:"+ argv.ia)
 
     if (process.argv.length <= 2) {
         ConsoleLogIfRequired('No Argument was passed.. Trying with URI-R = http://www.cs.odu.edu/~mweigle/Research/')
@@ -372,17 +369,10 @@ function processWithFileContents (fileContents, response) {
   var t = createMementosFromJSONFile(fileContents)
   /* ByMahee -- unnessessary for the current need
   t.printMementoInformation(response, null, false) */
-
   ConsoleLogIfRequired("Existing file contents are as follows:")
   ConsoleLogIfRequired("**************************************************************************************************");
   console.log(JSON.stringify(t));
-    if(isToComputeBoth){
-      t.calculateHammingDistancesWithOnlineFiltering()
-      t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI()
-      t.createScreenshotsForMementos(function () {
-        ConsoleLogIfRequired.log('Done creating screenshots')
-      })
-    }
+
 }
 
 /**
@@ -630,30 +620,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     function (callback) {t.calculateSimhashes(callback);},
     function (callback) {t.saveSimhashesToCache(callback);},
     function (callback) {t.writeJSONToCache(callback);},
-    function (callback) {
-        if(isToComputeBoth){
-          t.calculateHammingDistancesWithOnlineFiltering(callback);
-        }
-        else if (callback) {
-          callback('')
-        }
-    },
-    function (callback) {
-        if(isToComputeBoth){
-          t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);
-        }
-        else if (callback) {
-          callback('')
-        }
-    },
-    function (callback) {
-        if(isToComputeBoth){
-          t.createScreenshotsForMementos(callback);
-        }
-        else if (callback) {
-          callback('')
-        }
-    }
+//  function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback);},
 
     /*// function (callback) {calculateCaptureTimeDeltas(callback);},// CURRENTLY UNUSED, this can be combine with previous call to turn 2n-->1n
     // function (callback) {applyKMedoids(callback);}, // No functionality herein, no reason to call yet
@@ -903,13 +870,12 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
   // Assuming foreach is faster than for-i, this can be executed out-of-order
   this.mementos.forEach(function (memento,m) {
     var uri = memento.uri
-      uri = uri.replace("id_/http:","/http:");
     // ConsoleLogIfRequired("Hamming distance = "+memento.hammingDistance)
     if (memento.hammingDistance < HAMMING_DISTANCE_THRESHOLD  && memento.hammingDistance >= 0) {
       // ConsoleLogIfRequired(memento.uri+" is below the hamming distance threshold of "+HAMMING_DISTANCE_THRESHOLD)
       memento.screenshotURI = null
     } else {
-      var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      var filename = 'alSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       memento.screenshotURI = filename
     }
   })
@@ -1113,7 +1079,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (callback, withCriteri
 
 TimeMap.prototype.createScreenshotForMemento = function (memento, callback) {
   var uri = memento.uri
-  uri = uri.replace("id_/http:","/http:");
+
   var filename = memento.screenshotURI
 
   try {
