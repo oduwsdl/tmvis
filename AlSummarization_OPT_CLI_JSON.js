@@ -10,7 +10,15 @@
 * And some code to be added to optimize the process of selecting which memento to
 * be considered for simhash generation.
 * OPT in the file name stands for optimization, Where id_ is appended at the end to return only the original content
-*  Run this with:
+*
+* Docker commands required to run this code:
+* docker image ls
+* docker ps -a
+* docker build -t archthumb .
+* docker run -it --rm -v "$PWD":/app -p 15421:15421 -p 1338:1338 -p 15422:15422 archthumb bash
+* docker container kill 90f38d8debb3
+*
+* Run this with:
 *   > node AlSummarization_OPT_CLI_JSON.js URI-R
 *
 * Updated
@@ -918,6 +926,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (callback) {
 
      var mementoJObj_ForTimeline ={}
      var mementoJObj_ForGrid_Slider={}
+
      var dt =  new Date(memento["datetime"].split(",")[1])
      var date = dt.getDate()
      var month = dt.getMonth() + 1
@@ -930,10 +939,13 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (callback) {
      }
 
     var eventDisplayDate = dt.getUTCFullYear()+"-"+ month+"-"+date+", "+ memento["datetime"].split(" ")[4]
+
     mementoJObj_ForTimeline["timestamp"] = Number(dt)/1000
     if(memento.screenshotURI == null || memento.screenshotURI==''){
       mementoJObj_ForTimeline["event_series"] = "Non-Thumbnail Mementos"
       mementoJObj_ForTimeline["event_html"] = "<img src='http://www.cs.odu.edu/~mgunnam/TimeMapSummarization/photos/notcaptured.png' width='300px' />"
+      mementoJObj_ForTimeline["event_html_similarto"] = "<img src='http://www.cs.odu.edu/~mgunnam/TimeMapSummarization/photos/"+memento.hammingBasisScreenshotURI +"' width='300px' />"
+
     }else{
       var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       mementoJObj_ForTimeline["event_series"] = "Thumbnails"
@@ -974,6 +986,8 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
     if (memento.hammingDistance < HAMMING_DISTANCE_THRESHOLD  && memento.hammingDistance >= 0) {
       // ConsoleLogIfRequired(memento.uri+" is below the hamming distance threshold of "+HAMMING_DISTANCE_THRESHOLD)
       memento.screenshotURI = null
+      var filename = 'timemapSum_' + memento.hammingBasisURI.replace("id_/http:","/http:").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      memento.hammingBasisScreenshotURI = filename
     } else {
       var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       memento.screenshotURI = filename
@@ -1179,7 +1193,8 @@ TimeMap.prototype.createScreenshotsForMementos = function (callback, withCriteri
 
 TimeMap.prototype.createScreenshotForMemento = function (memento, callback) {
   var uri = memento.uri
-  uri = uri.replace("id_/http:","/http:");
+  // As id_ is for no-reworked(original content), if_ is for eleminating the headers of the archival organizations
+  uri = uri.replace("id_/http:","if_/http:");
   var filename = memento.screenshotURI
 
   try {
@@ -1254,7 +1269,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
       this.mementos[m].hammingDistance = getHamming(this.mementos[m].simhash, this.mementos[lastSignificantMementoIndexBasedOnHamming].simhash)
       // ConsoleLogIfRequired("Getting hamming basis")
       this.mementos[m].hammingBasis = this.mementos[lastSignificantMementoIndexBasedOnHamming].datetime
-
+      this.mementos[m].hammingBasisURI= this.mementos[lastSignificantMementoIndexBasedOnHamming].uri
       // ConsoleLogIfRequired('Comparing hamming distances (simhash,uri) = ' + this.mementos[m].hammingDistance + '\n' +
       //   ' > testing: ' + this.mementos[m].simhash + ' ' + this.mementos[m].uri + '\n' +
       //   ' > pivot:   ' + this.mementos[lastSignificantMementoIndexBasedOnHamming].simhash + ' ' + this.mementos[lastSignificantMementoIndexBasedOnHamming].uri)
