@@ -2,11 +2,11 @@
   "name": "tmvis",
   "version": "1.0.0",
   "description": "An archival thumbnail visualization server",
-  "repository": "https://github.com/mgunn001/tmvis",
+  "repository": "https://github.com/oduwsdl/tmvis",
   "license": "MIT",
   "author": "Maheedhar Gunnam <mgunn001@odu.edu> (http://www.cs.odu.edu/~mgunnam)",
   "start": "node tmvis.js",
-  "bugs": "https://github.com/mgunn001/tmvis/issues",
+  "bugs": "https://github.com/oduwsdl/tmvis/issues",
   "dependencies": {
     "async": "*",
     "color": "*",
