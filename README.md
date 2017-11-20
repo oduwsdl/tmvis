@@ -12,7 +12,7 @@ Archives"](http://www.cs.odu.edu/~mln/pubs/ecir-2014/ecir-2014.pdf) for the Web 
 
 To execute the code, run `node tmvis.js`.
 
-To query the server instance generated using your browser visit `http://localhost:3000/alsummarizedtimemap/?URI-R=http://4genderjustice.org/&ci=1068&primesource=archiveIt`, substituting the URI-R to request a different site's summarization. The additional parameters of `ci` is used to specify the collection identifier if not specified the argument 'all' is used, `primesource` gets the value of 'archiveIt' or 'internetarchive' as to let the service know which is the primary source.
+To query the server instance generated using your browser visit `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/http://4genderjustice.org/`, which has the attributes path as `primesource/ci/URI-R` substitute the URI-R to request a different site's summarization. The additional parameters of `ci` is used to specify the collection identifier if not specified the argument 'all' is used, `primesource` gets the value of 'archiveIt' or 'internetarchive' as to let the service know which is the primary source.
 
 ### Example URIs
 
