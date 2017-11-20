@@ -9,7 +9,7 @@
   "bugs": "https://github.com/oduwsdl/tmvis/issues",
   "dependencies": {
     "async": "*",
-    "color": "*",
+    "colors": "^1.1.2",
     "es6-promise": "*",
     "express": "*",
     "imagemagick": "*",
