@@ -16,7 +16,7 @@ To query the server instance generated using your browser visit `http://localhos
 
 ### Example URIs
 
-* `http://localhost:3000/alsummarizedtimemap/?URI-R=http://4genderjustice.org/&ci=1068&primesource=archiveIt`
+* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/http://4genderjustice.org/`
 
 
 ## Running as a Docker Container (experimental)
@@ -83,6 +83,10 @@ Running this service gives provides an user with the array of JSON object as the
 
 ```
 curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/http://4genderjustice.org/
+Mapping of attributes of URI to the values are as follows:
+  primesource -> archiveIt
+  collection Identifier -> 1068
+  URI-R under request -> http://4genderjustice.org/
 ```
 
 ## Response format
