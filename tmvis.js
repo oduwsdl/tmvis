@@ -60,7 +60,7 @@ var Memento = mementoFramework.Memento
 var TimeMap = mementoFramework.TimeMap
 var SimhashCacheFile = require('./lib/simhashCache.js').SimhashCacheFile
 
-var colors = require('color')
+var colors = require('colors')
 var im = require('imagemagick')
 var rimraf = require('rimraf')
 
@@ -72,13 +72,9 @@ var rimraf = require('rimraf')
 var zlib = require('zlib')
 var app = express()
 var host = argv.host ? argv.host : 'localhost' // Format: scheme://hostname
-host= "http://"+host
-var thumbnailServicePort = argv.p ? argv.p :3000
-var localAssetServerPort = argv.ap ? argv.ap : 3001
-
-var thumbnailServer = host + ':' + thumbnailServicePort + '/'
-var localAssetServer = host + ':' + thumbnailServicePort + '/static/'
-
+var port = argv.port ? argv.port : '3000'
+var proxy = argv.proxy ? argv.proxy.replace(/\/+$/, '') : ('http://' + host + (port == '80' ? '' : ':' + port))
+var localAssetServer = proxy + '/static/'
 
 var uriR = ''
 var isDebugMode = argv.debug? argv.debug: false
@@ -122,18 +118,37 @@ function main () {
   //startLocalAssetServer()  //- Now everything is made to be served from the same port.
   var endpoint = new PublicEndpoint()
 
+  //This route is just for testing
+    app.get('/hello', (request, response) => {
+
+          var headers = {}
+
+          // IE8 does not allow domains to be specified, just the *
+          // headers['Access-Control-Allow-Origin'] = req.headers.origin
+          headers['Access-Control-Allow-Origin'] = '*'
+          headers['Access-Control-Allow-Methods'] = 'GET'
+          headers['Access-Control-Allow-Credentials'] = false
+          headers['Access-Control-Max-Age'] = '86400'  // 24 hours
+          headers['Access-Control-Allow-Headers'] = 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Accept-Datetime'
+          headers['Content-Type'] = 'application/json' // text/html
+            var query = url.parse(request.url, true).query
+            console.log(JSON.stringify(query))
+          response.writeHead(200, headers)
+          response.write('Hello from what ever!')
+          response.end()
+    })
+
   // this is the actually place that hit the main server logic
   //app.get('/alsummarizedtimemap/:primesource/:ci/:urir', endpoint.respondToClient)
   app.get('/alsummarizedtimemap/:primesource/:ci/*', endpoint.respondToClient)
 
   app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
 
-
-  app.listen(thumbnailServicePort, (err) => {
+  app.listen(port, '0.0.0.0', (err) => {
     if (err) {
       return console.log('something bad happened', err)
     }
-    console.log(`server is listening on ${thumbnailServicePort}`)
+    console.log(`server is listening on ${port}`)
   })
 
 
@@ -214,7 +229,7 @@ function PublicEndpoint () {
     }
     if (!query['urir'] && // a urir was not passed via the query string...
         request._parsedUrl && !isARESTStyleURI(request._parsedUrl.pathname.substr(0, 5))) { // ...or the REST-style specification
-      console.log('No urir sent with request. ' + request.url + ' was sent. Try ' + thumbnailServer + '/archiveit/1068/http://matkelly.com')
+      console.log('No urir sent with request. ' + request.url + ' was sent. Try ' + proxy + '/archiveit/1068/http://matkelly.com')
       response.writeHead(400, headers)
       response.write('No urir Sent with the request')
       response.end()
