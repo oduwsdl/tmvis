@@ -71,7 +71,8 @@ var rimraf = require('rimraf')
 
 var zlib = require('zlib')
 var app = express()
-var host = 'http://localhost' // Format: scheme://hostname
+var host = argv.host ? argv.host : 'localhost' // Format: scheme://hostname
+host= "http://"+host
 var thumbnailServicePort = argv.p ? argv.p :3000
 var localAssetServerPort = argv.ap ? argv.ap : 3001
 
