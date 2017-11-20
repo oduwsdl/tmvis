@@ -72,16 +72,9 @@ var rimraf = require('rimraf')
 var zlib = require('zlib')
 var app = express()
 var host = argv.host ? argv.host : 'localhost' // Format: scheme://hostname
-host= "http://"+host
-var thumbnailServicePort = argv.p ? argv.p :3000
-var thumbnailServer = host + ':' + thumbnailServicePort + '/'
-var localAssetServer = host + ':' + thumbnailServicePort + '/static/'
-//
-if(host != "http://localhost"){
-  thumbnailServer = host +'/'
-  localAssetServer = host + '/static/'
-}
-
+var port = argv.port ? argv.port : '3000'
+var proxy = argv.proxy ? argv.proxy.replace(/\/+$/, '') : ('http://' + host + (port == '80' ? '' : ':' + port))
+var localAssetServer = proxy + '/static/'
 
 var uriR = ''
 var isDebugMode = argv.debug? argv.debug: false
@@ -151,12 +144,11 @@ function main () {
 
   app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
 
-
-  app.listen(thumbnailServicePort, (err) => {
+  app.listen(port, '0.0.0.0', (err) => {
     if (err) {
       return console.log('something bad happened', err)
     }
-    console.log(`server is listening on ${thumbnailServicePort}`)
+    console.log(`server is listening on ${port}`)
   })
 
 
@@ -237,7 +229,7 @@ function PublicEndpoint () {
     }
     if (!query['urir'] && // a urir was not passed via the query string...
         request._parsedUrl && !isARESTStyleURI(request._parsedUrl.pathname.substr(0, 5))) { // ...or the REST-style specification
-      console.log('No urir sent with request. ' + request.url + ' was sent. Try ' + thumbnailServer + '/archiveit/1068/http://matkelly.com')
+      console.log('No urir sent with request. ' + request.url + ' was sent. Try ' + proxy + '/archiveit/1068/http://matkelly.com')
       response.writeHead(400, headers)
       response.write('No urir Sent with the request')
       response.end()
