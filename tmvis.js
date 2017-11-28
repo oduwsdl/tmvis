@@ -635,13 +635,19 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
               return
             }
 
+            // to respond to the client as the intermediate response, while the server processes huge loads
+            if(t.mementos.length > 50){
+              response.write('Request being processed, Please retry approcimately after ( ' + t.mementos.length * 10  +' seconds ) and request again...')
+              response.end()
+            }
+
             ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
 
             callback('')
           }else{
-            ConsoleLogIfRequired('The page you requested has not been archived in Archive-It.')
+            ConsoleLogIfRequired('The page you requested has not been archived.')
              //process.exit(-1)
-             response.write('The page you requested has not been archived in Archive-It.')
+             response.write('The page you requested has not been archived.')
              response.end()
                return
 
@@ -762,8 +768,8 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
   var theTimeMap = this
   var arrayOfSetSimhashFunctions = []
 
-  // the way to get a damper, just 10 requests at a time.
-  async.eachLimit(this.mementos,10, function(curMemento, callback){
+  // the way to get a damper, just 7 requests at a time.
+  async.eachLimit(this.mementos,7, function(curMemento, callback){
     curMemento.setSimhash(callback)
   //  ConsoleLogIfRequired(curMemento)
   }, function(err) {
@@ -886,8 +892,12 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
 
   var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.writeThumbSumJSONOPContentToFile(JSON.stringify(mementoJObjArrForTimeline))
-  response.write(JSON.stringify(mementoJObjArrForTimeline))
-  response.end()
+
+  if(this.mementos.length <= 50 ){
+    response.write(JSON.stringify(mementoJObjArrForTimeline))
+    response.end()
+  }
+
   ConsoleLogIfRequired("--------------------- Json Array for TimeLine from  writeThumbSumJSONOPToCache------------------------------")
   ConsoleLogIfRequired(JSON.stringify(mementoJObjArrForTimeline))
   ConsoleLogIfRequired("------------------------------------------------------------------------------------------------------------")
@@ -1057,7 +1067,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
     // ConsoleLogIfRequired("Analyzing memento "+m+"/"+this.mementos.length+": "+this.mementos[m].uri)
     // ConsoleLogIfRequired("...with SimHash: "+this.mementos[m].simhash)
     if (m > 0) {
-      if ((this.mementos[m].simhash.match(/0/g) || []).length === 32) {
+      if ( this.mementos[m].simhash == null || (this.mementos[m].simhash.match(/0/g) || []).length === 32) { // added the null condition if the simhash is set to null because of error in connection
         ConsoleLogIfRequired('0s, returning')
         continue
       }
