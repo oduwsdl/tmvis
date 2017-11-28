@@ -82,6 +82,7 @@ var HAMMING_DISTANCE_THRESHOLD = argv.hdt?  argv.hdt: 4
 var isToOverrideCachedSimHash = argv.oes? argv.oes: false
 // by default the prime src is gonna be Archive-It
 var primeSrc = argv.ait? 1: (argv.ia ? 2:(argv.mg?3:1))
+var primeSource = "archiveit"
 var isToComputeBoth = argv.os? false: true // By default computes both simhash and hamming distance
 var collectionIdentifier = argv.ci?  argv.ci: 'all'
 var screenshotsLocation = "assets/screenshots/"
@@ -91,7 +92,6 @@ ConsoleLogIfRequired("collectionIdentifier for Archive-It :"+collectionIdentifie
 /* *******************************
    TODO: reorder functions (main first) to be more maintainable 20141205
 ****************************** */
-
 
 
 /**
@@ -247,7 +247,7 @@ function PublicEndpoint () {
     ConsoleLogIfRequired("--ByMahee: uriR = "+uriR)
 
 
-    var primeSource = theEndPoint.validSource[0] // Not specified? access=interface
+    primeSource = theEndPoint.validSource[0] // Not specified? access=interface
     // Override the default access parameter if the user has supplied a value
     //  via query parameters
     if (query.primesource) {
@@ -332,7 +332,7 @@ function PublicEndpoint () {
 
     // TODO: optimize this out of the conditional so the functions needed for each strategy are self-contained (and possibly OOP-ified)
     if (strategy === 'alSummarization') {
-      var cacheFile = new SimhashCacheFile(uriR,isDebugMode)
+      var cacheFile = new SimhashCacheFile( primeSource+"_"+collectionIdentifier+"_"+uriR,isDebugMode)
       cacheFile.path += '.json'
       ConsoleLogIfRequired('Checking if a cache file exists for ' + query['urir'] + '...')
     //  ConsoleLogIfRequired('cacheFile: '+JSON.stringify(cacheFile))
@@ -816,7 +816,7 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
   ConsoleLogIfRequired(strToWrite)
   ConsoleLogIfRequired("-------------------------------------------------------------------------")
 
-  var cacheFile = new SimhashCacheFile(this.originalURI,isDebugMode)
+  var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.replaceContentWith(strToWrite)
 
 
@@ -826,7 +826,7 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
 }
 
 TimeMap.prototype.writeJSONToCache = function (callback) {
-  var cacheFile = new SimhashCacheFile(this.originalURI,isDebugMode)
+  var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.writeFileContentsAsJSON(JSON.stringify(this.mementos))
   console.log(JSON.stringify(this.mementos));
   if (callback) {
@@ -884,7 +884,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
     mementoJObjArrForTimeline.push(mementoJObj_ForTimeline)
   })
 
-  var cacheFile = new SimhashCacheFile(this.originalURI,isDebugMode)
+  var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.writeThumbSumJSONOPContentToFile(JSON.stringify(mementoJObjArrForTimeline))
   response.write(JSON.stringify(mementoJObjArrForTimeline))
   response.end()
