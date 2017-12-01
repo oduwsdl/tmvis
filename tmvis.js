@@ -636,10 +636,10 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
             }
 
             // to respond to the client as the intermediate response, while the server processes huge loads
-            if(t.mementos.length > 50){
-              response.write('Request being processed, Please retry approcimately after ( ' + t.mementos.length * 10  +' seconds ) and request again...')
-              response.end()
-            }
+            // if(t.mementos.length > 50){
+            //   response.write('Request being processed, Please retry approximately after ( ' + t.mementos.length * 10  +' seconds ) and request again...')
+            //   response.end()
+            // }
 
             ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
 
@@ -855,7 +855,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
 
     var uri = memento.uri
     // need to have the following line, id_ isnot needed for screen shot
-    uri = uri.replace("id_/http:","/http:");
+    uri = uri.replace("id_/http","/http");
 
      var mementoJObj_ForTimeline ={}
      var mementoJObj_ForGrid_Slider={}
@@ -893,10 +893,9 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
   var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.writeThumbSumJSONOPContentToFile(JSON.stringify(mementoJObjArrForTimeline))
 
-  if(this.mementos.length <= 50 ){
-    response.write(JSON.stringify(mementoJObjArrForTimeline))
-    response.end()
-  }
+  response.write(JSON.stringify(mementoJObjArrForTimeline))
+  response.end()
+
 
   ConsoleLogIfRequired("--------------------- Json Array for TimeLine from  writeThumbSumJSONOPToCache------------------------------")
   ConsoleLogIfRequired(JSON.stringify(mementoJObjArrForTimeline))
@@ -916,12 +915,12 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
   // Assuming foreach is faster than for-i, this can be executed out-of-order
   this.mementos.forEach(function (memento,m) {
     var uri = memento.uri
-      uri = uri.replace("id_/http:","/http:");
+      uri = uri.replace("id_/http","/http");
     // ConsoleLogIfRequired("Hamming distance = "+memento.hammingDistance)
     if (memento.hammingDistance < HAMMING_DISTANCE_THRESHOLD  && memento.hammingDistance >= 0) {
       // ConsoleLogIfRequired(memento.uri+" is below the hamming distance threshold of "+HAMMING_DISTANCE_THRESHOLD)
       memento.screenshotURI = null
-      var filename = 'timemapSum_' + memento.hammingBasisURI.replace("id_/http:","/http:").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      var filename = 'timemapSum_' + memento.hammingBasisURI.replace("id_/http","/http").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       memento.hammingBasisScreenshotURI = filename
     } else {
       var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
@@ -984,7 +983,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (callback, withCriteri
 
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
-    10,
+    7,
     self.createScreenshotForMemento,            // Create a screenshot
     function doneCreatingScreenshots (err) {      // When finished, check for errors
       if (err) {
@@ -999,7 +998,9 @@ TimeMap.prototype.createScreenshotsForMementos = function (callback, withCriteri
 
 TimeMap.prototype.createScreenshotForMemento = function (memento, callback) {
   var uri = memento.uri
-  uri = uri.replace("id_/http:","if_/http:");
+  uri = uri.replace("id_/http","/http");
+  uri = uri.replace("/http","if_/http");
+
   var filename = memento.screenshotURI
 
   try {
