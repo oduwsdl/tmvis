@@ -75,7 +75,7 @@ var host = argv.host ? argv.host : 'localhost' // Format: scheme://hostname
 var port = argv.port ? argv.port : '3000'
 var proxy = argv.proxy ? argv.proxy.replace(/\/+$/, '') : ('http://' + host + (port == '80' ? '' : ':' + port))
 var localAssetServer = proxy + '/static/'
-
+var isResponseEnded = false
 var uriR = ''
 var isDebugMode = argv.debug? argv.debug: false
 var HAMMING_DISTANCE_THRESHOLD = argv.hdt?  argv.hdt: 4
@@ -178,6 +178,7 @@ function PublicEndpoint () {
   * @param response Currently active HTTP response to the client used to return information to the client based on the request
   */
   this.respondToClient = function (request, response) {
+     isResponseEnded = false //resetting the responseEnded indicator
     response.clientId = Math.random() * 101 | 0  // Associate a simple random integer to the user for logging (this is not scalable with the implemented method)
     var headers = {}
 
@@ -411,8 +412,8 @@ function processWithFileContents (fileContents, response) {
         async.series([
           function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback)},
           function (callback) {t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback)},
-          function (callback) {t.createScreenshotsForMementos(callback)},
-          function (callback) {t.SendThumbSumJSONCalledFromCache(response)}
+          function (callback) {t.createScreenshotsForMementos(response,callback)},
+          function (callback) {t.writeThumbSumJSONOPToCache(response)}
         ],
         function (err, result) {
           if (err) {
@@ -629,17 +630,18 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
             ConsoleLogIfRequired("---------------------------------------------------")
 
             if (t.mementos.length === 0) {
-            ConsoleLogIfRequired('There were no mementos for ' + uri + ' :(')
-            response.write('There were no mementos for ' + uri + ' :(')
-            response.end()
-              return
+              ConsoleLogIfRequired('There were no mementos for ' + uri + ' :(')
+              response.write('There were no mementos for ' + uri + ' :(')
+              response.end()
+                return
             }
 
             // to respond to the client as the intermediate response, while the server processes huge loads
-            if(t.mementos.length > 50){
-              response.write('Request being processed, Please retry approximately after ( ' + (t.mementos.length * 10)/60  +' Minutes ) and request again...')
-              response.end()
-            }
+           if(t.mementos.length > 250){
+             response.write('Request being processed, Please retry approximately after ( ' + ((t.mementos.length/50)  * 10)/60  +' Minutes ) and request again...')
+             response.end()
+             isResponseEnded = true
+           }
 
             ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
 
@@ -706,7 +708,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     function (callback) {t.writeJSONToCache(callback)},
     function (callback) {
         if(isToComputeBoth){
-          t.createScreenshotsForMementos(callback);
+          t.createScreenshotsForMementos(response,callback);
         }
         else if (callback) {
           callback('')
@@ -970,7 +972,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
   var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.writeThumbSumJSONOPContentToFile(JSON.stringify(mementoJObjArrForTimeline))
 
-    if(this.mementos.length <= 50 ){
+    if(!isResponseEnded){
       response.write(JSON.stringify(mementoJObjArrForTimeline))
       response.end()
     }
@@ -1062,6 +1064,58 @@ TimeMap.prototype.supplySelectedMementosAScreenshotURI = function (strategy,call
   }
 }
 
+/**
+* Generate a screenshot with all mementos that pass the passed-in criteria test
+* @param callback The next procedure to execution when this process concludes
+* @param withCriteria Function to inclusively filter mementos, i.e. returned from criteria
+*                     function means a screenshot should be generated for it.
+*/
+TimeMap.prototype.createScreenshotsForMementos = function (response,callback, withCriteria) {
+  ConsoleLogIfRequired('Creating screenshots...')
+
+  function hasScreenshot (e) {
+    return e.screenshotURI !== null
+  }
+
+  var self = this
+
+  var criteria = hasScreenshot
+  if (withCriteria) {
+    criteria = withCriteria
+  }
+  console.log("------------------ selected for screenshots------------")
+  console.log(JSON.stringify(self.mementos.filter(criteria)))
+
+  // to respond to the client as the intermediate response, while the server processes huge loads
+  var noOfThumbnailsSelectedToBeCaptured = getNotExistingCapturesCount(self.mementos.filter(criteria))
+  // console.log("--------------------------------------------------------")
+  // console.log("--------------------------------------------------------")
+  // console.log("--------------------------------------------------------")
+  // console.log("noOfThumbnailsSelectedToBeCaptured:"+noOfThumbnailsSelectedToBeCaptured)
+  // console.log("--------------------------------------------------------")
+  // console.log("--------------------------------------------------------")
+  // console.log("--------------------------------------------------------")
+  if (noOfThumbnailsSelectedToBeCaptured >= 4) {
+    response.write('Request being processed, Please retry approximately after ( ' + (noOfThumbnailsSelectedToBeCaptured * 40)/60  +' Minutes ) and request again...')
+    response.end()
+    isResponseEnded = true
+  }
+
+  async.eachLimit(
+    shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
+    7,
+    self.createScreenshotForMemento,            // Create a screenshot
+    function doneCreatingScreenshots (err) {      // When finished, check for errors
+      if (err) {
+        ConsoleLogIfRequired('Error creating screenshot')
+        ConsoleLogIfRequired(err)
+      }
+
+      callback('')
+    }
+  )
+}
+
 
 
 /**
@@ -1070,7 +1124,7 @@ TimeMap.prototype.supplySelectedMementosAScreenshotURI = function (strategy,call
 * @param withCriteria Function to inclusively filter mementos, i.e. returned from criteria
 *                     function means a screenshot should be generated for it.
 */
-TimeMap.prototype.createScreenshotsForMementos = function (callback, withCriteria) {
+TimeMap.prototype.createScreenshotsForMementosFromCached = function (callback, withCriteria) {
   ConsoleLogIfRequired('Creating screenshots...')
 
   function hasScreenshot (e) {
@@ -1318,6 +1372,24 @@ function getHamming (str1, str2) {
 
   return d
 }
+
+function getNotExistingCapturesCount(selectedMementosList){
+   //console.log("------------------------inside getExistingCapturesCount ---------------")
+    // console.log(selectedMementosList)
+  var count = 0 ;
+  selectedMementosList.forEach(function (memento,m) {
+  //  console.log(__dirname + '/'+screenshotsLocation + memento.screenshotURI);
+    if (!fs.existsSync(__dirname + '/'+screenshotsLocation + memento.screenshotURI)){
+        count ++;
+    }
+  })
+//  console.log("------------------------inside getExistingCapturesCount ---------------")
+
+  return count;
+}
+
+
+
 
 // Fischer-Yates shuffle so we don't fetch the memento in-order but preserve
 // them as objects and associated attributes
