@@ -412,7 +412,7 @@ function processWithFileContents (fileContents, response) {
           function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback)},
           function (callback) {t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback)},
           function (callback) {t.createScreenshotsForMementos(callback)},
-          function (callback) {t.writeThumbSumJSONOPToCache(response)}
+          function (callback) {t.SendThumbSumJSONCalledFromCache(response)}
         ],
         function (err, result) {
           if (err) {
@@ -637,7 +637,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
 
             // to respond to the client as the intermediate response, while the server processes huge loads
             if(t.mementos.length > 50){
-              response.write('Request being processed, Please retry approcimately after ( ' + t.mementos.length * 10  +' seconds ) and request again...')
+              response.write('Request being processed, Please retry approximately after ( ' + (t.mementos.length * 10)/60  +' Minutes ) and request again...')
               response.end()
             }
 
@@ -841,6 +841,69 @@ TimeMap.prototype.writeJSONToCache = function (callback) {
 }
 
 
+
+
+
+/**
+* Constructs the JSON in the needed format and sends it over to Client, this method is called only if the request comes from a Cached mode
+*/
+TimeMap.prototype.SendThumbSumJSONCalledFromCache= function (response,callback) {
+
+  var month_names_short= ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  var mementoJObjArrForTimeline=[];
+  var mementoJObjArrFor_Grid_Slider =[];
+  // Assuming foreach is faster than for-i, this can be executed out-of-order
+  this.mementos.forEach(function (memento,m) {
+
+    var uri = memento.uri
+    // need to have the following line, id_ isnot needed for screen shot
+    uri = uri.replace("id_/http","/http");
+
+     var mementoJObj_ForTimeline ={}
+     var mementoJObj_ForGrid_Slider={}
+     var dt =  new Date(memento["datetime"].split(",")[1])
+     var date = dt.getDate()
+     var month = dt.getMonth() + 1
+     if(date <10){
+       date = "0"+date
+     }
+
+     if(month < 10){
+       month = "0"+month
+     }
+
+    var eventDisplayDate = dt.getUTCFullYear()+"-"+ month+"-"+date+", "+ memento["datetime"].split(" ")[4]
+    mementoJObj_ForTimeline["timestamp"] = Number(dt)/1000
+    if(memento.screenshotURI == null || memento.screenshotURI==''){
+      mementoJObj_ForTimeline["event_series"] = "Non-Thumbnail Mementos"
+      mementoJObj_ForTimeline["event_html"] = "<img src='"+localAssetServer+"notcaptured.png' width='300px' />"
+      mementoJObj_ForTimeline["event_html_similarto"] = "<img src='"+localAssetServer+memento.hammingBasisScreenshotURI +"' width='300px' />"
+
+    }else{
+      var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      mementoJObj_ForTimeline["event_series"] = "Thumbnails"
+      mementoJObj_ForTimeline["event_html"] = "<img src='"+localAssetServer+memento.screenshotURI +"' width='300px' />"
+    }
+
+    mementoJObj_ForTimeline["event_date"] =  month_names_short[ parseInt(month)]+". "+date +", "+ dt.getUTCFullYear()
+    mementoJObj_ForTimeline["event_display_date"] = eventDisplayDate
+    mementoJObj_ForTimeline["event_description"] = ""
+    mementoJObj_ForTimeline["event_link"] = uri
+    mementoJObjArrForTimeline.push(mementoJObj_ForTimeline)
+  })
+
+  response.write(JSON.stringify(mementoJObjArrForTimeline))
+  response.end()
+
+  ConsoleLogIfRequired("--------------------- Json Array for TimeLine from  SendThumbSumJSONCalledFromCache ------------------------------")
+  ConsoleLogIfRequired(JSON.stringify(mementoJObjArrForTimeline))
+  ConsoleLogIfRequired("------------------------------------------------------------------------------------------------------------")
+  if (callback) {
+    callback('')
+  }
+}
+
+
 /**
 * Converts the JsonOutput from the current formate to the format required for timemap plugin
 * and saves in a json file
@@ -855,7 +918,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
 
     var uri = memento.uri
     // need to have the following line, id_ isnot needed for screen shot
-    uri = uri.replace("id_/http:","/http:");
+    uri = uri.replace("id_/http","/http");
 
      var mementoJObj_ForTimeline ={}
      var mementoJObj_ForGrid_Slider={}
@@ -893,10 +956,10 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
   var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.writeThumbSumJSONOPContentToFile(JSON.stringify(mementoJObjArrForTimeline))
 
-  if(this.mementos.length <= 50 ){
-    response.write(JSON.stringify(mementoJObjArrForTimeline))
-    response.end()
-  }
+    if(this.mementos.length <= 50 ){
+      response.write(JSON.stringify(mementoJObjArrForTimeline))
+      response.end()
+    }
 
   ConsoleLogIfRequired("--------------------- Json Array for TimeLine from  writeThumbSumJSONOPToCache------------------------------")
   ConsoleLogIfRequired(JSON.stringify(mementoJObjArrForTimeline))
@@ -905,6 +968,12 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
     callback('')
   }
 }
+
+
+
+
+
+
 
 
 /**
@@ -916,12 +985,12 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
   // Assuming foreach is faster than for-i, this can be executed out-of-order
   this.mementos.forEach(function (memento,m) {
     var uri = memento.uri
-      uri = uri.replace("id_/http:","/http:");
+      uri = uri.replace("id_/http","/http");
     // ConsoleLogIfRequired("Hamming distance = "+memento.hammingDistance)
     if (memento.hammingDistance < HAMMING_DISTANCE_THRESHOLD  && memento.hammingDistance >= 0) {
       // ConsoleLogIfRequired(memento.uri+" is below the hamming distance threshold of "+HAMMING_DISTANCE_THRESHOLD)
       memento.screenshotURI = null
-      var filename = 'timemapSum_' + memento.hammingBasisURI.replace("id_/http:","/http:").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      var filename = 'timemapSum_' + memento.hammingBasisURI.replace("id_/http","/http").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       memento.hammingBasisScreenshotURI = filename
     } else {
       var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
@@ -984,7 +1053,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (callback, withCriteri
 
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
-    10,
+    7,
     self.createScreenshotForMemento,            // Create a screenshot
     function doneCreatingScreenshots (err) {      // When finished, check for errors
       if (err) {
@@ -999,7 +1068,9 @@ TimeMap.prototype.createScreenshotsForMementos = function (callback, withCriteri
 
 TimeMap.prototype.createScreenshotForMemento = function (memento, callback) {
   var uri = memento.uri
-  uri = uri.replace("id_/http:","if_/http:");
+  uri = uri.replace("id_/http","/http");
+  uri = uri.replace("/http","if_/http");
+
   var filename = memento.screenshotURI
 
   try {
