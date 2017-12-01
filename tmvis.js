@@ -856,8 +856,15 @@ TimeMap.prototype.SendThumbSumJSONCalledFromCache= function (response,callback) 
   this.mementos.forEach(function (memento,m) {
 
     var uri = memento.uri
-    // need to have the following line, id_ isnot needed for screen shot
-    uri = uri.replace("id_/http","/http");
+    // need to have the following line, id_ isnot needed for screen shot, to replace /12345678912345id_/ to /12345678912345/
+    var regExpForDTStr = /\/\d{14}id_\// // to match something lile /12345678912345id_/
+    var matchedString = uri.match(regExpForDTStr)
+    if(matchedString != null){
+      uri = uri.replace(matchedString[0],(matchedString[0].toString().replace("id_",""))) // by default only the first occurance is replaced
+    }
+
+    // this is been replaced by the above so as not to have any clashes
+    //uri = uri.replace("id_/http","/http");
 
      var mementoJObj_ForTimeline ={}
      var mementoJObj_ForGrid_Slider={}
@@ -917,8 +924,15 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
   this.mementos.forEach(function (memento,m) {
 
     var uri = memento.uri
-    // need to have the following line, id_ isnot needed for screen shot
-    uri = uri.replace("id_/http","/http");
+
+    // need to have the following line, id_ isnot needed for screen shot, to replace /12345678912345id_/ to /12345678912345/
+    var regExpForDTStr = /\/\d{14}id_\// // to match something lile /12345678912345id_/
+    var matchedString = uri.match(regExpForDTStr)
+    if(matchedString != null){
+      uri = uri.replace(matchedString[0],(matchedString[0].toString().replace("id_",""))) // by default only the first occurance is replaced
+    }
+
+    //  uri = uri.replace("id_/http","/http"); //replaced by the above segment
 
      var mementoJObj_ForTimeline ={}
      var mementoJObj_ForGrid_Slider={}
@@ -985,12 +999,33 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
   // Assuming foreach is faster than for-i, this can be executed out-of-order
   this.mementos.forEach(function (memento,m) {
     var uri = memento.uri
-      uri = uri.replace("id_/http","/http");
+
+
+      //  to replace /12345678912345id_/ to /12345678912345/
+      var regExpForDTStr = /\/\d{14}id_\// // to match something lile /12345678912345id_/
+      var matchedString = uri.match(regExpForDTStr)
+      if(matchedString != null){
+        uri = uri.replace(matchedString[0],(matchedString[0].toString().replace("id_",""))) // by default only the first occurance is replaced
+      }
+
+      //uri = uri.replace("id_/http","/http"); //replaced by above code segment
+
+
+
+
     // ConsoleLogIfRequired("Hamming distance = "+memento.hammingDistance)
     if (memento.hammingDistance < HAMMING_DISTANCE_THRESHOLD  && memento.hammingDistance >= 0) {
       // ConsoleLogIfRequired(memento.uri+" is below the hamming distance threshold of "+HAMMING_DISTANCE_THRESHOLD)
       memento.screenshotURI = null
-      var filename = 'timemapSum_' + memento.hammingBasisURI.replace("id_/http","/http").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+
+      var regExpForDTStr = /\/\d{14}id_\// // to match something lile /12345678912345id_/
+      var matchedString = memento.hammingBasisURI.match(regExpForDTStr)
+      if(matchedString != null){
+        memento.hammingBasisURI = memento.hammingBasisURI.replace(matchedString[0],(matchedString[0].toString().replace("id_",""))) // by default only the first occurance is replaced
+      }
+      var filename = 'timemapSum_' + memento.hammingBasisURI.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+
+      //var filename = 'timemapSum_' + memento.hammingBasisURI.replace("id_/http","/http").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename // replaced by above segment
       memento.hammingBasisScreenshotURI = filename
     } else {
       var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
@@ -1068,8 +1103,15 @@ TimeMap.prototype.createScreenshotsForMementos = function (callback, withCriteri
 
 TimeMap.prototype.createScreenshotForMemento = function (memento, callback) {
   var uri = memento.uri
-  uri = uri.replace("id_/http","/http");
-  uri = uri.replace("/http","if_/http");
+
+  var regExpForDTStr = /\/\d{14}id_\/|\d{14}\// //to match something lile /12345678912345id_/
+  var matchedString = uri.match(regExpForDTStr)
+  if(matchedString != null){
+    uri = uri.replace(matchedString[0],(matchedString[0].toString().replace(/id_\/$|\/$/,"if_/"))) // by default only the first occurance is replaced
+  }
+
+  //uri = uri.replace("id_/http","/http");
+  //uri = uri.replace("/http","if_/http");
 
   var filename = memento.screenshotURI
 
@@ -1386,6 +1428,14 @@ function getHexString (onesAndZeros) {
   }
 
   return str
+}
+
+function prependWithIDHelper(regExpForDTStr, uri){
+  var matchedString = uri.match(regExpForDTStr)
+  if(matchedString != null){
+    uri = uri.replace(matchedString[0],(matchedString[0].toString().replace("id_",""))) // by default only the first occurance is replaced
+  }
+  return uri;
 }
 
 
