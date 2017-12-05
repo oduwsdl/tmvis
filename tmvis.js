@@ -86,8 +86,7 @@ var primeSource = "archiveit"
 var isToComputeBoth = argv.os? false: true // By default computes both simhash and hamming distance
 var collectionIdentifier = argv.ci?  argv.ci: 'all'
 var screenshotsLocation = "assets/screenshots/"
-ConsoleLogIfRequired("Primary source: ( ait -> 1, ia ->2 & mg -> 3)"+primeSrc)
-ConsoleLogIfRequired("collectionIdentifier for Archive-It :"+collectionIdentifier)
+ConsoleLogIfRequired("Hamming distance threshold set while running the server:"+HAMMING_DISTANCE_THRESHOLD)
 //return
 /* *******************************
    TODO: reorder functions (main first) to be more maintainable 20141205
@@ -506,9 +505,9 @@ Memento.prototype.setSimhash = function (callback) {
         /*** ByMahee -- commented the following block as the client and server doesn't have to be in publish and subscribe mode
         //var md5hash = md5(thatmemento.originalURI) // urir cannot be passed in the raw
         ConsoleLogIfRequired("-- By Mahee -- Inside On response end of http request of setSimhash")
-        ConsoleLogIfRequired("ByMahe -- here is the buffer content of " +mOptions.host+mOptions.path+":")
-        ConsoleLogIfRequired(buffer2)
-        ConsoleLogIfRequired("========================================================")  */
+        ConsoleLogIfRequired("ByMahe -- here is the buffer content of " +mOptions.host+mOptions.path+":")  */
+      //  ConsoleLogIfRequired(buffer2)
+      //  ConsoleLogIfRequired("========================================================")
         //ConsoleLogIfRequired("Buffer Length ("+mOptions.host + mOptions.path +"):-> "+ buffer2.length)
         if (buffer2.indexOf('Got an HTTP 302 response at crawl time') === -1 && thatmemento.simhash != '00000000') {
 
