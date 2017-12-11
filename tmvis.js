@@ -139,7 +139,7 @@ function main () {
 
   // this is the actually place that hit the main server logic
   //app.get('/alsummarizedtimemap/:primesource/:ci/:urir', endpoint.respondToClient)
-  app.get('/alsummarizedtimemap/:primesource/:ci/*', endpoint.respondToClient)
+  app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/*', endpoint.respondToClient)
 
   app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
 
@@ -206,6 +206,7 @@ function PublicEndpoint () {
       query['urir'] = request.params["0"] + (request._parsedUrl.search != null ? request._parsedUrl.search : '');
       query['ci']= request.params.ci;
       query['primesource']= request.params.primesource;
+      query['hdt']= request.params.hdt;
     ConsoleLogIfRequired("--- ByMahee: Query URL from client = "+ JSON.stringify(query))
 
     /******************************
@@ -252,6 +253,12 @@ function PublicEndpoint () {
     //  via query parameters
     if (query.primesource) {
       primeSource = query.primesource.toLowerCase()
+    }
+
+    if (isNaN(query.hdt)){
+          HAMMING_DISTANCE_THRESHOLD = 4; // setting to default hamming distance threshold
+    }else{
+          HAMMING_DISTANCE_THRESHOLD = parseInt(query.hdt)
     }
 
     if (!theEndPoint.isAValidSourceParameter(primeSource)) { // A bad access parameter was passed in
@@ -595,6 +602,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
   var t
   var retStr = ''
   var metadata = ''
+
   ConsoleLogIfRequired('Starting many asynchronous operationsX...')
   async.series([
     // TODO: define how this is different from the getTimemap() parent function (i.e., some name clarification is needed)
@@ -677,7 +685,6 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
 
       req.end()
     },
-
 
     //ByMahee -- commented out some of the methods called to build step by step
     /* **
