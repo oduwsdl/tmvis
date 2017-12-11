@@ -75,7 +75,7 @@ var host = argv.host ? argv.host : 'localhost' // Format: scheme://hostname
 var port = argv.port ? argv.port : '3000'
 var proxy = argv.proxy ? argv.proxy.replace(/\/+$/, '') : ('http://' + host + (port == '80' ? '' : ':' + port))
 var localAssetServer = proxy + '/static/'
-
+var isResponseEnded = false
 var uriR = ''
 var isDebugMode = argv.debug? argv.debug: false
 var HAMMING_DISTANCE_THRESHOLD = argv.hdt?  argv.hdt: 4
@@ -86,8 +86,7 @@ var primeSource = "archiveit"
 var isToComputeBoth = argv.os? false: true // By default computes both simhash and hamming distance
 var collectionIdentifier = argv.ci?  argv.ci: 'all'
 var screenshotsLocation = "assets/screenshots/"
-ConsoleLogIfRequired("Primary source: ( ait -> 1, ia ->2 & mg -> 3)"+primeSrc)
-ConsoleLogIfRequired("collectionIdentifier for Archive-It :"+collectionIdentifier)
+ConsoleLogIfRequired("Hamming distance threshold set while running the server:"+HAMMING_DISTANCE_THRESHOLD)
 //return
 /* *******************************
    TODO: reorder functions (main first) to be more maintainable 20141205
@@ -140,7 +139,7 @@ function main () {
 
   // this is the actually place that hit the main server logic
   //app.get('/alsummarizedtimemap/:primesource/:ci/:urir', endpoint.respondToClient)
-  app.get('/alsummarizedtimemap/:primesource/:ci/*', endpoint.respondToClient)
+  app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/*', endpoint.respondToClient)
 
   app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
 
@@ -178,6 +177,7 @@ function PublicEndpoint () {
   * @param response Currently active HTTP response to the client used to return information to the client based on the request
   */
   this.respondToClient = function (request, response) {
+     isResponseEnded = false //resetting the responseEnded indicator
     response.clientId = Math.random() * 101 | 0  // Associate a simple random integer to the user for logging (this is not scalable with the implemented method)
     var headers = {}
 
@@ -206,6 +206,7 @@ function PublicEndpoint () {
       query['urir'] = request.params["0"] + (request._parsedUrl.search != null ? request._parsedUrl.search : '');
       query['ci']= request.params.ci;
       query['primesource']= request.params.primesource;
+      query['hdt']= request.params.hdt;
     ConsoleLogIfRequired("--- ByMahee: Query URL from client = "+ JSON.stringify(query))
 
     /******************************
@@ -252,6 +253,12 @@ function PublicEndpoint () {
     //  via query parameters
     if (query.primesource) {
       primeSource = query.primesource.toLowerCase()
+    }
+
+    if (isNaN(query.hdt)){
+          HAMMING_DISTANCE_THRESHOLD = 4; // setting to default hamming distance threshold
+    }else{
+          HAMMING_DISTANCE_THRESHOLD = parseInt(query.hdt)
     }
 
     if (!theEndPoint.isAValidSourceParameter(primeSource)) { // A bad access parameter was passed in
@@ -411,8 +418,8 @@ function processWithFileContents (fileContents, response) {
         async.series([
           function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback)},
           function (callback) {t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback)},
-          function (callback) {t.createScreenshotsForMementos(callback)},
-          function (callback) {t.SendThumbSumJSONCalledFromCache(response)}
+          function (callback) {t.createScreenshotsForMementos(response,callback)},
+          function (callback) {t.writeThumbSumJSONOPToCache(response)}
         ],
         function (err, result) {
           if (err) {
@@ -505,9 +512,9 @@ Memento.prototype.setSimhash = function (callback) {
         /*** ByMahee -- commented the following block as the client and server doesn't have to be in publish and subscribe mode
         //var md5hash = md5(thatmemento.originalURI) // urir cannot be passed in the raw
         ConsoleLogIfRequired("-- By Mahee -- Inside On response end of http request of setSimhash")
-        ConsoleLogIfRequired("ByMahe -- here is the buffer content of " +mOptions.host+mOptions.path+":")
-        ConsoleLogIfRequired(buffer2)
-        ConsoleLogIfRequired("========================================================")  */
+        ConsoleLogIfRequired("ByMahe -- here is the buffer content of " +mOptions.host+mOptions.path+":")  */
+      //  ConsoleLogIfRequired(buffer2)
+      //  ConsoleLogIfRequired("========================================================")
         //ConsoleLogIfRequired("Buffer Length ("+mOptions.host + mOptions.path +"):-> "+ buffer2.length)
         if (buffer2.indexOf('Got an HTTP 302 response at crawl time') === -1 && thatmemento.simhash != '00000000') {
 
@@ -595,6 +602,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
   var t
   var retStr = ''
   var metadata = ''
+
   ConsoleLogIfRequired('Starting many asynchronous operationsX...')
   async.series([
     // TODO: define how this is different from the getTimemap() parent function (i.e., some name clarification is needed)
@@ -629,17 +637,18 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
             ConsoleLogIfRequired("---------------------------------------------------")
 
             if (t.mementos.length === 0) {
-            ConsoleLogIfRequired('There were no mementos for ' + uri + ' :(')
-            response.write('There were no mementos for ' + uri + ' :(')
-            response.end()
-              return
+              ConsoleLogIfRequired('There were no mementos for ' + uri + ' :(')
+              response.write('There were no mementos for ' + uri + ' :(')
+              response.end()
+                return
             }
 
             // to respond to the client as the intermediate response, while the server processes huge loads
-            if(t.mementos.length > 50){
-              response.write('Request being processed, Please retry approximately after ( ' + (t.mementos.length * 10)/60  +' Minutes ) and request again...')
-              response.end()
-            }
+           if(t.mementos.length > 250){
+             response.write('Request being processed, Please retry approximately after ( ' + ((t.mementos.length/50)  * 10)/60  +' Minutes ) and request again...')
+             response.end()
+             isResponseEnded = true
+           }
 
             ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
 
@@ -677,7 +686,6 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
       req.end()
     },
 
-
     //ByMahee -- commented out some of the methods called to build step by step
     /* **
     // TODO: remove this function from callback hell
@@ -706,7 +714,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     function (callback) {t.writeJSONToCache(callback)},
     function (callback) {
         if(isToComputeBoth){
-          t.createScreenshotsForMementos(callback);
+          t.createScreenshotsForMementos(response,callback);
         }
         else if (callback) {
           callback('')
@@ -856,8 +864,15 @@ TimeMap.prototype.SendThumbSumJSONCalledFromCache= function (response,callback) 
   this.mementos.forEach(function (memento,m) {
 
     var uri = memento.uri
-    // need to have the following line, id_ isnot needed for screen shot
-    uri = uri.replace("id_/http","/http");
+    // need to have the following line, id_ isnot needed for screen shot, to replace /12345678912345id_/ to /12345678912345/
+    var regExpForDTStr = /\/\d{14}id_\// // to match something lile /12345678912345id_/
+    var matchedString = uri.match(regExpForDTStr)
+    if(matchedString != null){
+      uri = uri.replace(matchedString[0],(matchedString[0].toString().replace("id_",""))) // by default only the first occurance is replaced
+    }
+
+    // this is been replaced by the above so as not to have any clashes
+    //uri = uri.replace("id_/http","/http");
 
      var mementoJObj_ForTimeline ={}
      var mementoJObj_ForGrid_Slider={}
@@ -917,8 +932,15 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
   this.mementos.forEach(function (memento,m) {
 
     var uri = memento.uri
-    // need to have the following line, id_ isnot needed for screen shot
-    uri = uri.replace("id_/http","/http");
+
+    // need to have the following line, id_ isnot needed for screen shot, to replace /12345678912345id_/ to /12345678912345/
+    var regExpForDTStr = /\/\d{14}id_\// // to match something lile /12345678912345id_/
+    var matchedString = uri.match(regExpForDTStr)
+    if(matchedString != null){
+      uri = uri.replace(matchedString[0],(matchedString[0].toString().replace("id_",""))) // by default only the first occurance is replaced
+    }
+
+    //  uri = uri.replace("id_/http","/http"); //replaced by the above segment
 
      var mementoJObj_ForTimeline ={}
      var mementoJObj_ForGrid_Slider={}
@@ -956,7 +978,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
   var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.writeThumbSumJSONOPContentToFile(JSON.stringify(mementoJObjArrForTimeline))
 
-    if(this.mementos.length <= 50 ){
+    if(!isResponseEnded){
       response.write(JSON.stringify(mementoJObjArrForTimeline))
       response.end()
     }
@@ -985,12 +1007,33 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
   // Assuming foreach is faster than for-i, this can be executed out-of-order
   this.mementos.forEach(function (memento,m) {
     var uri = memento.uri
-      uri = uri.replace("id_/http","/http");
+
+
+      //  to replace /12345678912345id_/ to /12345678912345/
+      var regExpForDTStr = /\/\d{14}id_\// // to match something lile /12345678912345id_/
+      var matchedString = uri.match(regExpForDTStr)
+      if(matchedString != null){
+        uri = uri.replace(matchedString[0],(matchedString[0].toString().replace("id_",""))) // by default only the first occurance is replaced
+      }
+
+      //uri = uri.replace("id_/http","/http"); //replaced by above code segment
+
+
+
+
     // ConsoleLogIfRequired("Hamming distance = "+memento.hammingDistance)
     if (memento.hammingDistance < HAMMING_DISTANCE_THRESHOLD  && memento.hammingDistance >= 0) {
       // ConsoleLogIfRequired(memento.uri+" is below the hamming distance threshold of "+HAMMING_DISTANCE_THRESHOLD)
       memento.screenshotURI = null
-      var filename = 'timemapSum_' + memento.hammingBasisURI.replace("id_/http","/http").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+
+      var regExpForDTStr = /\/\d{14}id_\// // to match something lile /12345678912345id_/
+      var matchedString = memento.hammingBasisURI.match(regExpForDTStr)
+      if(matchedString != null){
+        memento.hammingBasisURI = memento.hammingBasisURI.replace(matchedString[0],(matchedString[0].toString().replace("id_",""))) // by default only the first occurance is replaced
+      }
+      var filename = 'timemapSum_' + memento.hammingBasisURI.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+
+      //var filename = 'timemapSum_' + memento.hammingBasisURI.replace("id_/http","/http").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename // replaced by above segment
       memento.hammingBasisScreenshotURI = filename
     } else {
       var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
@@ -1027,6 +1070,58 @@ TimeMap.prototype.supplySelectedMementosAScreenshotURI = function (strategy,call
   }
 }
 
+/**
+* Generate a screenshot with all mementos that pass the passed-in criteria test
+* @param callback The next procedure to execution when this process concludes
+* @param withCriteria Function to inclusively filter mementos, i.e. returned from criteria
+*                     function means a screenshot should be generated for it.
+*/
+TimeMap.prototype.createScreenshotsForMementos = function (response,callback, withCriteria) {
+  ConsoleLogIfRequired('Creating screenshots...')
+
+  function hasScreenshot (e) {
+    return e.screenshotURI !== null
+  }
+
+  var self = this
+
+  var criteria = hasScreenshot
+  if (withCriteria) {
+    criteria = withCriteria
+  }
+  console.log("------------------ selected for screenshots------------")
+  console.log(JSON.stringify(self.mementos.filter(criteria)))
+
+  // to respond to the client as the intermediate response, while the server processes huge loads
+  var noOfThumbnailsSelectedToBeCaptured = getNotExistingCapturesCount(self.mementos.filter(criteria))
+  // console.log("--------------------------------------------------------")
+  // console.log("--------------------------------------------------------")
+  // console.log("--------------------------------------------------------")
+  // console.log("noOfThumbnailsSelectedToBeCaptured:"+noOfThumbnailsSelectedToBeCaptured)
+  // console.log("--------------------------------------------------------")
+  // console.log("--------------------------------------------------------")
+  // console.log("--------------------------------------------------------")
+  if (noOfThumbnailsSelectedToBeCaptured >= 4) {
+    response.write('Request being processed, Please retry approximately after ( ' + (noOfThumbnailsSelectedToBeCaptured * 40)/60  +' Minutes ) and request again...')
+    response.end()
+    isResponseEnded = true
+  }
+
+  async.eachLimit(
+    shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
+    7,
+    self.createScreenshotForMemento,            // Create a screenshot
+    function doneCreatingScreenshots (err) {      // When finished, check for errors
+      if (err) {
+        ConsoleLogIfRequired('Error creating screenshot')
+        ConsoleLogIfRequired(err)
+      }
+
+      callback('')
+    }
+  )
+}
+
 
 
 /**
@@ -1035,7 +1130,7 @@ TimeMap.prototype.supplySelectedMementosAScreenshotURI = function (strategy,call
 * @param withCriteria Function to inclusively filter mementos, i.e. returned from criteria
 *                     function means a screenshot should be generated for it.
 */
-TimeMap.prototype.createScreenshotsForMementos = function (callback, withCriteria) {
+TimeMap.prototype.createScreenshotsForMementosFromCached = function (callback, withCriteria) {
   ConsoleLogIfRequired('Creating screenshots...')
 
   function hasScreenshot (e) {
@@ -1068,8 +1163,15 @@ TimeMap.prototype.createScreenshotsForMementos = function (callback, withCriteri
 
 TimeMap.prototype.createScreenshotForMemento = function (memento, callback) {
   var uri = memento.uri
-  uri = uri.replace("id_/http","/http");
-  uri = uri.replace("/http","if_/http");
+
+  var regExpForDTStr = /\/\d{14}id_\/|\d{14}\// //to match something lile /12345678912345id_/
+  var matchedString = uri.match(regExpForDTStr)
+  if(matchedString != null){
+    uri = uri.replace(matchedString[0],(matchedString[0].toString().replace(/id_\/$|\/$/,"if_/"))) // by default only the first occurance is replaced
+  }
+
+  //uri = uri.replace("id_/http","/http");
+  //uri = uri.replace("/http","if_/http");
 
   var filename = memento.screenshotURI
 
@@ -1277,6 +1379,24 @@ function getHamming (str1, str2) {
   return d
 }
 
+function getNotExistingCapturesCount(selectedMementosList){
+   //console.log("------------------------inside getExistingCapturesCount ---------------")
+    // console.log(selectedMementosList)
+  var count = 0 ;
+  selectedMementosList.forEach(function (memento,m) {
+  //  console.log(__dirname + '/'+screenshotsLocation + memento.screenshotURI);
+    if (!fs.existsSync(__dirname + '/'+screenshotsLocation + memento.screenshotURI)){
+        count ++;
+    }
+  })
+//  console.log("------------------------inside getExistingCapturesCount ---------------")
+
+  return count;
+}
+
+
+
+
 // Fischer-Yates shuffle so we don't fetch the memento in-order but preserve
 // them as objects and associated attributes
 function shuffleArray (array) {
@@ -1386,6 +1506,14 @@ function getHexString (onesAndZeros) {
   }
 
   return str
+}
+
+function prependWithIDHelper(regExpForDTStr, uri){
+  var matchedString = uri.match(regExpForDTStr)
+  if(matchedString != null){
+    uri = uri.replace(matchedString[0],(matchedString[0].toString().replace("id_",""))) // by default only the first occurance is replaced
+  }
+  return uri;
 }
 
 
