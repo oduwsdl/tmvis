@@ -228,6 +228,7 @@ function PublicEndpoint () {
     function isARESTStyleURI (uri) {
       return (uri.substr(0, 5) === '/http')
     }
+
     if (!query['urir'] && // a urir was not passed via the query string...
         request._parsedUrl && !isARESTStyleURI(request._parsedUrl.pathname.substr(0, 5))) { // ...or the REST-style specification
       console.log('No urir sent with request. ' + request.url + ' was sent. Try ' + proxy + '/archiveit/1068/http://matkelly.com')
@@ -891,13 +892,19 @@ TimeMap.prototype.SendThumbSumJSONCalledFromCache= function (response,callback) 
     mementoJObj_ForTimeline["timestamp"] = Number(dt)/1000
     if(memento.screenshotURI == null || memento.screenshotURI==''){
       mementoJObj_ForTimeline["event_series"] = "Non-Thumbnail Mementos"
-      mementoJObj_ForTimeline["event_html"] = "<img src='"+localAssetServer+"notcaptured.png' width='300px' />"
-      mementoJObj_ForTimeline["event_html_similarto"] = "<img src='"+localAssetServer+memento.hammingBasisScreenshotURI +"' width='300px' />"
+
+      // the two following lines are connented as the JSON object must not contain HTML Fragment
+      // mementoJObj_ForTimeline["event_html"] = "<img src='"+localAssetServer+"notcaptured.png' width='300px' />"
+      // mementoJObj_ForTimeline["event_html_similarto"] = "<img src='"+localAssetServer+memento.hammingBasisScreenshotURI +"' width='300px' />"
+
+      mementoJObj_ForTimeline["event_html"] = localAssetServer+'notcaptured.png'
+      mementoJObj_ForTimeline["event_html_similarto"] = localAssetServer+memento.hammingBasisScreenshotURI
 
     }else{
       var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       mementoJObj_ForTimeline["event_series"] = "Thumbnails"
-      mementoJObj_ForTimeline["event_html"] = "<img src='"+localAssetServer+memento.screenshotURI +"' width='300px' />"
+      mementoJObj_ForTimeline["event_html"] = localAssetServer+memento.screenshotURI
+
     }
 
     mementoJObj_ForTimeline["event_date"] =  month_names_short[ parseInt(month)]+". "+date +", "+ dt.getUTCFullYear()
@@ -959,13 +966,15 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
     mementoJObj_ForTimeline["timestamp"] = Number(dt)/1000
     if(memento.screenshotURI == null || memento.screenshotURI==''){
       mementoJObj_ForTimeline["event_series"] = "Non-Thumbnail Mementos"
-      mementoJObj_ForTimeline["event_html"] = "<img src='"+localAssetServer+"notcaptured.png' width='300px' />"
-      mementoJObj_ForTimeline["event_html_similarto"] = "<img src='"+localAssetServer+memento.hammingBasisScreenshotURI +"' width='300px' />"
+     mementoJObj_ForTimeline["event_html"] = localAssetServer+"notcaptured.png"
+     mementoJObj_ForTimeline["event_html_similarto"] = localAssetServer+memento.hammingBasisScreenshotURI
 
     }else{
       var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       mementoJObj_ForTimeline["event_series"] = "Thumbnails"
-      mementoJObj_ForTimeline["event_html"] = "<img src='"+localAssetServer+memento.screenshotURI +"' width='300px' />"
+
+      // the two following lines are connented as the JSON object must not contain HTML Fragment
+      mementoJObj_ForTimeline["event_html"] = localAssetServer+memento.screenshotURI
     }
 
     mementoJObj_ForTimeline["event_date"] =  month_names_short[ parseInt(month)]+". "+date +", "+ dt.getUTCFullYear()
