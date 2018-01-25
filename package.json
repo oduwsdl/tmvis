@@ -16,10 +16,10 @@
     "minimist": "*",
     "mkdir-recursive": "*",
     "node-phantom": "*",
+    "puppeteer": "^1.0.0",
     "rimraf": "*",
     "simhash": "*",
     "validator": "*",
-    "webshot": "*",
-    "puppeteer": "*"
+    "webshot": "*"
   }
 }

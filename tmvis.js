@@ -63,6 +63,7 @@ var SimhashCacheFile = require('./lib/simhashCache.js').SimhashCacheFile
 var colors = require('colors')
 var im = require('imagemagick')
 var rimraf = require('rimraf')
+const puppeteer = require('puppeteer');
 
 //var faye = require('faye') // For status-based notifications to client
 
@@ -1119,7 +1120,8 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
     7,
-    self.createScreenshotForMemento,            // Create a screenshot
+  //  self.createScreenshotForMemento,            // Create a screenshot
+  self.createScreenshotForMementoWithPuppeteer,
     function doneCreatingScreenshots (err) {      // When finished, check for errors
       if (err) {
         ConsoleLogIfRequired('Error creating screenshot')
@@ -1158,7 +1160,9 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (callback, w
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
     7,
-    self.createScreenshotForMemento,            // Create a screenshot
+  //  self.createScreenshotForMemento,            // Create a screenshot
+    self.createScreenshotForMementoWithPuppeteer,
+
     function doneCreatingScreenshots (err) {      // When finished, check for errors
       if (err) {
         ConsoleLogIfRequired('Error creating screenshot')
@@ -1169,6 +1173,153 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (callback, w
     }
   )
 }
+
+
+// createScreenshotForMemento through puppeteer
+TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (memento, callback) {
+  var uri = memento.uri
+
+  var regExpForDTStr = /\/\d{14}id_\/|\d{14}\// //to match something like /12345678912345id_/
+  var matchedString = uri.match(regExpForDTStr)
+  if(matchedString != null){
+    uri = uri.replace(matchedString[0],(matchedString[0].toString().replace(/id_\/$|\/$/,"if_/"))) // by default only the first occurance is replaced
+  }
+
+  //uri = uri.replace("id_/http","/http");
+  //uri = uri.replace("/http","if_/http");
+
+  var filename = memento.screenshotURI
+
+  try {
+    fs.openSync(
+      path.join(__dirname + '/'+screenshotsLocation + memento.screenshotURI),
+      'r', function (e, r) {
+        ConsoleLogIfRequired(e)
+        ConsoleLogIfRequired(r)
+      })
+
+    ConsoleLogIfRequired(memento.screenshotURI + ' already exists...continuing')
+    callback()
+    return
+  }catch (e) {
+    ConsoleLogIfRequired((new Date()).getTime() + ' ' + memento.screenshotURI + ' does not exist...generating')
+  }
+
+
+
+
+  // var options = {
+  //   'phantomConfig': {
+  //     'ignore-ssl-errors': true,
+  //     'local-to-remote-url-access': true // ,
+  //     // 'default-white-background': true,
+  //   },
+  //   // Remove the Wayback UI
+  //   'onLoadFinished': function () {
+  //     document.getElementById('wm-ipp').style.display = 'none'
+  //   }
+  //
+  // }
+
+  ConsoleLogIfRequired('About to start screenshot generation process for ' + uri)
+
+  headless(uri, screenshotsLocation + filename).then(v => {
+      // Once all the async parts finish this prints.
+      console.log("Finished Headless");
+      fs.chmodSync('./'+screenshotsLocation + filename, '755')
+      im.convert(['./'+screenshotsLocation + filename, '-thumbnail', '200',
+            './'+screenshotsLocation + (filename.replace('.png', '_200.png'))],
+        function (err, stdout) {
+          if (err) {
+            ConsoleLogIfRequired('We could not downscale ./'+screenshotsLocation + filename + ' :(')
+          }
+
+          ConsoleLogIfRequired('Successfully scaled ' + filename + ' to 200 pixels', stdout)
+        })
+
+      ConsoleLogIfRequired('t=' + (new Date()).getTime() + ' ' + 'Screenshot created for ' + uri)
+      callback()
+  });
+
+
+  // webshot(uri, screenshotsLocation + filename, options, function (err) {
+  //   if (err) {
+  //     ConsoleLogIfRequired('Error creating a screenshot for ' + uri)
+  //     ConsoleLogIfRequired(err)
+  //     callback('Screenshot failed!')
+  //   } else {
+  //
+  //     fs.chmodSync('./'+screenshotsLocation + filename, '755')
+  //     im.convert(['./'+screenshotsLocation + filename, '-thumbnail', '200',
+  //           './'+screenshotsLocation + (filename.replace('.png', '_200.png'))],
+  //       function (err, stdout) {
+  //         if (err) {
+  //           ConsoleLogIfRequired('We could not downscale ./'+screenshotsLocation + filename + ' :(')
+  //         }
+  //
+  //         ConsoleLogIfRequired('Successfully scaled ' + filename + ' to 200 pixels', stdout)
+  //       })
+  //
+  //     ConsoleLogIfRequired('t=' + (new Date()).getTime() + ' ' + 'Screenshot created for ' + uri)
+  //     callback()
+  //   }
+  // })
+
+}
+
+
+async function headless(uri,filepath) {
+    const browser = await puppeteer.launch({
+        ignoreHTTPSErrors: true,
+          args: ['--no-sandbox']
+        // headless: false,
+    });
+    const page = await browser.newPage();
+    page.emulate({
+        viewport: {
+            width: 1024,
+            height: 768,
+        },
+        userAgent: "memento-damage research ODU <@WebSciDL>",
+    });
+
+    try {
+        // track failed responses ~ Security blocks, etc.
+        page.on('requestfailed', request => {
+          if(request.response()){
+              console.log(request.url, request.response().status);
+          }else{
+              console.log(request.url, request.response());
+          }
+        });
+
+        page.on('response', response => {
+          console.log(response.url, response.status, response.headers);
+        });
+
+        // timeout at 5 minutes (5 * 60 * 1000ms), network idle at 3 seconds
+        await page.goto(uri, {
+            waitUntil: 'networkidle0',
+            timeout: 300000,
+        });
+
+        // Take screenshots
+        await page.screenshot({
+            path: filepath,
+            //fullPage: true
+        });
+
+    } catch (e) {
+        console.log(uri,"Failed with error:", e);
+        //process.exit(1);
+    }
+    browser.close();
+}
+
+
+
+
+
 
 TimeMap.prototype.createScreenshotForMemento = function (memento, callback) {
   var uri = memento.uri
