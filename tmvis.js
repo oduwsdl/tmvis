@@ -647,7 +647,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
 
             // to respond to the client as the intermediate response, while the server processes huge loads
            if(t.mementos.length > 250){
-             response.write('Request being processed, Please retry approximately after ( ' + ((t.mementos.length/50)  * 10)/60  +' Minutes ) and request again...')
+             response.write('Request being processed, Please retry approximately after ( ' + Math.ceil(((t.mementos.length/50)  * 10)/60)  +' Minutes ) and request again...')
              response.end()
              isResponseEnded = true
            }
@@ -1112,7 +1112,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
   // console.log("--------------------------------------------------------")
   // console.log("--------------------------------------------------------")
   if (noOfThumbnailsSelectedToBeCaptured >= 4) {
-    response.write('Request being processed, Please retry approximately after ( ' + (noOfThumbnailsSelectedToBeCaptured * 40)/60  +' Minutes ) and request again...')
+    response.write('Request being processed, Please retry approximately after ( ' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)  +' Minutes ) and request again...')
     response.end()
     isResponseEnded = true
   }
@@ -1132,7 +1132,6 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
     }
   )
 }
-
 
 
 /**
@@ -1300,7 +1299,7 @@ async function headless(uri,filepath) {
         // timeout at 5 minutes (5 * 60 * 1000ms), network idle at 3 seconds
         await page.goto(uri, {
             waitUntil: 'networkidle0',
-            timeout: 300000,
+            timeout: 2000000,
         });
 
         // Take screenshots
