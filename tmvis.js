@@ -118,6 +118,13 @@ function main () {
   //startLocalAssetServer()  //- Now everything is made to be served from the same port.
   var endpoint = new PublicEndpoint()
 
+  app.use(express.static(__dirname + '/Client'));  //This route is just for testing
+  app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
+
+  app.get(['/','/index.html'], (request, response) => {
+    response.sendFile(__dirname + '/Client/UIInitialDraft.html');
+  })
+
   //This route is just for testing
     app.get('/hello', (request, response) => {
 
@@ -142,7 +149,6 @@ function main () {
   //app.get('/alsummarizedtimemap/:primesource/:ci/:urir', endpoint.respondToClient)
   app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/*', endpoint.respondToClient)
 
-  app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
 
   app.listen(port, '0.0.0.0', (err) => {
     if (err) {
@@ -1299,7 +1305,7 @@ async function headless(uri,filepath) {
         // timeout at 5 minutes (5 * 60 * 1000ms), network idle at 3 seconds
         await page.goto(uri, {
             waitUntil: 'networkidle0',
-            timeout: 2000000,
+            timeout: 5000000,
         });
 
         // Take screenshots
