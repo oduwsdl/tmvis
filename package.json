@@ -20,6 +20,7 @@
     "rimraf": "*",
     "simhash": "*",
     "validator": "*",
-    "webshot": "*"
+    "webshot": "*",
+    "puppeteer":"*"
   }
 }
