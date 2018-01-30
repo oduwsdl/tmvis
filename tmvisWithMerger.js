@@ -602,7 +602,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
   var mergedMementoArry = []
   var retStr = ''
   var metadata = ''
-  var uri2 ="https://www.epa.gov/smartway/smartway-sustainability-accounting-and-reporting" // needed if mementos from the redirected URI have to be merged
+  var uri2 ="https://www.neh.gov/divisions/odh" // needed if mementos from the redirected URI have to be merged
   //var uri2 = "";
 
   ConsoleLogIfRequired('Starting many asynchronous operationsX...')

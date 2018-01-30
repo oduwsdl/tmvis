@@ -1125,7 +1125,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
 
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
-    7,
+    2,
   //  self.createScreenshotForMemento,            // Create a screenshot
   self.createScreenshotForMementoWithPuppeteer,
     function doneCreatingScreenshots (err) {      // When finished, check for errors
@@ -1164,7 +1164,7 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (callback, w
 
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
-    7,
+    2,
   //  self.createScreenshotForMemento,            // Create a screenshot
     self.createScreenshotForMementoWithPuppeteer,
 
