@@ -556,11 +556,21 @@ var jsonObjRes = {};
 
             // uncommenting again as to follow the old style of navigating to even non-thumbnails
             var notches    = this.notches.not(".series_inactive");
+
+
+
             var isOnlyNTMSelected = false;
             if($(".series_legend_item_inactive").length == 1){
                 if($(".series_legend_item_inactive").attr("data-series") == "Thumbnails" ){
+
                             isOnlyNTMSelected = true;
                 }
+            }
+
+            if(this.direction.indexOf("unique") >= 0){
+                isOnlyNTMSelected = false;
+            }else{
+                isOnlyNTMSelected = true;
             }
 
             if(!isOnlyNTMSelected){
@@ -570,7 +580,7 @@ var jsonObjRes = {};
 
             var curCardIdx = notches.index($(".timeline_notch_active"));
             var numOfCards = notches.length;
-            if (this.direction === "next") {
+            if (this.direction === "next" || this.direction === "uniquenext") {
                 el = (curCardIdx < numOfCards ? notches.eq(curCardIdx + 1) : false);
             } else {
                 el = (curCardIdx > 0 ? notches.eq(curCardIdx - 1) : false);
@@ -673,6 +683,9 @@ var jsonObjRes = {};
                         new Zoom("out");
                         var chooseNext = new Chooser("next");
                         var choosePrev = new Chooser("prev");
+                        var chooseUniqueNext = new Chooser("uniquenext");
+                        var chooseUniquePrev = new Chooser("uniqueprev");
+
                         chooseNext.click();
                         $(document).bind('keydown', function(e) {
                             if (e.keyCode === 39) {

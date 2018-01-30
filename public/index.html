@@ -112,7 +112,9 @@
 										<a href="#" class="timeline_zoom timeline_zoom_in"><span class="timeline_controls_inner_text zoom_inner_text">+</i></span></a>
 										<a href="#" class="timeline_zoom timeline_zoom_out"><span class="timeline_controls_inner_text zoom_inner_text">-</span></a>
 										&nbsp;&nbsp;&nbsp;&nbsp;
-										<a href="#" class="timeline_choose timeline_choose_prev"><span class="timeline_controls_inner_text">Previous</span></a>
+										<a href="#" class="timeline_choose timeline_choose_prev"><span class="timeline_controls_inner_text" title="Previous">Prev</span></a>
+										<a href="#" class="timeline_choose timeline_choose_uniqueprev"><span class="timeline_controls_inner_text" title="Unique Previous">Unique Prev</span></a>
+										<a href="#" class="timeline_choose timeline_choose_uniquenext"><span class="timeline_controls_inner_text" title="Unique Next">Unique Next</span></a>
 										<a href="#" class="timeline_choose timeline_choose_next"><span class="timeline_controls_inner_text">Next</span></a>
 									</div>
 									<div class="series_nav_container"></div>
@@ -199,10 +201,12 @@
 						<div class="buttonsWrapperSlider">
 						<button type="button" class="btn" id='play'>Play</button>
 						<button type="button" class="btn" id='pause'>Pause</button>
-						<label> <input type="checkbox" class="playinloop" value="">loop</label>
+						&nbsp;<label> <input type="checkbox" class="playinloop" value=""> Play In Loop</label>
 						</div>
-						<img id="myImage" class="heightSet"/>
-						<p id="myContent"></p>
+							<div class="gridImagePlusContentWrapper" style="margin-left: 5%;">
+								<img id="myImage" class="heightSet"/>
+								<p id="myContent"></p>
+							</div>
 				    </div>
 				  </div>
 				  <div id="imageGrid" class="tab-pane fade">

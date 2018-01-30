@@ -127,7 +127,7 @@
 		margin: auto;
 		<!-- margin: 0 0 10px; -->
 	}
-	
+
 
 	#busy-loader {
 	    background: url(ajax-loader.gif) no-repeat scroll center center #FFF;
@@ -139,3 +139,7 @@
 	   	left:0;
 	   	top:0;
 	}
+
+.timeline_controls{
+	width: 100% !important;
+}
