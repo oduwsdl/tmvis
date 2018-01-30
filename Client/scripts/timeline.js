@@ -514,8 +514,8 @@ var jsonObjRes = {};
         this.direction = direction;
         this.el = $(this.prefix + direction);
         var that = this;
-        this.el.bind('click', function(e) { 
-            e.preventDefault(); 
+        this.el.bind('click', function(e) {
+            e.preventDefault();
             that.click(e);
         });
     };
@@ -552,19 +552,19 @@ var jsonObjRes = {};
             var el;
              /*Just commenting the following line, as the click of next and previous must be taken only to Thumbnail part,
              * So have manually added up a class to the nothces itself, in <script id="notch_tmpl" type="text/jst"> of timeline_*.html */
-           // var notches    = this.notches.not(".series_inactive"); 
+           // var notches    = this.notches.not(".series_inactive");
 
             // uncommenting again as to follow the old style of navigating to even non-thumbnails
-            var notches    = this.notches.not(".series_inactive"); 
+            var notches    = this.notches.not(".series_inactive");
             var isOnlyNTMSelected = false;
             if($(".series_legend_item_inactive").length == 1){
                 if($(".series_legend_item_inactive").attr("data-series") == "Thumbnails" ){
-                            isOnlyNTMSelected = true;    
+                            isOnlyNTMSelected = true;
                 }
             }
 
             if(!isOnlyNTMSelected){
-                  notches    = notches.not(".notch_Non-Thumbnail"); 
+                  notches    = notches.not(".notch_Non-Thumbnail");
             }
 
 
@@ -582,11 +582,11 @@ var jsonObjRes = {};
 
 
 
-   /* modified to the following function as the ui hits the server once to get all the data 
+   /* modified to the following function as the ui hits the server once to get all the data
    $(function(){
         var curJSONFileName= "timemapsumjson_"+collectionsList[parseInt(location.search.split("=")[1])-1].replace(/[^a-z0-9]/gi, '').toLowerCase();
 		$(".collection_name").html(collectionsList[parseInt(location.search.split("=")[1])-1]);
-       
+
          $.get(curJSONFileName+'.json',function(response) {
 			console.log(response);
 			var timelineData = response;
@@ -594,7 +594,7 @@ var jsonObjRes = {};
             // place where the notch width is being reduced t0 2px.
             $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
             // Color is changed in the Array at 284 line as that is the right place
-           // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");			
+           // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
             new Zoom("in");
 			new Zoom("out");
 			var chooseNext = new Chooser("next");
@@ -609,7 +609,7 @@ var jsonObjRes = {};
 					return;
 				}
 			});
-		},'json');  
+		},'json');
     }); */
 
    $(function(){
@@ -626,19 +626,19 @@ var jsonObjRes = {};
 
             if($(this).parents("form")[0].checkValidity()){
                 event.preventDefault();
-               //var SERVERHOST = "http://tmvis.cs.odu.edu/alsummarizedtimemap"; // to hit the hosted server
-               var SERVERHOST = "http://localhost:3000/alsummarizedtimemap"; // to hit the local one
-               // var queryStr="?"+$(".argumentsForm input").serialize();    
+               var SERVERHOST = "http://tmvis.cs.odu.edu/alsummarizedtimemap"; // to hit the hosted server
+              // var SERVERHOST = "http://localhost:3000/alsummarizedtimemap"; // to hit the local one
+               // var queryStr="?"+$(".argumentsForm input").serialize();
                var queryStr="/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+$('.argumentsForm #urirIP').val()
-                $("#busy-loader").show();  
+                $("#busy-loader").show();
 
                 $.ajax({
                   type: "GET",
                   url: SERVERHOST+queryStr,
                 /* url:'timemapsumjson_httpgulflabororg.json', */
                   dataType: "text",
-                  success: function( data, textStatus, jqXHR) { 
-                      $("#busy-loader").hide();        
+                  success: function( data, textStatus, jqXHR) {
+                      $("#busy-loader").hide();
                     try{
                         data = $.trim(data).split("...");
                         if(data.length > 1){
@@ -654,7 +654,7 @@ var jsonObjRes = {};
 
                         jsonObjRes= $.parseJSON(data);
 
-                        // following code segment makes the screenshot URI got with event_html | event_html_similarto properties to a html fragment                       
+                        // following code segment makes the screenshot URI got with event_html | event_html_similarto properties to a html fragment
                         jsonObjRes[0].event_html= "<img src='"+jsonObjRes[0].event_html+"' width='300px' />";
                         for(var i=1;i< jsonObjRes.length;i++){
                             jsonObjRes[i].event_html= "<img src='"+jsonObjRes[i].event_html+"' width='300px' />";
@@ -667,7 +667,7 @@ var jsonObjRes = {};
                         // place where the notch width is being reduced t0 2px.
                         $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
                         // Color is changed in the Array at 284 line as that is the right place
-                       // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");            
+                       // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
                         new Zoom("in");
                         new Zoom("out");
                         var chooseNext = new Chooser("next");
@@ -683,26 +683,26 @@ var jsonObjRes = {};
                             }
                         });
 
-                        console.log(jsonObjRes);        
-                        drawImageGrid(jsonObjRes); // calling Image Grid Function here          
+                        console.log(jsonObjRes);
+                        drawImageGrid(jsonObjRes); // calling Image Grid Function here
                         drawImageSlider(jsonObjRes);
-                    } 
+                    }
                     catch(err){
                         alert($.trim(data));
                         $(".statsWrapper").hide();
-                        $(".tabContentWrapper").hide();  
+                        $(".tabContentWrapper").hide();
                     }
 
-                   
+
                   },
                   error: function( data, textStatus, jqXHR) {
-                    $("#busy-loader").hide();        
+                    $("#busy-loader").hide();
                     var errMsg = "some problem fetching the response";
-                    alert(errMsg);   
+                    alert(errMsg);
                   }
                 });
             }
-            
+
         });
     });
 })(window, document);
