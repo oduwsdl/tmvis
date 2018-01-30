@@ -16,7 +16,7 @@ To query the server instance generated using your browser visit `http://localhos
 
 ### Example URIs
 
-* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/http://4genderjustice.org/`
+* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/http://4genderjustice.org/`
 
 
 ## Running as a Docker Container (experimental)
@@ -82,7 +82,7 @@ Running this service gives provides an user with the array of JSON object as the
 ## Request format
 
 ```
-curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/http://4genderjustice.org/
+curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/http://4genderjustice.org/
 
 Mapping of attributes of URI to the values are as follows:
   primesource -> archiveIt
@@ -97,7 +97,7 @@ Mapping of attributes of URI to the values are as follows:
   {
     "timestamp": 1435787801,
     "event_series": "Thumbnails",
-    "event_html": "<img src='http://localhost:3000/static/timemapSum_httpwaybackarchiveitorg106820150701215641http4genderjusticeorg.png' width='300px' />",
+    "event_html": 'http://localhost:3000/static/timemapSum_httpwaybackarchiveitorg106820150701215641http4genderjusticeorg.png',
     "event_date": "Aug. 01, 2015",
     "event_display_date": "2015-07-01, 21:56:41",
     "event_description": "",
@@ -106,8 +106,8 @@ Mapping of attributes of URI to the values are as follows:
   {
     "timestamp": 1435789960,
     "event_series": "Non-Thumbnail Mementos",
-    "event_html": "<img src='http://localhost:3000/static/notcaptured.png' width='300px' />",
-    "event_html_similarto": "<img src='http://localhost:3000/static/timemapSum_httpwaybackarchiveitorg106820150701215641http4genderjusticeorg.png' width='300px' />",
+    "event_html": 'http://localhost:3000/static/notcaptured.png',
+    "event_html_similarto": 'http://localhost:3000/static/timemapSum_httpwaybackarchiveitorg106820150701215641http4genderjusticeorg.png',
     "event_date": "Aug. 01, 2015",
     "event_display_date": "2015-07-01, 22:32:40",
     "event_description": "",

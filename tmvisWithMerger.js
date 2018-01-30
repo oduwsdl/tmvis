@@ -63,7 +63,6 @@ var SimhashCacheFile = require('./lib/simhashCache.js').SimhashCacheFile
 var colors = require('colors')
 var im = require('imagemagick')
 var rimraf = require('rimraf')
-const puppeteer = require('puppeteer');
 
 //var faye = require('faye') // For status-based notifications to client
 
@@ -118,14 +117,6 @@ function main () {
   //startLocalAssetServer()  //- Now everything is made to be served from the same port.
   var endpoint = new PublicEndpoint()
 
-  app.use(express.static(__dirname + '/public'));  //This route is just for testing
-
-  app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
-
-  app.get(['/','/index.html'], (request, response) => {
-    response.sendFile(__dirname + '/public/index.html');
-  })
-
   //This route is just for testing
     app.get('/hello', (request, response) => {
 
@@ -149,7 +140,7 @@ function main () {
   // this is the actually place that hit the main server logic
   //app.get('/alsummarizedtimemap/:primesource/:ci/:urir', endpoint.respondToClient)
   app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/*', endpoint.respondToClient)
-
+  app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
 
   app.listen(port, '0.0.0.0', (err) => {
     if (err) {
@@ -236,7 +227,6 @@ function PublicEndpoint () {
     function isARESTStyleURI (uri) {
       return (uri.substr(0, 5) === '/http')
     }
-
     if (!query['urir'] && // a urir was not passed via the query string...
         request._parsedUrl && !isARESTStyleURI(request._parsedUrl.pathname.substr(0, 5))) { // ...or the REST-style specification
       console.log('No urir sent with request. ' + request.url + ' was sent. Try ' + proxy + '/archiveit/1068/http://matkelly.com')
@@ -609,8 +599,11 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
   ConsoleLogIfRequired('Path: ' + options.host + options.path)
   var buffer = '' // An out-of-scope string to save the Timemap string, TODO: better documentation
   var t
+  var mergedMementoArry = []
   var retStr = ''
   var metadata = ''
+  var uri2 ="https://www.neh.gov/divisions/odh" // needed if mementos from the redirected URI have to be merged
+  //var uri2 = "";
 
   ConsoleLogIfRequired('Starting many asynchronous operationsX...')
   async.series([
@@ -644,6 +637,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
             ConsoleLogIfRequired("-- ByMahee -- Mementos are created by this point, following is the whole timeMap Object")
             ConsoleLogIfRequired(t);
             ConsoleLogIfRequired("---------------------------------------------------")
+            mergedMementoArry = mergedMementoArry.concat(t.mementos);
 
             if (t.mementos.length === 0) {
               ConsoleLogIfRequired('There were no mementos for ' + uri + ' :(')
@@ -654,7 +648,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
 
             // to respond to the client as the intermediate response, while the server processes huge loads
            if(t.mementos.length > 250){
-             response.write('Request being processed, Please retry approximately after ( ' + Math.ceil(((t.mementos.length/50)  * 10)/60)  +' Minutes ) and request again...')
+             response.write('Request being processed, Please retry approximately after ( ' + ((t.mementos.length/50)  * 10)/60  +' Minutes ) and request again...')
              response.end()
              isResponseEnded = true
            }
@@ -695,6 +689,99 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
       req.end()
     },
 
+    function fetchTimemap2 (callback) {
+      if(uri2 == ""){
+          callback('')
+      }
+      var timemapHost = 'web.archive.org'
+      var timemapPath = '/web/timemap/link/' + uri2
+      var buffer ="";
+
+      var options = {
+        'host': timemapHost,
+        'path': timemapPath,
+        'port': 80,
+        'method': 'GET'
+      }
+
+      var req = http.request(options, function (res) {
+         ConsoleLogIfRequired("--ByMahee-- Inside the http request call back success, request is made on the following obect:")
+        // ConsoleLogIfRequired(options);
+        // ConsoleLogIfRequired("----------------");
+        res.setEncoding('utf8')
+
+        res.on('data', function (data) {
+          buffer += data.toString()
+        })
+
+        res.on('end', function (d) {
+
+        //  ConsoleLogIfRequired("Data Response from fetchTimeMap:" + buffer)
+
+          if (buffer.length > 100) {  // Magic number = arbitrary, has be quantified for correctness
+
+            //ConsoleLogIfRequired('Timemap acquired for ' + uri + ' from ' + timemapHost + timemapPath)
+            // ConsoleLogIfRequired("-----------ByMahee--------")
+            // ConsoleLogIfRequired(buffer)
+            // ConsoleLogIfRequired("-----------ByMahee--------")
+
+            t = new TimeMap(buffer)
+            t.originalURI = uri // Need this for a filename for caching
+            t.createMementos()
+            ConsoleLogIfRequired("-- ByMahee -- Mementos are created by this point, following is the whole timeMap Object")
+            ConsoleLogIfRequired(t.mementos);
+            ConsoleLogIfRequired("---------------------------------------------------")
+            mergedMementoArry = mergedMementoArry.concat(t.mementos);
+            mergedMementoArry.sort(function(m1, m2){ // sort object by datetime field
+            	return ((new Date(m1["datetime"])).getTime()-(new Date(m2["datetime"])).getTime())
+            })
+            t.mementos = mergedMementoArry;
+            console.log("========================== Modified Merged array =====================")
+            console.log(JSON.stringify(t.mementos))
+            console.log("======================================================================")
+
+            if (t.mementos.length === 0) {
+              ConsoleLogIfRequired('There were no mementos for ' + uri + ' :(')
+              response.write('There were no mementos for ' + uri + ' :(')
+              response.end()
+                return
+            }
+
+
+            //ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
+            callback('')
+
+          }else{
+            ConsoleLogIfRequired('The page you requested has not been archived.')
+            //  response.write('The page you requested has not been archived.')
+            //  response.end()
+               return
+
+          }
+        })
+      })
+
+      req.on('error', function (e) { // Houston...
+        ConsoleLogIfRequired('problem with request: ' + e.message)
+        ConsoleLogIfRequired(e)
+        if (e.message === 'connect ETIMEDOUT') { // Error experienced when IA went down on 20141211
+          ConsoleLogIfRequired('Hmm, the connection timed out. Internet Archive might be down.')
+          // response.write('Hmm, the connection timed out. Internet Archive might be down.')
+          // response.end()
+            return
+        }
+      })
+
+      req.on('socket', function (socket) { // Slow connection is slow
+        /*socket.setTimeout(3000)
+        socket.on('timeout', function () {
+          ConsoleLogIfRequired("The server took too long to respond and we're only getting older so we aborted.")
+          req.abort()
+        }) */
+      })
+
+      req.end()
+    },
     //ByMahee -- commented out some of the methods called to build step by step
     /* **
     // TODO: remove this function from callback hell
@@ -901,18 +988,13 @@ TimeMap.prototype.SendThumbSumJSONCalledFromCache= function (response,callback) 
     if(memento.screenshotURI == null || memento.screenshotURI==''){
       mementoJObj_ForTimeline["event_series"] = "Non-Thumbnail Mementos"
 
-      // the two following lines are connented as the JSON object must not contain HTML Fragment
-      // mementoJObj_ForTimeline["event_html"] = "<img src='"+localAssetServer+"notcaptured.png' width='300px' />"
-      // mementoJObj_ForTimeline["event_html_similarto"] = "<img src='"+localAssetServer+memento.hammingBasisScreenshotURI +"' width='300px' />"
-
-      mementoJObj_ForTimeline["event_html"] = localAssetServer+'notcaptured.png'
+      mementoJObj_ForTimeline["event_html"] = localAssetServer+"notcaptured.png"
       mementoJObj_ForTimeline["event_html_similarto"] = localAssetServer+memento.hammingBasisScreenshotURI
 
     }else{
       var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       mementoJObj_ForTimeline["event_series"] = "Thumbnails"
       mementoJObj_ForTimeline["event_html"] = localAssetServer+memento.screenshotURI
-
     }
 
     mementoJObj_ForTimeline["event_date"] =  month_names_short[ parseInt(month)]+". "+date +", "+ dt.getUTCFullYear()
@@ -974,14 +1056,12 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
     mementoJObj_ForTimeline["timestamp"] = Number(dt)/1000
     if(memento.screenshotURI == null || memento.screenshotURI==''){
       mementoJObj_ForTimeline["event_series"] = "Non-Thumbnail Mementos"
-     mementoJObj_ForTimeline["event_html"] = localAssetServer+"notcaptured.png"
-     mementoJObj_ForTimeline["event_html_similarto"] = localAssetServer+memento.hammingBasisScreenshotURI
+      mementoJObj_ForTimeline["event_html"] = localAssetServer+"notcaptured.png"
+      mementoJObj_ForTimeline["event_html_similarto"] = localAssetServer+memento.hammingBasisScreenshotURI
 
     }else{
       var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       mementoJObj_ForTimeline["event_series"] = "Thumbnails"
-
-      // the two following lines are connented as the JSON object must not contain HTML Fragment
       mementoJObj_ForTimeline["event_html"] = localAssetServer+memento.screenshotURI
     }
 
@@ -1119,16 +1199,15 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
   // console.log("--------------------------------------------------------")
   // console.log("--------------------------------------------------------")
   if (noOfThumbnailsSelectedToBeCaptured >= 4) {
-    response.write('Request being processed, Please retry approximately after ( ' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)  +' Minutes ) and request again...')
+    response.write('Request being processed, Please retry approximately after ( ' + (noOfThumbnailsSelectedToBeCaptured * 40)/60  +' Minutes ) and request again...')
     response.end()
     isResponseEnded = true
   }
 
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
-    2,
-  //  self.createScreenshotForMemento,            // Create a screenshot
-  self.createScreenshotForMementoWithPuppeteer,
+    7,
+    self.createScreenshotForMemento,            // Create a screenshot
     function doneCreatingScreenshots (err) {      // When finished, check for errors
       if (err) {
         ConsoleLogIfRequired('Error creating screenshot')
@@ -1139,6 +1218,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
     }
   )
 }
+
 
 
 /**
@@ -1165,10 +1245,8 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (callback, w
 
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
-    2,
-  //  self.createScreenshotForMemento,            // Create a screenshot
-    self.createScreenshotForMementoWithPuppeteer,
-
+    7,
+    self.createScreenshotForMemento,            // Create a screenshot
     function doneCreatingScreenshots (err) {      // When finished, check for errors
       if (err) {
         ConsoleLogIfRequired('Error creating screenshot')
@@ -1179,153 +1257,6 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (callback, w
     }
   )
 }
-
-
-// createScreenshotForMemento through puppeteer
-TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (memento, callback) {
-  var uri = memento.uri
-
-  var regExpForDTStr = /\/\d{14}id_\/|\d{14}\// //to match something like /12345678912345id_/
-  var matchedString = uri.match(regExpForDTStr)
-  if(matchedString != null){
-    uri = uri.replace(matchedString[0],(matchedString[0].toString().replace(/id_\/$|\/$/,"if_/"))) // by default only the first occurance is replaced
-  }
-
-  //uri = uri.replace("id_/http","/http");
-  //uri = uri.replace("/http","if_/http");
-
-  var filename = memento.screenshotURI
-
-  try {
-    fs.openSync(
-      path.join(__dirname + '/'+screenshotsLocation + memento.screenshotURI),
-      'r', function (e, r) {
-        ConsoleLogIfRequired(e)
-        ConsoleLogIfRequired(r)
-      })
-
-    ConsoleLogIfRequired(memento.screenshotURI + ' already exists...continuing')
-    callback()
-    return
-  }catch (e) {
-    ConsoleLogIfRequired((new Date()).getTime() + ' ' + memento.screenshotURI + ' does not exist...generating')
-  }
-
-
-
-
-  // var options = {
-  //   'phantomConfig': {
-  //     'ignore-ssl-errors': true,
-  //     'local-to-remote-url-access': true // ,
-  //     // 'default-white-background': true,
-  //   },
-  //   // Remove the Wayback UI
-  //   'onLoadFinished': function () {
-  //     document.getElementById('wm-ipp').style.display = 'none'
-  //   }
-  //
-  // }
-
-  ConsoleLogIfRequired('About to start screenshot generation process for ' + uri)
-
-  headless(uri, screenshotsLocation + filename).then(v => {
-      // Once all the async parts finish this prints.
-      console.log("Finished Headless");
-      fs.chmodSync('./'+screenshotsLocation + filename, '755')
-      im.convert(['./'+screenshotsLocation + filename, '-thumbnail', '200',
-            './'+screenshotsLocation + (filename.replace('.png', '_200.png'))],
-        function (err, stdout) {
-          if (err) {
-            ConsoleLogIfRequired('We could not downscale ./'+screenshotsLocation + filename + ' :(')
-          }
-
-          ConsoleLogIfRequired('Successfully scaled ' + filename + ' to 200 pixels', stdout)
-        })
-
-      ConsoleLogIfRequired('t=' + (new Date()).getTime() + ' ' + 'Screenshot created for ' + uri)
-      callback()
-  });
-
-
-  // webshot(uri, screenshotsLocation + filename, options, function (err) {
-  //   if (err) {
-  //     ConsoleLogIfRequired('Error creating a screenshot for ' + uri)
-  //     ConsoleLogIfRequired(err)
-  //     callback('Screenshot failed!')
-  //   } else {
-  //
-  //     fs.chmodSync('./'+screenshotsLocation + filename, '755')
-  //     im.convert(['./'+screenshotsLocation + filename, '-thumbnail', '200',
-  //           './'+screenshotsLocation + (filename.replace('.png', '_200.png'))],
-  //       function (err, stdout) {
-  //         if (err) {
-  //           ConsoleLogIfRequired('We could not downscale ./'+screenshotsLocation + filename + ' :(')
-  //         }
-  //
-  //         ConsoleLogIfRequired('Successfully scaled ' + filename + ' to 200 pixels', stdout)
-  //       })
-  //
-  //     ConsoleLogIfRequired('t=' + (new Date()).getTime() + ' ' + 'Screenshot created for ' + uri)
-  //     callback()
-  //   }
-  // })
-
-}
-
-
-async function headless(uri,filepath) {
-    const browser = await puppeteer.launch({
-        ignoreHTTPSErrors: true,
-          args: ['--no-sandbox']
-        // headless: false,
-    });
-    const page = await browser.newPage();
-    page.emulate({
-        viewport: {
-            width: 1024,
-            height: 768,
-        },
-        userAgent: "memento-damage research ODU <@WebSciDL>",
-    });
-
-    try {
-        // track failed responses ~ Security blocks, etc.
-        page.on('requestfailed', request => {
-          if(request.response()){
-              console.log(request.url, request.response().status);
-          }else{
-              console.log(request.url, request.response());
-          }
-        });
-
-        page.on('response', response => {
-          console.log(response.url, response.status, response.headers);
-        });
-
-        // timeout at 5 minutes (5 * 60 * 1000ms), network idle at 3 seconds
-        await page.goto(uri, {
-            waitUntil: 'networkidle0',
-            timeout: 5000000,
-        });
-
-        // Take screenshots
-        await page.screenshot({
-            path: filepath,
-            //fullPage: true
-        });
-
-    } catch (e) {
-        console.log(uri,"Failed with error:", e);
-        //process.exit(1);
-    }
-    browser.close();
-}
-
-
-
-
-
 
 TimeMap.prototype.createScreenshotForMemento = function (memento, callback) {
   var uri = memento.uri

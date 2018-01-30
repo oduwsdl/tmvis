@@ -1,0 +1,141 @@
+
+	.collection_name{
+		font-size: 16px;
+   	 	margin-left: 0.5%
+	}
+
+	.collection_stats{
+		font-size: 12px;
+   	 	margin-left: 0.1%
+	}
+
+
+    #timeline {
+        width: 99% !important;
+        padding: 0 !important;
+        margin-top: 20px;
+    }
+	h2 {
+		font-family: 'Oswald', sans-serif;
+		font-size: 2em;
+		font-weight: 200;
+		margin: 0 0 10px;
+		text-align: center;
+	}
+	.container {
+		width: 1200px;
+		height: 350px;
+		margin: 0 auto;
+	}
+	.content_focusedWrapper{
+		margin-top: 5%;
+	}
+	.similarToPictureEle img{
+		width: 250px;
+    	height: 200px;
+	}
+	.similarToPictureEle h2{
+			font-weight: bolder;
+	}
+    #myImage {
+		margin-left: 33%;
+		border: 1px solid black;
+		cursor: pointer;
+		box-shadow: 0 0 5px #ddd;
+		box-sizing: border-box;
+	}
+	#myContent {
+		margin-left: 38%;
+	}
+	.buttonsWrapperSlider{
+		margin-left: 10%;
+	}
+	h2 {
+		font-family: 'Oswald', sans-serif;
+		font-size: 1em;
+		font-weight: 100;
+		margin: 0 0 10px;
+		text-align: center;
+	}
+	h1 {
+		font-family: 'Oswald', sans-serif;
+		font-size: 2em;
+		font-weight: 200;
+		margin: 0 0 10px;
+		text-align: center;
+	}
+	.container {
+		width: 1200px;
+		margin: 0 auto;
+	}
+	#controls {
+		margin-top : 30px;
+	}
+	/*li {
+		display : inline-block;
+		padding : 5px;
+		border : 1px solid #ccc;
+		background-color : #eee;
+		cursor : pointer;
+	}*/
+	#play, #pause {
+		display : inline-block;
+		font-family: 'Oswald', sans-serif;
+		font-size: 1em;
+		padding : 5px;
+		cursor : pointer;
+		text-align: center;
+		margin: 0 0 10px;
+	}
+	#play {
+		margin-left: 37%;
+	}
+	.heightSet {
+		max-height: 300px;
+	}
+	hr {
+		border-top: 1px solid #ccc;
+		border-bottom: 1px solid #fff;
+		margin: 25px 0;
+		clear: both;
+	}
+	.centered {
+		text-align: center;
+	}
+	/* ----- Image grids ----- */
+	ul.rig {
+		list-style: none;
+		font-size: 0px; /* should match li left margin */
+	}
+	ul.rig li {
+		display: inline-block;
+		background: #fff;
+		border: 2px solid #ddd;
+		font-size: 16px;
+		font-size: 0.8rem;
+		vertical-align: top;
+		box-shadow: 0 0 5px #ddd;
+		box-sizing: border-box;
+		margin: 10px;
+		-moz-box-sizing: border-box;
+		-webkit-box-sizing: border-box;
+		cursor: pointer;
+	}
+	ul.rig li img {
+		max-width: 100%;
+		height: auto;
+		margin: auto;
+		<!-- margin: 0 0 10px; -->
+	}
+	
+
+	#busy-loader {
+	    background: url(ajax-loader.gif) no-repeat scroll center center #FFF;
+	    position: absolute;
+	    height: 100%;
+	    width: 100%;
+	    opacity: 0.6;
+	   	z-index: 1000;
+	   	left:0;
+	   	top:0;
+	}
