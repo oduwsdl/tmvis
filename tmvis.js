@@ -118,11 +118,12 @@ function main () {
   //startLocalAssetServer()  //- Now everything is made to be served from the same port.
   var endpoint = new PublicEndpoint()
 
-  app.use(express.static(__dirname + '/Client'));  //This route is just for testing
+  app.use(express.static(__dirname + '/public'));  //This route is just for testing
+
   app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
 
   app.get(['/','/index.html'], (request, response) => {
-    response.sendFile(__dirname + '/Client/UIInitialDraft.html');
+    response.sendFile(__dirname + '/public/index.html');
   })
 
   //This route is just for testing
