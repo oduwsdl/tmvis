@@ -629,15 +629,14 @@ var jsonObjRes = {};
                 var ENDPOINT = "/alsummarizedtimemap";
                 //var SERVERHOST = "http://tmvis.cs.odu.edu/"; // to hit the hosted server
                //var SERVERHOST = "http://tmvis.cs.odu.edu/alsummarizedtimemap"; // to hit the hosted server
-              // var SERVERHOST = "http://localhost:3000/alsummarizedtimemap"; // to hit the local one
+              // var LOCALHOST = "http://localhost:3000/"; // to hit the local one
                // var queryStr="?"+$(".argumentsForm input").serialize();
                var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+$('.argumentsForm #urirIP').val()
                 $("#busy-loader").show();
 
                 $.ajax({
                   type: "GET",
-                  url: address,
-                /* url:'timemapsumjson_httpgulflabororg.json', */
+                  url: address, // uncomment this for deployment
                   dataType: "text",
                   success: function( data, textStatus, jqXHR) {
                       $("#busy-loader").hide();

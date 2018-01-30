@@ -43,8 +43,8 @@ var simhash = require('simhash')('md5')
 //var moment = require('moment')
 
 //var ProgressBar = require('progress')
-var phantom = require('node-phantom')
-
+//var phantom = require('node-phantom')
+var phantom = null;
 var fs = require('fs')
 var mdr = require('mkdir-recursive')
 var path = require('path')
