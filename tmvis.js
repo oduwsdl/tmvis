@@ -87,6 +87,9 @@ var primeSource = "archiveit"
 var isToComputeBoth = argv.os? false: true // By default computes both simhash and hamming distance
 var collectionIdentifier = argv.ci?  argv.ci: 'all'
 var screenshotsLocation = "assets/screenshots/"
+var role = "stats"
+var noOfUniqueMementos = 0
+var totalMementos = 0
 ConsoleLogIfRequired("Hamming distance threshold set while running the server:"+HAMMING_DISTANCE_THRESHOLD)
 //return
 /* *******************************
@@ -148,7 +151,7 @@ function main () {
 
   // this is the actually place that hit the main server logic
   //app.get('/alsummarizedtimemap/:primesource/:ci/:urir', endpoint.respondToClient)
-  app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/*', endpoint.respondToClient)
+  app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/:role/*', endpoint.respondToClient)
 
 
   app.listen(port, '0.0.0.0', (err) => {
@@ -215,6 +218,8 @@ function PublicEndpoint () {
       query['ci']= request.params.ci;
       query['primesource']= request.params.primesource;
       query['hdt']= request.params.hdt;
+      // for the intermediate step of involving user to decide the value of k
+      query['role']= request.params.role;
     ConsoleLogIfRequired("--- ByMahee: Query URL from client = "+ JSON.stringify(query))
 
     /******************************
@@ -238,8 +243,7 @@ function PublicEndpoint () {
     }
 
     if (!query['urir'] && // a urir was not passed via the query string...
-        request._parsedUrl && !isARESTStyleURI(request._parsedUrl.pathname.substr(0, 5))) { // ...or the REST-style specification
-      console.log('No urir sent with request. ' + request.url + ' was sent. Try ' + proxy + '/archiveit/1068/http://matkelly.com')
+      request._parsedUrl && !isARESTStyleURI(request._parsedUrl.pathname.substr(0, 5))) { // ...or the REST-style specification
       response.writeHead(400, headers)
       response.write('No urir Sent with the request')
       response.end()
@@ -268,6 +272,14 @@ function PublicEndpoint () {
           HAMMING_DISTANCE_THRESHOLD = 4; // setting to default hamming distance threshold
     }else{
           HAMMING_DISTANCE_THRESHOLD = parseInt(query.hdt)
+    }
+
+    if(query.role === "stats"){
+      role = "stats"
+    }else if(query.role === "summary"){
+        role = "summary"
+    }else{
+        role = "stats" // incase if a dirty value is sent
     }
 
     if (!theEndPoint.isAValidSourceParameter(primeSource)) { // A bad access parameter was passed in
@@ -427,7 +439,9 @@ function processWithFileContents (fileContents, response) {
         async.series([
           function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback)},
           function (callback) {t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback)},
-          function (callback) {t.createScreenshotsForMementos(response,callback)},
+          function (callback) {
+            t.createScreenshotsForMementos(response,callback)
+          },
           function (callback) {t.writeThumbSumJSONOPToCache(response)}
         ],
         function (err, result) {
@@ -720,8 +734,11 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
           callback('')
         }
     },
-    function (callback) {t.writeJSONToCache(callback)},
     function (callback) {
+      t.writeJSONToCache(callback)
+    },
+    function (callback) {
+
         if(isToComputeBoth){
           t.createScreenshotsForMementos(response,callback);
         }
@@ -853,6 +870,7 @@ TimeMap.prototype.writeJSONToCache = function (callback) {
   var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.writeFileContentsAsJSON(JSON.stringify(this.mementos))
   console.log(JSON.stringify(this.mementos));
+
   if (callback) {
     callback('')
   }
@@ -940,6 +958,8 @@ TimeMap.prototype.SendThumbSumJSONCalledFromCache= function (response,callback) 
 * and saves in a json file
 */
 TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
+
+  console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& in ThumbSumJSON wiritng method &&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 
   var month_names_short= ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
   var mementoJObjArrForTimeline=[];
@@ -1095,6 +1115,18 @@ TimeMap.prototype.supplySelectedMementosAScreenshotURI = function (strategy,call
 *                     function means a screenshot should be generated for it.
 */
 TimeMap.prototype.createScreenshotsForMementos = function (response,callback, withCriteria) {
+
+  // breaking the control and returning the stats if the the request is made for status
+  if(role == "stats"){
+    var statsObj={
+       'totalmementos' : totalMementos,
+       'unique': noOfUniqueMementos
+    }
+    response.write(JSON.stringify(statsObj))
+    response.end()
+    return
+  }
+
   ConsoleLogIfRequired('Creating screenshots...')
 
   function hasScreenshot (e) {
@@ -1432,7 +1464,8 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
       ConsoleLogIfRequired('m==0, continuing')
     }
   }
-
+  noOfUniqueMementos = copyOfMementos.length
+  totalMementos = this.mementos.length;
   //ConsoleLogIfRequired((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
   copyOfMementos = null
 

@@ -633,7 +633,7 @@ var jsonObjRes = {};
             if(hammingDistance == ""){
                 hammingDistance = 4;
             }
-
+            var role = "summary" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
             if($(this).parents("form")[0].checkValidity()){
                 event.preventDefault();
                 var ENDPOINT = "/alsummarizedtimemap";
@@ -641,7 +641,7 @@ var jsonObjRes = {};
                //var SERVERHOST = "http://tmvis.cs.odu.edu/alsummarizedtimemap"; // to hit the hosted server
               // var LOCALHOST = "http://localhost:3000/"; // to hit the local one
                // var queryStr="?"+$(".argumentsForm input").serialize();
-               var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+$('.argumentsForm #urirIP').val()
+               var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
                 $("#busy-loader").show();
 
                 $.ajax({
