@@ -12,15 +12,15 @@
     "colors": "^1.1.2",
     "es6-promise": "*",
     "express": "*",
+    "image-watermark": "0.0.7",
     "imagemagick": "*",
     "minimist": "*",
     "mkdir-recursive": "*",
     "node-phantom": "*",
-    "puppeteer": "^1.0.0",
+    "puppeteer": "*",
     "rimraf": "*",
     "simhash": "*",
     "validator": "*",
-    "webshot": "*",
-    "puppeteer":"*"
+    "webshot": "*"
   }
 }

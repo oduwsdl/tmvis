@@ -348,7 +348,7 @@ function PublicEndpoint () {
 
     // TODO: optimize this out of the conditional so the functions needed for each strategy are self-contained (and possibly OOP-ified)
     if (strategy === 'alSummarization') {
-      var cacheFile = new SimhashCacheFile( primeSource+"_"+collectionIdentifier+"_"+uriR,isDebugMode)
+      var cacheFile = new SimhashCacheFile( primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+uriR,isDebugMode)
       cacheFile.path += '.json'
       ConsoleLogIfRequired('Checking if a cache file exists for ' + query['urir'] + '...')
     //  ConsoleLogIfRequired('cacheFile: '+JSON.stringify(cacheFile))
@@ -839,7 +839,8 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
   ConsoleLogIfRequired(strToWrite)
   ConsoleLogIfRequired("-------------------------------------------------------------------------")
 
-  var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
+  // modified ti accomodate the hdt aswell with in the cache - meaning different hdt will have different cached file from now on
+  var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD +"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.replaceContentWith(strToWrite)
 
 
@@ -849,7 +850,7 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
 }
 
 TimeMap.prototype.writeJSONToCache = function (callback) {
-  var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
+  var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.writeFileContentsAsJSON(JSON.stringify(this.mementos))
   console.log(JSON.stringify(this.mementos));
   if (callback) {
@@ -992,7 +993,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
     mementoJObjArrForTimeline.push(mementoJObj_ForTimeline)
   })
 
-  var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
+  var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.writeThumbSumJSONOPContentToFile(JSON.stringify(mementoJObjArrForTimeline))
 
     if(!isResponseEnded){

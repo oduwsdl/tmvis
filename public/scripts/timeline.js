@@ -711,7 +711,7 @@ var jsonObjRes = {};
                   },
                   error: function( data, textStatus, jqXHR) {
                     $("#busy-loader").hide();
-                    var errMsg = "some problem fetching the response";
+                    var errMsg = "Some problem fetching the response, Please try again.";
                     alert(errMsg);
                   }
                 });
