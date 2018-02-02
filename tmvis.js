@@ -14,10 +14,11 @@
 *   > node AlSummarization_OPT_CLI_JSON.js urir
 *
 * Updated
-*  > node AlSummarization_OPT_CLI_JSON.js urir [--debug] [--hdt 4] [--ia || --ait || -mg] [--oes] [--ci 1068] [--os || --s&h]
+*  > node AlSummarization_OPT_CLI_JSON.js urir [--debug] [--hdt 4] [--ssd 0] [--ia || --ait || -mg] [--oes] [--ci 1068] [--os || --s&h]
 *  ex: node AlSummarization_OPT_CLI_JSON.js http://4genderjustice.org/ --oes --debug --ci 1068
 * debug -> Run in debug mode
 * hdt -> Hamming Distance Threshold
+* ssd -> Screenshot delay
 * ia -> Internet Archive
 * ait -> Archive IT
 * mg -> Memegator
@@ -80,6 +81,7 @@ var isResponseEnded = false
 var uriR = ''
 var isDebugMode = argv.debug? argv.debug: false
 var HAMMING_DISTANCE_THRESHOLD = argv.hdt?  argv.hdt: 4
+var SCREENSHOT_DELTA = argv.ssd? argv.ssd: 0
 var isToOverrideCachedSimHash = argv.oes? argv.oes: false
 // by default the prime src is gonna be Archive-It
 var primeSrc = argv.ait? 1: (argv.ia ? 2:(argv.mg?3:1))
@@ -151,7 +153,7 @@ function main () {
 
   // this is the actually place that hit the main server logic
   //app.get('/alsummarizedtimemap/:primesource/:ci/:urir', endpoint.respondToClient)
-  app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/:role/*', endpoint.respondToClient)
+  app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/:role/:ssd/*', endpoint.respondToClient)
 
 
   app.listen(port, '0.0.0.0', (err) => {
@@ -1306,6 +1308,9 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (memento, c
 
 }
 
+function timeout(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+};
 
 async function headless(uri,filepath) {
     const browser = await puppeteer.launch({
@@ -1342,6 +1347,10 @@ async function headless(uri,filepath) {
             timeout: 5000000,
         });
 
+	//Set wait time before screenshotURI
+	//await timeout(SCREENSHOT_DELTA*1000)
+	
+	
         // Take screenshots
         await page.screenshot({
             path: filepath,
