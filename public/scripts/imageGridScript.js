@@ -1,5 +1,5 @@
 var imagesData_IG = [];
-	
+
 function drawImageGrid(data){
 
 	imagesData_IG = [];
@@ -13,7 +13,7 @@ function drawImageGrid(data){
 	$(".collection_stats").html(memStatStr);
 	console.log(memStatStr);
 	$.each(imagesData_IG, function(i){
-		$("#imageGrid ul").append("<li><a class='row' target='_blank' href='" + imagesData_IG[i].event_link + "'><img style='width:285px;height:185px;' src='" + $(imagesData_IG[i].event_html).attr('src')+"'></img></a><span class='row gridimagedatetime'><b>Datetime: </b>" + (imagesData_IG[i].event_display_date).split(",")[0] + ", " + (imagesData_IG[i].event_display_date).split(",")[1] + "</span></li>");
+		$("#imageGrid ul").append("<li><a class='row' target='_blank' href='" + imagesData_IG[i].event_link + "'><img  style='width:285px;height:185px;' class='gridimage' src='" + $(imagesData_IG[i].event_html).attr('src')+"'></img></a><span class='row gridimagedatetime'><b>Datetime: </b>" + (imagesData_IG[i].event_display_date).split(",")[0] + ", " + (imagesData_IG[i].event_display_date).split(",")[1] + "</span></li>");
 		//console.log("<li><a target='_blank' href='" + imagesData_IG[i].event_link + "'><img style='height:150px;' src='" + $(imagesData_IG[i].event_html).attr('src')+"'></img></a><b>Datetime: </b>" + (imagesData_IG[i].event_display_date).split(",")[0] + ", " + (imagesData_IG[i].event_display_date).split(",")[1] + "</li>");
 	});
 }

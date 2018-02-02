@@ -1079,6 +1079,26 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
     }
   })
 
+
+  /* // this following block must be commented after use, the purpose is to manually hand pick one memento per year and picked ones stay in the following array
+  var pickedMementos = [ '20080329234635id_','20090101145747id_','20100327184104id_','20110202145110id_','20121017105642id_', '20130313164412id_', '20140531083303id_', '20151217174112id_','20160712045817id_','20170119114915id_','20180120202944id_'];
+  for (var m = 0; m < this.mementos.length; m++) {
+      var curMemento = this.mementos[m];
+      for(var i = 0; i < pickedMementos.length; i++ ){
+        if(curMemento.uri.indexOf(pickedMementos[i]) > 0){
+            curMemento.hammingDistance = 4
+          curMemento.screenshotURI = 'timemapSum_httpwebarchiveorgweb'+pickedMementos[i].split("id_")[0] +'httpwwwnehgov80odh.png'
+          break
+        }else{
+          curMemento.hammingDistance = 0
+          curMemento.screenshotURI = null
+        }
+      }
+      this.mementos[m]  = curMemento;
+  } */
+
+
+
   ConsoleLogIfRequired('done with supplyChosenMementosBasedOnHammingDistanceAScreenshotURI, calling back')
   if (callback) {
     callback('')
@@ -1116,18 +1136,6 @@ TimeMap.prototype.supplySelectedMementosAScreenshotURI = function (strategy,call
 */
 TimeMap.prototype.createScreenshotsForMementos = function (response,callback, withCriteria) {
 
-  // breaking the control and returning the stats if the the request is made for status
-  if(role == "stats"){
-    var statsObj={
-       'totalmementos' : totalMementos,
-       'unique': noOfUniqueMementos
-    }
-    response.write(JSON.stringify(statsObj))
-    response.end()
-    return
-  }
-
-  ConsoleLogIfRequired('Creating screenshots...')
 
   function hasScreenshot (e) {
     return e.screenshotURI !== null
@@ -1151,7 +1159,23 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
   // console.log("--------------------------------------------------------")
   // console.log("--------------------------------------------------------")
   // console.log("--------------------------------------------------------")
-  if (noOfThumbnailsSelectedToBeCaptured >= 4) {
+
+  // breaking the control and returning the stats if the the request is made for status
+  if(role == "stats"){
+    var statsObj={
+       'totalmementos' : totalMementos,
+       'unique': noOfUniqueMementos,
+       'timetowait': Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)
+    }
+    response.write(JSON.stringify(statsObj))
+    response.end()
+    return
+  }
+
+  ConsoleLogIfRequired('Creating screenshots...')
+
+
+  if (noOfThumbnailsSelectedToBeCaptured >= 2) {
     response.write('Request being processed, Please retry approximately after ( ' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)  +' Minutes ) and request again...')
     response.end()
     isResponseEnded = true
@@ -1159,7 +1183,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
 
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
-    2,
+    1,
   //  self.createScreenshotForMemento,            // Create a screenshot
   self.createScreenshotForMementoWithPuppeteer,
     function doneCreatingScreenshots (err) {      // When finished, check for errors

@@ -143,3 +143,8 @@
 .timeline_controls{
 	width: 100% !important;
 }
+
+.gridimage{
+	width: 300px !important;
+	height: 200px !important;
+}

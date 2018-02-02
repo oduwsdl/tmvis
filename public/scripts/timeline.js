@@ -557,8 +557,6 @@ var jsonObjRes = {};
             // uncommenting again as to follow the old style of navigating to even non-thumbnails
             var notches    = this.notches.not(".series_inactive");
 
-
-
             var isOnlyNTMSelected = false;
             if($(".series_legend_item_inactive").length == 1){
                 if($(".series_legend_item_inactive").attr("data-series") == "Thumbnails" ){
@@ -623,7 +621,59 @@ var jsonObjRes = {};
     }); */
 
    $(function(){
+
+
     $(".getJSONFromServer").click(function(event){
+       event.preventDefault();
+      var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+      if(collectionIdentifer == ""){
+          collectionIdentifer = "all";
+      }
+      var hammingDistance = $('.argumentsForm #hammingDistance').val();
+      if(hammingDistance == ""){
+          hammingDistance = 4;
+      }
+      var role = "stats" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
+      if($(this).parents("form")[0].checkValidity()){
+            event.preventDefault();
+            var ENDPOINT = "/alsummarizedtimemap";
+            //var SERVERHOST = "http://tmvis.cs.odu.edu/"; // to hit the hosted server
+            //var SERVERHOST = "http://tmvis.cs.odu.edu/alsummarizedtimemap"; // to hit the hosted server
+            // var LOCALHOST = "http://localhost:3000/"; // to hit the local one
+            // var queryStr="?"+$(".argumentsForm input").serialize();
+            var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+            $("#busy-loader").show();
+
+              $.ajax({
+                  type: "GET",
+                  url: address, // uncomment this for deployment
+                  dataType: "text",
+                  success: function( data, textStatus, jqXHR) {
+                      $("#busy-loader").hide();
+                      try{
+                          jsonObjRes= $.parseJSON(data);
+                          var memStatStr = jsonObjRes["totalmementos"]+" mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
+                          $(".statsWrapper .collection_stats").html(memStatStr);
+                          $(".statsWrapper").show();
+                          $(".approxTimeShowingPTag").html('Takes about '+ jsonObjRes["timetowait"] +' minutes Approximately, Please be patient');
+                          $(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
+                      }catch(err){
+                          alert($.trim(data));
+                          $(".statsWrapper").hide();
+                          $(".tabContentWrapper").hide();
+                      }
+                  },
+                  error: function( data, textStatus, jqXHR) {
+                    $("#busy-loader").hide();
+                    var errMsg = "Some problem fetching the response, Please try again.";
+                    alert(errMsg);
+                  }
+              });
+        }
+      });
+
+
+    $(".getSummary").click(function(event){
 
             var collectionIdentifer = $('.argumentsForm #collectionNo').val();
             if(collectionIdentifer == ""){
@@ -634,7 +684,7 @@ var jsonObjRes = {};
                 hammingDistance = 4;
             }
             var role = "summary" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
-            if($(this).parents("form")[0].checkValidity()){
+            if($(this).parents("body").find("form")[0].checkValidity()){
                 event.preventDefault();
                 var ENDPOINT = "/alsummarizedtimemap";
                 //var SERVERHOST = "http://tmvis.cs.odu.edu/"; // to hit the hosted server
