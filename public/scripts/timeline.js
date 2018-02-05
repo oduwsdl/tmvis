@@ -655,7 +655,7 @@ var jsonObjRes = {};
                           var memStatStr = jsonObjRes["totalmementos"]+" mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
                           $(".statsWrapper .collection_stats").html(memStatStr);
                           $(".statsWrapper").show();
-                          $(".approxTimeShowingPTag").html('Takes about '+ jsonObjRes["timetowait"] +' minutes Approximately, Please be patient');
+                          $(".approxTimeShowingPTag").html('Takes about '+ jsonObjRes["timetowait"] +' minutes Approximately, Click on Continue button and please be patient');
                           $(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
                       }catch(err){
                           alert($.trim(data));

@@ -72,6 +72,7 @@ const puppeteer = require('puppeteer');
 
 var zlib = require('zlib')
 var app = express()
+var morgan  = require('morgan')
 var host = argv.host ? argv.host : 'localhost' // Format: scheme://hostname
 var port = argv.port ? argv.port : '3000'
 var proxy = argv.proxy ? argv.proxy.replace(/\/+$/, '') : ('http://' + host + (port == '80' ? '' : ':' + port))
@@ -117,9 +118,30 @@ function main () {
     fs.mkdirSync(__dirname+"/cache");
   }
 
+  if (!fs.existsSync(__dirname+"/logs")){
+    fs.mkdirSync(__dirname+"/logs");
+  }
+
+
+
 
   //startLocalAssetServer()  //- Now everything is made to be served from the same port.
   var endpoint = new PublicEndpoint()
+
+  // create a write stream (in append mode)
+  var accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs' ,'access.log'), {flags: 'a'})
+  var exceptionLogStream = fs.createWriteStream(path.join(__dirname, 'logs' ,'exception.log'), {flags: 'a'})
+
+// all the common  requests are logged via here
+  app.use(morgan('common',{
+    stream: accessLogStream
+  }));
+
+// to log all the exceptions in to exception log file
+  app.use(morgan('common',{
+    skip: function (req, res) { return res.statusCode < 400 },
+    stream: exceptionLogStream
+  }));
 
   app.use(express.static(__dirname + '/public'));  //This route is just for testing
 
@@ -133,7 +155,6 @@ function main () {
     app.get('/hello', (request, response) => {
 
           var headers = {}
-
           // IE8 does not allow domains to be specified, just the *
           // headers['Access-Control-Allow-Origin'] = req.headers.origin
           headers['Access-Control-Allow-Origin'] = '*'
@@ -1080,7 +1101,7 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
   })
 
 
-  /* // this following block must be commented after use, the purpose is to manually hand pick one memento per year and picked ones stay in the following array
+/*  // this following block must be commented after use, the purpose is to manually hand pick one memento per year and picked ones stay in the following array - for presentation ppts
   var pickedMementos = [ '20080329234635id_','20090101145747id_','20100327184104id_','20110202145110id_','20121017105642id_', '20130313164412id_', '20140531083303id_', '20151217174112id_','20160712045817id_','20170119114915id_','20180120202944id_'];
   for (var m = 0; m < this.mementos.length; m++) {
       var curMemento = this.mementos[m];
@@ -1096,7 +1117,6 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
       }
       this.mementos[m]  = curMemento;
   } */
-
 
 
   ConsoleLogIfRequired('done with supplyChosenMementosBasedOnHammingDistanceAScreenshotURI, calling back')
@@ -1567,6 +1587,7 @@ TimeMap.prototype.setupWithURIR = function (response, uriR, callback) {
     ConsoleLogIfRequired('problem with request: ' + e.message)
     ConsoleLogIfRequired(e)
     if (e.message === 'connect ETIMEDOUT') { // Error experienced when IA went down on 20141211
+      response.writeHead(500, headers)
       response.write('Hmm, the connection timed out. Internet Archive might be down.')
       response.end()
     }
