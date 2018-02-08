@@ -67,9 +67,13 @@
 
 
 		$('.tabContentWrapper').waitForImages(function() {
+			$(".tabContentWrapper").show();
 			$("#busy-loader").hide();
-		   	$(".tabContentWrapper").show();  /* now that all the 3 visualization graphs are initialized and images are got to clinet side and ready to be rendered,
-		   										now unhiding the tab content */
+			// setTimeout(function(){
+			// 	console.log("timed out now, will show the tabed content")
+			// 	$(".tabContentWrapper").show();  /* now that all the 3 visualization graphs are initialized and images are got to clinet side and ready to be rendered, 										now unhiding the tab content */
+			// 	$("#busy-loader").hide();
+			// }, 2000);
 		});
 	}
 

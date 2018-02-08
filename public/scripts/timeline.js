@@ -753,7 +753,7 @@ var jsonObjRes = {};
                     }
                     catch(err){
                         alert($.trim(data));
-                        $(".statsWrapper").hide();
+                        //$(".statsWrapper").hide();
                         $(".tabContentWrapper").hide();
                     }
 
