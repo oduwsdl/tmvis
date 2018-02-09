@@ -20,13 +20,21 @@ To query the server instance generated using your browser visit `http://localhos
 * `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/summary/http://4genderjustice.org/`
 
 
+## Running as a Docker Container (Non development mode: Recommended for naive users)
+Follow the following steps:
+```
+$ git clone https://github.com/mgunn001/tmvis.git
+$ cd tmvis
+$ docker image build -t timemapvis .
+$ docker container run -it --rm -p 3000:3000 timemapvis node tmvis.js
+```
+
 
 ## Running as a Docker Container (experimental)
 
 Running the server in a [Docker](https://www.docker.com/) container can make the process of dependency management easier. The code is shipped with a `Dockerfile` to build a Docker image that will run the service when started. This document assumes that you have Docker setup already, if not then follow the [official guide](https://docs.docker.com/installation/).
 
 ### Building Docker Image
-
 Clone the repository and change working directory (if not already) then build the image.
 
 ```
@@ -38,7 +46,6 @@ $ docker image build -t timemapvis .
 In the above command `timemapvis` is the name of the image which can be anything, but the same needs to be used when running the container instance.
 
 ### Running Docker Container
-
 ```
 docker run -it --rm -v "$PWD":/app -p 3000:3000 --user=$(id -u):$(id -g) timemapvis bash
 
