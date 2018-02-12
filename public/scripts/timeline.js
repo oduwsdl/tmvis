@@ -589,42 +589,126 @@ var jsonObjRes = {};
     });
 
 
+    // takes care of the drawbacks from timeline-setter resetting problem
+    window.onload = function() {
+      //alert("Windows loaded back");
+     // $("#urirIP").val("hello.com");
+      if(sessionStorage.getItem("summaryClicked") == "true"){
+          $(".getSummary").hide();
+        sessionStorage.setItem("summaryClicked","false");
+        var curInputObj = JSON.parse(sessionStorage.getItem("curInputObj"));
 
-   /* modified to the following function as the ui hits the server once to get all the data
+        $('.argumentsForm #urirIP').val(curInputObj["urir"]);
+        $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
+        $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
+        $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked");
+        role = curInputObj["role"];
+
+
+        var collectionIdentifer =curInputObj["collectionIdentifer"];
+        if(collectionIdentifer == ""){
+            collectionIdentifer = "all";
+        }
+        var hammingDistance = curInputObj["hammingDistance"];
+        if(hammingDistance == ""){
+            hammingDistance = 4;
+        }
+        var role = "summary" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
+        if($("body").find("form")[0].checkValidity()){
+            event.preventDefault();
+            var ENDPOINT = "/alsummarizedtimemap";
+            //var SERVERHOST = "http://tmvis.cs.odu.edu/"; // to hit the hosted server
+           //var SERVERHOST = "http://tmvis.cs.odu.edu/alsummarizedtimemap"; // to hit the hosted server
+          // var LOCALHOST = "http://localhost:3000/"; // to hit the local one
+           // var queryStr="?"+$(".argumentsForm input").serialize();
+           var address= ENDPOINT+"/"+curInputObj["primesource"]+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+            $("#busy-loader").show();
+
+            $.ajax({
+              type: "GET",
+              url: address, // uncomment this for deployment
+              dataType: "text",
+              success: function( data, textStatus, jqXHR) {
+                  $("#busy-loader").hide();
+                try{
+                    data = $.trim(data).split("...");
+                    if(data.length > 1){
+                        if(data [1] == ""){
+                            data = data [0];
+                        }else{
+                            data = data [1];
+                        }
+                    }
+                    else{
+                        data = data [0];
+                    }
+
+                    jsonObjRes= $.parseJSON(data);
+
+                    // following code segment makes the screenshot URI got with event_html | event_html_similarto properties to a html fragment
+                    jsonObjRes[0].event_html= "<img src='"+jsonObjRes[0].event_html+"' width='300px' />";
+                    for(var i=1;i< jsonObjRes.length;i++){
+                        jsonObjRes[i].event_html= "<img src='"+jsonObjRes[i].event_html+"' width='300px' />";
+                        jsonObjRes[i].event_html_similarto= "<img src='"+jsonObjRes[i].event_html_similarto+"' width='300px' />";
+                    }
+
+
+                    $(".statsWrapper").show();
+                     window.timeline = new Timeline(jsonObjRes);
+                    // place where the notch width is being reduced t0 2px.
+                    $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
+                    // Color is changed in the Array at 284 line as that is the right place
+                   // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
+                    new Zoom("in");
+                    new Zoom("out");
+                    var chooseNext = new Chooser("next");
+                    var choosePrev = new Chooser("prev");
+                    var chooseUniqueNext = new Chooser("uniquenext");
+                    var chooseUniquePrev = new Chooser("uniqueprev");
+
+                    chooseNext.click();
+                    $(document).bind('keydown', function(e) {
+                        if (e.keyCode === 39) {
+                            chooseNext.click();
+                        } else if (e.keyCode === 37) {
+                            choosePrev.click();
+                        } else {
+                            return;
+                        }
+                    });
+
+                    console.log(jsonObjRes);
+                    drawImageGrid(jsonObjRes); // calling Image Grid Function here
+                    drawImageSlider(jsonObjRes);
+                }
+                catch(err){
+                    alert($.trim(data));
+                    //$(".statsWrapper").hide();
+                    $(".tabContentWrapper").hide();
+                }
+
+
+              },
+              error: function( data, textStatus, jqXHR) {
+                $("#busy-loader").hide();
+                var errMsg = "Some problem fetching the response, Please try again.";
+                alert(errMsg);
+              }
+            });
+          }
+       }
+    }
+
+
+
+
    $(function(){
-        var curJSONFileName= "timemapsumjson_"+collectionsList[parseInt(location.search.split("=")[1])-1].replace(/[^a-z0-9]/gi, '').toLowerCase();
-		$(".collection_name").html(collectionsList[parseInt(location.search.split("=")[1])-1]);
 
-         $.get(curJSONFileName+'.json',function(response) {
-			console.log(response);
-			var timelineData = response;
-			window.timeline = new Timeline(timelineData);
-            // place where the notch width is being reduced t0 2px.
-            $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
-            // Color is changed in the Array at 284 line as that is the right place
-           // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
-            new Zoom("in");
-			new Zoom("out");
-			var chooseNext = new Chooser("next");
-			var choosePrev = new Chooser("prev");
-			chooseNext.click();
-			$(document).bind('keydown', function(e) {
-				if (e.keyCode === 39) {
-					chooseNext.click();
-				} else if (e.keyCode === 37) {
-					choosePrev.click();
-				} else {
-					return;
-				}
-			});
-		},'json');
-    }); */
-
-   $(function(){
 
 
     $(".getJSONFromServer").click(function(event){
        event.preventDefault();
+       $(".tabContentWrapper").hide();
       var collectionIdentifer = $('.argumentsForm #collectionNo').val();
       if(collectionIdentifer == ""){
           collectionIdentifer = "all";
@@ -655,8 +739,10 @@ var jsonObjRes = {};
                           var memStatStr = jsonObjRes["totalmementos"]+" mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
                           $(".statsWrapper .collection_stats").html(memStatStr);
                           $(".statsWrapper").show();
+                          $(".getSummary").show();
                           $(".approxTimeShowingPTag").html('Takes about '+ jsonObjRes["timetowait"] +' minutes Approximately, Click on Continue button and please be patient');
                           $(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
+
                       }catch(err){
                           alert($.trim(data));
                           $(".statsWrapper").hide();
@@ -674,6 +760,23 @@ var jsonObjRes = {};
 
 
     $(".getSummary").click(function(event){
+
+      sessionStorage.setItem("summaryClicked", "true");
+      var curInputJsobObj = {};
+      curInputJsobObj["urir"]= $("#urirIP").val();
+      curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
+      curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
+      curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
+      curInputJsobObj["role"]= "summary";
+      sessionStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
+      window.location.reload();
+    });
+
+
+
+
+
+  /*  $(".getSummary").click(function(event){
 
             var collectionIdentifer = $('.argumentsForm #collectionNo').val();
             if(collectionIdentifer == ""){
@@ -765,8 +868,9 @@ var jsonObjRes = {};
                     alert(errMsg);
                   }
                 });
+
             }
 
-        });
+        });  */
     });
 })(window, document);
