@@ -57,23 +57,20 @@
 							<div class="form-group">
 								<label class="radio-inline"><input type="radio" name="primesource" checked="checked" value="archiveit">Archive-It</label>
 								<label class="radio-inline"><input type="radio" name="primesource" value="internetarchive">Internet Archive</label>
-		<!-- 						<label class="radio-inline"><input type="radio" name="optradio">Memgator</label>
-		 -->					</div>
+								<!-- <label class="radio-inline"><input type="radio" name="optradio">Memgator</label>
+								 -->
+						</div>
 							<div class="form-group pull-right">
 								<label for="collectionNo">Collection Identifier</label>
 							    <input class="form-control" type="number" title="Collection Identifier"  name="ci"  id="collectionNo" placeholder="1068">
-							    <button class="btn getJSONFromServer"> Go </button>
-
+							    <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
 							</div>
-
-
 
 							<div class="form-group pull-right" style="margin-right:1%;">
 								<div class="dropdown">
 								    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" title="Advanced Settings"><i class="fa fa-cog" aria-hidden="true"></i></button>
 								    <ul class="dropdown-menu">
 								      <li class="form-group" style="padding:6%;">
-
 								      	<label for="hammingDistance">Threshold:</label>
 							    		<input class="form-control" style="width:40%;" type="number" title="Uniqueness Threshold"  name="hdt"  id="hammingDistance" value="4" />
 								      </li>
@@ -82,17 +79,17 @@
 								</div>
 
 							</div>
-
-
-
-
-
 					</div>
 				</form>
 			</div>
 
 			<div class="statsWrapper row" style="display:none;">
-					<p> <b>Stats : </b><span class="collection_name"></span><span class="collection_stats"></span></p>
+				<div class="col-lg-9">
+					<p> <b>Stats : </b><span class="collection_stats"></span> &nbsp; <lable class="approxTimeShowingPTag" style="display:none"> </lable></P>
+				</div>
+				<div class="col-lg-3">
+				   <button class="btn getSummary" title="Displays visualizations after screenshots are captured"> Continue </button>
+				</div>
 			</div>
 
 			<div class="row tabContentWrapper" style="display: none;">
@@ -214,7 +211,7 @@
 					<p id="myContent"></p>
 
 					<div class="grid-container">
-						<ul class="rig columns-4">
+						<ul class="rig columns-3">
 						</ul>
 					</div>
 				  </div>
