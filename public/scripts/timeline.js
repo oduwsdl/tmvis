@@ -602,7 +602,7 @@ var jsonObjRes = {};
         $('.argumentsForm #urirIP').val(curInputObj["urir"]);
         $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
         $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
-        $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked");
+        $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true);
         role = curInputObj["role"];
 
 
