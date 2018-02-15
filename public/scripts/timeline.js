@@ -591,12 +591,13 @@ var jsonObjRes = {};
 
     // takes care of the drawbacks from timeline-setter resetting problem
     window.onload = function() {
+    //  window.location.href = window.location.origin;
       //alert("Windows loaded back");
      // $("#urirIP").val("hello.com");
-      if(sessionStorage.getItem("summaryClicked") == "true"){
-          $(".getSummary").hide();
-        sessionStorage.setItem("summaryClicked","false");
-        var curInputObj = JSON.parse(sessionStorage.getItem("curInputObj"));
+      if(localStorage.getItem("summaryClicked") == "true"){
+          //$(".getSummary").hide();
+        localStorage.setItem("summaryClicked","false");
+        var curInputObj = JSON.parse(localStorage.getItem("curInputObj"));
 
         $('.argumentsForm #urirIP').val(curInputObj["urir"]);
         $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
@@ -704,9 +705,8 @@ var jsonObjRes = {};
 
    $(function(){
 
-
-
-    $(".getJSONFromServer").click(function(event){
+     // following is commented to first stabilise the single step process
+  /*  $(".getJSONFromServer").click(function(event){
        event.preventDefault();
        $(".tabContentWrapper").hide();
       var collectionIdentifer = $('.argumentsForm #collectionNo').val();
@@ -756,27 +756,49 @@ var jsonObjRes = {};
                   }
               });
         }
-      });
+      }); */
 
+
+
+
+    // work around for the timeline setting stuff
+    //$(".getSummary").click(function(event){
 
     $(".getSummary").click(function(event){
 
-      sessionStorage.setItem("summaryClicked", "true");
-      var curInputJsobObj = {};
-      curInputJsobObj["urir"]= $("#urirIP").val();
-      curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
-      curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
-      curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
-      curInputJsobObj["role"]= "summary";
-      sessionStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
-      window.location.reload();
+      var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+      if(collectionIdentifer == ""){
+          collectionIdentifer = "all";
+      }
+      var hammingDistance = $('.argumentsForm #hammingDistance').val();
+      if(hammingDistance == ""){
+          hammingDistance = 4;
+      }
+      var role = "summary" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
+      if($(this).parents("body").find("form")[0].checkValidity()){
+          event.preventDefault();
+          localStorage.setItem("summaryClicked", "true");
+          var curInputJsobObj = {};
+          curInputJsobObj["urir"]= $("#urirIP").val();
+          curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
+          curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
+          curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
+          curInputJsobObj["role"]= "summary";
+          localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
+        //  window.location.reload();
+          window.location.href = window.location.origin;
+      }
+
+      // window.location.reload();
     });
 
 
 
 
 
-  /*  $(".getSummary").click(function(event){
+
+  /*  // following is uncomment to stablish the single step process..
+    $(".getSummary").click(function(event){
 
             var collectionIdentifer = $('.argumentsForm #collectionNo').val();
             if(collectionIdentifer == ""){

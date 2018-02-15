@@ -21,6 +21,8 @@
     	<script src="./scripts/imageGridScript.js"></script>
     	<script src="./scripts/timeline.js"></script>
     	<script src="./scripts/waitforimages.js"></script>
+			<!-- Priorirty is to stabilise the current single step build -->
+			<!-- <script src="./scripts/embedded.js"></script> -->
     	<script type="text/javascript">
     		$(document).ready(function(){
     			$("input[name='primesource']").click(function(){
@@ -63,7 +65,13 @@
 							<div class="form-group pull-right">
 								<label for="collectionNo">Collection Identifier</label>
 							    <input class="form-control" type="number" title="Collection Identifier"  name="ci"  id="collectionNo" placeholder="1068">
-							    <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
+
+									<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
+							    <!-- <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
+								-->
+									<button class="btn getSummary" title="Get number of unique mementos"> Go </button>
+
+
 							</div>
 
 							<div class="form-group pull-right" style="margin-right:1%;">
@@ -87,9 +95,10 @@
 				<div class="col-lg-9">
 					<p> <b>Stats : </b><span class="collection_stats"></span> &nbsp; <lable class="approxTimeShowingPTag" style="display:none"> </lable></P>
 				</div>
-				<div class="col-lg-3">
+
+				<!-- <div class="col-lg-3">
 				   <button class="btn getSummary" title="Displays visualizations after screenshots are captured"> Continue </button>
-				</div>
+				</div> -->
 			</div>
 
 			<div class="row tabContentWrapper" style="display: none;">
