@@ -1,5 +1,7 @@
 
 var jsonObjRes = {};
+
+
 (function(window, document, undefined){
 
 
@@ -704,6 +706,20 @@ var jsonObjRes = {};
 
 
    $(function(){
+
+
+     var source = new EventSource('/sse');
+           source.onmessage = function(e) {
+              console.log(e.data);
+              if( e.data === "readyToDisplay"){
+                alert(" Ready for display");
+                $(".getSummary").trigger("click");
+              }
+           };
+
+          //  source.ping = function(e) {
+          //    alert("Ready for the display");
+          //  };
 
      // following is commented to first stabilise the single step process
   /*  $(".getJSONFromServer").click(function(event){
