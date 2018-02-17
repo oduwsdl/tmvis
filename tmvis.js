@@ -889,7 +889,8 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
 
 TimeMap.prototype.writeJSONToCache = function (callback) {
   var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
-  cacheFile.writeFileContentsAsJSON(JSON.stringify(this.mementos))
+  //cacheFile.writeFileContentsAsJSON(JSON.stringify(this.mementos))
+  cacheFile.writeFileContentsAsJSON(this.mementos)
   console.log(JSON.stringify(this.mementos));
 
   if (callback) {
@@ -1035,7 +1036,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
   })
 
   var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
-  cacheFile.writeThumbSumJSONOPContentToFile(JSON.stringify(mementoJObjArrForTimeline))
+  cacheFile.writeThumbSumJSONOPContentToFile(mementoJObjArrForTimeline)
 
     if(!isResponseEnded){
       response.write(JSON.stringify(mementoJObjArrForTimeline))
