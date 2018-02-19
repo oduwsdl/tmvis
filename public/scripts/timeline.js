@@ -698,6 +698,7 @@ var jsonObjRes = {};
               },
               error: function( data, textStatus, jqXHR) {
                 $("#busy-loader").hide();
+                $('#serverStreamingModal').modal('hide');
                 var errMsg = "Some problem fetching the response, Please try again.";
                 alert(errMsg);
               }

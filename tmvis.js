@@ -763,7 +763,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
             // to respond to the client as the intermediate response, while the server processes huge loads
            if(t.mementos.length > 250){
 
-            constructSSE('Might aprroximately take  <h3>  ' + Math.ceil((t.mementos.length)/60)  +' Minutes ...<h3> to compute simhashes')
+            constructSSE('Might aprroximately take  <h3>  ' + Math.ceil((t.mementos.length)/(60*4))  +' Minutes ...<h3> to compute simhashes')
 
             // now that streaming is in place, dont bother about sending an intermediate response
             //  response.write('Request being processed, Please retry approximately after ( ' + Math.ceil(((t.mementos.length/50)  * 10)/60)  +' Minutes ) and request again...')
