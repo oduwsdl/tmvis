@@ -597,7 +597,7 @@ var jsonObjRes = {};
       //alert("Windows loaded back");
      // $("#urirIP").val("hello.com");
       if(localStorage.getItem("summaryClicked") == "true"){
-          //$(".getSummary").hide();
+        $(".getSummary").hide();
         localStorage.setItem("summaryClicked","false");
         var curInputObj = JSON.parse(localStorage.getItem("curInputObj"));
 
@@ -726,16 +726,19 @@ var jsonObjRes = {};
                   $('#serverStreamingModal .logsContent').empty();
                     $('#serverStreamingModal').modal('show');
               }
-              if( e.data === "readyToDisplay"){
+              else if( e.data === "readyToDisplay"){
               //  alert(" Ready for display");
                 $(".getSummary").trigger("click");
+              }
+              else if(e.data == "statssent"){
+                  $('#serverStreamingModal .logsContent').empty();
+                  $('#serverStreamingModal').modal('hide');
               }
               else{
                 $("#serverStreamingModal .logsContent").prepend(curLog);
                 // $('#serverStreamingModal .modal-body').animate({
                 //      scrollTop: $("#bottomModal").offset().top
                 //  }, 20);
-
               }
            };
 
@@ -744,7 +747,7 @@ var jsonObjRes = {};
           //  };
 
      // following is commented to first stabilise the single step process
-  /*  $(".getJSONFromServer").click(function(event){
+    $(".getJSONFromServer").click(function(event){
        event.preventDefault();
        $(".tabContentWrapper").hide();
       var collectionIdentifer = $('.argumentsForm #collectionNo').val();
@@ -765,6 +768,8 @@ var jsonObjRes = {};
             // var queryStr="?"+$(".argumentsForm input").serialize();
             var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
             $("#busy-loader").show();
+            $('#serverStreamingModal .logsContent').empty();
+              $('#serverStreamingModal').modal('show');
 
               $.ajax({
                   type: "GET",
@@ -778,23 +783,34 @@ var jsonObjRes = {};
                           $(".statsWrapper .collection_stats").html(memStatStr);
                           $(".statsWrapper").show();
                           $(".getSummary").show();
-                          $(".approxTimeShowingPTag").html('Takes about '+ jsonObjRes["timetowait"] +' minutes Approximately, Click on Continue button and please be patient');
+
+                          if(jsonObjRes["timetowait"] == 0){
+                            $(".approxTimeShowingPTag").html('Takes no time as the images are already captured, Click on Continue button');
+
+                          }else{
+                            $(".approxTimeShowingPTag").html('Takes about '+ jsonObjRes["timetowait"] +' minutes Approximately, Click on Continue button and please be patient');
+                          }
                           $(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
+
 
                       }catch(err){
                           alert($.trim(data));
+                          $('#serverStreamingModal .logsContent').empty();
+                            $('#serverStreamingModal').modal('hide');
                           $(".statsWrapper").hide();
                           $(".tabContentWrapper").hide();
                       }
                   },
                   error: function( data, textStatus, jqXHR) {
                     $("#busy-loader").hide();
+                    $('#serverStreamingModal .logsContent').empty();
+                      $('#serverStreamingModal').modal('hide');
                     var errMsg = "Some problem fetching the response, Please try again.";
                     alert(errMsg);
                   }
               });
         }
-      }); */
+      });
 
 
 
@@ -831,106 +847,5 @@ var jsonObjRes = {};
     });
 
 
-
-
-
-
-  /*  // following is uncomment to stablish the single step process..
-    $(".getSummary").click(function(event){
-
-            var collectionIdentifer = $('.argumentsForm #collectionNo').val();
-            if(collectionIdentifer == ""){
-                collectionIdentifer = "all";
-            }
-            var hammingDistance = $('.argumentsForm #hammingDistance').val();
-            if(hammingDistance == ""){
-                hammingDistance = 4;
-            }
-            var role = "summary" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
-            if($(this).parents("body").find("form")[0].checkValidity()){
-                event.preventDefault();
-                var ENDPOINT = "/alsummarizedtimemap";
-                //var SERVERHOST = "http://tmvis.cs.odu.edu/"; // to hit the hosted server
-               //var SERVERHOST = "http://tmvis.cs.odu.edu/alsummarizedtimemap"; // to hit the hosted server
-              // var LOCALHOST = "http://localhost:3000/"; // to hit the local one
-               // var queryStr="?"+$(".argumentsForm input").serialize();
-               var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
-                $("#busy-loader").show();
-
-                $.ajax({
-                  type: "GET",
-                  url: address, // uncomment this for deployment
-                  dataType: "text",
-                  success: function( data, textStatus, jqXHR) {
-                      $("#busy-loader").hide();
-                    try{
-                        data = $.trim(data).split("...");
-                        if(data.length > 1){
-                            if(data [1] == ""){
-                                data = data [0];
-                            }else{
-                                data = data [1];
-                            }
-                        }
-                        else{
-                            data = data [0];
-                        }
-
-                        jsonObjRes= $.parseJSON(data);
-
-                        // following code segment makes the screenshot URI got with event_html | event_html_similarto properties to a html fragment
-                        jsonObjRes[0].event_html= "<img src='"+jsonObjRes[0].event_html+"' width='300px' />";
-                        for(var i=1;i< jsonObjRes.length;i++){
-                            jsonObjRes[i].event_html= "<img src='"+jsonObjRes[i].event_html+"' width='300px' />";
-                            jsonObjRes[i].event_html_similarto= "<img src='"+jsonObjRes[i].event_html_similarto+"' width='300px' />";
-                        }
-
-
-                        $(".statsWrapper").show();
-                         window.timeline = new Timeline(jsonObjRes);
-                        // place where the notch width is being reduced t0 2px.
-                        $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
-                        // Color is changed in the Array at 284 line as that is the right place
-                       // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
-                        new Zoom("in");
-                        new Zoom("out");
-                        var chooseNext = new Chooser("next");
-                        var choosePrev = new Chooser("prev");
-                        var chooseUniqueNext = new Chooser("uniquenext");
-                        var chooseUniquePrev = new Chooser("uniqueprev");
-
-                        chooseNext.click();
-                        $(document).bind('keydown', function(e) {
-                            if (e.keyCode === 39) {
-                                chooseNext.click();
-                            } else if (e.keyCode === 37) {
-                                choosePrev.click();
-                            } else {
-                                return;
-                            }
-                        });
-
-                        console.log(jsonObjRes);
-                        drawImageGrid(jsonObjRes); // calling Image Grid Function here
-                        drawImageSlider(jsonObjRes);
-                    }
-                    catch(err){
-                        alert($.trim(data));
-                        //$(".statsWrapper").hide();
-                        $(".tabContentWrapper").hide();
-                    }
-
-
-                  },
-                  error: function( data, textStatus, jqXHR) {
-                    $("#busy-loader").hide();
-                    var errMsg = "Some problem fetching the response, Please try again.";
-                    alert(errMsg);
-                  }
-                });
-
-            }
-
-        });  */
-    });
+  });
 })(window, document);
