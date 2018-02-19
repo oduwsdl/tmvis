@@ -104,12 +104,38 @@
 
 			<div class="row tabContentWrapper" style="display: none;">
 				<ul class="nav nav-tabs">
-				  <li class="active"><a data-toggle="tab" href="#timeLine">TimeLine</a></li>
+					<li class="active"><a data-toggle="tab" href="#imageGrid">Grid</a></li>
 				  <li><a data-toggle="tab" href="#imageSlider">Slider</a></li>
-				  <li><a data-toggle="tab" href="#imageGrid">Grid</a></li>
+					<li ><a data-toggle="tab" href="#timeLine">TimeLine</a></li>
+
 				</ul>
 
 				<div class="tab-content">
+
+					<div id="imageGrid" class="tab-pane fade">
+						<p id="myContent"></p>
+						<div class="grid-container">
+							<ul class="rig columns-3">
+							</ul>
+						</div>
+					</div>
+
+					<div id="imageSlider" class="tab-pane fade">
+				  	<div class="imageslider_wrapper content_focusedWrapper" style="margin-top: 1%;">
+				    	<h2>Swipe over the images to move through time</h2>
+						<h2>Click on an image to view the memento</h2>
+						<div class="buttonsWrapperSlider">
+						<button type="button" class="btn" id='play'>Play</button>
+						<button type="button" class="btn" id='pause'>Pause</button>
+						&nbsp;<label> <input type="checkbox" class="playinloop" value=""> Play In Loop</label>
+						</div>
+							<div class="gridImagePlusContentWrapper" style="margin-left: 5%;">
+								<img id="myImage" class="heightSet"/>
+								<p id="myContent"></p>
+							</div>
+				    </div>
+				  </div>
+
 				  <div id="timeLine" class="tab-pane fade in active">
 				   	<div class="timeline_Wrapper content_focusedWrapper">
 						<div class="article">
@@ -201,30 +227,8 @@
 						</div>
 					</div>
 				  </div>
-				  <div id="imageSlider" class="tab-pane fade">
-				  	<div class="imageslider_wrapper content_focusedWrapper" style="margin-top: 1%;">
-				    	<h2>Swipe over the images to move through time</h2>
-						<h2>Click on an image to view the memento</h2>
-						<div class="buttonsWrapperSlider">
-						<button type="button" class="btn" id='play'>Play</button>
-						<button type="button" class="btn" id='pause'>Pause</button>
-						&nbsp;<label> <input type="checkbox" class="playinloop" value=""> Play In Loop</label>
-						</div>
-							<div class="gridImagePlusContentWrapper" style="margin-left: 5%;">
-								<img id="myImage" class="heightSet"/>
-								<p id="myContent"></p>
-							</div>
-				    </div>
-				  </div>
-				  <div id="imageGrid" class="tab-pane fade">
 
-					<p id="myContent"></p>
 
-					<div class="grid-container">
-						<ul class="rig columns-3">
-						</ul>
-					</div>
-				  </div>
 				</div>
 			</div>
 

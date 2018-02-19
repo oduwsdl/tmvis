@@ -633,6 +633,7 @@ var jsonObjRes = {};
               type: "GET",
               url: address, // uncomment this for deployment
               dataType: "text",
+               timeout: 0,
               success: function( data, textStatus, jqXHR) {
                   $("#busy-loader").hide();
                   $('#serverStreamingModal').modal('hide');
@@ -689,7 +690,9 @@ var jsonObjRes = {};
                     drawImageSlider(jsonObjRes);
                 }
                 catch(err){
-                    alert($.trim(data));
+                  alert("Some problem fetching the response, Please try again.");
+                  $("#busy-loader").hide();
+                  $('#serverStreamingModal').modal('hide');
                     //$(".statsWrapper").hide();
                     $(".tabContentWrapper").hide();
                 }
@@ -697,9 +700,10 @@ var jsonObjRes = {};
 
               },
               error: function( data, textStatus, jqXHR) {
+
+                var errMsg = "Some problem fetching the response, Please try again.";
                 $("#busy-loader").hide();
                 $('#serverStreamingModal').modal('hide');
-                var errMsg = "Some problem fetching the response, Please try again.";
                 alert(errMsg);
               }
             });
