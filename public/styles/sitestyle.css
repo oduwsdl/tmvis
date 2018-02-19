@@ -148,3 +148,9 @@
 	width: 300px !important;
 	height: 200px !important;
 }
+
+#serverStreamingModal .modal-body {
+	max-height: 800px !important;
+    overflow-y: scroll;
+		overflow-x: hidden;
+}

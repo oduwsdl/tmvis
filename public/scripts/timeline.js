@@ -626,6 +626,8 @@ var jsonObjRes = {};
            // var queryStr="?"+$(".argumentsForm input").serialize();
            var address= ENDPOINT+"/"+curInputObj["primesource"]+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
             $("#busy-loader").show();
+            $('#serverStreamingModal .logsContent').empty();
+            $('#serverStreamingModal').modal('show');
 
             $.ajax({
               type: "GET",
@@ -633,6 +635,8 @@ var jsonObjRes = {};
               dataType: "text",
               success: function( data, textStatus, jqXHR) {
                   $("#busy-loader").hide();
+                  $('#serverStreamingModal').modal('hide');
+
                 try{
                     data = $.trim(data).split("...");
                     if(data.length > 1){
@@ -711,9 +715,22 @@ var jsonObjRes = {};
      var source = new EventSource('/sse');
            source.onmessage = function(e) {
               console.log(e.data);
+              var curLog = "<p>"+e.data+"</p>";
+
+              if(e.data === "streamingStarted"){
+                  $('#serverStreamingModal .logsContent').empty();
+                    $('#serverStreamingModal').modal('show');
+              }
               if( e.data === "readyToDisplay"){
-                alert(" Ready for display");
+              //  alert(" Ready for display");
                 $(".getSummary").trigger("click");
+              }
+              else{
+                $("#serverStreamingModal .logsContent").prepend(curLog);
+                // $('#serverStreamingModal .modal-body').animate({
+                //      scrollTop: $("#bottomModal").offset().top
+                //  }, 20);
+
               }
            };
 

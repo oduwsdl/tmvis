@@ -216,6 +216,7 @@ function sendSSE(req, res,data) {
   //   constructSSE( data);
   // }, 5000);
   constructSSE('Started streaming the events happening at the server side...');
+
 }
 
 function constructSSE(data) {
@@ -257,6 +258,7 @@ function PublicEndpoint () {
   * @param response Currently active HTTP response to the client used to return information to the client based on the request
   */
   this.respondToClient = function (request, response) {
+    constructSSE("streamingStarted");
      isResponseEnded = false //resetting the responseEnded indicator
     response.clientId = Math.random() * 101 | 0  // Associate a simple random integer to the user for logging (this is not scalable with the implemented method)
     var headers = {}
@@ -629,7 +631,7 @@ Memento.prototype.setSimhash = function (callback) {
 
           var retStr = getHexString(sh)
 
-          if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302) {
+          if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302 || (retStr == null)) {
             // Normalize so not undefined
             retStr = Memento.prototype.simhashIndicatorForHTTP302
 
@@ -720,6 +722,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
 
       var req = http.request(options, function (res) {
          ConsoleLogIfRequired("--ByMahee-- Inside the http request call back success, request is made on the following obect:")
+        constructSSE('streamingStarted')
         constructSSE('Writing the data response into buffer..')
         // ConsoleLogIfRequired(options);
         // ConsoleLogIfRequired("----------------");
@@ -754,15 +757,21 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
                 return
             }
 
-            // to respond to the client as the intermediate response, while the server processes huge loads
-           if(t.mementos.length > 250){
-             response.write('Request being processed, Please retry approximately after ( ' + Math.ceil(((t.mementos.length/50)  * 10)/60)  +' Minutes ) and request again...')
-             response.end()
-             isResponseEnded = true
-           }
-
             ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
             constructSSE('Timemap fetched has a total of '+t.mementos.length + ' mementos.')
+
+            // to respond to the client as the intermediate response, while the server processes huge loads
+           if(t.mementos.length > 250){
+
+            constructSSE('Might aprroximately take  <h3>  ' + Math.ceil((t.mementos.length)/60)  +' Minutes ...<h3> to compute simhashes')
+
+            // now that streaming is in place, dont bother about sending an intermediate response
+            //  response.write('Request being processed, Please retry approximately after ( ' + Math.ceil(((t.mementos.length/50)  * 10)/60)  +' Minutes ) and request again...')
+            //  response.end()
+            //  isResponseEnded = true
+           }
+
+
             callback('')
           }else{
             ConsoleLogIfRequired('The page you requested has not been archived.')
@@ -896,7 +905,7 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
   var arrayOfSetSimhashFunctions = []
 
   // the way to get a damper, just 7 requests at a time.
-  async.eachLimit(this.mementos,7, function(curMemento, callback){
+  async.eachLimit(this.mementos,5, function(curMemento, callback){
     curMemento.setSimhash(callback)
   //  ConsoleLogIfRequired(curMemento)
   }, function(err) {
@@ -921,7 +930,7 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
          * doing the same: just changed the above condition as to follow
         */
 
-        if(theTimeMap.mementos[i].simhash === Memento.prototype.simhashIndicatorForHTTP302){
+        if(theTimeMap.mementos[i].simhash === Memento.prototype.simhashIndicatorForHTTP302 || theTimeMap.mementos[i].simhash  == null){
           theTimeMap.mementos.splice(i, 1)
           mementosRemoved++
         }
@@ -1269,10 +1278,12 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
   constructSSE('Started the process of capturing the screenshots...')
 
   if (noOfThumbnailsSelectedToBeCaptured >= 2) {
-    constructSSE('Might approximately take ( ' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)  +' Minutes ). Please be patient..')
-    response.write('Request being processed, Please retry approximately after ( ' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)  +' Minutes ) and request again...')
-    response.end()
-    isResponseEnded = true
+    constructSSE('Might approximately take <h3>' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)  +' Minutes <h3> to capture screen shots. Please be patient....')
+
+    // now that streaming is in place, dont bother about sending an intermediate response
+    // response.write('Request being processed, Please retry approximately after ( ' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)  +' Minutes ) and request again...')
+    // response.end()
+    // isResponseEnded = true
   }
 
   async.eachLimit(
@@ -1597,7 +1608,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
   noOfUniqueMementos = copyOfMementos.length
   totalMementos = this.mementos.length;
   constructSSE('Completed filtering...')
-  constructSSE('Out of the total '+totalMementos+' eixisting mementos,'+noOfUniqueMementos +' mementos are considered to be unique...')
+  constructSSE('Out of the total <h3>'+totalMementos+'</h3> eixisting mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique...')
   //ConsoleLogIfRequired((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
   copyOfMementos = null
 
