@@ -12,11 +12,22 @@ Archives"](http://www.cs.odu.edu/~mln/pubs/ecir-2014/ecir-2014.pdf) for the Web 
 
 To execute the code, run `node tmvis.js`.
 
-To query the server instance generated using your browser visit `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/http://4genderjustice.org/`, which has the attributes path as `primesource/ci/URI-R` substitute the URI-R to request a different site's summarization. The additional parameters of `ci` is used to specify the collection identifier if not specified the argument 'all' is used, `primesource` gets the value of 'archiveIt' or 'internetarchive' as to let the service know which is the primary source.
+To query the server instance generated using your browser visit `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/[stats | summary]/http://4genderjustice.org/`, which has the attributes path as `primesource/ci/role/URI-R` substitute the URI-R to request a different site's summarization. The additional parameters of role is used to specify the values 'stats' or 'summary', stats: for getting the no of unique mementos and summary: to get the the unique mementos along with the screenshots captured,`ci` is used to specify the collection identifier if not specified the argument 'all' is used, `primesource` gets the value of 'archiveIt' or 'internetarchive' as to let the service know which is the primary source.
 
 ### Example URIs
 
-* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/http://4genderjustice.org/`
+* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/stats/http://4genderjustice.org/`
+* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/summary/http://4genderjustice.org/`
+
+
+## Running as a Docker Container (Non development mode: Recommended for naive users)
+Follow the following steps:
+```
+$ git clone https://github.com/mgunn001/tmvis.git
+$ cd tmvis
+$ docker image build -t timemapvis .
+$ docker container run -it --rm -p 3000:3000 timemapvis node tmvis.js
+```
 
 
 ## Running as a Docker Container (experimental)
@@ -24,7 +35,6 @@ To query the server instance generated using your browser visit `http://localhos
 Running the server in a [Docker](https://www.docker.com/) container can make the process of dependency management easier. The code is shipped with a `Dockerfile` to build a Docker image that will run the service when started. This document assumes that you have Docker setup already, if not then follow the [official guide](https://docs.docker.com/installation/).
 
 ### Building Docker Image
-
 Clone the repository and change working directory (if not already) then build the image.
 
 ```
@@ -36,9 +46,9 @@ $ docker image build -t timemapvis .
 In the above command `timemapvis` is the name of the image which can be anything, but the same needs to be used when running the container instance.
 
 ### Running Docker Container
-
 ```
-docker run -it --rm -v "$PWD":/app -p 3000:3000  timemapvis bash
+docker run -it --rm -v "$PWD":/app -p 3000:3000 --user=$(id -u):$(id -g) timemapvis bash
+
 ```
 
 In the above command the container is running in detached mode and can be accessed from outside on port `3000` at http://localhost:3000/. If you want to run the service on a different port, say `80` then change `-p 3000:3000` to `-p 80:3000`.
@@ -53,21 +63,11 @@ In case if you want to make changes in the `tmvis` code itself, you might want t
 $ git clone https://github.com/mgunn001/tmvis.git
 $ cd tmvis
 $ docker image build -t timemapvis .
-$ docker container run -it --rm -v "$PWD":/app timemapvis npm install
-$ docker container run -it --rm -v "$PWD":/app -p 3000:3000 timemapvis
+$ docker container run -it --rm -v "$PWD":/app --user=$(id -u):$(id -g) timemapvis npm install
+$ docker container run -it --rm -v "$PWD":/app -p 3000:3000 --user=$(id -u):$(id -g) timemapvis
 ```
 
 Once the image is built and dependencies are installed locally under the `node_modules` directory of the local clone, only the last command would be needed for continuous development. Since the default container runs under the `root` user, there might be permission related issues on the `npm install` step. If so, then try to manually create the `node_modules` directory and change its permissions to world writable (`chmod -R a+w node_modules`) then run the command to install dependencies again.
-
-### Running via Docker Compose
-
-An alternate way of running the service container is using [Docker Compose](https://docs.docker.com/compose/). We have provided a default `docker-compose.yml` file to build and run the container easily. Provided that the Docker daemon is running and the Docker Compose binary is installed, running following command from the directory where this repository is checked out will build an image if necessary and spin a container.
-
-```
-$ docker-compose up -d
-```
-
-The `docker-compose.yml` file has port mapping as described in the previous section. Additionally it also makes the generated thumbnail persistent on the host machine in the `thumbnails` directory under this checked out code directory. Please feel free to modify or inherit from the `docker-compose.yml` file according to your needs.
 
 
 ### Regarding License
@@ -77,21 +77,43 @@ Though GPL Licensing was used for base (https://github.com/machawk1/ArchiveThumb
 
 ### Usage of the service
 
-Running this service gives provides an user with the array of JSON object as the response (webservice model), which then has to be visualized with the UI tool deployed at http://www.cs.odu.edu/~mgunnam/TimeMapVisualisationUI/UIInitialDraft.html for which the code is available at https://github.com/mgunn001/TimeMapVisualisationUI
+Running this service gives provides an user with the array of JSON object as the response (webservice model), which then has to be visualized with the UI tool deployed at http://tmvis.cs.odu.edu/ for which the code is available at https://github.com/mgunn001/tmvis/ under public folder
 
-## Request format
 
+## Request format (Role -> stats)
 ```
-curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/http://4genderjustice.org/
+curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/stats/http://4genderjustice.org/
 
 Mapping of attributes of URI to the values are as follows:
   primesource -> archiveIt
+  hammingdistance -> 4
+  role -> stats
   collection Identifier -> 1068
   URI-R under request -> http://4genderjustice.org/
 ```
 
 ## Response format
+```
+{
+  "totalmementos": 21,
+  "unique": 2,
+  "timetowait": 0
+}
+```
 
+## Request format (Role -> summary)
+```
+curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/summary/http://4genderjustice.org/
+
+Mapping of attributes of URI to the values are as follows:
+  primesource -> archiveIt
+  hammingdistance -> 4
+  role -> summary
+  collection Identifier -> 1068
+  URI-R under request -> http://4genderjustice.org/
+```
+
+## Response format
 ```
 [
   {

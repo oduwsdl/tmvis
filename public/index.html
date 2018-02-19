@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 	<head>
 		<title>UI Initial Draft</title>
@@ -21,6 +22,8 @@
     	<script src="./scripts/imageGridScript.js"></script>
     	<script src="./scripts/timeline.js"></script>
     	<script src="./scripts/waitforimages.js"></script>
+			<!-- Priorirty is to stabilise the current single step build -->
+			<!-- <script src="./scripts/embedded.js"></script> -->
     	<script type="text/javascript">
     		$(document).ready(function(){
     			$("input[name='primesource']").click(function(){
@@ -57,23 +60,26 @@
 							<div class="form-group">
 								<label class="radio-inline"><input type="radio" name="primesource" checked="checked" value="archiveit">Archive-It</label>
 								<label class="radio-inline"><input type="radio" name="primesource" value="internetarchive">Internet Archive</label>
-		<!-- 						<label class="radio-inline"><input type="radio" name="optradio">Memgator</label>
-		 -->					</div>
+								<!-- <label class="radio-inline"><input type="radio" name="optradio">Memgator</label>
+								 -->
+						</div>
 							<div class="form-group pull-right">
 								<label for="collectionNo">Collection Identifier</label>
 							    <input class="form-control" type="number" title="Collection Identifier"  name="ci"  id="collectionNo" placeholder="1068">
-							    <button class="btn getJSONFromServer"> Go </button>
+
+									<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
+							    <!-- <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
+								-->
+									<button class="btn getSummary" title="Get number of unique mementos"> Go </button>
+
 
 							</div>
-
-
 
 							<div class="form-group pull-right" style="margin-right:1%;">
 								<div class="dropdown">
 								    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" title="Advanced Settings"><i class="fa fa-cog" aria-hidden="true"></i></button>
 								    <ul class="dropdown-menu">
 								      <li class="form-group" style="padding:6%;">
-
 								      	<label for="hammingDistance">Threshold:</label>
 							    		<input class="form-control" style="width:40%;" type="number" title="Uniqueness Threshold"  name="hdt"  id="hammingDistance" value="4" />
 								      </li>
@@ -82,27 +88,54 @@
 								</div>
 
 							</div>
-
-
-
-
-
 					</div>
 				</form>
 			</div>
 
 			<div class="statsWrapper row" style="display:none;">
-					<p> <b>Stats : </b><span class="collection_name"></span><span class="collection_stats"></span></p>
+				<div class="col-lg-9">
+					<p> <b>Stats : </b><span class="collection_stats"></span> &nbsp; <lable class="approxTimeShowingPTag" style="display:none"> </lable></P>
+				</div>
+
+				<!-- <div class="col-lg-3">
+				   <button class="btn getSummary" title="Displays visualizations after screenshots are captured"> Continue </button>
+				</div> -->
 			</div>
 
 			<div class="row tabContentWrapper" style="display: none;">
 				<ul class="nav nav-tabs">
-				  <li class="active"><a data-toggle="tab" href="#timeLine">TimeLine</a></li>
+					<li class="active"><a data-toggle="tab" href="#imageGrid">Grid</a></li>
 				  <li><a data-toggle="tab" href="#imageSlider">Slider</a></li>
-				  <li><a data-toggle="tab" href="#imageGrid">Grid</a></li>
+					<li ><a data-toggle="tab" href="#timeLine">TimeLine</a></li>
+
 				</ul>
 
 				<div class="tab-content">
+
+					<div id="imageGrid" class="tab-pane fade">
+						<p id="myContent"></p>
+						<div class="grid-container">
+							<ul class="rig columns-3">
+							</ul>
+						</div>
+					</div>
+
+					<div id="imageSlider" class="tab-pane fade">
+				  	<div class="imageslider_wrapper content_focusedWrapper" style="margin-top: 1%;">
+				    	<h2>Swipe over the images to move through time</h2>
+						<h2>Click on an image to view the memento</h2>
+						<div class="buttonsWrapperSlider">
+						<button type="button" class="btn" id='play'>Play</button>
+						<button type="button" class="btn" id='pause'>Pause</button>
+						&nbsp;<label> <input type="checkbox" class="playinloop" value=""> Play In Loop</label>
+						</div>
+							<div class="gridImagePlusContentWrapper" style="margin-left: 5%;">
+								<img id="myImage" class="heightSet"/>
+								<p id="myContent"></p>
+							</div>
+				    </div>
+				  </div>
+
 				  <div id="timeLine" class="tab-pane fade in active">
 				   	<div class="timeline_Wrapper content_focusedWrapper">
 						<div class="article">
@@ -112,7 +145,9 @@
 										<a href="#" class="timeline_zoom timeline_zoom_in"><span class="timeline_controls_inner_text zoom_inner_text">+</i></span></a>
 										<a href="#" class="timeline_zoom timeline_zoom_out"><span class="timeline_controls_inner_text zoom_inner_text">-</span></a>
 										&nbsp;&nbsp;&nbsp;&nbsp;
-										<a href="#" class="timeline_choose timeline_choose_prev"><span class="timeline_controls_inner_text">Previous</span></a>
+										<a href="#" class="timeline_choose timeline_choose_prev"><span class="timeline_controls_inner_text" title="Previous">Prev</span></a>
+										<a href="#" class="timeline_choose timeline_choose_uniqueprev"><span class="timeline_controls_inner_text" title="Unique Previous">Unique Prev</span></a>
+										<a href="#" class="timeline_choose timeline_choose_uniquenext"><span class="timeline_controls_inner_text" title="Unique Next">Unique Next</span></a>
 										<a href="#" class="timeline_choose timeline_choose_next"><span class="timeline_controls_inner_text">Next</span></a>
 									</div>
 									<div class="series_nav_container"></div>
@@ -192,35 +227,36 @@
 						</div>
 					</div>
 				  </div>
-				  <div id="imageSlider" class="tab-pane fade">
-				  	<div class="imageslider_wrapper content_focusedWrapper" style="margin-top: 1%;">
-				    	<h2>Swipe over the images to move through time</h2>
-						<h2>Click on an image to view the memento</h2>
-						<div class="buttonsWrapperSlider">
-						<button type="button" class="btn" id='play'>Play</button>
-						<button type="button" class="btn" id='pause'>Pause</button>
-						<label> <input type="checkbox" class="playinloop" value="">loop</label>
-						</div>
-						<img id="myImage" class="heightSet"/>
-						<p id="myContent"></p>
-				    </div>
-				  </div>
-				  <div id="imageGrid" class="tab-pane fade">
 
-					<p id="myContent"></p>
 
-					<div class="grid-container">
-						<ul class="rig columns-4">
-						</ul>
-					</div>
-				  </div>
 				</div>
 			</div>
 
 		</div>
 
-		<div id="busy-loader" style="min-width:90%; display: none;">
+		<div id="busy-loader" style="min-width:90%; display: none; z-index:1999">
 		</div>
+
+
+		<!-- Modal -->
+		<div class="modal fade" id="serverStreamingModal" tabindex="-1" role="dialog"  aria-hidden="true">
+		  <div class="modal-dialog modal-lg" role="document">
+		    <div class="modal-content">
+		      <!-- <div class="modal-header">
+		        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+		      </div> -->
+		      <div class="modal-body">
+						<div class="logsContent"></div>
+						<div id="bottomModal">
+						</div>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+
 
 
 	</body>

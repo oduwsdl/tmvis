@@ -12,15 +12,20 @@
     "colors": "^1.1.2",
     "es6-promise": "*",
     "express": "*",
+    "fs-extra": "*",
+    "image-watermark": "0.0.7",
     "imagemagick": "*",
+    "log": "^1.4.0",
     "minimist": "*",
     "mkdir-recursive": "*",
+    "morgan": "^1.9.0",
     "node-phantom": "*",
-    "puppeteer": "^1.0.0",
+    "nodemon": "^1.14.12",
+    "puppeteer": "*",
     "rimraf": "*",
     "simhash": "*",
     "validator": "*",
     "webshot": "*",
-    "puppeteer":"*"
+    "write-json-file": "^2.3.0"
   }
 }

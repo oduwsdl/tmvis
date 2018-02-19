@@ -338,7 +338,7 @@ function PublicEndpoint () {
 
     // TODO: optimize this out of the conditional so the functions needed for each strategy are self-contained (and possibly OOP-ified)
     if (strategy === 'alSummarization') {
-      var cacheFile = new SimhashCacheFile( primeSource+"_"+collectionIdentifier+"_"+uriR,isDebugMode)
+      var cacheFile = new SimhashCacheFile( primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+uriR,isDebugMode)
       cacheFile.path += '.json'
       ConsoleLogIfRequired('Checking if a cache file exists for ' + query['urir'] + '...')
     //  ConsoleLogIfRequired('cacheFile: '+JSON.stringify(cacheFile))
@@ -926,7 +926,7 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
   ConsoleLogIfRequired(strToWrite)
   ConsoleLogIfRequired("-------------------------------------------------------------------------")
 
-  var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
+  var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.replaceContentWith(strToWrite)
 
 
@@ -936,8 +936,29 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
 }
 
 TimeMap.prototype.writeJSONToCache = function (callback) {
-  var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
-  cacheFile.writeFileContentsAsJSON(JSON.stringify(this.mementos))
+  var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
+
+  /*// this following block must be commented after use, the purpose is to manually hand pick one memento per year and picked ones stay in the following array
+  var pickedMementos = [ '20080329234635id_','20090101145747id_','20100327184104id_','20110202145110id_','20121017105642id_', '20130313164412id_', '20140531083303id_', '20151217174112id_','20160712045817id_','20170119114915id_','20180120202944id_'];
+  for (var m = 0; m < this.mementos.length; m++) {
+      var curMemento = this.mementos[m];
+      for(var i = 0; i < pickedMementos.length; i++ ){
+        if(curMemento.uri.indexOf(pickedMementos[i]) > 0){
+            curMemento.hammingDistance = 4
+          curMemento.screenshotURI = 'timemapSum_httpwebarchiveorgweb'+pickedMementos[i].split("id_")[0] +'httpwwwnehgov80odh.png'
+          break
+        }else{
+          curMemento.hammingDistance = 0
+          curMemento.screenshotURI = null
+        }
+      }
+      this.mementos[m]  = curMemento;
+  } */
+
+  cacheFile.writeFileContentsAsJSON(this.mementos)
+
+
+
   console.log(JSON.stringify(this.mementos));
   if (callback) {
     callback('')
@@ -1072,8 +1093,8 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
     mementoJObjArrForTimeline.push(mementoJObj_ForTimeline)
   })
 
-  var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
-  cacheFile.writeThumbSumJSONOPContentToFile(JSON.stringify(mementoJObjArrForTimeline))
+  var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
+  cacheFile.writeThumbSumJSONOPContentToFile(mementoJObjArrForTimeline)
 
     if(!isResponseEnded){
       response.write(JSON.stringify(mementoJObjArrForTimeline))
