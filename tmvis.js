@@ -174,12 +174,8 @@ function main () {
 
     //This route is just for testing, testing the SSE
      app.get('/sse', (request, response) => {
-
-            var headers = {}
-            // IE8 does not allow domains to be specified, just the *
-            headers['Access-Control-Allow-Origin'] = '*';
-            sendSSE(request, response, "Hello");
-      })
+            sendSSE(request, response);
+    })
 
 
 
@@ -203,7 +199,7 @@ function main () {
 
 // SSE Related.
 
-function sendSSE(req, res,data) {
+function sendSSE(req, res) {
   streamingRes = res;
   streamingRes.writeHead(200, {
     'Content-Type': 'text/event-stream',
@@ -216,7 +212,6 @@ function sendSSE(req, res,data) {
   //   constructSSE( data);
   // }, 5000);
   constructSSE('Started streaming the events happening at the server side...');
-
 }
 
 function constructSSE(data) {
@@ -241,16 +236,12 @@ function constructSSEForFinsh(data) {
 */
 function PublicEndpoint () {
   var theEndPoint = this
-
-
   // Parameters supplied for means of access:
   this.validSource = ['archiveit', 'internetarchive'];
 
   this.isAValidSourceParameter = function (accessParameter) {
     return theEndPoint.validSource.indexOf(accessParameter) > -1
   }
-
-
 
   /**
   * Handle an HTTP request and respond appropriately
@@ -631,7 +622,8 @@ Memento.prototype.setSimhash = function (callback) {
 
           var retStr = getHexString(sh)
 
-          if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302 || (retStr == null)) {
+          //|| (retStr == null)
+          if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302 || retStr == null) {
             // Normalize so not undefined
             retStr = Memento.prototype.simhashIndicatorForHTTP302
 
@@ -1254,13 +1246,6 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
 
   // to respond to the client as the intermediate response, while the server processes huge loads
   var noOfThumbnailsSelectedToBeCaptured = getNotExistingCapturesCount(self.mementos.filter(criteria))
-  // console.log("--------------------------------------------------------")
-  // console.log("--------------------------------------------------------")
-  // console.log("--------------------------------------------------------")
-  // console.log("noOfThumbnailsSelectedToBeCaptured:"+noOfThumbnailsSelectedToBeCaptured)
-  // console.log("--------------------------------------------------------")
-  // console.log("--------------------------------------------------------")
-  // console.log("--------------------------------------------------------")
 
   // breaking the control and returning the stats if the the request is made for status
   if(role == "stats"){
@@ -1269,6 +1254,9 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
        'unique': noOfUniqueMementos,
        'timetowait': Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)
     }
+    constructSSE('Stats built and ready to serve...')
+    constructSSE('statssent')
+
     response.write(JSON.stringify(statsObj))
     response.end()
     return
