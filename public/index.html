@@ -29,10 +29,9 @@
     			$("input[name='primesource']").click(function(){
 	    			if($(this).val() == "internetarchive"){
 	    				$("#collectionNo").attr("disabled",true);
-
+							$("#collectionNo").val("");
 	    			}else{
 	    				$("#collectionNo").removeAttr("disabled");
-
 	    			}
 
 				});
@@ -70,7 +69,7 @@
 									<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
 							    <!-- <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
 								-->
-									<button class="btn getSummary" title="Get number of unique mementos"> Go </button>
+									<button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
 
 
 							</div>
@@ -97,9 +96,9 @@
 					<p> <b>Stats : </b><span class="collection_stats"></span> &nbsp; <lable class="approxTimeShowingPTag" style="display:none"> </lable></P>
 				</div>
 
-				<!-- <div class="col-lg-3">
+				<div class="col-lg-3">
 				   <button class="btn getSummary" title="Displays visualizations after screenshots are captured"> Continue </button>
-				</div> -->
+				</div>
 			</div>
 
 			<div class="row tabContentWrapper" style="display: none;">
@@ -112,8 +111,7 @@
 
 				<div class="tab-content">
 
-					<div id="imageGrid" class="tab-pane fade">
-						<p id="myContent"></p>
+					<div id="imageGrid" class="tab-pane fade in active">
 						<div class="grid-container">
 							<ul class="rig columns-3">
 							</ul>
@@ -136,7 +134,7 @@
 				    </div>
 				  </div>
 
-				  <div id="timeLine" class="tab-pane fade in active">
+				  <div id="timeLine" class="tab-pane fade">
 				   	<div class="timeline_Wrapper content_focusedWrapper">
 						<div class="article">
 							<div id="timeline">
