@@ -25,6 +25,12 @@
 			<!-- <script src="./scripts/embedded.js"></script> -->
     	<script type="text/javascript">
     		$(document).ready(function(){
+
+					if($("input[name='primesource']:checked").val() == "internetarchive"){
+						$("#collectionNo").val("");
+						$("#collectionNo").attr("disabled",true);
+					}
+
     			$("input[name='primesource']").click(function(){
 	    			if($(this).val() == "internetarchive"){
 	    				$("#collectionNo").attr("disabled",true);
