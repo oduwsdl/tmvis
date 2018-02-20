@@ -595,7 +595,6 @@ var jsonObjRes = {};
     window.onload = function() {
     //  window.location.href = window.location.origin;
       //alert("Windows loaded back");
-     // $("#urirIP").val("hello.com");
       if(localStorage.getItem("summaryClicked") == "true"){
         $(".getSummary").hide();
         localStorage.setItem("summaryClicked","false");
@@ -696,8 +695,6 @@ var jsonObjRes = {};
                     //$(".statsWrapper").hide();
                     $(".tabContentWrapper").hide();
                 }
-
-
               },
               error: function( data, textStatus, jqXHR) {
 
@@ -715,10 +712,8 @@ var jsonObjRes = {};
 
 
    $(function(){
-
-
      var source = new EventSource('/sse');
-           source.onmessage = function(e) {
+          source.onmessage = function(e) {
               console.log(e.data);
               var curLog = "<p>"+e.data+"</p>";
 
@@ -728,9 +723,14 @@ var jsonObjRes = {};
               }
               else if( e.data === "readyToDisplay"){
               //  alert(" Ready for display");
-                $(".getSummary").trigger("click");
+              //  $(".getSummary").trigger("click");
+                $('#serverStreamingModal .logsContent').empty();
+                $('#serverStreamingModal').modal('hide');
+                $(".tabContentWrapper").show();
+
+
               }
-              else if(e.data == "statssent"){
+              else if(e.data === "statssent"){
                   $('#serverStreamingModal .logsContent').empty();
                   $('#serverStreamingModal').modal('hide');
               }
@@ -742,24 +742,21 @@ var jsonObjRes = {};
               }
            };
 
-          //  source.ping = function(e) {
-          //    alert("Ready for the display");
-          //  };
-
      // following is commented to first stabilise the single step process
     $(".getJSONFromServer").click(function(event){
-       event.preventDefault();
-       $(".tabContentWrapper").hide();
-      var collectionIdentifer = $('.argumentsForm #collectionNo').val();
-      if(collectionIdentifer == ""){
-          collectionIdentifer = "all";
-      }
-      var hammingDistance = $('.argumentsForm #hammingDistance').val();
-      if(hammingDistance == ""){
-          hammingDistance = 4;
-      }
-      var role = "stats" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
-      if($(this).parents("form")[0].checkValidity()){
+        event.preventDefault();
+        $(".tabContentWrapper").hide();
+        $(".statsWrapper").hide();
+        var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+        if(collectionIdentifer == ""){
+            collectionIdentifer = "all";
+        }
+        var hammingDistance = $('.argumentsForm #hammingDistance').val();
+        if(hammingDistance == ""){
+            hammingDistance = 4;
+        }
+        var role = "stats" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
+        if($(this).parents("form")[0].checkValidity()){
             event.preventDefault();
             var ENDPOINT = "/alsummarizedtimemap";
             //var SERVERHOST = "http://tmvis.cs.odu.edu/"; // to hit the hosted server
@@ -769,7 +766,7 @@ var jsonObjRes = {};
             var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
             $("#busy-loader").show();
             $('#serverStreamingModal .logsContent').empty();
-              $('#serverStreamingModal').modal('show');
+            $('#serverStreamingModal').modal('show');
 
               $.ajax({
                   type: "GET",
@@ -777,6 +774,8 @@ var jsonObjRes = {};
                   dataType: "text",
                   success: function( data, textStatus, jqXHR) {
                       $("#busy-loader").hide();
+                      $('#serverStreamingModal .logsContent').empty();
+                      $('#serverStreamingModal').modal('hide');
                       try{
                           jsonObjRes= $.parseJSON(data);
                           var memStatStr = jsonObjRes["totalmementos"]+" mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
@@ -816,8 +815,6 @@ var jsonObjRes = {};
 
 
     // work around for the timeline setting stuff
-    //$(".getSummary").click(function(event){
-
     $(".getSummary").click(function(event){
 
       var collectionIdentifer = $('.argumentsForm #collectionNo').val();
@@ -839,13 +836,10 @@ var jsonObjRes = {};
           curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
           curInputJsobObj["role"]= "summary";
           localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
-        //  window.location.reload();
+          // window.location.reload();
           window.location.href = window.location.origin;
       }
-
-      // window.location.reload();
     });
-
 
   });
 })(window, document);

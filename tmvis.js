@@ -212,7 +212,6 @@ function sendSSE(req, res) {
   //   constructSSE( data);
   // }, 5000);
   constructSSE('Started streaming the events happening at the server side...');
-
 }
 
 function constructSSE(data) {
@@ -237,16 +236,12 @@ function constructSSEForFinsh(data) {
 */
 function PublicEndpoint () {
   var theEndPoint = this
-
-
   // Parameters supplied for means of access:
   this.validSource = ['archiveit', 'internetarchive'];
 
   this.isAValidSourceParameter = function (accessParameter) {
     return theEndPoint.validSource.indexOf(accessParameter) > -1
   }
-
-
 
   /**
   * Handle an HTTP request and respond appropriately
