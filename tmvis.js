@@ -623,7 +623,7 @@ Memento.prototype.setSimhash = function (callback) {
           var retStr = getHexString(sh)
 
           //|| (retStr == null)
-          if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302 ) {
+          if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302 || retStr == null) {
             // Normalize so not undefined
             retStr = Memento.prototype.simhashIndicatorForHTTP302
 

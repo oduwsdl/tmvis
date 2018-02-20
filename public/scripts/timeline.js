@@ -595,9 +595,8 @@ var jsonObjRes = {};
     window.onload = function() {
     //  window.location.href = window.location.origin;
       //alert("Windows loaded back");
-      if(localStorage.getItem("summaryClicked") == "true"){
-        $(".getSummary").hide();
-        localStorage.setItem("summaryClicked","false");
+      if(localStorage.getItem("getStatsClicked") == "true"){
+        localStorage.setItem("getStatsClicked","false");
         var curInputObj = JSON.parse(localStorage.getItem("curInputObj"));
 
         $('.argumentsForm #urirIP').val(curInputObj["urir"]);
@@ -615,148 +614,8 @@ var jsonObjRes = {};
         if(hammingDistance == ""){
             hammingDistance = 4;
         }
-        var role = "summary" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
+
         if($("body").find("form")[0].checkValidity()){
-            event.preventDefault();
-            var ENDPOINT = "/alsummarizedtimemap";
-            //var SERVERHOST = "http://tmvis.cs.odu.edu/"; // to hit the hosted server
-           //var SERVERHOST = "http://tmvis.cs.odu.edu/alsummarizedtimemap"; // to hit the hosted server
-          // var LOCALHOST = "http://localhost:3000/"; // to hit the local one
-           // var queryStr="?"+$(".argumentsForm input").serialize();
-           var address= ENDPOINT+"/"+curInputObj["primesource"]+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
-            $("#busy-loader").show();
-            $('#serverStreamingModal .logsContent').empty();
-            $('#serverStreamingModal').modal('show');
-
-            $.ajax({
-              type: "GET",
-              url: address, // uncomment this for deployment
-              dataType: "text",
-               timeout: 0,
-              success: function( data, textStatus, jqXHR) {
-                  $("#busy-loader").hide();
-                  $('#serverStreamingModal').modal('hide');
-
-                try{
-                    data = $.trim(data).split("...");
-                    if(data.length > 1){
-                        if(data [1] == ""){
-                            data = data [0];
-                        }else{
-                            data = data [1];
-                        }
-                    }
-                    else{
-                        data = data [0];
-                    }
-
-                    jsonObjRes= $.parseJSON(data);
-
-                    // following code segment makes the screenshot URI got with event_html | event_html_similarto properties to a html fragment
-                    jsonObjRes[0].event_html= "<img src='"+jsonObjRes[0].event_html+"' width='300px' />";
-                    for(var i=1;i< jsonObjRes.length;i++){
-                        jsonObjRes[i].event_html= "<img src='"+jsonObjRes[i].event_html+"' width='300px' />";
-                        jsonObjRes[i].event_html_similarto= "<img src='"+jsonObjRes[i].event_html_similarto+"' width='300px' />";
-                    }
-
-
-                    $(".statsWrapper").show();
-                     window.timeline = new Timeline(jsonObjRes);
-                    // place where the notch width is being reduced t0 2px.
-                    $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
-                    // Color is changed in the Array at 284 line as that is the right place
-                   // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
-                    new Zoom("in");
-                    new Zoom("out");
-                    var chooseNext = new Chooser("next");
-                    var choosePrev = new Chooser("prev");
-                    var chooseUniqueNext = new Chooser("uniquenext");
-                    var chooseUniquePrev = new Chooser("uniqueprev");
-
-                    chooseNext.click();
-                    $(document).bind('keydown', function(e) {
-                        if (e.keyCode === 39) {
-                            chooseNext.click();
-                        } else if (e.keyCode === 37) {
-                            choosePrev.click();
-                        } else {
-                            return;
-                        }
-                    });
-
-                    console.log(jsonObjRes);
-                    drawImageGrid(jsonObjRes); // calling Image Grid Function here
-                    drawImageSlider(jsonObjRes);
-                }
-                catch(err){
-                  alert("Some problem fetching the response, Please try again.");
-                  $("#busy-loader").hide();
-                  $('#serverStreamingModal').modal('hide');
-                    //$(".statsWrapper").hide();
-                    $(".tabContentWrapper").hide();
-                }
-              },
-              error: function( data, textStatus, jqXHR) {
-
-                var errMsg = "Some problem fetching the response, Please try again.";
-                $("#busy-loader").hide();
-                $('#serverStreamingModal').modal('hide');
-                alert(errMsg);
-              }
-            });
-          }
-       }
-    }
-
-
-
-
-   $(function(){
-     var source = new EventSource('/sse');
-          source.onmessage = function(e) {
-              console.log(e.data);
-              var curLog = "<p>"+e.data+"</p>";
-
-              if(e.data === "streamingStarted"){
-                  $('#serverStreamingModal .logsContent').empty();
-                    $('#serverStreamingModal').modal('show');
-              }
-              else if( e.data === "readyToDisplay"){
-              //  alert(" Ready for display");
-              //  $(".getSummary").trigger("click");
-                $('#serverStreamingModal .logsContent').empty();
-                $('#serverStreamingModal').modal('hide');
-                $(".tabContentWrapper").show();
-
-
-              }
-              else if(e.data === "statssent"){
-                  $('#serverStreamingModal .logsContent').empty();
-                  $('#serverStreamingModal').modal('hide');
-              }
-              else{
-                $("#serverStreamingModal .logsContent").prepend(curLog);
-                // $('#serverStreamingModal .modal-body').animate({
-                //      scrollTop: $("#bottomModal").offset().top
-                //  }, 20);
-              }
-           };
-
-     // following is commented to first stabilise the single step process
-    $(".getJSONFromServer").click(function(event){
-        event.preventDefault();
-        $(".tabContentWrapper").hide();
-        $(".statsWrapper").hide();
-        var collectionIdentifer = $('.argumentsForm #collectionNo').val();
-        if(collectionIdentifer == ""){
-            collectionIdentifer = "all";
-        }
-        var hammingDistance = $('.argumentsForm #hammingDistance').val();
-        if(hammingDistance == ""){
-            hammingDistance = 4;
-        }
-        var role = "stats" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
-        if($(this).parents("form")[0].checkValidity()){
             event.preventDefault();
             var ENDPOINT = "/alsummarizedtimemap";
             //var SERVERHOST = "http://tmvis.cs.odu.edu/"; // to hit the hosted server
@@ -808,6 +667,71 @@ var jsonObjRes = {};
                     alert(errMsg);
                   }
               });
+            }
+
+       }
+    }
+
+
+
+
+   $(function(){
+     var source = new EventSource('/sse');
+          source.onmessage = function(e) {
+              console.log(e.data);
+              var curLog = "<p>"+e.data+"</p>";
+
+              if(e.data === "streamingStarted"){
+                  $('#serverStreamingModal .logsContent').empty();
+                    $('#serverStreamingModal').modal('show');
+              }
+              else if( e.data === "readyToDisplay"){
+              //  alert(" Ready for display");
+              //  $(".getSummary").trigger("click");
+                $('#serverStreamingModal .logsContent').empty();
+                $('#serverStreamingModal').modal('hide');
+                $(".tabContentWrapper").show();
+
+
+              }
+              else if(e.data === "statssent"){
+                  $('#serverStreamingModal .logsContent').empty();
+                  $('#serverStreamingModal').modal('hide');
+              }
+              else{
+                $("#serverStreamingModal .logsContent").prepend(curLog);
+                // $('#serverStreamingModal .modal-body').animate({
+                //      scrollTop: $("#bottomModal").offset().top
+                //  }, 20);
+              }
+           };
+
+     // following is commented to first stabilise the single step process
+    $(".getJSONFromServer").click(function(event){
+        event.preventDefault();
+        $(".tabContentWrapper").hide();
+        $(".statsWrapper").hide();
+        var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+        if(collectionIdentifer == ""){
+            collectionIdentifer = "all";
+        }
+        var hammingDistance = $('.argumentsForm #hammingDistance').val();
+        if(hammingDistance == ""){
+            hammingDistance = 4;
+        }
+        var role = "stats" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
+        if($(this).parents("body").find("form")[0].checkValidity()){
+            event.preventDefault();
+            localStorage.setItem("getStatsClicked", "true");
+            var curInputJsobObj = {};
+            curInputJsobObj["urir"]= $("#urirIP").val();
+            curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
+            curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
+            curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
+            curInputJsobObj["role"]= role;
+            localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
+            // window.location.reload();
+            window.location.href = window.location.origin;
         }
       });
 
@@ -825,20 +749,93 @@ var jsonObjRes = {};
       if(hammingDistance == ""){
           hammingDistance = 4;
       }
-      var role = "summary" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
-      if($(this).parents("body").find("form")[0].checkValidity()){
-          event.preventDefault();
-          localStorage.setItem("summaryClicked", "true");
-          var curInputJsobObj = {};
-          curInputJsobObj["urir"]= $("#urirIP").val();
-          curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
-          curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
-          curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
-          curInputJsobObj["role"]= "summary";
-          localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
-          // window.location.reload();
-          window.location.href = window.location.origin;
-      }
+
+      var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
+      if($("body").find("form")[0].checkValidity()){
+            $(".getSummary").hide();
+           event.preventDefault();
+           var ENDPOINT = "/alsummarizedtimemap";
+           var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+           $("#busy-loader").show();
+           $('#serverStreamingModal .logsContent').empty();
+           $('#serverStreamingModal').modal('show');
+          $.ajax({
+            type: "GET",
+            url: address, // uncomment this for deployment
+            dataType: "text",
+             timeout: 0,
+            success: function( data, textStatus, jqXHR) {
+                $("#busy-loader").hide();
+                $('#serverStreamingModal').modal('hide');
+
+              try{
+                  data = $.trim(data).split("...");
+                  if(data.length > 1){
+                      if(data [1] == ""){
+                          data = data [0];
+                      }else{
+                          data = data [1];
+                      }
+                  }
+                  else{
+                      data = data [0];
+                  }
+
+                  jsonObjRes= $.parseJSON(data);
+
+                  // following code segment makes the screenshot URI got with event_html | event_html_similarto properties to a html fragment
+                  jsonObjRes[0].event_html= "<img src='"+jsonObjRes[0].event_html+"' width='300px' />";
+                  for(var i=1;i< jsonObjRes.length;i++){
+                      jsonObjRes[i].event_html= "<img src='"+jsonObjRes[i].event_html+"' width='300px' />";
+                      jsonObjRes[i].event_html_similarto= "<img src='"+jsonObjRes[i].event_html_similarto+"' width='300px' />";
+                  }
+
+
+                  $(".statsWrapper").show();
+                   window.timeline = new Timeline(jsonObjRes);
+                  // place where the notch width is being reduced t0 2px.
+                  $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
+                  // Color is changed in the Array at 284 line as that is the right place
+                 // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
+                  new Zoom("in");
+                  new Zoom("out");
+                  var chooseNext = new Chooser("next");
+                  var choosePrev = new Chooser("prev");
+                  var chooseUniqueNext = new Chooser("uniquenext");
+                  var chooseUniquePrev = new Chooser("uniqueprev");
+
+                  chooseNext.click();
+                  $(document).bind('keydown', function(e) {
+                      if (e.keyCode === 39) {
+                          chooseNext.click();
+                      } else if (e.keyCode === 37) {
+                          choosePrev.click();
+                      } else {
+                          return;
+                      }
+                  });
+
+                  console.log(jsonObjRes);
+                  drawImageGrid(jsonObjRes); // calling Image Grid Function here
+                  drawImageSlider(jsonObjRes);
+              }
+              catch(err){
+                alert("Some problem fetching the response, Please try again.");
+                $("#busy-loader").hide();
+                $('#serverStreamingModal').modal('hide');
+                  //$(".statsWrapper").hide();
+                  $(".tabContentWrapper").hide();
+              }
+            },
+            error: function( data, textStatus, jqXHR) {
+
+              var errMsg = "Some problem fetching the response, Please try again.";
+              $("#busy-loader").hide();
+              $('#serverStreamingModal').modal('hide');
+              alert(errMsg);
+            }
+          });
+        }
     });
 
   });
