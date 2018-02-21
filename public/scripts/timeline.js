@@ -618,10 +618,6 @@ var jsonObjRes = {};
         if($("body").find("form")[0].checkValidity()){
             event.preventDefault();
             var ENDPOINT = "/alsummarizedtimemap";
-            //var SERVERHOST = "http://tmvis.cs.odu.edu/"; // to hit the hosted server
-            //var SERVERHOST = "http://tmvis.cs.odu.edu/alsummarizedtimemap"; // to hit the hosted server
-            // var LOCALHOST = "http://localhost:3000/"; // to hit the local one
-            // var queryStr="?"+$(".argumentsForm input").serialize();
             var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
             $("#busy-loader").show();
             $('#serverStreamingModal .logsContent').empty();
@@ -649,6 +645,7 @@ var jsonObjRes = {};
                             $(".approxTimeShowingPTag").html('Takes about '+ jsonObjRes["timetowait"] +' minutes Approximately, Click on Continue button and please be patient');
                           }
                           $(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
+                          $(".modal-backdrop").remove();
 
 
                       }catch(err){
@@ -683,7 +680,7 @@ var jsonObjRes = {};
 
               if(e.data === "streamingStarted"){
                   $('#serverStreamingModal .logsContent').empty();
-                    $('#serverStreamingModal').modal('show');
+                    //$('#serverStreamingModal').modal('show');
               }
               else if( e.data === "readyToDisplay"){
               //  alert(" Ready for display");
@@ -818,6 +815,7 @@ var jsonObjRes = {};
                   console.log(jsonObjRes);
                   drawImageGrid(jsonObjRes); // calling Image Grid Function here
                   drawImageSlider(jsonObjRes);
+                  $(".modal-backdrop").remove();
               }
               catch(err){
                 alert("Some problem fetching the response, Please try again.");
