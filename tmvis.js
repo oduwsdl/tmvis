@@ -83,7 +83,6 @@ var uriR = ''
 var isDebugMode = argv.debug? argv.debug: false
 var HAMMING_DISTANCE_THRESHOLD = argv.hdt?  argv.hdt: 4
 var SCREENSHOT_DELTA = argv.ssd? argv.ssd: 0
-console.log("SCREENSHOT DELTA " + SCREENSHOT_DELTA);
 var isToOverrideCachedSimHash = argv.oes? argv.oes: false
 // by default the prime src is gonna be Archive-It
 var primeSrc = argv.ait? 1: (argv.ia ? 2:(argv.mg?3:1))
@@ -94,6 +93,8 @@ var screenshotsLocation = "assets/screenshots/"
 var role = "stats"
 var noOfUniqueMementos = 0
 var totalMementos = 0
+var streamingRes
+
 ConsoleLogIfRequired("Hamming distance threshold set while running the server:"+HAMMING_DISTANCE_THRESHOLD)
 //return
 /* *******************************
@@ -134,7 +135,6 @@ function main () {
   // create a write stream (in append mode)
   var accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs' ,'access.log'), {flags: 'a'})
   var exceptionLogStream = fs.createWriteStream(path.join(__dirname, 'logs' ,'exception.log'), {flags: 'a'})
-
 // all the common  requests are logged via here
   app.use(morgan('common',{
     stream: accessLogStream
@@ -154,8 +154,8 @@ function main () {
     response.sendFile(__dirname + '/public/index.html');
   })
 
-  //This route is just for testing
-    app.get('/hello', (request, response) => {
+  //This is just a hello test route
+   app.get('/hello', (request, response) => {
 
           var headers = {}
           // IE8 does not allow domains to be specified, just the *
@@ -173,6 +173,16 @@ function main () {
           response.end()
     })
 
+
+    //This route is just for testing, testing the SSE
+     app.get('/sse', (request, response) => {
+            sendSSE(request, response);
+    })
+
+
+
+
+
   // this is the actually place that hit the main server logic
   //app.get('/alsummarizedtimemap/:primesource/:ci/:urir', endpoint.respondToClient)
   app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/:role/:ssd/*', endpoint.respondToClient)
@@ -189,14 +199,45 @@ function main () {
 }
 
 
+// SSE Related.
+
+function sendSSE(req, res) {
+  streamingRes = res;
+  streamingRes.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+
+  // sends a SSE every 5 seconds on a single connection.
+  // setInterval(function() {
+  //   constructSSE( data);
+  // }, 5000);
+  constructSSE('Started streaming the events happening at the server side...');
+}
+
+function constructSSE(data) {
+  var id = (new Date()).toLocaleTimeString();
+  streamingRes.write('id: ' + id + '\n');
+  streamingRes.write("data: " + data + '\n\n');
+}
+
+function constructSSEForFinsh(data) {
+  var id = (new Date()).toLocaleTimeString();
+  streamingRes.write('id: ' + id + '\n');
+  streamingRes.write("data: " + data + '\n\n');
+}
+
+
+
+
+
 
 /**
 * Setup the public-facing attributes of the service
 */
 function PublicEndpoint () {
   var theEndPoint = this
-
-
   // Parameters supplied for means of access:
   this.validSource = ['archiveit', 'internetarchive'];
 
@@ -204,14 +245,13 @@ function PublicEndpoint () {
     return theEndPoint.validSource.indexOf(accessParameter) > -1
   }
 
-
-
   /**
   * Handle an HTTP request and respond appropriately
   * @param request  The request object from the client representing query information
   * @param response Currently active HTTP response to the client used to return information to the client based on the request
   */
   this.respondToClient = function (request, response) {
+    constructSSE("streamingStarted");
      isResponseEnded = false //resetting the responseEnded indicator
     response.clientId = Math.random() * 101 | 0  // Associate a simple random integer to the user for logging (this is not scalable with the implemented method)
     var headers = {}
@@ -394,6 +434,9 @@ function PublicEndpoint () {
       var cacheFile = new SimhashCacheFile( primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+uriR,isDebugMode)
       cacheFile.path += '.json'
       ConsoleLogIfRequired('Checking if a cache file exists for ' + query['urir'] + '...')
+      constructSSE('Checking if a cache file exists for ' + query['urir'] + '...')
+
+
     //  ConsoleLogIfRequired('cacheFile: '+JSON.stringify(cacheFile))
       cacheFile.readFileContents(
         function success (data) {
@@ -407,6 +450,7 @@ function PublicEndpoint () {
               getTimemapGodFunctionForAlSummarization(query['urir'], response)
             }else{
               ConsoleLogIfRequired("Responded to continue with the exisitng cached simhashes file. Proceeding..");
+              constructSSE('cached simhashes exist, proceeding with cache...')
               processWithFileContents(data, response)
             }
           //ByMahee -- UnComment Following Line(UCF)
@@ -415,7 +459,8 @@ function PublicEndpoint () {
         function failed () {
           //ByMahee -- calling the core function responsible for AlSummarization, if the cached file doesn't exist
           ConsoleLogIfRequired("**ByMahee** -- readFileContents : Inside Failed ReadFile Content (meaning file doesn't exist), getTimemapGodFunctionForAlSummarization is called next ")
-          //ByMahee -- UCF
+          constructSSE("cached simhashes doesn't exist, proceeding to compute the simhashes...")
+
           getTimemapGodFunctionForAlSummarization(query['urir'], response)
         }
 
@@ -473,14 +518,21 @@ function processWithFileContents (fileContents, response) {
           function (callback) {
             t.createScreenshotsForMementos(response,callback)
           },
-          function (callback) {t.writeThumbSumJSONOPToCache(response)}
+          function (callback) {
+            constructSSE('Writing the data into cache file for future use...')
+            t.writeThumbSumJSONOPToCache(response)
+          }
         ],
         function (err, result) {
+
           if (err) {
             console.log('ERROR!')
             console.log(err)
           } else {
+            constructSSE('Finshed writing into cache...')
             console.log('There were no errors executing the callback chain')
+
+
           }
         }
       )
@@ -529,6 +581,7 @@ Memento.prototype.setSimhash = function (callback) {
     var buffer2 = ''
     var memento = this // Potentially unused? The 'this' reference will be relative to the promise here
     var mOptions = url.parse(thaturi)
+    constructSSE('Memento under processing -> '+thaturi)
     ConsoleLogIfRequired('Starting a simhash: ' + mOptions.host + mOptions.path)
     var req = http.request({
       'host': mOptions.host,
@@ -574,10 +627,12 @@ Memento.prototype.setSimhash = function (callback) {
 
           var sh = simhash((buffer2).split('')).join('')
          ConsoleLogIfRequired("ByMahee -- computed simhash for "+mOptions.host+mOptions.path+" -> "+ sh)
+         constructSSE('computed simhash for '+mOptions.host+mOptions.path +' -> '+ sh)
 
           var retStr = getHexString(sh)
 
-          if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302) {
+          //|| (retStr == null)
+          if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302 || retStr == null) {
             // Normalize so not undefined
             retStr = Memento.prototype.simhashIndicatorForHTTP302
 
@@ -602,6 +657,8 @@ Memento.prototype.setSimhash = function (callback) {
       })
 
       outputBuffer.on('error', function (err) {
+        constructSSE('Error generating the simhash');
+
         ConsoleLogIfRequired('Error generating Simhash in Response')
       })
     })
@@ -662,8 +719,12 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     // TODO: define how this is different from the getTimemap() parent function (i.e., some name clarification is needed)
     // TODO: abstract this method to its callback form. Currently, this is reaching and populating the timemap out of scope and can't be simply isolated (I tried)
     function fetchTimemap (callback) {
+      constructSSE('Http Request made to fetch the timemap...')
+
       var req = http.request(options, function (res) {
          ConsoleLogIfRequired("--ByMahee-- Inside the http request call back success, request is made on the following obect:")
+        constructSSE('streamingStarted')
+        constructSSE('Writing the data response into buffer..')
         // ConsoleLogIfRequired(options);
         // ConsoleLogIfRequired("----------------");
         res.setEncoding('utf8')
@@ -697,18 +758,26 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
                 return
             }
 
+            ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
+            constructSSE('Timemap fetched has a total of '+t.mementos.length + ' mementos.')
+
             // to respond to the client as the intermediate response, while the server processes huge loads
            if(t.mementos.length > 250){
-             response.write('Request being processed, Please retry approximately after ( ' + Math.ceil(((t.mementos.length/50)  * 10)/60)  +' Minutes ) and request again...')
-             response.end()
-             isResponseEnded = true
+
+            constructSSE('Might aprroximately take  <h3>  ' + Math.ceil((t.mementos.length)/(60*4))  +' Minutes ...<h3> to compute simhashes')
+
+            // now that streaming is in place, dont bother about sending an intermediate response
+            //  response.write('Request being processed, Please retry approximately after ( ' + Math.ceil(((t.mementos.length/50)  * 10)/60)  +' Minutes ) and request again...')
+            //  response.end()
+            //  isResponseEnded = true
            }
 
-            ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
 
             callback('')
           }else{
             ConsoleLogIfRequired('The page you requested has not been archived.')
+            constructSSE('The page requested has not been archived.')
+
              //process.exit(-1)
              response.write('The page you requested has not been archived.')
              response.end()
@@ -723,6 +792,8 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
         ConsoleLogIfRequired(e)
         if (e.message === 'connect ETIMEDOUT') { // Error experienced when IA went down on 20141211
           ConsoleLogIfRequired('Hmm, the connection timed out. Internet Archive might be down.')
+          constructSSE('the connection timed out, prime source of archive might be down.')
+
           response.write('Hmm, the connection timed out. Internet Archive might be down.')
           response.end()
             return
@@ -786,6 +857,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
       ConsoleLogIfRequired(err)
     } else {
       ConsoleLogIfRequired('There were no errors executing the callback chain')
+
     }
   })
 
@@ -834,7 +906,7 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
   var arrayOfSetSimhashFunctions = []
 
   // the way to get a damper, just 7 requests at a time.
-  async.eachLimit(this.mementos,7, function(curMemento, callback){
+  async.eachLimit(this.mementos,5, function(curMemento, callback){
     curMemento.setSimhash(callback)
   //  ConsoleLogIfRequired(curMemento)
   }, function(err) {
@@ -859,7 +931,7 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
          * doing the same: just changed the above condition as to follow
         */
 
-        if(theTimeMap.mementos[i].simhash === Memento.prototype.simhashIndicatorForHTTP302){
+        if(theTimeMap.mementos[i].simhash === Memento.prototype.simhashIndicatorForHTTP302 || theTimeMap.mementos[i].simhash  == null){
           theTimeMap.mementos.splice(i, 1)
           mementosRemoved++
         }
@@ -899,7 +971,8 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
 
 TimeMap.prototype.writeJSONToCache = function (callback) {
   var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
-  cacheFile.writeFileContentsAsJSON(JSON.stringify(this.mementos))
+  //cacheFile.writeFileContentsAsJSON(JSON.stringify(this.mementos))
+  cacheFile.writeFileContentsAsJSON(this.mementos)
   console.log(JSON.stringify(this.mementos));
 
   if (callback) {
@@ -1045,7 +1118,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
   })
 
   var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
-  cacheFile.writeThumbSumJSONOPContentToFile(JSON.stringify(mementoJObjArrForTimeline))
+  cacheFile.writeThumbSumJSONOPContentToFile(mementoJObjArrForTimeline)
 
     if(!isResponseEnded){
       response.write(JSON.stringify(mementoJObjArrForTimeline))
@@ -1182,33 +1255,32 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
 
   // to respond to the client as the intermediate response, while the server processes huge loads
   var noOfThumbnailsSelectedToBeCaptured = getNotExistingCapturesCount(self.mementos.filter(criteria))
-  // console.log("--------------------------------------------------------")
-  // console.log("--------------------------------------------------------")
-  // console.log("--------------------------------------------------------")
-  // console.log("noOfThumbnailsSelectedToBeCaptured:"+noOfThumbnailsSelectedToBeCaptured)
-  // console.log("--------------------------------------------------------")
-  // console.log("--------------------------------------------------------")
-  // console.log("--------------------------------------------------------")
 
   // breaking the control and returning the stats if the the request is made for status
   if(role == "stats"){
     var statsObj={
        'totalmementos' : totalMementos,
        'unique': noOfUniqueMementos,
-       'timetowait': Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)
+       'timetowait': Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA))
     }
+    constructSSE('Stats built and ready to serve...')
+    constructSSE('statssent')
+
     response.write(JSON.stringify(statsObj))
     response.end()
     return
   }
 
   ConsoleLogIfRequired('Creating screenshots...')
-
+  constructSSE('Started the process of capturing the screenshots...')
 
   if (noOfThumbnailsSelectedToBeCaptured >= 2) {
-    response.write('Request being processed, Please retry approximately after ( ' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)  +' Minutes ) and request again...')
-    response.end()
-    isResponseEnded = true
+    constructSSE('Might approximately take <h3>' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA))  +' Minutes <h3> to capture screen shots. Please be patient....')
+
+    // now that streaming is in place, dont bother about sending an intermediate response
+    // response.write('Request being processed, Please retry approximately after ( ' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)  +' Minutes ) and request again...')
+    // response.end()
+    // isResponseEnded = true
   }
 
   async.eachLimit(
@@ -1217,11 +1289,14 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
   //  self.createScreenshotForMemento,            // Create a screenshot
   self.createScreenshotForMementoWithPuppeteer,
     function doneCreatingScreenshots (err) {      // When finished, check for errors
+      constructSSE('Finished capturing all the required screenshots...')
+        constructSSEForFinsh('readyToDisplay')
+
       if (err) {
         ConsoleLogIfRequired('Error creating screenshot')
+
         ConsoleLogIfRequired(err)
       }
-
       callback('')
     }
   )
@@ -1257,6 +1332,8 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (callback, w
     self.createScreenshotForMementoWithPuppeteer,
 
     function doneCreatingScreenshots (err) {      // When finished, check for errors
+      constructSSE('Finished capturing all the required screenshots...')
+        constructSSEForFinsh('readyToDisplay')
       if (err) {
         ConsoleLogIfRequired('Error creating screenshot')
         ConsoleLogIfRequired(err)
@@ -1290,12 +1367,14 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (memento, c
         ConsoleLogIfRequired(e)
         ConsoleLogIfRequired(r)
       })
-
+    constructSSE(memento.screenshotURI + ' already exists...')
     ConsoleLogIfRequired(memento.screenshotURI + ' already exists...continuing')
     callback()
     return
   }catch (e) {
     ConsoleLogIfRequired((new Date()).getTime() + ' ' + memento.screenshotURI + ' does not exist...generating')
+    ConsoleLogIfRequired(memento.screenshotURI + 'does not exist, generating...')
+
   }
 
 
@@ -1315,10 +1394,14 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (memento, c
   // }
 
   ConsoleLogIfRequired('About to start screenshot generation process for ' + uri)
+  constructSSE('Starting screenshot generation process for -> ' + uri)
+  constructSSE('....................................')
 
   headless(uri, screenshotsLocation + filename).then(v => {
       // Once all the async parts finish this prints.
       console.log("Finished Headless");
+      constructSSE('Done capturing the screenshot..')
+
       fs.chmodSync('./'+screenshotsLocation + filename, '755')
       im.convert(['./'+screenshotsLocation + filename, '-thumbnail', '200',
             './'+screenshotsLocation + (filename.replace('.png', '_200.png'))],
@@ -1360,10 +1443,6 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (memento, c
 
 }
 
-function timeout(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-};
-
 async function headless(uri,filepath) {
     const browser = await puppeteer.launch({
         ignoreHTTPSErrors: true,
@@ -1400,7 +1479,6 @@ async function headless(uri,filepath) {
         });
 
 	//Set wait time before screenshotURI
-	//await timeout(2000);
 	await page.waitFor(SCREENSHOT_DELTA * 1000); //convert to seconds
 	
         // Take screenshots
@@ -1491,6 +1569,7 @@ TimeMap.prototype.createScreenshotForMemento = function (memento, callback) {
 
 TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callback) {
   console.time('Hamming And Filtering, a synchronous operation')
+  constructSSE('computing the Hamming Distance and Filtering synchronously...')
 
   var lastSignificantMementoIndexBasedOnHamming = 0
   var copyOfMementos = [this.mementos[0]]
@@ -1527,16 +1606,15 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
   }
   noOfUniqueMementos = copyOfMementos.length
   totalMementos = this.mementos.length;
+  constructSSE('Completed filtering...')
+  constructSSE('Out of the total <h3>'+totalMementos+'</h3> eixisting mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique...')
   //ConsoleLogIfRequired((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
   copyOfMementos = null
-
 
   ConsoleLogIfRequired("------------ByMahee-- After the hamming distance is calculated, here is how the mementos with additional details look like ------------------")
   ConsoleLogIfRequired(JSON.stringify(this.mementos))
   //ConsoleLogIfRequired(this.mementos)
   ConsoleLogIfRequired("----------------------------------------------------------------------------------------------------------------------------------------------")
-
-
   if (callback) { callback('') }
 }
 
