@@ -83,7 +83,6 @@ var uriR = ''
 var isDebugMode = argv.debug? argv.debug: false
 var HAMMING_DISTANCE_THRESHOLD = argv.hdt?  argv.hdt: 4
 var SCREENSHOT_DELTA = argv.ssd? argv.ssd: 0
-console.log("SCREENSHOT DELTA " + SCREENSHOT_DELTA);
 var isToOverrideCachedSimHash = argv.oes? argv.oes: false
 // by default the prime src is gonna be Archive-It
 var primeSrc = argv.ait? 1: (argv.ia ? 2:(argv.mg?3:1))
@@ -1360,10 +1359,6 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (memento, c
 
 }
 
-function timeout(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-};
-
 async function headless(uri,filepath) {
     const browser = await puppeteer.launch({
         ignoreHTTPSErrors: true,
@@ -1393,14 +1388,13 @@ async function headless(uri,filepath) {
           console.log(response.url, response.status, response.headers);
         });
 
-        // timeout at 5 minutes (5 * 60 * 1000ms), network idle at 3 seconds
+        // timeout at 5 minutes (5 * 60 * 1000ms), wait until all dom content is loaded
         await page.goto(uri, {
             waitUntil: 'domcontentloaded',
             timeout: 5000000,
         });
 
 	//Set wait time before screenshotURI
-	//await timeout(2000);
 	await page.waitFor(SCREENSHOT_DELTA * 1000); //convert to seconds
 	
         // Take screenshots

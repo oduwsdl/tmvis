@@ -601,6 +601,7 @@ var jsonObjRes = {};
         $('.argumentsForm #urirIP').val(curInputObj["urir"]);
         $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
         $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
+        $('.argumentsForm #screenshotDelta').val(curInputObj["screenshotDelta"]);
         $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked");
         role = curInputObj["role"];
 
@@ -613,7 +614,7 @@ var jsonObjRes = {};
         if(hammingDistance == ""){
             hammingDistance = 4;
         }
-        var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
+        var screenshotDelta = curInputObj["#screenshotDelta"];
             if(screenshotDelta == ""){
                 screenshotDelta = 0;
         }
@@ -623,9 +624,9 @@ var jsonObjRes = {};
             var ENDPOINT = "/alsummarizedtimemap";
             //var SERVERHOST = "http://tmvis.cs.odu.edu/"; // to hit the hosted server
            //var SERVERHOST = "http://tmvis.cs.odu.edu/alsummarizedtimemap"; // to hit the hosted server
-          // var LOCALHOST = "http://localhost:3000/"; // to hit the local one
+           var LOCALHOST = "http://localhost:3000/alsummarizedtimemap"; // to hit the local one
            // var queryStr="?"+$(".argumentsForm input").serialize();
-           var address= ENDPOINT+"/"+curInputObj["primesource"]+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+ screenshotDelta+"/"+$('.argumentsForm #urirIP').val()
+           var address= LOCALHOST+"/"+curInputObj["primesource"]+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+ screenshotDelta+"/"+$('.argumentsForm #urirIP').val()
             $("#busy-loader").show();
 
             $.ajax({
@@ -721,15 +722,19 @@ var jsonObjRes = {};
       if(hammingDistance == ""){
           hammingDistance = 4;
       }
+      var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
+      if(screenshotDelta == ""){
+          screenshotDelta = 0;
+      }
       var role = "stats" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
       if($(this).parents("form")[0].checkValidity()){
             event.preventDefault();
             var ENDPOINT = "/alsummarizedtimemap";
             //var SERVERHOST = "http://tmvis.cs.odu.edu/"; // to hit the hosted server
             //var SERVERHOST = "http://tmvis.cs.odu.edu/alsummarizedtimemap"; // to hit the hosted server
-            // var LOCALHOST = "http://localhost:3000/"; // to hit the local one
+             var LOCALHOST = "http://localhost:3000/alsummarizedtimemap"; // to hit the local one
             // var queryStr="?"+$(".argumentsForm input").serialize();
-            var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+            var address= LOCALHOST+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+screenshotDelta+"/"+$('.argumentsForm #urirIP').val()
             $("#busy-loader").show();
 
               $.ajax({
@@ -772,6 +777,7 @@ var jsonObjRes = {};
       curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
       curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
       curInputJsobObj["role"]= "summary";
+      curInputJsobObj["screenshotDelta"]=   $('.argumentsForm #screenshotDelta').val();
       sessionStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
       window.location.reload();
     });
