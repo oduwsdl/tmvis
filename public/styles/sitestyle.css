@@ -10,14 +10,16 @@
 	}
 
 .Title h1{
-		text-align:center;
+
+		text-align: center;
 		font-family: 'Oswald', sans-serif;
 		font-size: 5em;
 	}
 	.Title img{
 		position:absolute;
 		text-align:left;
-		width:150;
+		width:10%;
+
 	}
 	#footer{
 		text-align:center;
@@ -166,3 +168,10 @@
 	width: 300px !important;
 	height: 200px !important;
 }
+
+#serverStreamingModal .modal-body {
+	max-height: 800px !important;
+    overflow-y: scroll;
+		overflow-x: hidden;
+}
+
