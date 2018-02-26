@@ -125,8 +125,6 @@ function main () {
   }
 
 
-
-
   //startLocalAssetServer()  //- Now everything is made to be served from the same port.
   var endpoint = new PublicEndpoint()
 
@@ -173,7 +171,7 @@ function main () {
 
 
     //This route is just for testing, testing the SSE
-     app.get('/sse', (request, response) => {
+     app.get('/sse/*', (request, response) => {
             sendSSE(request, response);
     })
 
