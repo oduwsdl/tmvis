@@ -649,6 +649,7 @@ function uriAnalysisForAttributes(uri){
 
     }else{
       urir = uri; // one and the same - case where the URI-R is directly given
+      $('.argumentsForm #urirIP').val(urir);
     }
   }else{ // Incase of URI-M
     dtstr = uri.match(/\/[0-9]{14}\//g)[0];
