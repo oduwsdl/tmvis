@@ -1,6 +1,6 @@
 
 var jsonObjRes = {};
-
+var curURIUnderFocus=null;
 
 (function(window, document, undefined){
 
@@ -598,6 +598,7 @@ var jsonObjRes = {};
       if(localStorage.getItem("getStatsClicked") == "true"){
           localStorage.setItem("getStatsClicked","false");
           var curInputObj = JSON.parse(localStorage.getItem("curInputObj"));
+          $('.argumentsForm #uriIP').val(curInputObj["uri"]);
           $('.argumentsForm #urirIP').val(curInputObj["urir"]);
           $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
           $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
@@ -606,6 +607,8 @@ var jsonObjRes = {};
       }else{
         //alert("doesn't have the local storage set, using the Query parameters");
         //GET Request-> "http://localhost:3000/GetResponse/?URI-R=http://4genderjustice.org/&ci=1068&primesource=archiveit&hdt=4"
+
+        $('.argumentsForm #uriIP').val(getParameterByName("URI"));
         $('.argumentsForm #urirIP').val(getParameterByName("URI-R"));
         $('.argumentsForm #collectionNo').val( getParameterByName("ci"));
         var hammingDistance = getParameterByName("hdt");
@@ -617,6 +620,36 @@ var jsonObjRes = {};
         getStats();
       }
   }
+
+function uriAnalysisForAttributes(uri){
+  var urir;
+  if(uri.match(/\/[0-9]{14}\//g) == null){
+    urir = uri // one and the same
+  }else{
+    dtstr = uri.match(/\/[0-9]{14}\//g)[0];
+    urir = uri.split(dtstr)[1]; // uri is here now
+    var prePartToURIR = uri.split(dtstr)[0];
+    var hdt = 4;
+    var primesource = "";
+    var ci = "all";
+    if(prePartToURIR.indexOf("archive-it") > -1){
+      primesource = "archiveit";
+      ci = parseInt(prePartToURIR.match(/org\/[0-9]*/g)[0].split("/")[1]);
+      if(isNaN(ci)){
+          ci = "all";
+      }
+    }else if(prePartToURIR.indexOf("archive.org") > -1){
+      primesource = "internetarchive";
+    }else{
+      alert("not a valid input for URI, pass a valid URI-R or URI-M");
+      return false;
+    }
+    $('.argumentsForm #urirIP').val(urir);
+    $('.argumentsForm #collectionNo').val(ci);
+    $('.argumentsForm input[value='+primesource+']').prop("checked",true);
+  }
+}
+
 
 function getStats(){
   var collectionIdentifer = $('.argumentsForm #collectionNo').val();
@@ -681,6 +714,13 @@ function getStats(){
 
 
 $(function(){
+
+    // Analyses the input pattern and finds all the parameters
+    $(document).on('focusout','#uriIP',function(){
+          var uri = $(this).val();
+          uriAnalysisForAttributes(uri);
+    });
+
     var source = new EventSource('/sse/'+parseInt(Math.random()*1000000000));
           source.onmessage = function(e) {
               console.log(e.data);
@@ -706,10 +746,13 @@ $(function(){
                 //      scrollTop: $("#bottomModal").offset().top
                 //  }, 20);
               }
-           };
+          };
+
+
      // following is commented to first stabilise the single step process
     $(".getJSONFromServer").click(function(event){
         event.preventDefault();
+        uriAnalysisForAttributes($("#uriIP").val());
         $(".tabContentWrapper").hide();
         $(".statsWrapper").hide();
         var collectionIdentifer = $('.argumentsForm #collectionNo').val();
@@ -725,6 +768,7 @@ $(function(){
             event.preventDefault();
             localStorage.setItem("getStatsClicked", "true");
             var curInputJsobObj = {};
+            curInputJsobObj["uri"]= $("#uriIP").val();
             curInputJsobObj["urir"]= $("#urirIP").val();
             curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
             curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
