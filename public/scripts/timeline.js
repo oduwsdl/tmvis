@@ -624,8 +624,33 @@ var curURIUnderFocus=null;
 function uriAnalysisForAttributes(uri){
   var urir;
   if(uri.match(/\/[0-9]{14}\//g) == null){
-    urir = uri // one and the same
-  }else{
+    if(uri.match(/\/\*\//g) != null){ // incase the given URI is timemap URI-TM
+      tmIndicator = uri.match(/\/\*\//g)[0];
+      urir = uri.split(tmIndicator)[1]; // uri is here now
+      var prePartToURIR = uri.split(tmIndicator)[0];
+      var hdt = 4;
+      var primesource = "";
+      var ci = "all";
+      if(prePartToURIR.indexOf("archive-it") > -1){
+        primesource = "archiveit";
+        ci = parseInt(prePartToURIR.match(/org\/[0-9]*/g)[0].split("/")[1]); // checking for a numerical valuef or COllection Identifier
+        if(isNaN(ci)){
+            ci = "all";
+        }
+      }else if(prePartToURIR.indexOf("archive.org") > -1){
+        primesource = "internetarchive";
+      }else{
+        alert("not a valid input for URI, pass a valid URI-R || URI-M || URI-TM");
+        return false;
+      }
+      $('.argumentsForm #urirIP').val(urir);
+      $('.argumentsForm #collectionNo').val(ci);
+      $('.argumentsForm input[value='+primesource+']').prop("checked",true);
+
+    }else{
+      urir = uri; // one and the same - case where the URI-R is directly given
+    }
+  }else{ // Incase of URI-M
     dtstr = uri.match(/\/[0-9]{14}\//g)[0];
     urir = uri.split(dtstr)[1]; // uri is here now
     var prePartToURIR = uri.split(dtstr)[0];
