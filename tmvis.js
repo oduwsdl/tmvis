@@ -381,17 +381,13 @@ function PublicEndpoint () {
 
     headers['Content-Type'] = 'application/json' //'text/html'
     response.writeHead(200, headers)
-    // response.write('New client request urir: ' + query['urir'] + '\r\n> Primesource: ' + primeSource + '\r\n> Strategy: ' + strategy);
-    // response.end()
 
     ConsoleLogIfRequired('New client request urir: ' + query['urir'] + '\r\n> Primesource: ' + primeSource + '\r\n> Strategy: ' + strategy)
-
-
 
     if (!validator.isURL(uriR)) { // Return "invalid URL"
 
       consoleLogJSONError('Invalid URI')
-      response.writeHead(200, headers)
+      //response.writeHead(200, headers)
       response.write('Invalid urir \r\n')
       response.end()
       return
@@ -408,15 +404,11 @@ function PublicEndpoint () {
       collectionIdentifier = parseInt(query.ci)
     }
 
-
-
     // ByMahee -- setting the  incoming data from request into response Object
     response.thumbnails = [] // Carry the original query parameters over to the eventual response
     response.thumbnails['primesource'] = primeSource
     response.thumbnails['strategy'] = strategy
     response.thumbnails['collectionidentifier'] = collectionIdentifier
-
-
 
     /*TODO: include consideration for strategy parameter supplied here
             If we consider the strategy, we can simply use the TimeMap instead of the cache file
