@@ -91,7 +91,8 @@ var screenshotsLocation = "assets/screenshots/"
 var role = "stats"
 var noOfUniqueMementos = 0
 var totalMementos = 0
-var streamingRes
+var streamingRes = null
+var curSerReq = null
 
 ConsoleLogIfRequired("Hamming distance threshold set while running the server:"+HAMMING_DISTANCE_THRESHOLD)
 //return
@@ -123,8 +124,6 @@ function main () {
   if (!fs.existsSync(__dirname+"/logs")){
     fs.mkdirSync(__dirname+"/logs");
   }
-
-
 
 
   //startLocalAssetServer()  //- Now everything is made to be served from the same port.
@@ -173,7 +172,7 @@ function main () {
 
 
     //This route is just for testing, testing the SSE
-     app.get('/sse', (request, response) => {
+     app.get('/notifications/:usid', (request, response) => {
             sendSSE(request, response);
     })
 
@@ -201,6 +200,7 @@ function main () {
 
 function sendSSE(req, res) {
   streamingRes = res;
+  curSerReq = req;
   streamingRes.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
@@ -215,15 +215,22 @@ function sendSSE(req, res) {
 }
 
 function constructSSE(data) {
-  var id = (new Date()).toLocaleTimeString();
+  var id = Date.now();
+  var streamObj = {};
+  streamObj.data= data;
+  streamObj.usid = curSerReq.params.usid;
   streamingRes.write('id: ' + id + '\n');
-  streamingRes.write("data: " + data + '\n\n');
+  streamingRes.write("data: " + JSON.stringify(streamObj) + '\n\n');
 }
 
 function constructSSEForFinsh(data) {
-  var id = (new Date()).toLocaleTimeString();
+  var id = Date.now();
   streamingRes.write('id: ' + id + '\n');
-  streamingRes.write("data: " + data + '\n\n');
+  //streamingRes.write("data: " + data + '\n\n');
+  var streamObj = {};
+  streamObj.data= data;
+  streamObj.usid = curSerReq.params.usid;
+  streamingRes.write("data: " + JSON.stringify(streamObj) + '\n\n');
 }
 
 
@@ -374,17 +381,13 @@ function PublicEndpoint () {
 
     headers['Content-Type'] = 'application/json' //'text/html'
     response.writeHead(200, headers)
-    // response.write('New client request urir: ' + query['urir'] + '\r\n> Primesource: ' + primeSource + '\r\n> Strategy: ' + strategy);
-    // response.end()
 
     ConsoleLogIfRequired('New client request urir: ' + query['urir'] + '\r\n> Primesource: ' + primeSource + '\r\n> Strategy: ' + strategy)
-
-
 
     if (!validator.isURL(uriR)) { // Return "invalid URL"
 
       consoleLogJSONError('Invalid URI')
-      response.writeHead(200, headers)
+      //response.writeHead(200, headers)
       response.write('Invalid urir \r\n')
       response.end()
       return
@@ -401,15 +404,11 @@ function PublicEndpoint () {
       collectionIdentifier = parseInt(query.ci)
     }
 
-
-
     // ByMahee -- setting the  incoming data from request into response Object
     response.thumbnails = [] // Carry the original query parameters over to the eventual response
     response.thumbnails['primesource'] = primeSource
     response.thumbnails['strategy'] = strategy
     response.thumbnails['collectionidentifier'] = collectionIdentifier
-
-
 
     /*TODO: include consideration for strategy parameter supplied here
             If we consider the strategy, we can simply use the TimeMap instead of the cache file

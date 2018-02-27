@@ -1,6 +1,6 @@
 
 var jsonObjRes = {};
-
+var curURIUnderFocus=null;
 
 (function(window, document, undefined){
 
@@ -591,107 +591,186 @@ var jsonObjRes = {};
     });
 
 
-    // takes care of the drawbacks from timeline-setter resetting problem
-    window.onload = function() {
-    //  window.location.href = window.location.origin;
+  // takes care of the drawbacks from timeline-setter resetting problem
+  window.onload = function() {
+      //window.location.href = window.location.origin;
       //alert("Windows loaded back");
       if(localStorage.getItem("getStatsClicked") == "true"){
-        localStorage.setItem("getStatsClicked","false");
-        var curInputObj = JSON.parse(localStorage.getItem("curInputObj"));
+          localStorage.setItem("getStatsClicked","false");
+          var curInputObj = JSON.parse(localStorage.getItem("curInputObj"));
+          $('.argumentsForm #uriIP').val(curInputObj["uri"]);
+          $('.argumentsForm #urirIP').val(curInputObj["urir"]);
+          $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
+          $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
+          $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true);
+          getStats(); // this makes the call for getting the initial stats.
+      }else{
+        //alert("doesn't have the local storage set, using the Query parameters");
+        //GET Request-> "http://localhost:3000/GetResponse/?URI-R=http://4genderjustice.org/&ci=1068&primesource=archiveit&hdt=4"
 
-        $('.argumentsForm #urirIP').val(curInputObj["urir"]);
-        $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
-        $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
-        $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true);
-        role = curInputObj["role"];
-
-
-        var collectionIdentifer =curInputObj["collectionIdentifer"];
-        if(collectionIdentifer == ""){
-            collectionIdentifer = "all";
-        }
-        var hammingDistance = curInputObj["hammingDistance"];
-        if(hammingDistance == ""){
+        $('.argumentsForm #uriIP').val(getParameterByName("URI"));
+        $('.argumentsForm #urirIP').val(getParameterByName("URI-R"));
+        $('.argumentsForm #collectionNo').val( getParameterByName("ci"));
+        var hammingDistance = getParameterByName("hdt");
+        if(hammingDistance == "" || hammingDistance == undefined || hammingDistance == null){
             hammingDistance = 4;
         }
+        $('.argumentsForm #hammingDistance').val(hammingDistance);
+        $('.argumentsForm input[value='+getParameterByName("primesource") +']').prop("checked",true);
+        getStats();
+      }
+  }
 
-        if($("body").find("form")[0].checkValidity()){
-            event.preventDefault();
-            var ENDPOINT = "/alsummarizedtimemap";
-            var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
-            $("#busy-loader").show();
-            $('#serverStreamingModal .logsContent').empty();
-            $('#serverStreamingModal').modal('show');
+function uriAnalysisForAttributes(uri){
+  if(uri == ""){
+    return;
+  }
+  var urir;
+  if(uri.match(/\/[0-9]{14}\//g) == null){
+    if(uri.match(/\/\*\//g) != null){ // incase the given URI is timemap URI-TM
+      tmIndicator = uri.match(/\/\*\//g)[0];
+      urir = uri.split(tmIndicator)[1]; // uri is here now
+      var prePartToURIR = uri.split(tmIndicator)[0];
+      var hdt = 4;
+      var primesource = "";
+      var ci = "all";
+      if(prePartToURIR.indexOf("archive-it") > -1){
+        primesource = "archiveit";
+        ci = parseInt(prePartToURIR.match(/org\/[0-9]*/g)[0].split("/")[1]); // checking for a numerical valuef or COllection Identifier
+        if(isNaN(ci)){
+            ci = "all";
+        }
+      }else if(prePartToURIR.indexOf("archive.org") > -1){
+        primesource = "internetarchive";
+      }else{
+        alert("not a valid input for URI, pass a valid URI-R || URI-M || URI-TM");
+        return false;
+      }
+      $('.argumentsForm #urirIP').val(urir);
+      $('.argumentsForm #collectionNo').val(ci);
+      $('.argumentsForm input[value='+primesource+']').prop("checked",true);
 
-              $.ajax({
-                  type: "GET",
-                  url: address, // uncomment this for deployment
-                  dataType: "text",
-                  success: function( data, textStatus, jqXHR) {
-                      $("#busy-loader").hide();
-                      $('#serverStreamingModal .logsContent').empty();
-                      $('#serverStreamingModal').modal('hide');
-                      try{
-                          jsonObjRes= $.parseJSON(data);
-                          var memStatStr = jsonObjRes["totalmementos"]+" mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
-                          $(".statsWrapper .collection_stats").html(memStatStr);
-                          $(".statsWrapper").show();
-                          $(".getSummary").show();
+    }else{
+      urir = uri; // one and the same - case where the URI-R is directly given
+      $('.argumentsForm #urirIP').val(urir);
+    }
+  }else{ // Incase of URI-M
+    dtstr = uri.match(/\/[0-9]{14}\//g)[0];
+    urir = uri.split(dtstr)[1]; // uri is here now
+    var prePartToURIR = uri.split(dtstr)[0];
+    var hdt = 4;
+    var primesource = "";
+    var ci = "all";
+    if(prePartToURIR.indexOf("archive-it") > -1){
+      primesource = "archiveit";
+      ci = parseInt(prePartToURIR.match(/org\/[0-9]*/g)[0].split("/")[1]);
+      if(isNaN(ci)){
+          ci = "all";
+      }
+    }else if(prePartToURIR.indexOf("archive.org") > -1){
+      primesource = "internetarchive";
+    }else{
+      alert("not a valid input for URI, pass a valid URI-R or URI-M");
+      return false;
+    }
+    $('.argumentsForm #urirIP').val(urir);
+    $('.argumentsForm #collectionNo').val(ci);
+    $('.argumentsForm input[value='+primesource+']').prop("checked",true);
+  }
+}
 
-                          if(jsonObjRes["timetowait"] == 0){
-                            $(".approxTimeShowingPTag").html('Takes no time as the images are already captured, Click on Continue button');
 
-                          }else{
-                            $(".approxTimeShowingPTag").html('Takes about '+ jsonObjRes["timetowait"] +' minutes Approximately, Click on Continue button and please be patient');
-                          }
-                          $(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
-                          $(".modal-backdrop").remove();
+function getStats(){
+  var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+  if(collectionIdentifer == ""){
+      collectionIdentifer = "all";
+  }
+  var hammingDistance = $('.argumentsForm #hammingDistance').val();
+  if(hammingDistance == ""){
+      hammingDistance = 4;
+  }
+  var role = "stats";
+  if($("body").find("form")[0].checkValidity()){
+      event.preventDefault();
+      var ENDPOINT = "/alsummarizedtimemap";
+      var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+      $("#busy-loader").show();
+      $('#serverStreamingModal .logsContent').empty();
+      $('#serverStreamingModal').modal('show');
+        $.ajax({
+            type: "GET",
+            url: address, // uncomment this for deployment
+            dataType: "text",
+            success: function( data, textStatus, jqXHR) {
+                $("#busy-loader").hide();
+                $('#serverStreamingModal .logsContent').empty();
+                $('#serverStreamingModal').modal('hide');
+                try{
+                    jsonObjRes= $.parseJSON(data);
+                    var memStatStr = jsonObjRes["totalmementos"]+" mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
+                    $(".statsWrapper .collection_stats").html(memStatStr);
+                    $(".statsWrapper").show();
+                    $(".getSummary").show();
+
+                    if(jsonObjRes["timetowait"] == 0){
+                      $(".approxTimeShowingPTag").html('Takes no time as the images are already captured, Click on Continue button');
+
+                    }else{
+                      $(".approxTimeShowingPTag").html('Takes about '+ jsonObjRes["timetowait"] +' minutes Approximately, Click on Continue button and please be patient');
+                    }
+                    $(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
+                    $(".modal-backdrop").remove();
 
 
-                      }catch(err){
-                          alert($.trim(data));
-                          $('#serverStreamingModal .logsContent').empty();
-                            $('#serverStreamingModal').modal('hide');
-                          $(".statsWrapper").hide();
-                          $(".tabContentWrapper").hide();
-                      }
-                  },
-                  error: function( data, textStatus, jqXHR) {
-                    $("#busy-loader").hide();
+                }catch(err){
+                    alert($.trim(data));
                     $('#serverStreamingModal .logsContent').empty();
                       $('#serverStreamingModal').modal('hide');
-                    var errMsg = "Some problem fetching the response, Please try again.";
-                    alert(errMsg);
-                  }
-              });
+                    $(".statsWrapper").hide();
+                    $(".tabContentWrapper").hide();
+                }
+            },
+            error: function( data, textStatus, jqXHR) {
+              $("#busy-loader").hide();
+              $('#serverStreamingModal .logsContent').empty();
+                $('#serverStreamingModal').modal('hide');
+              var errMsg = "Some problem fetching the response, Please try again.";
+              alert(errMsg);
             }
-
-       }
-    }
-
-
+        });
+      }
+}
 
 
-   $(function(){
-     var source = new EventSource('/sse');
+$(function(){
+
+    // Analyses the input pattern and finds all the parameters
+    $(document).on('focusout','#uriIP',function(){
+          var uri = $(this).val();
+          uriAnalysisForAttributes(uri);
+    });
+    var uniqueSessionId = Date.now().toString();
+    console.log("current SessionID:"+ uniqueSessionId);
+    var source = new EventSource('/notifications/'+uniqueSessionId);
           source.onmessage = function(e) {
               console.log(e.data);
-              var curLog = "<p>"+e.data+"</p>";
-
-              if(e.data === "streamingStarted"){
-                  $('#serverStreamingModal .logsContent').empty();
-                    //$('#serverStreamingModal').modal('show');
+              var streamedObj = JSON.parse(e.data);
+              if(streamedObj.usid != uniqueSessionId){
+                  return false;
               }
-              else if( e.data === "readyToDisplay"){
+              var curLog = "<p>"+streamedObj.data+"</p>";
+              if(streamedObj.data === "streamingStarted"){
+                  $('#serverStreamingModal .logsContent').empty();
+                  //$('#serverStreamingModal').modal('show');
+              }
+              else if( streamedObj.data === "readyToDisplay"){
               //  alert(" Ready for display");
               //  $(".getSummary").trigger("click");
                 $('#serverStreamingModal .logsContent').empty();
                 $('#serverStreamingModal').modal('hide');
                 $(".tabContentWrapper").show();
-
-
               }
-              else if(e.data === "statssent"){
+              else if(streamedObj.data === "statssent"){
                   $('#serverStreamingModal .logsContent').empty();
                   $('#serverStreamingModal').modal('hide');
               }
@@ -701,11 +780,13 @@ var jsonObjRes = {};
                 //      scrollTop: $("#bottomModal").offset().top
                 //  }, 20);
               }
-           };
+          };
+
 
      // following is commented to first stabilise the single step process
     $(".getJSONFromServer").click(function(event){
         event.preventDefault();
+        uriAnalysisForAttributes($("#uriIP").val());
         $(".tabContentWrapper").hide();
         $(".statsWrapper").hide();
         var collectionIdentifer = $('.argumentsForm #collectionNo').val();
@@ -721,23 +802,25 @@ var jsonObjRes = {};
             event.preventDefault();
             localStorage.setItem("getStatsClicked", "true");
             var curInputJsobObj = {};
+            curInputJsobObj["uri"]= $("#uriIP").val();
             curInputJsobObj["urir"]= $("#urirIP").val();
             curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
             curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
             curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
             curInputJsobObj["role"]= role;
             localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
-            // window.location.reload();
-            window.location.href = window.location.origin;
+            //window.location.reload();
+            source.close();
+            window.location.href = window.location.origin+"?"+$(".argumentsForm").serialize();
+        }else{
+          if( $("#uriIP").val()==""){
+            alert("Please enter URI-R, required field.");
+          }
         }
       });
 
-
-
-
     // work around for the timeline setting stuff
     $(".getSummary").click(function(event){
-
       var collectionIdentifer = $('.argumentsForm #collectionNo').val();
       if(collectionIdentifer == ""){
           collectionIdentifer = "all";
@@ -746,7 +829,6 @@ var jsonObjRes = {};
       if(hammingDistance == ""){
           hammingDistance = 4;
       }
-
       var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
       if($("body").find("form")[0].checkValidity()){
             $(".getSummary").hide();
@@ -764,7 +846,6 @@ var jsonObjRes = {};
             success: function( data, textStatus, jqXHR) {
                 $("#busy-loader").hide();
                 $('#serverStreamingModal').modal('hide');
-
               try{
                   data = $.trim(data).split("...");
                   if(data.length > 1){
@@ -779,28 +860,24 @@ var jsonObjRes = {};
                   }
 
                   jsonObjRes= $.parseJSON(data);
-
                   // following code segment makes the screenshot URI got with event_html | event_html_similarto properties to a html fragment
                   jsonObjRes[0].event_html= "<img src='"+jsonObjRes[0].event_html+"' width='300px' />";
                   for(var i=1;i< jsonObjRes.length;i++){
                       jsonObjRes[i].event_html= "<img src='"+jsonObjRes[i].event_html+"' width='300px' />";
                       jsonObjRes[i].event_html_similarto= "<img src='"+jsonObjRes[i].event_html_similarto+"' width='300px' />";
                   }
-
-
                   $(".statsWrapper").show();
                    window.timeline = new Timeline(jsonObjRes);
                   // place where the notch width is being reduced t0 2px.
                   $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
                   // Color is changed in the Array at 284 line as that is the right place
-                 // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
+                  // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
                   new Zoom("in");
                   new Zoom("out");
                   var chooseNext = new Chooser("next");
                   var choosePrev = new Chooser("prev");
                   var chooseUniqueNext = new Chooser("uniquenext");
                   var chooseUniquePrev = new Chooser("uniqueprev");
-
                   chooseNext.click();
                   $(document).bind('keydown', function(e) {
                       if (e.keyCode === 39) {
@@ -811,7 +888,6 @@ var jsonObjRes = {};
                           return;
                       }
                   });
-
                   console.log(jsonObjRes);
                   drawImageGrid(jsonObjRes); // calling Image Grid Function here
                   drawImageSlider(jsonObjRes);
@@ -826,7 +902,6 @@ var jsonObjRes = {};
               }
             },
             error: function( data, textStatus, jqXHR) {
-
               var errMsg = "Some problem fetching the response, Please try again.";
               $("#busy-loader").hide();
               $('#serverStreamingModal').modal('hide');
@@ -835,6 +910,16 @@ var jsonObjRes = {};
           });
         }
     });
-
   });
 })(window, document);
+
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
