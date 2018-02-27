@@ -206,9 +206,8 @@ function sendSSE(req, res) {
   streamingRes = res;
   curSerReq = req;
   if(!streamedHashMapObj.has(req.cookies.clientId)){
-    streamedHashMapObj.set( req.cookies.clientId,[req,res])
+    streamedHashMapObj.set( req.cookies.clientId,res)
   }
-
   streamingRes.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
@@ -219,7 +218,7 @@ function sendSSE(req, res) {
   // setInterval(function() {
   //   constructSSE( data);
   // }, 5000);
-  constructSSE('Started streaming the events happening at the server side...',req.cookies.clientId);
+  //constructSSE('Started streaming the events happening at the server side...',req.cookies.clientId);
 }
 
 
@@ -227,15 +226,22 @@ function sendSSE(req, res) {
 function constructSSE(data,clientIdInCookie) {
   var id = Date.now();
   var streamObj = {};
+  var curResponseObj= null;
   streamObj.data= data;
   if(clientIdInCookie != undefined && clientIdInCookie != null){
     streamObj.usid = clientIdInCookie;
   }else{
     streamObj.usid = 100;
   }
-  //streamingRes = streamedHashMapObj.get(clientIdInCookie)[1];
-  streamingRes.write('id: ' + id + '\n');
-  streamingRes.write("data: " + JSON.stringify(streamObj) + '\n\n');
+  console.log("clientIdInCookie --->"+clientIdInCookie);
+
+  console.log("streamedHashMapObj keys--->",streamedHashMapObj.keys().toString(), streamedHashMapObj.count())
+
+  curResponseObj=streamedHashMapObj.get(clientIdInCookie);
+
+  console.log("Response Obj -->"+curResponseObj);
+  curResponseObj.write('id: ' + id + '\n')
+  curResponseObj.write("data: " + JSON.stringify(streamObj) + '\n\n')
 }
 
 function constructSSEForFinsh(data,clientIdInCookie) {
@@ -248,7 +254,7 @@ function constructSSEForFinsh(data,clientIdInCookie) {
     streamObj.usid = 100;
 
   }
-  //streamingRes = streamedHashMapObj.get(clientIdInCookie)[1];
+  streamingRes = streamedHashMapObj.get(clientIdInCookie)[1];
   streamingRes.write('id: ' + id + '\n');
   streamingRes.write("data: " + JSON.stringify(streamObj) + '\n\n');
 }
