@@ -10,9 +10,11 @@
   "dependencies": {
     "async": "*",
     "colors": "^1.1.2",
+    "cookie-parser": "^1.4.3",
     "es6-promise": "*",
     "express": "*",
     "fs-extra": "*",
+    "hashmap": "^2.3.0",
     "image-watermark": "0.0.7",
     "imagemagick": "*",
     "log": "^1.4.0",

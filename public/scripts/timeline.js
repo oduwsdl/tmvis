@@ -749,15 +749,13 @@ $(function(){
           var uri = $(this).val();
           uriAnalysisForAttributes(uri);
     });
-    var uniqueSessionId = Date.now().toString();
-    console.log("current SessionID:"+ uniqueSessionId);
-    var source = new EventSource('/notifications/'+uniqueSessionId);
+    var source = new EventSource('/notifications');
           source.onmessage = function(e) {
               console.log(e.data);
               var streamedObj = JSON.parse(e.data);
-              if(streamedObj.usid != uniqueSessionId){
-                  return false;
-              }
+              // if(streamedObj.usid != uniqueSessionId){
+              //     return false;
+              // }
               var curLog = "<p>"+streamedObj.data+"</p>";
               if(streamedObj.data === "streamingStarted"){
                   $('#serverStreamingModal .logsContent').empty();
