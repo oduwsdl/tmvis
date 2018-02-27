@@ -91,7 +91,8 @@ var screenshotsLocation = "assets/screenshots/"
 var role = "stats"
 var noOfUniqueMementos = 0
 var totalMementos = 0
-var streamingRes
+var streamingRes = null
+var curSerReq = null
 
 ConsoleLogIfRequired("Hamming distance threshold set while running the server:"+HAMMING_DISTANCE_THRESHOLD)
 //return
@@ -171,7 +172,7 @@ function main () {
 
 
     //This route is just for testing, testing the SSE
-     app.get('/sse/*', (request, response) => {
+     app.get('/notifications/:usid', (request, response) => {
             sendSSE(request, response);
     })
 
@@ -199,6 +200,7 @@ function main () {
 
 function sendSSE(req, res) {
   streamingRes = res;
+  curSerReq = req;
   streamingRes.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
@@ -213,15 +215,22 @@ function sendSSE(req, res) {
 }
 
 function constructSSE(data) {
-  var id = (new Date()).toLocaleTimeString();
+  var id = Date.now();
+  var streamObj = {};
+  streamObj.data= data;
+  streamObj.usid = curSerReq.params.usid;
   streamingRes.write('id: ' + id + '\n');
-  streamingRes.write("data: " + data + '\n\n');
+  streamingRes.write("data: " + JSON.stringify(streamObj) + '\n\n');
 }
 
 function constructSSEForFinsh(data) {
-  var id = (new Date()).toLocaleTimeString();
+  var id = Date.now();
   streamingRes.write('id: ' + id + '\n');
-  streamingRes.write("data: " + data + '\n\n');
+  //streamingRes.write("data: " + data + '\n\n');
+  var streamObj = {};
+  streamObj.data= data;
+  streamObj.usid = curSerReq.params.usid;
+  streamingRes.write("data: " + JSON.stringify(streamObj) + '\n\n');
 }
 
 

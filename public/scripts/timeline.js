@@ -622,6 +622,9 @@ var curURIUnderFocus=null;
   }
 
 function uriAnalysisForAttributes(uri){
+  if(uri == ""){
+    return;
+  }
   var urir;
   if(uri.match(/\/[0-9]{14}\//g) == null){
     if(uri.match(/\/\*\//g) != null){ // incase the given URI is timemap URI-TM
@@ -746,23 +749,28 @@ $(function(){
           var uri = $(this).val();
           uriAnalysisForAttributes(uri);
     });
-
-    var source = new EventSource('/sse/'+parseInt(Math.random()*1000000000));
+    var uniqueSessionId = Date.now().toString();
+    console.log("current SessionID:"+ uniqueSessionId);
+    var source = new EventSource('/notifications/'+uniqueSessionId);
           source.onmessage = function(e) {
               console.log(e.data);
-              var curLog = "<p>"+e.data+"</p>";
-              if(e.data === "streamingStarted"){
-                  $('#serverStreamingModal .logsContent').empty();
-                    //$('#serverStreamingModal').modal('show');
+              var streamedObj = JSON.parse(e.data);
+              if(streamedObj.usid != uniqueSessionId){
+                  return false;
               }
-              else if( e.data === "readyToDisplay"){
+              var curLog = "<p>"+streamedObj.data+"</p>";
+              if(streamedObj.data === "streamingStarted"){
+                  $('#serverStreamingModal .logsContent').empty();
+                  //$('#serverStreamingModal').modal('show');
+              }
+              else if( streamedObj.data === "readyToDisplay"){
               //  alert(" Ready for display");
               //  $(".getSummary").trigger("click");
                 $('#serverStreamingModal .logsContent').empty();
                 $('#serverStreamingModal').modal('hide');
                 $(".tabContentWrapper").show();
               }
-              else if(e.data === "statssent"){
+              else if(streamedObj.data === "statssent"){
                   $('#serverStreamingModal .logsContent').empty();
                   $('#serverStreamingModal').modal('hide');
               }
@@ -802,7 +810,12 @@ $(function(){
             curInputJsobObj["role"]= role;
             localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
             //window.location.reload();
+            source.close();
             window.location.href = window.location.origin+"?"+$(".argumentsForm").serialize();
+        }else{
+          if( $("#uriIP").val()==""){
+            alert("Please enter URI-R, required field.");
+          }
         }
       });
 
