@@ -137,6 +137,24 @@ function main () {
 
   app.use(cookieParser());
 
+    // set a cookie
+  app.use(function (request, response, next) {
+
+    if(request.cookies.clientId == undefined || request.cookies.clientId == null ||request.cookies.clientId == ""){
+      response.cookie('clientId',Date.now().toString())
+        console.log('cookie created successfully');
+    }else
+    {
+      // yes, cookie was already present
+      console.log('cookie already exists --->', request.cookies.clientId);
+    }
+
+
+
+    next(); // <-- important!
+  });
+
+
 // all the common  requests are logged via here
   app.use(morgan('common',{
     stream: accessLogStream
@@ -150,10 +168,12 @@ function main () {
 
   app.use(express.static(__dirname + '/public'));  //This route is just for testing
 
+
+
   app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
 
   app.get(['/','/index.html'], (request, response) => {
-    response.sendFile(__dirname + '/public/index.html');
+    response.sendFile(__dirname + '/public/index.html')
   })
 
   //This is just a hello test route
@@ -178,7 +198,6 @@ function main () {
 
     //This route is just for testing, testing the SSE
      app.get('/notifications', (request, response) => {
-       response.cookie('clientId',Date.now().toString())
        sendSSE(request, response);
     })
 
@@ -203,22 +222,27 @@ function main () {
 // SSE Related.
 
 function sendSSE(req, res) {
-  streamingRes = res;
-  curSerReq = req;
-  if(!streamedHashMapObj.has(req.cookies.clientId)){
-    streamedHashMapObj.set( req.cookies.clientId,res)
-  }
-  streamingRes.writeHead(200, {
+
+  res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive'
   });
 
-  // sends a SSE every 5 seconds on a single connection.
-  // setInterval(function() {
-  //   constructSSE( data);
-  // }, 5000);
-  //constructSSE('Started streaming the events happening at the server side...',req.cookies.clientId);
+
+    if(req.cookies.clientId !== "" && req.cookies.clientId !== undefined &&  req.cookies.clientId !== null){
+        if( !streamedHashMapObj.has(req.cookies.clientId)){
+          streamedHashMapObj.set(req.cookies.clientId,res)
+        }
+      }
+
+
+  //sends a SSE every 5 seconds on a single connection.
+  setInterval(function() {
+    constructSSE('Started streaming the events happening at the server side to --->'+req.cookies.clientId,req.cookies.clientId);
+  }, 2500);
+  constructSSE('streamingStarted',req.cookies.clientId);
+
 }
 
 
@@ -230,18 +254,21 @@ function constructSSE(data,clientIdInCookie) {
   streamObj.data= data;
   if(clientIdInCookie != undefined && clientIdInCookie != null){
     streamObj.usid = clientIdInCookie;
+
   }else{
     streamObj.usid = 100;
   }
   console.log("clientIdInCookie --->"+clientIdInCookie);
-
-  console.log("streamedHashMapObj keys--->",streamedHashMapObj.keys().toString(), streamedHashMapObj.count())
-
+  console.log("streamedHashMapObj keys --->"+streamedHashMapObj.keys().toString());
+  console.log("count --->"+ streamedHashMapObj.count())
   curResponseObj=streamedHashMapObj.get(clientIdInCookie);
+  if(curResponseObj != null){
+    console.log("From retrieved Response Obj -->"+curResponseObj);
+    curResponseObj.write('id: ' + id + '\n')
+    curResponseObj.write("data: " + JSON.stringify(streamObj) + '\n\n')
+  }
 
-  console.log("Response Obj -->"+curResponseObj);
-  curResponseObj.write('id: ' + id + '\n')
-  curResponseObj.write("data: " + JSON.stringify(streamObj) + '\n\n')
+
 }
 
 function constructSSEForFinsh(data,clientIdInCookie) {
@@ -252,7 +279,6 @@ function constructSSEForFinsh(data,clientIdInCookie) {
     streamObj.usid = clientIdInCookie;
   }else{
     streamObj.usid = 100;
-
   }
   streamingRes = streamedHashMapObj.get(clientIdInCookie)[1];
   streamingRes.write('id: ' + id + '\n');
@@ -288,8 +314,8 @@ function PublicEndpoint () {
     ConsoleLogIfRequired("Cookies------------------>"+request.cookies.clientId)
     constructSSE("streamingStarted",request.cookies.clientId);
      isResponseEnded = false //resetting the responseEnded indicator
-     response.clientId = Math.random() * 101 | 0  // Associate a simple random integer to the user for logging (this is not scalable with the implemented method)
-
+     //response.clientId = Math.random() * 101 | 0  // Associate a simple random integer to the user for logging (this is not scalable with the implemented method)
+     response.clientId = request.cookies.clientId
     var headers = {}
 
     // IE8 does not allow domains to be specified, just the *
