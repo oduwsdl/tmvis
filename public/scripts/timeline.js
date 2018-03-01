@@ -810,7 +810,7 @@ $(function(){
             curInputJsobObj["role"]= role;
             localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
             //window.location.reload();
-            source.close();
+          //  source.close();
             delete_cookie("clientId");
             window.location.href = window.location.origin+"?"+$(".argumentsForm").serialize();
         }else{
@@ -822,7 +822,7 @@ $(function(){
 
     // work around for the timeline setting stuff
     $(".getSummary").click(function(event){
-      delete_cookie("clientId");
+    //  delete_cookie("clientId");
       var collectionIdentifer = $('.argumentsForm #collectionNo').val();
       if(collectionIdentifer == ""){
           collectionIdentifer = "all";

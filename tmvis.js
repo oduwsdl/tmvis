@@ -195,9 +195,9 @@ function main () {
 
 
     //This route is just for testing, testing the SSE
-     app.get('/notifications', (request, response) => {
+   app.get('/notifications', (request, response) => {
        sendSSE(request, response);
-    })
+   })
 
 
 
@@ -227,6 +227,13 @@ function sendSSE(req, res) {
     'Connection': 'keep-alive'
   });
 
+
+
+    if(req.cookies.clientId !== "" && req.cookies.clientId !== undefined &&  req.cookies.clientId !== null){
+        if( !streamedHashMapObj.has(req.cookies.clientId)){
+            streamedHashMapObj.set(req.cookies.clientId,res)
+        }
+    }
 
 
 
@@ -259,7 +266,7 @@ function constructSSE(data,clientIdInCookie) {
     console.log("From retrieved Response Obj -->"+curResponseObj);
     curResponseObj.write('id: ' + id + '\n')
     curResponseObj.write("data: " + JSON.stringify(streamObj) + '\n\n')
-    if(data == "statssent" || data == "readyToDisplay"){
+    if(data == "readyToDisplay"){
         streamedHashMapObj.delete(clientIdInCookie)
     }
   }
@@ -307,6 +314,7 @@ function PublicEndpoint () {
   * @param response Currently active HTTP response to the client used to return information to the client based on the request
   */
   this.respondToClient = function (request, response) {
+
 
     ConsoleLogIfRequired("Cookies------------------>"+request.cookies.clientId)
     constructSSE("streamingStarted",request.cookies.clientId);
@@ -435,16 +443,11 @@ function PublicEndpoint () {
 
     headers['Content-Type'] = 'application/json' //'text/html'
     response.writeHead(200, headers)
-    if(request.cookies.clientId !== "" && request.cookies.clientId !== undefined &&  request.cookies.clientId !== null){
-        if( !streamedHashMapObj.has(request.cookies.clientId)){
-          streamedHashMapObj.set(request.cookies.clientId,response)
-        }
-      }
-
 
     ConsoleLogIfRequired('New client request urir: ' + query['urir'] + '\r\n> Primesource: ' + primeSource + '\r\n> Strategy: ' + strategy)
 
     if (!validator.isURL(uriR)) { // Return "invalid URL"
+
       consoleLogJSONError('Invalid URI')
       //response.writeHead(200, headers)
       response.write('Invalid urir \r\n')
@@ -1385,7 +1388,7 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (curCookieCl
 
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
-    2,
+    1,
     function( memento,callback){
       self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
     },
