@@ -149,8 +149,6 @@ function main () {
       console.log('cookie already exists --->', request.cookies.clientId);
     }
 
-
-
     next(); // <-- important!
   });
 
@@ -238,10 +236,10 @@ function sendSSE(req, res) {
 
 
   //sends a SSE every 5 seconds on a single connection.
-  setInterval(function() {
-    constructSSE('Started streaming the events happening at the server side to --->'+req.cookies.clientId,req.cookies.clientId);
-  }, 2500);
-  constructSSE('streamingStarted',req.cookies.clientId);
+  // setInterval(function() {
+  //   constructSSE('Started streaming the events happening at the server side to --->'+req.cookies.clientId,req.cookies.clientId);
+  // }, 2500);
+  // constructSSE('streamingStarted',req.cookies.clientId);
 
 }
 
@@ -266,6 +264,9 @@ function constructSSE(data,clientIdInCookie) {
     console.log("From retrieved Response Obj -->"+curResponseObj);
     curResponseObj.write('id: ' + id + '\n')
     curResponseObj.write("data: " + JSON.stringify(streamObj) + '\n\n')
+    if(data == "statssent" || data == "readyToDisplay"){
+        streamedHashMapObj.delete(clientIdInCookie)
+    }
   }
 
 
@@ -1337,7 +1338,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
   self.createScreenshotForMementoWithPuppeteer,
     function doneCreatingScreenshots (err) {      // When finished, check for errors
       constructSSE('Finished capturing all the required screenshots...',curCookieClientId)
-        constructSSEForFinsh('readyToDisplay')
+        constructSSE('readyToDisplay',curCookieClientId)
 
       if (err) {
         ConsoleLogIfRequired('Error creating screenshot',curCookieClientId)
@@ -1356,7 +1357,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
 * @param withCriteria Function to inclusively filter mementos, i.e. returned from criteria
 *                     function means a screenshot should be generated for it.
 */
-TimeMap.prototype.createScreenshotsForMementosFromCached = function (callback, withCriteria) {
+TimeMap.prototype.createScreenshotsForMementosFromCached = function (curCookieClientId,callback, withCriteria) {
   ConsoleLogIfRequired('Creating screenshots...')
 
   function hasScreenshot (e) {
@@ -1380,7 +1381,7 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (callback, w
 
     function doneCreatingScreenshots (err) {      // When finished, check for errors
       constructSSE('Finished capturing all the required screenshots...',curCookieClientId)
-        constructSSEForFinsh('readyToDisplay')
+        constructSSE('readyToDisplay',curCookieClientId)
       if (err) {
         ConsoleLogIfRequired('Error creating screenshot')
         ConsoleLogIfRequired(err)

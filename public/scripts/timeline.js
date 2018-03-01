@@ -761,7 +761,7 @@ $(function(){
               if(streamedObj.data === "streamingStarted"){
                   $('#serverStreamingModal .logsContent').empty();
                   // un comment the following line after POC
-                  $('#serverStreamingModal').modal('show');
+                $('#serverStreamingModal').modal('show');
               }
               else if( streamedObj.data === "readyToDisplay"){
               //  alert(" Ready for display");
@@ -811,6 +811,7 @@ $(function(){
             localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
             //window.location.reload();
             source.close();
+            delete_cookie("clientId");
             window.location.href = window.location.origin+"?"+$(".argumentsForm").serialize();
         }else{
           if( $("#uriIP").val()==""){
@@ -821,6 +822,7 @@ $(function(){
 
     // work around for the timeline setting stuff
     $(".getSummary").click(function(event){
+        delete_cookie("clientId");
       var collectionIdentifer = $('.argumentsForm #collectionNo').val();
       if(collectionIdentifer == ""){
           collectionIdentifer = "all";
@@ -918,6 +920,10 @@ function getCookie(name) {
   var parts = value.split("; " + name + "=");
   if (parts.length == 2) return parts.pop().split(";").shift();
 }
+
+function delete_cookie (name) {
+    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+};
 
 
 function getParameterByName(name, url) {
