@@ -749,19 +749,19 @@ $(function(){
           var uri = $(this).val();
           uriAnalysisForAttributes(uri);
     });
-    var uniqueSessionId = Date.now().toString();
-    console.log("current SessionID:"+ uniqueSessionId);
-    var source = new EventSource('/notifications/'+uniqueSessionId);
+    //var source = new EventSource('/notifications/'+getCookie("clientId"));
+    var source = new EventSource('/notifications');
           source.onmessage = function(e) {
               console.log(e.data);
               var streamedObj = JSON.parse(e.data);
-              if(streamedObj.usid != uniqueSessionId){
-                  return false;
-              }
+              // if(streamedObj.usid != uniqueSessionId){
+              //     return false;
+              // }
               var curLog = "<p>"+streamedObj.data+"</p>";
               if(streamedObj.data === "streamingStarted"){
                   $('#serverStreamingModal .logsContent').empty();
-                  //$('#serverStreamingModal').modal('show');
+                  // un comment the following line after POC
+                $('#serverStreamingModal').modal('show');
               }
               else if( streamedObj.data === "readyToDisplay"){
               //  alert(" Ready for display");
@@ -810,7 +810,8 @@ $(function(){
             curInputJsobObj["role"]= role;
             localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
             //window.location.reload();
-            source.close();
+          //  source.close();
+            delete_cookie("clientId");
             window.location.href = window.location.origin+"?"+$(".argumentsForm").serialize();
         }else{
           if( $("#uriIP").val()==""){
@@ -821,6 +822,7 @@ $(function(){
 
     // work around for the timeline setting stuff
     $(".getSummary").click(function(event){
+    //  delete_cookie("clientId");
       var collectionIdentifer = $('.argumentsForm #collectionNo').val();
       if(collectionIdentifer == ""){
           collectionIdentifer = "all";
@@ -912,6 +914,16 @@ $(function(){
     });
   });
 })(window, document);
+
+function getCookie(name) {
+  var value = "; " + document.cookie;
+  var parts = value.split("; " + name + "=");
+  if (parts.length == 2) return parts.pop().split(";").shift();
+}
+
+function delete_cookie (name) {
+    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+};
 
 
 function getParameterByName(name, url) {
