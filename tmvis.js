@@ -228,11 +228,6 @@ function sendSSE(req, res) {
   });
 
 
-    if(req.cookies.clientId !== "" && req.cookies.clientId !== undefined &&  req.cookies.clientId !== null){
-        if( !streamedHashMapObj.has(req.cookies.clientId)){
-          streamedHashMapObj.set(req.cookies.clientId,res)
-        }
-      }
 
 
   //sends a SSE every 5 seconds on a single connection.
@@ -312,6 +307,7 @@ function PublicEndpoint () {
   * @param response Currently active HTTP response to the client used to return information to the client based on the request
   */
   this.respondToClient = function (request, response) {
+
     ConsoleLogIfRequired("Cookies------------------>"+request.cookies.clientId)
     constructSSE("streamingStarted",request.cookies.clientId);
      isResponseEnded = false //resetting the responseEnded indicator
@@ -439,11 +435,16 @@ function PublicEndpoint () {
 
     headers['Content-Type'] = 'application/json' //'text/html'
     response.writeHead(200, headers)
+    if(request.cookies.clientId !== "" && request.cookies.clientId !== undefined &&  request.cookies.clientId !== null){
+        if( !streamedHashMapObj.has(request.cookies.clientId)){
+          streamedHashMapObj.set(request.cookies.clientId,response)
+        }
+      }
+
 
     ConsoleLogIfRequired('New client request urir: ' + query['urir'] + '\r\n> Primesource: ' + primeSource + '\r\n> Strategy: ' + strategy)
 
     if (!validator.isURL(uriR)) { // Return "invalid URL"
-
       consoleLogJSONError('Invalid URI')
       //response.writeHead(200, headers)
       response.write('Invalid urir \r\n')
@@ -552,6 +553,7 @@ function cleanSystemData (cb) {
 function processWithFileContents (fileContents, response,curCookieClientId) {
 
   var t = createMementosFromJSONFile(fileContents)
+   t.curClientId = curCookieClientId
    t.originalURI = uriR
   /* ByMahee -- unnessessary for the current need
   t.printMementoInformation(response, null, false) */
@@ -564,6 +566,7 @@ function processWithFileContents (fileContents, response,curCookieClientId) {
           function (callback) {t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback)},
           function (callback) {t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback)},
           function (callback) {
+            ConsoleLogIfRequired('****************curCookieClientId from processWithFileContents ->'+curCookieClientId +' *********')
             t.createScreenshotsForMementos(curCookieClientId,response,callback)
           },
           function (callback) {
@@ -890,6 +893,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
     function (callback) {
 
         if(isToComputeBoth){
+
           t.createScreenshotsForMementos(curCookieClientId,response,callback);
         }
         else if (callback) {
@@ -1303,7 +1307,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
 
   // to respond to the client as the intermediate response, while the server processes huge loads
   var noOfThumbnailsSelectedToBeCaptured = getNotExistingCapturesCount(self.mementos.filter(criteria))
-
+  constructSSE('No of screenshots to be captured -> <h4>'+noOfThumbnailsSelectedToBeCaptured +'</h4>',curCookieClientId)
   // breaking the control and returning the stats if the the request is made for status
   if(role == "stats"){
     var statsObj={
@@ -1320,6 +1324,8 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
   }
 
   ConsoleLogIfRequired('Creating screenshots...')
+  ConsoleLogIfRequired('Started the process of capturing the screenshots...',curCookieClientId)
+
   constructSSE('Started the process of capturing the screenshots...',curCookieClientId)
 
   if (noOfThumbnailsSelectedToBeCaptured >= 2) {
@@ -1333,10 +1339,14 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
 
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
-    1,
-  //  self.createScreenshotForMemento,            // Create a screenshot
-  self.createScreenshotForMementoWithPuppeteer,
+    1,function( memento,callback){
+      ConsoleLogIfRequired('************curCookieClientId just before calling  createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'************')
+      self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
+    } ,
     function doneCreatingScreenshots (err) {      // When finished, check for errors
+
+      ConsoleLogIfRequired('Finished capturing all the required screenshots...'+curCookieClientId)
+
       constructSSE('Finished capturing all the required screenshots...',curCookieClientId)
         constructSSE('readyToDisplay',curCookieClientId)
 
@@ -1376,8 +1386,9 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (curCookieCl
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
     2,
-  //  self.createScreenshotForMemento,            // Create a screenshot
-    self.createScreenshotForMementoWithPuppeteer,
+    function( memento,callback){
+      self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
+    },
 
     function doneCreatingScreenshots (err) {      // When finished, check for errors
       constructSSE('Finished capturing all the required screenshots...',curCookieClientId)
@@ -1394,8 +1405,9 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (curCookieCl
 
 
 // createScreenshotForMemento through puppeteer
-TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (memento, callback) {
+TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieClientId,memento,callback) {
   var uri = memento.uri
+  ConsoleLogIfRequired('********** curCookieClientId in createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'***************')
 
   var regExpForDTStr = /\/\d{14}id_\/|\d{14}\// //to match something like /12345678912345id_/
   var matchedString = uri.match(regExpForDTStr)
@@ -1415,6 +1427,7 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (memento, c
         ConsoleLogIfRequired(e)
         ConsoleLogIfRequired(r)
       })
+
     constructSSE(memento.screenshotURI + ' already exists...',curCookieClientId)
     ConsoleLogIfRequired(memento.screenshotURI + ' already exists...continuing',curCookieClientId)
     callback()
