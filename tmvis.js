@@ -170,9 +170,19 @@ function main () {
 
   app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
 
+  //app.get(['/','/index.html','/alsummarizedview/:primesource/:ci/:hdt/:role/*'], (request, response) => {
   app.get(['/','/index.html'], (request, response) => {
     response.sendFile(__dirname + '/public/index.html')
   })
+
+
+  app.get('/alsummarizedview/:primesource/:ci/:hdt/:role/*', (request, response) => {
+    response.sendFile(__dirname + '/public/index.html')
+    response.end()
+  })
+
+
+
 
   //This is just a hello test route
    app.get('/hello', (request, response) => {
@@ -288,13 +298,6 @@ function constructSSEForFinsh(data,clientIdInCookie) {
   streamingRes.write("data: " + JSON.stringify(streamObj) + '\n\n');
 }
 
-
-// function getCook(cookiename) {
-//   // Get name followed by anything except a semicolon
-//   var cookiestring=RegExp(""+cookiename+"[^;]+").exec(document.cookie);
-//   // Return everything after the equal sign, or an empty string if the cookie name not found
-//   return decodeURIComponent(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./,"") : "");
-// }
 
 /**
 * Setup the public-facing attributes of the service
