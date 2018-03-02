@@ -171,16 +171,9 @@ function main () {
   app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
 
   //app.get(['/','/index.html','/alsummarizedview/:primesource/:ci/:hdt/:role/*'], (request, response) => {
-  app.get(['/','/index.html'], (request, response) => {
+  app.get(['/','/index.html','/alsummarizedview/:primesource/:ci/:hdt/:role/*'], (request, response) => {
     response.sendFile(__dirname + '/public/index.html')
   })
-
-
-  app.get('/alsummarizedview/:primesource/:ci/:hdt/:role/*', (request, response) => {
-    response.sendFile(__dirname + '/public/index.html')
-    response.end()
-  })
-
 
 
 

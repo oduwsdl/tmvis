@@ -973,6 +973,7 @@ function updateDeepLinkStateArr() {
         curDeepLinkStateArr[2] = deepLinkParts[2];
         curDeepLinkStateArr[3]= deepLinkParts[3];
         curDeepLinkStateArr[5] = deepLinkStr.split("/"+deepLinkParts[4]+"/")[1];
+        return true;
       }
     }else{
       alert("Something went wrong with the request URI");
