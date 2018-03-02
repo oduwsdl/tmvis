@@ -64,6 +64,8 @@ var colors = require('colors')
 var im = require('imagemagick')
 var rimraf = require('rimraf')
 const puppeteer = require('puppeteer');
+var HashMap = require('hashmap');
+var cookieParser = require("cookie-parser");
 
 //var faye = require('faye') // For status-based notifications to client
 
@@ -93,7 +95,7 @@ var noOfUniqueMementos = 0
 var totalMementos = 0
 var streamingRes = null
 var curSerReq = null
-
+var streamedHashMapObj = new HashMap();
 ConsoleLogIfRequired("Hamming distance threshold set while running the server:"+HAMMING_DISTANCE_THRESHOLD)
 //return
 /* *******************************
@@ -132,6 +134,25 @@ function main () {
   // create a write stream (in append mode)
   var accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs' ,'access.log'), {flags: 'a'})
   var exceptionLogStream = fs.createWriteStream(path.join(__dirname, 'logs' ,'exception.log'), {flags: 'a'})
+
+  app.use(cookieParser());
+
+    // set a cookie
+  app.use(function (request, response, next) {
+
+    if(request.cookies.clientId == undefined || request.cookies.clientId == null ||request.cookies.clientId == ""){
+      response.cookie('clientId',Date.now().toString())
+        console.log('cookie created successfully');
+    }else
+    {
+      // yes, cookie was already present
+      console.log('cookie already exists --->', request.cookies.clientId);
+    }
+
+    next(); // <-- important!
+  });
+
+
 // all the common  requests are logged via here
   app.use(morgan('common',{
     stream: accessLogStream
@@ -145,10 +166,12 @@ function main () {
 
   app.use(express.static(__dirname + '/public'));  //This route is just for testing
 
+
+
   app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
 
   app.get(['/','/index.html'], (request, response) => {
-    response.sendFile(__dirname + '/public/index.html');
+    response.sendFile(__dirname + '/public/index.html')
   })
 
   //This is just a hello test route
@@ -172,11 +195,9 @@ function main () {
 
 
     //This route is just for testing, testing the SSE
-     app.get('/notifications/:usid', (request, response) => {
-            sendSSE(request, response);
-    })
-
-
+   app.get('/notifications', (request, response) => {
+       sendSSE(request, response);
+   })
 
 
 
@@ -199,44 +220,81 @@ function main () {
 // SSE Related.
 
 function sendSSE(req, res) {
-  streamingRes = res;
-  curSerReq = req;
-  streamingRes.writeHead(200, {
+
+  res.writeHead(200, {
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive'
   });
 
-  // sends a SSE every 5 seconds on a single connection.
+
+
+    if(req.cookies.clientId !== "" && req.cookies.clientId !== undefined &&  req.cookies.clientId !== null){
+        if( !streamedHashMapObj.has(req.cookies.clientId)){
+            streamedHashMapObj.set(req.cookies.clientId,res)
+        }
+    }
+
+
+
+  //sends a SSE every 5 seconds on a single connection.
   // setInterval(function() {
-  //   constructSSE( data);
-  // }, 5000);
-  constructSSE('Started streaming the events happening at the server side...');
+  //   constructSSE('Started streaming the events happening at the server side to --->'+req.cookies.clientId,req.cookies.clientId);
+  // }, 2500);
+  // constructSSE('streamingStarted',req.cookies.clientId);
+
 }
 
-function constructSSE(data) {
+
+
+function constructSSE(data,clientIdInCookie) {
+  var id = Date.now();
+  var streamObj = {};
+  var curResponseObj= null;
+  streamObj.data= data;
+  if(clientIdInCookie != undefined && clientIdInCookie != null){
+    streamObj.usid = clientIdInCookie;
+
+  }else{
+    streamObj.usid = 100;
+  }
+  console.log("clientIdInCookie --->"+clientIdInCookie);
+  console.log("streamedHashMapObj keys --->"+streamedHashMapObj.keys().toString());
+  console.log("count --->"+ streamedHashMapObj.count())
+  curResponseObj=streamedHashMapObj.get(clientIdInCookie);
+  if(curResponseObj != null){
+    console.log("From retrieved Response Obj -->"+curResponseObj);
+    curResponseObj.write('id: ' + id + '\n')
+    curResponseObj.write("data: " + JSON.stringify(streamObj) + '\n\n')
+    if(data == "readyToDisplay"){
+        streamedHashMapObj.delete(clientIdInCookie)
+    }
+  }
+
+
+}
+
+function constructSSEForFinsh(data,clientIdInCookie) {
   var id = Date.now();
   var streamObj = {};
   streamObj.data= data;
-  streamObj.usid = curSerReq.params.usid;
+  if(clientIdInCookie){
+    streamObj.usid = clientIdInCookie;
+  }else{
+    streamObj.usid = 100;
+  }
+  streamingRes = streamedHashMapObj.get(clientIdInCookie)[1];
   streamingRes.write('id: ' + id + '\n');
   streamingRes.write("data: " + JSON.stringify(streamObj) + '\n\n');
 }
 
-function constructSSEForFinsh(data) {
-  var id = Date.now();
-  streamingRes.write('id: ' + id + '\n');
-  //streamingRes.write("data: " + data + '\n\n');
-  var streamObj = {};
-  streamObj.data= data;
-  streamObj.usid = curSerReq.params.usid;
-  streamingRes.write("data: " + JSON.stringify(streamObj) + '\n\n');
-}
 
-
-
-
-
+// function getCook(cookiename) {
+//   // Get name followed by anything except a semicolon
+//   var cookiestring=RegExp(""+cookiename+"[^;]+").exec(document.cookie);
+//   // Return everything after the equal sign, or an empty string if the cookie name not found
+//   return decodeURIComponent(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./,"") : "");
+// }
 
 /**
 * Setup the public-facing attributes of the service
@@ -256,9 +314,13 @@ function PublicEndpoint () {
   * @param response Currently active HTTP response to the client used to return information to the client based on the request
   */
   this.respondToClient = function (request, response) {
-    constructSSE("streamingStarted");
+
+
+    ConsoleLogIfRequired("Cookies------------------>"+request.cookies.clientId)
+    constructSSE("streamingStarted",request.cookies.clientId);
      isResponseEnded = false //resetting the responseEnded indicator
-    response.clientId = Math.random() * 101 | 0  // Associate a simple random integer to the user for logging (this is not scalable with the implemented method)
+     //response.clientId = Math.random() * 101 | 0  // Associate a simple random integer to the user for logging (this is not scalable with the implemented method)
+     response.clientId = request.cookies.clientId
     var headers = {}
 
     // IE8 does not allow domains to be specified, just the *
@@ -424,7 +486,7 @@ function PublicEndpoint () {
       var cacheFile = new SimhashCacheFile( primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+uriR,isDebugMode)
       cacheFile.path += '.json'
       ConsoleLogIfRequired('Checking if a cache file exists for ' + query['urir'] + '...')
-      constructSSE('Checking if a cache file exists for ' + query['urir'] + '...')
+      constructSSE('Checking if a cache file exists for ' + query['urir'] + '...',request.cookies.clientId)
 
 
     //  ConsoleLogIfRequired('cacheFile: '+JSON.stringify(cacheFile))
@@ -437,11 +499,11 @@ function PublicEndpoint () {
 
             if(isToOverrideCachedSimHash){
               ConsoleLogIfRequired("Responded to compute latest simhahes, Proceeding....");
-              getTimemapGodFunctionForAlSummarization(query['urir'], response)
+              getTimemapGodFunctionForAlSummarization(query['urir'], response,request.cookies.clientId)
             }else{
               ConsoleLogIfRequired("Responded to continue with the exisitng cached simhashes file. Proceeding..");
-              constructSSE('cached simhashes exist, proceeding with cache...')
-              processWithFileContents(data, response)
+              constructSSE('cached simhashes exist, proceeding with cache...',request.cookies.clientId)
+              processWithFileContents(data, response,request.cookies.clientId)
             }
           //ByMahee -- UnComment Following Line(UCF)
          //  processWithFileContents(data, response)
@@ -449,9 +511,9 @@ function PublicEndpoint () {
         function failed () {
           //ByMahee -- calling the core function responsible for AlSummarization, if the cached file doesn't exist
           ConsoleLogIfRequired("**ByMahee** -- readFileContents : Inside Failed ReadFile Content (meaning file doesn't exist), getTimemapGodFunctionForAlSummarization is called next ")
-          constructSSE("cached simhashes doesn't exist, proceeding to compute the simhashes...")
+          constructSSE("cached simhashes doesn't exist, proceeding to compute the simhashes...",request.cookies.clientId)
 
-          getTimemapGodFunctionForAlSummarization(query['urir'], response)
+          getTimemapGodFunctionForAlSummarization(query['urir'], response,request.cookies.clientId)
         }
 
       )
@@ -491,9 +553,10 @@ function cleanSystemData (cb) {
 * @param fileContents JSON string consistenting of an array of mementos
 * @param response handler to client's browser interface
 */
-function processWithFileContents (fileContents, response) {
+function processWithFileContents (fileContents, response,curCookieClientId) {
 
   var t = createMementosFromJSONFile(fileContents)
+   t.curClientId = curCookieClientId
    t.originalURI = uriR
   /* ByMahee -- unnessessary for the current need
   t.printMementoInformation(response, null, false) */
@@ -503,13 +566,14 @@ function processWithFileContents (fileContents, response) {
   console.log(JSON.stringify(t));
     if(isToComputeBoth){
         async.series([
-          function (callback) {t.calculateHammingDistancesWithOnlineFiltering(callback)},
+          function (callback) {t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback)},
           function (callback) {t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback)},
           function (callback) {
-            t.createScreenshotsForMementos(response,callback)
+            ConsoleLogIfRequired('****************curCookieClientId from processWithFileContents ->'+curCookieClientId +' *********')
+            t.createScreenshotsForMementos(curCookieClientId,response,callback)
           },
           function (callback) {
-            constructSSE('Writing the data into cache file for future use...')
+            constructSSE('Writing the data into cache file for future use...',curCookieClientId)
             t.writeThumbSumJSONOPToCache(response)
           }
         ],
@@ -519,7 +583,7 @@ function processWithFileContents (fileContents, response) {
             console.log('ERROR!')
             console.log(err)
           } else {
-            constructSSE('Finshed writing into cache...')
+            constructSSE('Finshed writing into cache...',curCookieClientId)
             console.log('There were no errors executing the callback chain')
 
 
@@ -564,14 +628,14 @@ Memento.prototype.simhashIndicatorForHTTP302 = '00000000'
 /**
 * Fetch URI-M HTML contents and generate a Simhash
 */
-Memento.prototype.setSimhash = function (callback) {
+Memento.prototype.setSimhash = function (curCookieClientId,callback) {
   // Retain the urir for reference in the promise (this context lost with async)
   var thaturi = this.uri
   var thatmemento = this
     var buffer2 = ''
     var memento = this // Potentially unused? The 'this' reference will be relative to the promise here
     var mOptions = url.parse(thaturi)
-    constructSSE('Memento under processing -> '+thaturi)
+    constructSSE('Memento under processing -> '+thaturi, curCookieClientId)
     ConsoleLogIfRequired('Starting a simhash: ' + mOptions.host + mOptions.path)
     var req = http.request({
       'host': mOptions.host,
@@ -617,7 +681,7 @@ Memento.prototype.setSimhash = function (callback) {
 
           var sh = simhash((buffer2).split('')).join('')
          ConsoleLogIfRequired("ByMahee -- computed simhash for "+mOptions.host+mOptions.path+" -> "+ sh)
-         constructSSE('computed simhash for '+mOptions.host+mOptions.path +' -> '+ sh)
+         constructSSE('computed simhash for '+mOptions.host+mOptions.path +' -> '+ sh,curCookieClientId)
 
           var retStr = getHexString(sh)
 
@@ -647,7 +711,7 @@ Memento.prototype.setSimhash = function (callback) {
       })
 
       outputBuffer.on('error', function (err) {
-        constructSSE('Error generating the simhash');
+        constructSSE('Error generating the simhash',curCookieClientId);
 
         ConsoleLogIfRequired('Error generating Simhash in Response')
       })
@@ -668,7 +732,7 @@ Memento.prototype.setSimhash = function (callback) {
 * TODO: God function that does WAY more than simply getting a timemap
 * @param uri The urir in-question
 */
-function getTimemapGodFunctionForAlSummarization (uri, response) {
+function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientId) {
   ConsoleLogIfRequired("--ByMahee -- Inside function : getTimemapGodFunctionForAlSummarization")
   ConsoleLogIfRequired("--ByMahee -- Applying AlSummarization on given urir = "+ uri)
 
@@ -709,12 +773,12 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     // TODO: define how this is different from the getTimemap() parent function (i.e., some name clarification is needed)
     // TODO: abstract this method to its callback form. Currently, this is reaching and populating the timemap out of scope and can't be simply isolated (I tried)
     function fetchTimemap (callback) {
-      constructSSE('Http Request made to fetch the timemap...')
+      constructSSE('Http Request made to fetch the timemap...',curCookieClientId)
 
       var req = http.request(options, function (res) {
          ConsoleLogIfRequired("--ByMahee-- Inside the http request call back success, request is made on the following obect:")
-        constructSSE('streamingStarted')
-        constructSSE('Writing the data response into buffer..')
+        constructSSE('streamingStarted',curCookieClientId)
+        constructSSE('Writing the data response into buffer..',curCookieClientId)
         // ConsoleLogIfRequired(options);
         // ConsoleLogIfRequired("----------------");
         res.setEncoding('utf8')
@@ -749,12 +813,12 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
             }
 
             ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
-            constructSSE('Timemap fetched has a total of '+t.mementos.length + ' mementos.')
+            constructSSE('Timemap fetched has a total of '+t.mementos.length + ' mementos.',curCookieClientId)
 
             // to respond to the client as the intermediate response, while the server processes huge loads
            if(t.mementos.length > 250){
 
-            constructSSE('Might aprroximately take  <h3>  ' + Math.ceil((t.mementos.length)/(60*4))  +' Minutes ...<h3> to compute simhashes')
+            constructSSE('Might aprroximately take  <h3>  ' + Math.ceil((t.mementos.length)/(60*4))  +' Minutes ...<h3> to compute simhashes',curCookieClientId)
 
             // now that streaming is in place, dont bother about sending an intermediate response
             //  response.write('Request being processed, Please retry approximately after ( ' + Math.ceil(((t.mementos.length/50)  * 10)/60)  +' Minutes ) and request again...')
@@ -766,10 +830,10 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
             callback('')
           }else{
             ConsoleLogIfRequired('The page you requested has not been archived.')
-            constructSSE('The page requested has not been archived.')
+            constructSSE('The page requested has not been archived.',curCookieClientId)
 
              //process.exit(-1)
-             response.write('The page you requested has not been archived.')
+             response.write('The page you requested has not been archived.',)
              response.end()
                return
 
@@ -782,7 +846,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
         ConsoleLogIfRequired(e)
         if (e.message === 'connect ETIMEDOUT') { // Error experienced when IA went down on 20141211
           ConsoleLogIfRequired('Hmm, the connection timed out. Internet Archive might be down.')
-          constructSSE('the connection timed out, prime source of archive might be down.')
+          constructSSE('the connection timed out, prime source of archive might be down.',curCookieClientId)
 
           response.write('Hmm, the connection timed out. Internet Archive might be down.')
           response.end()
@@ -807,12 +871,12 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP */
 
     // -- ByMahee -- Uncomment one by one for CLI_JSON
-    function (callback) {t.calculateSimhashes(callback);},
+    function (callback) {t.calculateSimhashes(curCookieClientId,callback);},
     function (callback) {t.saveSimhashesToCache(callback);},
 
     function (callback) {
         if(isToComputeBoth){
-          t.calculateHammingDistancesWithOnlineFiltering(callback);
+          t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback);
         }
         else if (callback) {
           callback('')
@@ -832,7 +896,8 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
     function (callback) {
 
         if(isToComputeBoth){
-          t.createScreenshotsForMementos(response,callback);
+
+          t.createScreenshotsForMementos(curCookieClientId,response,callback);
         }
         else if (callback) {
           callback('')
@@ -889,7 +954,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response) {
    // SUPPLEMENTAL TIMEMAP FUNCTIONALITY
 ***************************************** */
 
-TimeMap.prototype.calculateSimhashes = function (callback) {
+TimeMap.prototype.calculateSimhashes = function (curCookieClientId,callback) {
   //ConsoleLogIfRequired("--- By Mahee - For my understanding")
   //ConsoleLogIfRequired("Inside CalculateSimhashes")
   var theTimeMap = this
@@ -897,7 +962,7 @@ TimeMap.prototype.calculateSimhashes = function (callback) {
 
   // the way to get a damper, just 7 requests at a time.
   async.eachLimit(this.mementos,5, function(curMemento, callback){
-    curMemento.setSimhash(callback)
+    curMemento.setSimhash(curCookieClientId,callback)
   //  ConsoleLogIfRequired(curMemento)
   }, function(err) {
     //  ConsoleLogIfRequired("length of arrayOfSetSimhashFunctions: -> " + arrayOfSetSimhashFunctions.length);
@@ -1227,7 +1292,7 @@ TimeMap.prototype.supplySelectedMementosAScreenshotURI = function (strategy,call
 * @param withCriteria Function to inclusively filter mementos, i.e. returned from criteria
 *                     function means a screenshot should be generated for it.
 */
-TimeMap.prototype.createScreenshotsForMementos = function (response,callback, withCriteria) {
+TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,response,callback, withCriteria) {
 
 
   function hasScreenshot (e) {
@@ -1245,7 +1310,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
 
   // to respond to the client as the intermediate response, while the server processes huge loads
   var noOfThumbnailsSelectedToBeCaptured = getNotExistingCapturesCount(self.mementos.filter(criteria))
-
+  constructSSE('No of screenshots to be captured -> <h4>'+noOfThumbnailsSelectedToBeCaptured +'</h4>',curCookieClientId)
   // breaking the control and returning the stats if the the request is made for status
   if(role == "stats"){
     var statsObj={
@@ -1253,8 +1318,8 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
        'unique': noOfUniqueMementos,
        'timetowait': Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)
     }
-    constructSSE('Stats built and ready to serve...')
-    constructSSE('statssent')
+    constructSSE('Stats built and ready to serve...',curCookieClientId)
+    constructSSE('statssent',curCookieClientId)
 
     response.write(JSON.stringify(statsObj))
     response.end()
@@ -1262,7 +1327,9 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
   }
 
   ConsoleLogIfRequired('Creating screenshots...')
-  constructSSE('Started the process of capturing the screenshots...')
+  ConsoleLogIfRequired('Started the process of capturing the screenshots...',curCookieClientId)
+
+  constructSSE('Started the process of capturing the screenshots...',curCookieClientId)
 
   if (noOfThumbnailsSelectedToBeCaptured >= 2) {
     constructSSE('Might approximately take <h3>' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)  +' Minutes <h3> to capture screen shots. Please be patient....')
@@ -1275,15 +1342,19 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
 
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
-    1,
-  //  self.createScreenshotForMemento,            // Create a screenshot
-  self.createScreenshotForMementoWithPuppeteer,
+    1,function( memento,callback){
+      ConsoleLogIfRequired('************curCookieClientId just before calling  createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'************')
+      self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
+    } ,
     function doneCreatingScreenshots (err) {      // When finished, check for errors
-      constructSSE('Finished capturing all the required screenshots...')
-        constructSSEForFinsh('readyToDisplay')
+
+      ConsoleLogIfRequired('Finished capturing all the required screenshots...'+curCookieClientId)
+
+      constructSSE('Finished capturing all the required screenshots...',curCookieClientId)
+        constructSSE('readyToDisplay',curCookieClientId)
 
       if (err) {
-        ConsoleLogIfRequired('Error creating screenshot')
+        ConsoleLogIfRequired('Error creating screenshot',curCookieClientId)
 
         ConsoleLogIfRequired(err)
       }
@@ -1299,7 +1370,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (response,callback, wi
 * @param withCriteria Function to inclusively filter mementos, i.e. returned from criteria
 *                     function means a screenshot should be generated for it.
 */
-TimeMap.prototype.createScreenshotsForMementosFromCached = function (callback, withCriteria) {
+TimeMap.prototype.createScreenshotsForMementosFromCached = function (curCookieClientId,callback, withCriteria) {
   ConsoleLogIfRequired('Creating screenshots...')
 
   function hasScreenshot (e) {
@@ -1317,13 +1388,14 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (callback, w
 
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
-    2,
-  //  self.createScreenshotForMemento,            // Create a screenshot
-    self.createScreenshotForMementoWithPuppeteer,
+    1,
+    function( memento,callback){
+      self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
+    },
 
     function doneCreatingScreenshots (err) {      // When finished, check for errors
-      constructSSE('Finished capturing all the required screenshots...')
-        constructSSEForFinsh('readyToDisplay')
+      constructSSE('Finished capturing all the required screenshots...',curCookieClientId)
+        constructSSE('readyToDisplay',curCookieClientId)
       if (err) {
         ConsoleLogIfRequired('Error creating screenshot')
         ConsoleLogIfRequired(err)
@@ -1336,8 +1408,9 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (callback, w
 
 
 // createScreenshotForMemento through puppeteer
-TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (memento, callback) {
+TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieClientId,memento,callback) {
   var uri = memento.uri
+  ConsoleLogIfRequired('********** curCookieClientId in createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'***************')
 
   var regExpForDTStr = /\/\d{14}id_\/|\d{14}\// //to match something like /12345678912345id_/
   var matchedString = uri.match(regExpForDTStr)
@@ -1357,8 +1430,9 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (memento, c
         ConsoleLogIfRequired(e)
         ConsoleLogIfRequired(r)
       })
-    constructSSE(memento.screenshotURI + ' already exists...')
-    ConsoleLogIfRequired(memento.screenshotURI + ' already exists...continuing')
+
+    constructSSE(memento.screenshotURI + ' already exists...',curCookieClientId)
+    ConsoleLogIfRequired(memento.screenshotURI + ' already exists...continuing',curCookieClientId)
     callback()
     return
   }catch (e) {
@@ -1384,13 +1458,13 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (memento, c
   // }
 
   ConsoleLogIfRequired('About to start screenshot generation process for ' + uri)
-  constructSSE('Starting screenshot generation process for -> ' + uri)
-  constructSSE('....................................')
+  constructSSE('Starting screenshot generation process for -> ' + uri,curCookieClientId)
+  constructSSE('....................................',curCookieClientId)
 
   headless(uri, screenshotsLocation + filename).then(v => {
       // Once all the async parts finish this prints.
       console.log("Finished Headless");
-      constructSSE('Done capturing the screenshot..')
+      constructSSE('Done capturing the screenshot..',curCookieClientId)
 
       fs.chmodSync('./'+screenshotsLocation + filename, '755')
       im.convert(['./'+screenshotsLocation + filename, '-thumbnail', '200',
@@ -1555,9 +1629,9 @@ TimeMap.prototype.createScreenshotForMemento = function (memento, callback) {
 
 }
 
-TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callback) {
+TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCookieClientId,callback) {
   console.time('Hamming And Filtering, a synchronous operation')
-  constructSSE('computing the Hamming Distance and Filtering synchronously...')
+  constructSSE('computing the Hamming Distance and Filtering synchronously...',curCookieClientId)
 
   var lastSignificantMementoIndexBasedOnHamming = 0
   var copyOfMementos = [this.mementos[0]]
@@ -1594,8 +1668,8 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (callb
   }
   noOfUniqueMementos = copyOfMementos.length
   totalMementos = this.mementos.length;
-  constructSSE('Completed filtering...')
-  constructSSE('Out of the total <h3>'+totalMementos+'</h3> eixisting mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique...')
+  constructSSE('Completed filtering...',curCookieClientId)
+  constructSSE('Out of the total <h3>'+totalMementos+'</h3> eixisting mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique...',curCookieClientId)
   //ConsoleLogIfRequired((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
   copyOfMementos = null
 
