@@ -596,7 +596,7 @@ var curDeepLinkStateArr=[];
   window.onload = function() {
       //window.location.href = window.location.origin;
       //alert("Windows loaded back");
-      delete_cookie("clientId");
+    //  delete_cookie("clientId");
       if(localStorage.getItem("getStatsClicked") == "true"){
           localStorage.setItem("getStatsClicked","false");
           var curInputObj = JSON.parse(localStorage.getItem("curInputObj"));
@@ -689,6 +689,45 @@ function uriAnalysisForAttributes(uri){
     $('.argumentsForm input[value='+primesource+']').prop("checked",true);
   }
 }
+var notificationSrc= null;
+
+function startEventNotification(){
+  notificationSrc= new EventSource('/notifications');
+       notificationSrc.onmessage = function(e) {
+           console.log(e.data);
+           var streamedObj = JSON.parse(e.data);
+           // if(streamedObj.usid != uniqueSessionId){
+           //     return false;
+           // }
+           var curLog = "<p>"+streamedObj.data+"</p>";
+           if(streamedObj.data === "streamingStarted"){
+               $('#serverStreamingModal .logsContent').empty();
+               // un comment the following line after POC
+             $('#serverStreamingModal').modal('show');
+           }
+           else if( streamedObj.data === "readyToDisplay"){
+           //  alert(" Ready for display");
+           //  $(".getSummary").trigger("click");
+             $('#serverStreamingModal .logsContent').empty();
+             $('#serverStreamingModal').modal('hide');
+             $(".tabContentWrapper").show();
+             notificationSrc.close();
+
+           }
+           else if(streamedObj.data === "statssent"){
+               $('#serverStreamingModal .logsContent').empty();
+               $('#serverStreamingModal').modal('hide');
+               notificationSrc.close();
+           }
+           else{
+             $("#serverStreamingModal .logsContent").prepend(curLog);
+             // $('#serverStreamingModal .modal-body').animate({
+             //      scrollTop: $("#bottomModal").offset().top
+             //  }, 20);
+           }
+       };
+}
+
 
 
 function getStats(){
@@ -702,6 +741,7 @@ function getStats(){
   }
   var role = "stats";
   if($("body").find("form")[0].checkValidity()){
+      startEventNotification();
       event.preventDefault();
       var ENDPOINT = "/alsummarizedtimemap";
       var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
@@ -761,38 +801,6 @@ $(function(){
           uriAnalysisForAttributes(uri);
     });
     //var source = new EventSource('/notifications/'+getCookie("clientId"));
-    var source = new EventSource('/notifications');
-          source.onmessage = function(e) {
-              console.log(e.data);
-              var streamedObj = JSON.parse(e.data);
-              // if(streamedObj.usid != uniqueSessionId){
-              //     return false;
-              // }
-              var curLog = "<p>"+streamedObj.data+"</p>";
-              if(streamedObj.data === "streamingStarted"){
-                  $('#serverStreamingModal .logsContent').empty();
-                  // un comment the following line after POC
-                $('#serverStreamingModal').modal('show');
-              }
-              else if( streamedObj.data === "readyToDisplay"){
-              //  alert(" Ready for display");
-              //  $(".getSummary").trigger("click");
-                $('#serverStreamingModal .logsContent').empty();
-                $('#serverStreamingModal').modal('hide');
-                $(".tabContentWrapper").show();
-              }
-              else if(streamedObj.data === "statssent"){
-                  $('#serverStreamingModal .logsContent').empty();
-                  $('#serverStreamingModal').modal('hide');
-              }
-              else{
-                $("#serverStreamingModal .logsContent").prepend(curLog);
-                // $('#serverStreamingModal .modal-body').animate({
-                //      scrollTop: $("#bottomModal").offset().top
-                //  }, 20);
-              }
-          };
-
 
      // following is commented to first stabilise the single step process
     $(".getJSONFromServer").click(function(event){
@@ -824,7 +832,7 @@ $(function(){
             curInputJsobObj["role"]= role;
             localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
             //window.location.reload();
-            source.close();
+            notificationSrc.close();
             delete_cookie("clientId");
             window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
         }else{
@@ -849,6 +857,7 @@ $(function(){
       if($("body").find("form")[0].checkValidity()){
             $(".getSummary").hide();
            event.preventDefault();
+           startEventNotification();
            var ENDPOINT = "/alsummarizedtimemap";
            var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
            $("#busy-loader").show();
@@ -970,7 +979,8 @@ function updateDeepLinkStateArr() {
           alert("The value after 3rd backword slash(/) has to be either a numeric value or 'all', Please correct that !");
           return false;
         }
-      }else if(isNaN(deepLinkParts[3])){ // hamming distance is not being a number
+      }
+      if(isNaN(deepLinkParts[3])){ // hamming distance is not being a number
         alert("The value after 4th backword slash(/) has to be a numeric value, Please correct that !");
         return false;
       }else{

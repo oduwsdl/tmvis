@@ -140,14 +140,16 @@ function main () {
     // set a cookie
   app.use(function (request, response, next) {
 
-    if(request.cookies.clientId == undefined || request.cookies.clientId == null ||request.cookies.clientId == ""){
-      response.cookie('clientId',Date.now().toString())
-        console.log('cookie created successfully');
-    }else
-    {
-      // yes, cookie was already present
-      console.log('cookie already exists --->', request.cookies.clientId);
-    }
+    response.cookie('clientId',Date.now().toString())
+
+    // if(request.cookies.clientId == undefined || request.cookies.clientId == null ||request.cookies.clientId == ""){
+    //   response.cookie('clientId',Date.now().toString())
+    //     console.log('cookie created successfully');
+    // }else
+    // {
+    //   // yes, cookie was already present
+    //   console.log('cookie already exists --->', request.cookies.clientId);
+    // }
 
     next(); // <-- important!
   });
