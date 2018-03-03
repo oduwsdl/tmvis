@@ -596,6 +596,7 @@ var curDeepLinkStateArr=[];
   window.onload = function() {
       //window.location.href = window.location.origin;
       //alert("Windows loaded back");
+      delete_cookie("clientId");
       if(localStorage.getItem("getStatsClicked") == "true"){
           localStorage.setItem("getStatsClicked","false");
           var curInputObj = JSON.parse(localStorage.getItem("curInputObj"));
@@ -816,11 +817,14 @@ $(function(){
             curInputJsobObj["urir"]= $("#urirIP").val();
             curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
             curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
+            if(!parseInt(curInputJsobObj["collectionIdentifer"])){
+              curInputJsobObj["collectionIdentifer"] = "all";
+            }
             curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
             curInputJsobObj["role"]= role;
             localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
             //window.location.reload();
-          //  source.close();
+            source.close();
             delete_cookie("clientId");
             window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
         }else{
@@ -832,7 +836,7 @@ $(function(){
 
     // work around for the timeline setting stuff
     $(".getSummary").click(function(event){
-    //  delete_cookie("clientId");
+      //delete_cookie("clientId");
       var collectionIdentifer = $('.argumentsForm #collectionNo').val();
       if(collectionIdentifer == ""){
           collectionIdentifer = "all";
