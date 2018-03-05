@@ -788,7 +788,7 @@ function getStats(){
               $("#busy-loader").hide();
               $('#serverStreamingModal .logsContent').empty();
                 $('#serverStreamingModal').modal('hide');
-              var errMsg = "Some problem fetching the response, Please try again.";
+              var errMsg = "Some problem fetching the response, Please refresh and try again.";
               alert(errMsg);
             }
         });
@@ -924,7 +924,7 @@ $(function(){
                   $(".modal-backdrop").remove();
               }
               catch(err){
-                alert("Some problem fetching the response, Please try again.");
+                alert("Some problem fetching the response, Please refresh and try again.");
                 $("#busy-loader").hide();
                 $('#serverStreamingModal').modal('hide');
                   //$(".statsWrapper").hide();
@@ -932,7 +932,7 @@ $(function(){
               }
             },
             error: function( data, textStatus, jqXHR) {
-              var errMsg = "Some problem fetching the response, Please try again.";
+              var errMsg = "Some problem fetching the response, Please refresh try again.";
               $("#busy-loader").hide();
               $('#serverStreamingModal').modal('hide');
               alert(errMsg);
