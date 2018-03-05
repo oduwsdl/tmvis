@@ -139,17 +139,8 @@ function main () {
 
     // set a cookie
   app.use(function (request, response, next) {
-
-    if(request.cookies.clientId == undefined || request.cookies.clientId == null ||request.cookies.clientId == ""){
-      response.cookie('clientId',Date.now().toString())
-        console.log('cookie created successfully');
-    }else
-    {
-      // yes, cookie was already present
-      console.log('cookie already exists --->', request.cookies.clientId);
-    }
-
-    next(); // <-- important!
+    response.cookie('clientId',Date.now().toString())
+    next();
   });
 
 
@@ -170,9 +161,12 @@ function main () {
 
   app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
 
-  app.get(['/','/index.html'], (request, response) => {
+  //app.get(['/','/index.html','/alsummarizedview/:primesource/:ci/:hdt/:role/*'], (request, response) => {
+  app.get(['/','/index.html','/alsummarizedview/:primesource/:ci/:hdt/:role/*'], (request, response) => {
     response.sendFile(__dirname + '/public/index.html')
   })
+
+
 
   //This is just a hello test route
    app.get('/hello', (request, response) => {
@@ -288,13 +282,6 @@ function constructSSEForFinsh(data,clientIdInCookie) {
   streamingRes.write("data: " + JSON.stringify(streamObj) + '\n\n');
 }
 
-
-// function getCook(cookiename) {
-//   // Get name followed by anything except a semicolon
-//   var cookiestring=RegExp(""+cookiename+"[^;]+").exec(document.cookie);
-//   // Return everything after the equal sign, or an empty string if the cookie name not found
-//   return decodeURIComponent(!!cookiestring ? cookiestring.toString().replace(/^[^=]+./,"") : "");
-// }
 
 /**
 * Setup the public-facing attributes of the service
