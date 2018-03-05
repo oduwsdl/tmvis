@@ -305,6 +305,8 @@ function PublicEndpoint () {
 
     ConsoleLogIfRequired("Cookies------------------>"+request.cookies.clientId)
     constructSSE("streamingStarted",request.cookies.clientId);
+    constructSSE("percentagedone-2",request.cookies.clientId);
+
      isResponseEnded = false //resetting the responseEnded indicator
      //response.clientId = Math.random() * 101 | 0  // Associate a simple random integer to the user for logging (this is not scalable with the implemented method)
      response.clientId = request.cookies.clientId
@@ -474,6 +476,7 @@ function PublicEndpoint () {
       cacheFile.path += '.json'
       ConsoleLogIfRequired('Checking if a cache file exists for ' + query['urir'] + '...')
       constructSSE('Checking if a cache file exists for ' + query['urir'] + '...',request.cookies.clientId)
+      constructSSE("percentagedone-10",request.cookies.clientId);
 
 
     //  ConsoleLogIfRequired('cacheFile: '+JSON.stringify(cacheFile))
@@ -490,6 +493,8 @@ function PublicEndpoint () {
             }else{
               ConsoleLogIfRequired("Responded to continue with the exisitng cached simhashes file. Proceeding..");
               constructSSE('cached simhashes exist, proceeding with cache...',request.cookies.clientId)
+              constructSSE("percentagedone-60",request.cookies.clientId);
+
               processWithFileContents(data, response,request.cookies.clientId)
             }
           //ByMahee -- UnComment Following Line(UCF)
@@ -553,14 +558,24 @@ function processWithFileContents (fileContents, response,curCookieClientId) {
   console.log(JSON.stringify(t));
     if(isToComputeBoth){
         async.series([
-          function (callback) {t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback)},
-          function (callback) {t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback)},
+          function (callback) {
+            t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback)
+            constructSSE("percentagedone-5",curCookieClientId);
+
+          },
+          function (callback) {
+            t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback)
+            constructSSE("percentagedone-15",curCookieClientId);
+          },
           function (callback) {
             ConsoleLogIfRequired('****************curCookieClientId from processWithFileContents ->'+curCookieClientId +' *********')
+            constructSSE("percentagedone-20",curCookieClientId);
             t.createScreenshotsForMementos(curCookieClientId,response,callback)
           },
           function (callback) {
             constructSSE('Writing the data into cache file for future use...',curCookieClientId)
+            constructSSE("percentagedone-95",curCookieClientId);
+
             t.writeThumbSumJSONOPToCache(response)
           }
         ],
@@ -571,6 +586,7 @@ function processWithFileContents (fileContents, response,curCookieClientId) {
             console.log(err)
           } else {
             constructSSE('Finshed writing into cache...',curCookieClientId)
+            constructSSE("percentagedone-100",curCookieClientId);
             console.log('There were no errors executing the callback chain')
 
 
@@ -664,6 +680,7 @@ Memento.prototype.setSimhash = function (curCookieClientId,callback) {
       //  ConsoleLogIfRequired(buffer2)
       //  ConsoleLogIfRequired("========================================================")
         //ConsoleLogIfRequired("Buffer Length ("+mOptions.host + mOptions.path +"):-> "+ buffer2.length)
+
         if (buffer2.indexOf('Got an HTTP 302 response at crawl time') === -1 && thatmemento.simhash != '00000000') {
 
           var sh = simhash((buffer2).split('')).join('')
@@ -806,7 +823,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
            if(t.mementos.length > 250){
 
             constructSSE('Might aprroximately take  <h3>  ' + Math.ceil((t.mementos.length)/(60*4))  +' Minutes ...<h3> to compute simhashes',curCookieClientId)
-
+            constructSSE("percentagedone-20",curCookieClientId);
             // now that streaming is in place, dont bother about sending an intermediate response
             //  response.write('Request being processed, Please retry approximately after ( ' + Math.ceil(((t.mementos.length/50)  * 10)/60)  +' Minutes ) and request again...')
             //  response.end()
@@ -818,7 +835,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
           }else{
             ConsoleLogIfRequired('The page you requested has not been archived.')
             constructSSE('The page requested has not been archived.',curCookieClientId)
-
+            constructSSE("percentagedone-100",curCookieClientId);
              //process.exit(-1)
              response.write('The page you requested has not been archived.',)
              response.end()
@@ -858,8 +875,13 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
     function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP */
 
     // -- ByMahee -- Uncomment one by one for CLI_JSON
-    function (callback) {t.calculateSimhashes(curCookieClientId,callback);},
-    function (callback) {t.saveSimhashesToCache(callback);},
+    function (callback) {
+      t.calculateSimhashes(curCookieClientId,callback);
+    },
+    function (callback) {
+      constructSSE("percentagedone-75",curCookieClientId);
+      t.saveSimhashesToCache(callback);
+    },
 
     function (callback) {
         if(isToComputeBoth){
@@ -878,6 +900,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
         }
     },
     function (callback) {
+      constructSSE("percentagedone-90",curCookieClientId);
       t.writeJSONToCache(callback)
     },
     function (callback) {
@@ -1306,6 +1329,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
        'timetowait': Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)
     }
     constructSSE('Stats built and ready to serve...',curCookieClientId)
+    constructSSE("percentagedone-100",curCookieClientId);
     constructSSE('statssent',curCookieClientId)
 
     response.write(JSON.stringify(statsObj))
@@ -1317,6 +1341,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
   ConsoleLogIfRequired('Started the process of capturing the screenshots...',curCookieClientId)
 
   constructSSE('Started the process of capturing the screenshots...',curCookieClientId)
+  constructSSE("percentagedone-5",curCookieClientId);
 
   if (noOfThumbnailsSelectedToBeCaptured >= 2) {
     constructSSE('Might approximately take <h3>' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)  +' Minutes <h3> to capture screen shots. Please be patient....')
@@ -1338,6 +1363,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
       ConsoleLogIfRequired('Finished capturing all the required screenshots...'+curCookieClientId)
 
       constructSSE('Finished capturing all the required screenshots...',curCookieClientId)
+      constructSSE("percentagedone-100",curCookieClientId);
         constructSSE('readyToDisplay',curCookieClientId)
 
       if (err) {
