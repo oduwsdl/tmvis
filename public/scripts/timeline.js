@@ -711,14 +711,17 @@ function startEventNotification(){
              $('#serverStreamingModal .logsContent').empty();
              $('#serverStreamingModal').modal('hide');
              $(".tabContentWrapper").show();
-             notificationSrc.close();
-
+             if(notificationSrc != null){
+               notificationSrc.close();
+             }
            }
            else if(streamedObj.data === "statssent"){
                $('#serverStreamingModal .logsContent').empty();
                $('#serverStreamingModal').modal('hide');
-               notificationSrc.close();
-           }
+               if(notificationSrc != null){
+                 notificationSrc.close();
+               }
+             }
            else{
              $("#serverStreamingModal .logsContent").prepend(curLog);
              // $('#serverStreamingModal .modal-body').animate({
@@ -832,7 +835,9 @@ $(function(){
             curInputJsobObj["role"]= role;
             localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
             //window.location.reload();
-            notificationSrc.close();
+            if(notificationSrc != null){
+              notificationSrc.close();
+            }
             delete_cookie("clientId");
             window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
         }else{
