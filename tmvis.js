@@ -305,7 +305,7 @@ function PublicEndpoint () {
 
     ConsoleLogIfRequired("Cookies------------------>"+request.cookies.clientId)
     constructSSE("streamingStarted",request.cookies.clientId);
-    constructSSE("percentagedone-2",request.cookies.clientId);
+    constructSSE("percentagedone-3",request.cookies.clientId);
 
      isResponseEnded = false //resetting the responseEnded indicator
      //response.clientId = Math.random() * 101 | 0  // Associate a simple random integer to the user for logging (this is not scalable with the implemented method)
