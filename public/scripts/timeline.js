@@ -835,6 +835,10 @@ $(function(){
         if(hammingDistance == ""){
             hammingDistance = 4;
         }
+        var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
+            if(screenshotDelta == ""){
+                screenshotDelta = 0;
+        }
         var role = "stats" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
         if($(this).parents("body").find("form")[0].checkValidity()){
             event.preventDefault();
@@ -848,6 +852,7 @@ $(function(){
               curInputJsobObj["collectionIdentifer"] = "all";
             }
             curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
+            curInputJsobObj["screenshotDelta"]= $('.argumentsForm #screenshotDelta').val();
             curInputJsobObj["role"]= role;
             localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
             //window.location.reload();
@@ -874,13 +879,20 @@ $(function(){
       if(hammingDistance == ""){
           hammingDistance = 4;
       }
+
+	    var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
+      if(screenshotDelta == ""){
+          screenshotDelta = 0;
+      }
+
       var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
       if($("body").find("form")[0].checkValidity()){
             $(".getSummary").hide();
            event.preventDefault();
            startEventNotification();
            var ENDPOINT = "/alsummarizedtimemap";
-           var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+           var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+ screenshotDelta+ "/" +$('.argumentsForm #urirIP').val();
+           //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
            $("#busy-loader").show();
            $('#serverStreamingModal .logsContent').empty();
            $('#serverStreamingModal').modal('show');

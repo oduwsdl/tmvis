@@ -9,7 +9,27 @@
    	 	margin-left: 0.1%
 	}
 
+.Title h1{
 
+		text-align: center;
+		font-family: 'Oswald', sans-serif;
+		font-size: 5em;
+	}
+	.Title img{
+		position:absolute;
+		text-align:left;
+		width:10%;
+
+	}
+	#footer{
+		text-align:center;
+		font-family: 'Oswald', sans-serif;
+		width:100%;
+		margin-bottom: 1%;
+		position:absolute;
+   		bottom:0;
+		
+	}
     #timeline {
         width: 99% !important;
         padding: 0 !important;
@@ -154,3 +174,4 @@
     overflow-y: scroll;
 		overflow-x: hidden;
 }
+

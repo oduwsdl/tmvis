@@ -14,10 +14,11 @@
 *   > node AlSummarization_OPT_CLI_JSON.js urir
 *
 * Updated
-*  > node AlSummarization_OPT_CLI_JSON.js urir [--debug] [--hdt 4] [--ia || --ait || -mg] [--oes] [--ci 1068] [--os || --s&h]
+*  > node AlSummarization_OPT_CLI_JSON.js urir [--debug] [--hdt 4] [--ssd 0] [--ia || --ait || -mg] [--oes] [--ci 1068] [--os || --s&h]
 *  ex: node AlSummarization_OPT_CLI_JSON.js http://4genderjustice.org/ --oes --debug --ci 1068
 * debug -> Run in debug mode
 * hdt -> Hamming Distance Threshold
+* ssd -> Screenshot delay
 * ia -> Internet Archive
 * ait -> Archive IT
 * mg -> Memegator
@@ -83,6 +84,7 @@ var isResponseEnded = false
 var uriR = ''
 var isDebugMode = argv.debug? argv.debug: false
 var HAMMING_DISTANCE_THRESHOLD = argv.hdt?  argv.hdt: 4
+var SCREENSHOT_DELTA = argv.ssd? argv.ssd: 0
 var isToOverrideCachedSimHash = argv.oes? argv.oes: false
 // by default the prime src is gonna be Archive-It
 var primeSrc = argv.ait? 1: (argv.ia ? 2:(argv.mg?3:1))
@@ -197,7 +199,7 @@ function main () {
 
   // this is the actually place that hit the main server logic
   //app.get('/alsummarizedtimemap/:primesource/:ci/:urir', endpoint.respondToClient)
-  app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/:role/*', endpoint.respondToClient)
+  app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/:role/:ssd/*', endpoint.respondToClient)
 
 
   app.listen(port, '0.0.0.0', (err) => {
@@ -340,6 +342,7 @@ function PublicEndpoint () {
       query['hdt']= request.params.hdt;
       // for the intermediate step of involving user to decide the value of k
       query['role']= request.params.role;
+      query['ssd']=request.params.ssd;
     ConsoleLogIfRequired("--- ByMahee: Query URL from client = "+ JSON.stringify(query))
 
     /******************************
@@ -402,6 +405,12 @@ function PublicEndpoint () {
         role = "stats" // incase if a dirty value is sent
     }
 
+    if (isNaN(query.ssd)){
+          SCREENSHOT_DELTA = 0; // setting to default screenshot delay time
+    }else{
+          SCREENSHOT_DELTA = parseInt(query.ssd)
+    }
+    
     if (!theEndPoint.isAValidSourceParameter(primeSource)) { // A bad access parameter was passed in
       console.log('Bad source query parameter: ' + primeSource)
       response.writeHead(501, headers)
@@ -1100,7 +1109,7 @@ TimeMap.prototype.SendThumbSumJSONCalledFromCache= function (response,callback) 
       mementoJObj_ForTimeline["event_html_similarto"] = localAssetServer+memento.hammingBasisScreenshotURI
 
     }else{
-      var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       mementoJObj_ForTimeline["event_series"] = "Thumbnails"
       mementoJObj_ForTimeline["event_html"] = localAssetServer+memento.screenshotURI
 
@@ -1171,7 +1180,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
      mementoJObj_ForTimeline["event_html_similarto"] = localAssetServer+memento.hammingBasisScreenshotURI
 
     }else{
-      var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       mementoJObj_ForTimeline["event_series"] = "Thumbnails"
 
       // the two following lines are connented as the JSON object must not contain HTML Fragment
@@ -1241,12 +1250,12 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
       if(matchedString != null){
         memento.hammingBasisURI = memento.hammingBasisURI.replace(matchedString[0],(matchedString[0].toString().replace("id_",""))) // by default only the first occurance is replaced
       }
-      var filename = 'timemapSum_' + memento.hammingBasisURI.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ memento.hammingBasisURI.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
 
-      //var filename = 'timemapSum_' + memento.hammingBasisURI.replace("id_/http","/http").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename // replaced by above segment
+      //var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ memento.hammingBasisURI.replace("id_/http","/http").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename // replaced by above segment
       memento.hammingBasisScreenshotURI = filename
     } else {
-      var filename = 'timemapSum_' + uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       memento.screenshotURI = filename
     }
   })
@@ -1286,7 +1295,7 @@ TimeMap.prototype.supplySelectedMementosAScreenshotURI = function (strategy,call
   var ii = 0
   for (var m in this.mementos) {
     if (this.mementos[m].selected) {
-      var filename = strategy + '_' + this.mementos[m].uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'
+      var filename = strategy + '_' + SCREENSHOT_DELTA + '_'+ this.mementos[m].uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'
       this.mementos[m].screenshotURI = filename
       ii++
     }
@@ -1329,7 +1338,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
     var statsObj={
        'totalmementos' : totalMementos,
        'unique': noOfUniqueMementos,
-       'timetowait': Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)
+       'timetowait': Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA))
     }
     constructSSE('Stats built and ready to serve...',curCookieClientId)
     constructSSE("percentagedone-100",curCookieClientId);
@@ -1347,7 +1356,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
   constructSSE("percentagedone-5",curCookieClientId);
 
   if (noOfThumbnailsSelectedToBeCaptured >= 2) {
-    constructSSE('Might approximately take <h3>' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)  +' Minutes <h3> to capture screen shots. Please be patient....')
+    constructSSE('Might approximately take <h3>' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA))  +' Minutes <h3> to capture screen shots. Please be patient....')
 
     // now that streaming is in place, dont bother about sending an intermediate response
     // response.write('Request being processed, Please retry approximately after ( ' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)  +' Minutes ) and request again...')
@@ -1527,7 +1536,6 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieC
 
 }
 
-
 async function headless(uri,filepath) {
     const browser = await puppeteer.launch({
         ignoreHTTPSErrors: true,
@@ -1557,12 +1565,15 @@ async function headless(uri,filepath) {
           console.log(response.url, response.status, response.headers);
         });
 
-        // timeout at 5 minutes (5 * 60 * 1000ms), network idle at 3 seconds
+        // timeout at 5 minutes (5 * 60 * 1000ms), wait until all dom content is loaded
         await page.goto(uri, {
-            waitUntil: 'networkidle0',
+            waitUntil: 'domcontentloaded',
             timeout: 5000000,
         });
 
+	//Set wait time before screenshotURI
+	await page.waitFor(SCREENSHOT_DELTA * 1000); //convert to seconds
+	
         // Take screenshots
         await page.screenshot({
             path: filepath,
