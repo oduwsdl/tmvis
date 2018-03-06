@@ -700,15 +700,23 @@ function startEventNotification(){
            //     return false;
            // }
            var curLog = "<p>"+streamedObj.data+"</p>";
+
+
            if(streamedObj.data === "streamingStarted"){
                $('#serverStreamingModal .logsContent').empty();
+               setProgressBar(2);
                // un comment the following line after POC
              $('#serverStreamingModal').modal('show');
+           }else if (streamedObj.data.indexOf("percentagedone-") == 0) {
+             var value = parseInt(streamedObj.data.split("-")[1]);
+             setProgressBar(value);
            }
            else if( streamedObj.data === "readyToDisplay"){
            //  alert(" Ready for display");
            //  $(".getSummary").trigger("click");
              $('#serverStreamingModal .logsContent').empty();
+             setProgressBar(2);
+
              $('#serverStreamingModal').modal('hide');
              $(".tabContentWrapper").show();
              if(notificationSrc != null){
@@ -717,6 +725,7 @@ function startEventNotification(){
            }
            else if(streamedObj.data === "statssent"){
                $('#serverStreamingModal .logsContent').empty();
+               setProgressBar(2);
                $('#serverStreamingModal').modal('hide');
                if(notificationSrc != null){
                  notificationSrc.close();
@@ -729,6 +738,13 @@ function startEventNotification(){
              //  }, 20);
            }
        };
+}
+
+
+function setProgressBar(value){
+  $(".progress-bar-space .progress-bar-striped").html(value+"%");
+  $(".progress-bar-space .progress-bar-striped").attr("aria-valuenow", value);
+  $(".progress-bar-space .progress-bar-striped").css("width",value+"%");
 }
 
 
