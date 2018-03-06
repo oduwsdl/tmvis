@@ -4,9 +4,9 @@
 		<title>UI Initial Draft</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	    <link href="./styles/style_timeline.css" rel="stylesheet" />
-	    <link href="./styles/sitestyle.css" rel="stylesheet" />
-	    <script type="text/javascript" src="./scripts/script.js" charset="utf-8"></script>
+	    <link href="/styles/style_timeline.css" rel="stylesheet" />
+	    <link href="/styles/sitestyle.css" rel="stylesheet" />
+	    <script type="text/javascript" src="/scripts/script.js" charset="utf-8"></script>
 
   		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -17,10 +17,10 @@
 		<link href='http://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
 		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    	<script src="./scripts/imageSliderScript.js"></script>
-    	<script src="./scripts/imageGridScript.js"></script>
-    	<script src="./scripts/timeline.js"></script>
-    	<script src="./scripts/waitforimages.js"></script>
+    	<script src="/scripts/imageSliderScript.js"></script>
+    	<script src="/scripts/imageGridScript.js"></script>
+    	<script src="/scripts/timeline.js?v=1000"></script>
+    	<script src="/scripts/waitforimages.js"></script>
 			<!-- Priorirty is to stabilise the current single step build -->
 			<!-- <script src="./scripts/embedded.js"></script> -->
     	<script type="text/javascript">
@@ -42,8 +42,6 @@
 				});
 
     		});
-
-
     	</script>
 
 	</head>
@@ -55,10 +53,13 @@
 					<div class = "Title">
 						<img src="images/odu-logo.png"  alt = "ODU Logo" >
 						<h1>TimeMap Visualization</h1>
-					
 					</div>
 					<div class="row URIWrapper" >
-						  <div class="form-group">
+							<div class="form-group">
+								<label for="uriIP">Enter URI-R | URI-M | URI-TM:</label>
+								<input class="form-control" name="URI" id="uriIP" required placeholder="http://4genderjustice.org/">
+							</div>
+							<div class="form-group hidden">
 						    <label for="urirIP">Enter URI-R:</label>
 						    <input class="form-control" name="URI-R" id="urirIP" required placeholder="http://4genderjustice.org/">
 						  </div>
@@ -118,7 +119,7 @@
 				</div>
 
 				<div class="col-lg-3">
-				   <button class="btn getSummary" title="Displays visualizations after screenshots are captured"> Continue </button>
+				   <button class="btn getSummary" title="Displays visualizations after screenshots are captured"> Summarize </button>
 				</div>
 			</div>
 
@@ -268,9 +269,13 @@
 		        </button>
 		      </div> -->
 		      <div class="modal-body">
-						<div class="logsContent"></div>
-						<div id="bottomModal">
+						<div class="progress progress-bar-space">
+							<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="100" style="width:4%">
+								1%
+							</div>
 						</div>
+						<div class="logsContent"></div>
+						<div id="bottomModal"></div>
 		      </div>
 		    </div>
 		  </div>

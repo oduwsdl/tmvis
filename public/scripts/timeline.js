@@ -1,6 +1,7 @@
 
 var jsonObjRes = {};
-
+var curURIUnderFocus=null;
+var curDeepLinkStateArr=[];
 
 (function(window, document, undefined){
 
@@ -591,130 +592,239 @@ var jsonObjRes = {};
     });
 
 
-    // takes care of the drawbacks from timeline-setter resetting problem
-    window.onload = function() {
-    //  window.location.href = window.location.origin;
+  // takes care of the drawbacks from timeline-setter resetting problem
+  window.onload = function() {
+      //window.location.href = window.location.origin;
       //alert("Windows loaded back");
+    //  delete_cookie("clientId");
       if(localStorage.getItem("getStatsClicked") == "true"){
-        localStorage.setItem("getStatsClicked","false");
-        var curInputObj = JSON.parse(localStorage.getItem("curInputObj"));
+          localStorage.setItem("getStatsClicked","false");
+          var curInputObj = JSON.parse(localStorage.getItem("curInputObj"));
+          $('.argumentsForm #uriIP').val(curInputObj["uri"]);
+          $('.argumentsForm #urirIP').val(curInputObj["urir"]);
+          $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
+          $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
+          $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true);
+          getStats(); // this makes the call for getting the initial stats.
+      }else{
+        //alert("doesn't have the local storage set, using the Query parameters");
+        //GET Request-> "http://localhost:3000/GetResponse/?URI-R=http://4genderjustice.org/&ci=1068&primesource=archiveit&hdt=4"
+        var pathname = window.location.pathname;
+        if(pathname == "/" || pathname == "/index.html"){
+          return true;
+        }else{
+          if(updateDeepLinkStateArr()){
 
-        $('.argumentsForm #urirIP').val(curInputObj["urir"]);
-        $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
-        $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
-
-        $('.argumentsForm #screenshotDelta').val(curInputObj["screenshotDelta"] );
-        $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true);
-
-        role = curInputObj["role"];
-
-
-        var collectionIdentifer =curInputObj["collectionIdentifer"];
-        if(collectionIdentifer == ""){
-            collectionIdentifer = "all";
-        }
-        var hammingDistance = curInputObj["hammingDistance"];  
-        if(hammingDistance == ""){
-            hammingDistance = 4;
-        }
-        var screenshotDelta = curInputObj["#screenshotDelta"];
-            if(screenshotDelta == ""){
-                screenshotDelta = 0;
-        }
-
-
-        if($("body").find("form")[0].checkValidity()){
-            event.preventDefault();
-            var ENDPOINT = "alsummarizedtimemap";
-            var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" + screenshotDelta+ "/" +$('.argumentsForm #urirIP').val()
-
-            $("#busy-loader").show();
-            $('#serverStreamingModal .logsContent').empty();
-            $('#serverStreamingModal').modal('show');
-
-              $.ajax({
-                  type: "GET",
-                  url: address, // uncomment this for deployment
-                  dataType: "text",
-                  success: function( data, textStatus, jqXHR) {
-                      $("#busy-loader").hide();
-                      $('#serverStreamingModal .logsContent').empty();
-                      $('#serverStreamingModal').modal('hide');
-                      try{
-                          jsonObjRes= $.parseJSON(data);
-                          var memStatStr = jsonObjRes["totalmementos"]+" mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
-                          $(".statsWrapper .collection_stats").html(memStatStr);
-                          $(".statsWrapper").show();
-                          $(".getSummary").show();
-
-                          if(jsonObjRes["timetowait"] == 0){
-                            $(".approxTimeShowingPTag").html('Takes no time as the images are already captured, Click on Continue button');
-
-                          }else{
-                            $(".approxTimeShowingPTag").html('Takes about '+ jsonObjRes["timetowait"] +' minutes Approximately, Click on Continue button and please be patient');
-                          }
-                          $(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
-                          $(".modal-backdrop").remove();
-
-
-                      }catch(err){
-                          alert($.trim(data));
-                          $('#serverStreamingModal .logsContent').empty();
-                            $('#serverStreamingModal').modal('hide');
-                          $(".statsWrapper").hide();
-                          $(".tabContentWrapper").hide();
-                      }
-                  },
-                  error: function( data, textStatus, jqXHR) {
-                    $("#busy-loader").hide();
-                    $('#serverStreamingModal .logsContent').empty();
-                      $('#serverStreamingModal').modal('hide');
-                    var errMsg = "Some problem fetching the response, Please try again.";
-                    alert(errMsg);
-                  }
-              });
+            $('.argumentsForm #uriIP').val(curDeepLinkStateArr[5]);
+            $('.argumentsForm #urirIP').val(curDeepLinkStateArr[5]);
+            $('.argumentsForm #collectionNo').val( curDeepLinkStateArr[2]);
+            var hammingDistance = curDeepLinkStateArr[3];
+            if(hammingDistance == "" || hammingDistance == undefined || hammingDistance == null){
+                hammingDistance = 4;
             }
+            $('.argumentsForm #hammingDistance').val(hammingDistance);
+            $('.argumentsForm input[value='+ curDeepLinkStateArr[1] +']').prop("checked",true);
+            getStats();
+          }else{
+              return false;
+          }
+        }
+      }
+  }
 
-       }
+function uriAnalysisForAttributes(uri){
+  if(uri == ""){
+    return;
+  }
+  var urir;
+  if(uri.match(/\/[0-9]{14}\//g) == null){
+    if(uri.match(/\/\*\//g) != null){ // incase the given URI is timemap URI-TM
+      tmIndicator = uri.match(/\/\*\//g)[0];
+      urir = uri.split(tmIndicator)[1]; // uri is here now
+      var prePartToURIR = uri.split(tmIndicator)[0];
+      var hdt = 4;
+      var primesource = "";
+      var ci = "all";
+      if(prePartToURIR.indexOf("archive-it") > -1){
+        primesource = "archiveit";
+        ci = parseInt(prePartToURIR.match(/org\/[0-9]*/g)[0].split("/")[1]); // checking for a numerical valuef or COllection Identifier
+        if(isNaN(ci)){
+            ci = "all";
+        }
+      }else if(prePartToURIR.indexOf("archive.org") > -1){
+        primesource = "internetarchive";
+      }else{
+        alert("not a valid input for URI, pass a valid URI-R || URI-M || URI-TM");
+        return false;
+      }
+      $('.argumentsForm #urirIP').val(urir);
+      $('.argumentsForm #collectionNo').val(ci);
+      $('.argumentsForm input[value='+primesource+']').prop("checked",true);
+
+    }else{
+      urir = uri; // one and the same - case where the URI-R is directly given
+      $('.argumentsForm #urirIP').val(urir);
     }
+  }else{ // Incase of URI-M
+    dtstr = uri.match(/\/[0-9]{14}\//g)[0];
+    urir = uri.split(dtstr)[1]; // uri is here now
+    var prePartToURIR = uri.split(dtstr)[0];
+    var hdt = 4;
+    var primesource = "";
+    var ci = "all";
+    if(prePartToURIR.indexOf("archive-it") > -1){
+      primesource = "archiveit";
+      ci = parseInt(prePartToURIR.match(/org\/[0-9]*/g)[0].split("/")[1]);
+      if(isNaN(ci)){
+          ci = "all";
+      }
+    }else if(prePartToURIR.indexOf("archive.org") > -1){
+      primesource = "internetarchive";
+    }else{
+      alert("not a valid input for URI, pass a valid URI-R or URI-M");
+      return false;
+    }
+    $('.argumentsForm #urirIP').val(urir);
+    $('.argumentsForm #collectionNo').val(ci);
+    $('.argumentsForm input[value='+primesource+']').prop("checked",true);
+  }
+}
+var notificationSrc= null;
+
+function startEventNotification(){
+  notificationSrc= new EventSource('/notifications');
+       notificationSrc.onmessage = function(e) {
+           console.log(e.data);
+           var streamedObj = JSON.parse(e.data);
+           // if(streamedObj.usid != uniqueSessionId){
+           //     return false;
+           // }
+           var curLog = "<p>"+streamedObj.data+"</p>";
+
+
+           if(streamedObj.data === "streamingStarted"){
+               $('#serverStreamingModal .logsContent').empty();
+               setProgressBar(2);
+               // un comment the following line after POC
+             $('#serverStreamingModal').modal('show');
+           }else if (streamedObj.data.indexOf("percentagedone-") == 0) {
+             var value = parseInt(streamedObj.data.split("-")[1]);
+             setProgressBar(value);
+           }
+           else if( streamedObj.data === "readyToDisplay"){
+           //  alert(" Ready for display");
+           //  $(".getSummary").trigger("click");
+             $('#serverStreamingModal .logsContent').empty();
+             setProgressBar(2);
+
+             $('#serverStreamingModal').modal('hide');
+             $(".tabContentWrapper").show();
+             if(notificationSrc != null){
+               notificationSrc.close();
+             }
+           }
+           else if(streamedObj.data === "statssent"){
+               $('#serverStreamingModal .logsContent').empty();
+               setProgressBar(2);
+               $('#serverStreamingModal').modal('hide');
+               if(notificationSrc != null){
+                 notificationSrc.close();
+               }
+             }
+           else{
+             $("#serverStreamingModal .logsContent").prepend(curLog);
+             // $('#serverStreamingModal .modal-body').animate({
+             //      scrollTop: $("#bottomModal").offset().top
+             //  }, 20);
+           }
+       };
+}
+
+
+function setProgressBar(value){
+  $(".progress-bar-space .progress-bar-striped").html(value+"%");
+  $(".progress-bar-space .progress-bar-striped").attr("aria-valuenow", value);
+  $(".progress-bar-space .progress-bar-striped").css("width",value+"%");
+}
 
 
 
-
-   $(function(){
-     var source = new EventSource('/sse');
-          source.onmessage = function(e) {
-              console.log(e.data);
-              var curLog = "<p>"+e.data+"</p>";
-
-              if(e.data === "streamingStarted"){
-                  $('#serverStreamingModal .logsContent').empty();
-                    //$('#serverStreamingModal').modal('show');
-              }
-              else if( e.data === "readyToDisplay"){
-              //  alert(" Ready for display");
-              //  $(".getSummary").trigger("click");
+function getStats(){
+  var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+  if(collectionIdentifer == ""){
+      collectionIdentifer = "all";
+  }
+  var hammingDistance = $('.argumentsForm #hammingDistance').val();
+  if(hammingDistance == ""){
+      hammingDistance = 4;
+  }
+  var role = "stats";
+  if($("body").find("form")[0].checkValidity()){
+      startEventNotification();
+      event.preventDefault();
+      var ENDPOINT = "/alsummarizedtimemap";
+      var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+      $("#busy-loader").show();
+      $('#serverStreamingModal .logsContent').empty();
+      $('#serverStreamingModal').modal('show');
+        $.ajax({
+            type: "GET",
+            url: address, // uncomment this for deployment
+            dataType: "text",
+            success: function( data, textStatus, jqXHR) {
+                $("#busy-loader").hide();
                 $('#serverStreamingModal .logsContent').empty();
                 $('#serverStreamingModal').modal('hide');
-                $(".tabContentWrapper").show();
+                try{
+                    jsonObjRes= $.parseJSON(data);
+                    var memStatStr = jsonObjRes["totalmementos"]+" mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
+                    $(".statsWrapper .collection_stats").html(memStatStr);
+                    $(".statsWrapper").show();
+                    $(".getSummary").show();
+
+                    if(jsonObjRes["timetowait"] == 0){
+                      $(".approxTimeShowingPTag").html('Takes no time as the images are already captured, Click on Continue button');
+
+                    }else{
+                      $(".approxTimeShowingPTag").html('Takes about '+ jsonObjRes["timetowait"] +' minutes Approximately, Click on Continue button and please be patient');
+                    }
+                    $(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
+                    $(".modal-backdrop").remove();
 
 
-              }
-              else if(e.data === "statssent"){
-                  $('#serverStreamingModal .logsContent').empty();
-                  $('#serverStreamingModal').modal('hide');
-              }
-              else{
-                $("#serverStreamingModal .logsContent").prepend(curLog);
-                // $('#serverStreamingModal .modal-body').animate({
-                //      scrollTop: $("#bottomModal").offset().top
-                //  }, 20);
-              }
-           };
+                }catch(err){
+                    alert($.trim(data));
+                    $('#serverStreamingModal .logsContent').empty();
+                      $('#serverStreamingModal').modal('hide');
+                    $(".statsWrapper").hide();
+                    $(".tabContentWrapper").hide();
+                }
+            },
+            error: function( data, textStatus, jqXHR) {
+              $("#busy-loader").hide();
+              $('#serverStreamingModal .logsContent').empty();
+                $('#serverStreamingModal').modal('hide');
+              var errMsg = "Some problem fetching the response, Please refresh and try again.";
+              alert(errMsg);
+            }
+        });
+      }
+}
+
+
+$(function(){
+
+    // Analyses the input pattern and finds all the parameters
+    $(document).on('focusout','#uriIP',function(){
+          var uri = $(this).val();
+          uriAnalysisForAttributes(uri);
+    });
+    //var source = new EventSource('/notifications/'+getCookie("clientId"));
 
      // following is commented to first stabilise the single step process
     $(".getJSONFromServer").click(function(event){
         event.preventDefault();
+        uriAnalysisForAttributes($("#uriIP").val());
         $(".tabContentWrapper").hide();
         $(".statsWrapper").hide();
         var collectionIdentifer = $('.argumentsForm #collectionNo').val();
@@ -734,24 +844,33 @@ var jsonObjRes = {};
             event.preventDefault();
             localStorage.setItem("getStatsClicked", "true");
             var curInputJsobObj = {};
+            curInputJsobObj["uri"]= $("#uriIP").val();
             curInputJsobObj["urir"]= $("#urirIP").val();
             curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
             curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
+            if(!parseInt(curInputJsobObj["collectionIdentifer"])){
+              curInputJsobObj["collectionIdentifer"] = "all";
+            }
             curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
             curInputJsobObj["screenshotDelta"]= $('.argumentsForm #screenshotDelta').val();
             curInputJsobObj["role"]= role;
             localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
-            // window.location.reload();
-            window.location.href = window.location.origin;
+            //window.location.reload();
+            if(notificationSrc != null){
+              notificationSrc.close();
+            }
+            delete_cookie("clientId");
+            window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
+        }else{
+          if( $("#uriIP").val()==""){
+            alert("Please enter an URI-R, required field.");
+          }
         }
       });
 
-
-
-
     // work around for the timeline setting stuff
     $(".getSummary").click(function(event){
-
+      //delete_cookie("clientId");
       var collectionIdentifer = $('.argumentsForm #collectionNo').val();
       if(collectionIdentifer == ""){
           collectionIdentifer = "all";
@@ -760,17 +879,21 @@ var jsonObjRes = {};
       if(hammingDistance == ""){
           hammingDistance = 4;
       }
-	var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
-            if(screenshotDelta == ""){
-                screenshotDelta = 0;
-        }
+
+	    var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
+      if(screenshotDelta == ""){
+          screenshotDelta = 0;
+      }
+
       var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
       if($("body").find("form")[0].checkValidity()){
             $(".getSummary").hide();
            event.preventDefault();
-           var ENDPOINT = "alsummarizedtimemap";
-           var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+ screenshotDelta+ "/" +$('.argumentsForm #urirIP').val()
-           $("#busy-loader").show(); 
+           startEventNotification();
+           var ENDPOINT = "/alsummarizedtimemap";
+           var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+ screenshotDelta+ "/" +$('.argumentsForm #urirIP').val();
+           //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+           $("#busy-loader").show();
            $('#serverStreamingModal .logsContent').empty();
            $('#serverStreamingModal').modal('show');
           $.ajax({
@@ -781,7 +904,6 @@ var jsonObjRes = {};
             success: function( data, textStatus, jqXHR) {
                 $("#busy-loader").hide();
                 $('#serverStreamingModal').modal('hide');
-
               try{
                   data = $.trim(data).split("...");
                   if(data.length > 1){
@@ -796,28 +918,24 @@ var jsonObjRes = {};
                   }
 
                   jsonObjRes= $.parseJSON(data);
-
                   // following code segment makes the screenshot URI got with event_html | event_html_similarto properties to a html fragment
                   jsonObjRes[0].event_html= "<img src='"+jsonObjRes[0].event_html+"' width='300px' />";
                   for(var i=1;i< jsonObjRes.length;i++){
                       jsonObjRes[i].event_html= "<img src='"+jsonObjRes[i].event_html+"' width='300px' />";
                       jsonObjRes[i].event_html_similarto= "<img src='"+jsonObjRes[i].event_html_similarto+"' width='300px' />";
                   }
-
-
                   $(".statsWrapper").show();
                    window.timeline = new Timeline(jsonObjRes);
                   // place where the notch width is being reduced t0 2px.
                   $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
                   // Color is changed in the Array at 284 line as that is the right place
-                 // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
+                  // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
                   new Zoom("in");
                   new Zoom("out");
                   var chooseNext = new Chooser("next");
                   var choosePrev = new Chooser("prev");
                   var chooseUniqueNext = new Chooser("uniquenext");
                   var chooseUniquePrev = new Chooser("uniqueprev");
-
                   chooseNext.click();
                   $(document).bind('keydown', function(e) {
                       if (e.keyCode === 39) {
@@ -828,14 +946,13 @@ var jsonObjRes = {};
                           return;
                       }
                   });
-
                   console.log(jsonObjRes);
                   drawImageGrid(jsonObjRes); // calling Image Grid Function here
                   drawImageSlider(jsonObjRes);
                   $(".modal-backdrop").remove();
               }
               catch(err){
-                alert("Some problem fetching the response, Please try again.");
+                alert("Some problem fetching the response, Please refresh and try again.");
                 $("#busy-loader").hide();
                 $('#serverStreamingModal').modal('hide');
                   //$(".statsWrapper").hide();
@@ -843,8 +960,7 @@ var jsonObjRes = {};
               }
             },
             error: function( data, textStatus, jqXHR) {
-
-              var errMsg = "Some problem fetching the response, Please try again.";
+              var errMsg = "Some problem fetching the response, Please refresh try again.";
               $("#busy-loader").hide();
               $('#serverStreamingModal').modal('hide');
               alert(errMsg);
@@ -852,6 +968,63 @@ var jsonObjRes = {};
           });
         }
     });
-
   });
 })(window, document);
+
+function getCookie(name) {
+  var value = "; " + document.cookie;
+  var parts = value.split("; " + name + "=");
+  if (parts.length == 2) return parts.pop().split(";").shift();
+}
+
+function delete_cookie (name) {
+    document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+};
+
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+
+function generateDeepLinkState(curInputJsobObj){
+  return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["urir"];
+}
+
+function updateDeepLinkStateArr() {
+    //format of the deep link: http://localhost:3000/alsummarizedview/archiveit/1068/4/stats/http://4genderjustice.org/
+    //curDeepLinkStateArr=[alsummarizedview,archiveIt,1068,4,stats,http://4genderjustice.org];
+    var pathname = window.location.pathname;
+    var deepLinkStr = pathname.slice(1);
+    var deepLinkParts = deepLinkStr.split("/");
+    if(deepLinkParts[0] == "alsummarizedview" && (deepLinkParts[1].toLowerCase()=="archiveit" || deepLinkParts[1].toLowerCase()=="internetarchive"  )  && (deepLinkParts[4]=="stats" || deepLinkParts[4]=="summary")){
+      curDeepLinkStateArr[0] = deepLinkParts[0];
+      curDeepLinkStateArr[1] = deepLinkParts[1];
+      curDeepLinkStateArr[4]= deepLinkParts[4];
+      if(isNaN(deepLinkParts[2]) ){ //taking care of CI
+        if(deepLinkParts[2] != "all"){
+          alert("The value after 3rd backword slash(/) has to be either a numeric value or 'all', Please correct that !");
+          return false;
+        }
+      }
+      if(isNaN(deepLinkParts[3])){ // hamming distance is not being a number
+        alert("The value after 4th backword slash(/) has to be a numeric value, Please correct that !");
+        return false;
+      }else{
+        curDeepLinkStateArr[2] = deepLinkParts[2];
+        curDeepLinkStateArr[3]= deepLinkParts[3];
+        curDeepLinkStateArr[5] = deepLinkStr.split("/"+deepLinkParts[4]+"/")[1];
+        return true;
+      }
+    }else{
+      alert("Something went wrong with the request URI");
+      return false;
+    }
+
+}
