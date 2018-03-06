@@ -164,7 +164,7 @@ function main () {
   app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
 
   //app.get(['/','/index.html','/alsummarizedview/:primesource/:ci/:hdt/:role/*'], (request, response) => {
-  app.get(['/','/index.html','/alsummarizedview/:primesource/:ci/:hdt/:role/*'], (request, response) => {
+  app.get(['/','/index.html','/alsummarizedview/:primesource/:ci/:hdt/stats/*','/alsummarizedview/:primesource/:ci/:hdt/summary/:ssd/*'  ], (request, response) => {
     response.sendFile(__dirname + '/public/index.html')
   })
 
@@ -410,7 +410,7 @@ function PublicEndpoint () {
     }else{
           SCREENSHOT_DELTA = parseInt(query.ssd)
     }
-    
+
     if (!theEndPoint.isAValidSourceParameter(primeSource)) { // A bad access parameter was passed in
       console.log('Bad source query parameter: ' + primeSource)
       response.writeHead(501, headers)
@@ -1571,9 +1571,9 @@ async function headless(uri,filepath) {
             timeout: 5000000,
         });
 
-	//Set wait time before screenshotURI
-	await page.waitFor(SCREENSHOT_DELTA * 1000); //convert to seconds
-	
+      	//Set wait time before screenshotURI
+      	await page.waitFor(SCREENSHOT_DELTA * 1000); //convert to seconds
+
         // Take screenshots
         await page.screenshot({
             path: filepath,
