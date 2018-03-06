@@ -686,7 +686,6 @@ Memento.prototype.setSimhash = function (curCookieClientId,callback) {
           var sh = simhash((buffer2).split('')).join('')
          ConsoleLogIfRequired("ByMahee -- computed simhash for "+mOptions.host+mOptions.path+" -> "+ sh)
          constructSSE('computed simhash for '+mOptions.host+mOptions.path +' -> '+ sh,curCookieClientId)
-
           var retStr = getHexString(sh)
 
           //|| (retStr == null)
@@ -969,10 +968,14 @@ TimeMap.prototype.calculateSimhashes = function (curCookieClientId,callback) {
   //ConsoleLogIfRequired("Inside CalculateSimhashes")
   var theTimeMap = this
   var arrayOfSetSimhashFunctions = []
-
+  var completedSimhashedMementoCount = 0;
+  var totalMemetoCount = this.mementos.length;
   // the way to get a damper, just 7 requests at a time.
   async.eachLimit(this.mementos,5, function(curMemento, callback){
     curMemento.setSimhash(curCookieClientId,callback)
+    completedSimhashedMementoCount++;
+    var value = (completedSimhashedMementoCount/totalMemetoCount)*70+20;
+    constructSSE("percentagedone-"+value,curCookieClientId);
   //  ConsoleLogIfRequired(curMemento)
   }, function(err) {
     //  ConsoleLogIfRequired("length of arrayOfSetSimhashFunctions: -> " + arrayOfSetSimhashFunctions.length);
