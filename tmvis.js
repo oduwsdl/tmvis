@@ -1361,9 +1361,8 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
       ConsoleLogIfRequired('************curCookieClientId just before calling  createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'************')
       self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
       completedScreenshotCaptures++;
-      var value = (completedScreenshotCaptures/noOfThumbnailsSelectedToBeCaptured)*95+5;
+      var value = (completedScreenshotCaptures/noOfThumbnailsSelectedToBeCaptured)*80+5;
       constructSSE("percentagedone-"+value,curCookieClientId);
-
 
     } ,
     function doneCreatingScreenshots (err) {      // When finished, check for errors

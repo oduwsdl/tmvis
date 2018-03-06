@@ -715,6 +715,8 @@ function startEventNotification(){
            //  alert(" Ready for display");
            //  $(".getSummary").trigger("click");
              $('#serverStreamingModal .logsContent').empty();
+             setProgressBar(2);
+
              $('#serverStreamingModal').modal('hide');
              $(".tabContentWrapper").show();
              if(notificationSrc != null){
@@ -723,6 +725,7 @@ function startEventNotification(){
            }
            else if(streamedObj.data === "statssent"){
                $('#serverStreamingModal .logsContent').empty();
+               setProgressBar(2);
                $('#serverStreamingModal').modal('hide');
                if(notificationSrc != null){
                  notificationSrc.close();
