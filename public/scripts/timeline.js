@@ -852,10 +852,14 @@ function getSummary(){
   if($("body").find("form")[0].checkValidity()){
         $(".getSummary").hide();
        event.preventDefault();
+       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+ screenshotDelta+ "/" +$('.argumentsForm #urirIP').val();
+
+       var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
+       changeToSummaryState(summaryStatePath);
+
        startEventNotification();
        var ENDPOINT = "/alsummarizedtimemap";
-       var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+ screenshotDelta+ "/" +$('.argumentsForm #urirIP').val();
-       //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+       var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
        $("#busy-loader").show();
        $('#serverStreamingModal .logsContent').empty();
        $('#serverStreamingModal').modal('show');
@@ -1025,6 +1029,13 @@ function generateDeepLinkState(curInputJsobObj){
 
 function generateDeepLinkStateForSummary(curInputJsobObj){
   return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/" +curInputJsobObj["screenshotDelta"]+"/"+curInputJsobObj["urir"];
+}
+
+function changeToSummaryState(curURLState) {
+    var state = {},
+        title = "Smmary State",
+        path  = curURLState;
+    history.pushState(state, title, path);
 }
 
 function updateDeepLinkStateArr() {
