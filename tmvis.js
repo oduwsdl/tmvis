@@ -1354,12 +1354,14 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
     // response.end()
     // isResponseEnded = true
   }
-
+  var completedScreenshotCaptures = 0;
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
     1,function( memento,callback){
       ConsoleLogIfRequired('************curCookieClientId just before calling  createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'************')
       self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
+      completedScreenshotCaptures++;
+      var value = (completedScreenshotCaptures/noOfThumbnailsSelectedToBeCaptured)*95+5;
     } ,
     function doneCreatingScreenshots (err) {      // When finished, check for errors
 
