@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>UI Initial Draft</title>
+		<title>Timemap Vis</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
 	    <link href="/styles/style_timeline.css" rel="stylesheet" />
@@ -12,45 +12,34 @@
 		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 		<link href='http://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
-		<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
-		<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+		<!--link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/-->
+		<!--script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script-->
 		<link href='http://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
 		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
     	<script src="/scripts/imageSliderScript.js"></script>
     	<script src="/scripts/imageGridScript.js"></script>
-    	<script src="/scripts/timeline.js?v=1000"></script>
+    	<script src="/scripts/timeline.js"></script>
     	<script src="/scripts/waitforimages.js"></script>
+			<script src="/scripts/formatting.js"></script>
+
 			<!-- Priorirty is to stabilise the current single step build -->
 			<!-- <script src="./scripts/embedded.js"></script> -->
-    	<script type="text/javascript">
-    		$(document).ready(function(){
 
-					if($("input[name='primesource']:checked").val() == "internetarchive"){
-						$("#collectionNo").val("");
-						$("#collectionNo").attr("disabled",true);
-					}
-
-    			$("input[name='primesource']").click(function(){
-	    			if($(this).val() == "internetarchive"){
-	    				$("#collectionNo").attr("disabled",true);
-							$("#collectionNo").val("");
-	    			}else{
-	    				$("#collectionNo").removeAttr("disabled");
-	    			}
-
-				});
-
-    		});
-    	</script>
 
 	</head>
 	<body>
 
-		<div class="container-fluid" style="max-width:90%;">
+		<div class="container-fluid">
 			<div class="well row attributesWrapper" style="margin-top: 1%;">
-				<form action="#" class="argumentsForm">
 
+				<div class = "Title">
+
+					<h1>TimeMap Visualization</h1>
+
+					</div>
+				<form action="#" class="argumentsForm">
 
 					<div class="row URIWrapper" >
 							<div class="form-group">
@@ -63,54 +52,93 @@
 						  </div>
 					</div>
 
-					<div class="row orgAndCollNoWrapper form-inline" >
 
-							<div class="form-group">
-								<label class="radio-inline"><input type="radio" name="primesource" checked="checked" value="archiveit">Archive-It</label>
-								<label class="radio-inline"><input type="radio" name="primesource" value="internetarchive">Internet Archive</label>
-								<!-- <label class="radio-inline"><input type="radio" name="optradio">Memgator</label>
-								 -->
+					<div class="row orgAndCollNoWrapper form-inline" style="vertical-align:middle;" >
+						<!--ARCHIVE OPTIONS -->
+							<div class="pull-left" style="min-width:25%;">
+								<label class="radio"><input type="radio" class ="form-control" checked="checked" name="primesource"  id = "internetarchive" value="internetarchive" onclick="javascript:yesnoCheck();">Internet Archive</label><br/>
+								<label class="radio"><input type="radio" class ="form-control" name="primesource" id = "archiveit" value="archiveit" onclick="javascript:yesnoCheck();">Archive-It</label>
+								<!--label for="collectionNo">Collection Identifier</label-->
+							  <input class="form-control" type="number" class ="form-control" title="Collection Identifier"  name="ci"  id="collectionNo" placeholder="Collection Identifier" />
+							</div>
+							<!-- THRESHOLD AND DELAY-->
+
+
+						<div class="col-md-3" style="text-align: center;" >
+
+								<label for="hammingDistance" >Webpage Difference: <span id="hammingdistanceValue">4</span> </label>
+								<br/>
+
+							   <div class="slidecontainer">
+							    <input  id="hammingDistance" name="hdt" class="slider" type="range" min="0" max="10" step="1" value="4" oninput="javascript:updateTextH(value);" onclick="javascript:updateTextH(value);" />
+							    </div>
+
+							  <p>Larger difference means less thumbnails.</p>
 						</div>
-							<div class="form-group pull-right">
-								<label for="collectionNo">Collection Identifier</label>
-							    <input class="form-control" type="number" title="Collection Identifier"  name="ci"  id="collectionNo" placeholder="1068">
 
+						<div class="col-md-3" style="text-align: center;">
+								<label for="screenshotDelta"  >Delay: <span id="screenshotValue">0</span> </label> <br/>
+								<div class="slidecontainer">
+									<input  id="screenshotDelta"  name="ssd" class="slider" type="range" min="0" max="10" step="1" value="0" oninput="javascript:updateTextS(value);" onclick="javascript:updateTextS(value);"/></div>
+								<p>Delay taking screenshot of webpage once it's loaded.</p>
+							</div>
+
+
+							<!--div class="form-group pull-right" style="margin-right:1%;">
+								<div class="dropdown">
+										<button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" title="Advanced Settings"><i class="fa fa-cog" aria-hidden="true"></i></button>
+										<ul class="dropdown-menu">
+											<li class="form-group" style="padding:6%;">
+												<label for="hammingDistance">Threshold:</label>
+											<input class="form-control" style="width:40%;" type="number" title="Uniqueness Threshold"  name="hdt"  id="hammingDistance" value="4" />
+
+											</li>
+											<li class="form-group" style="padding:6%;">
+											<label for="screenshotDelta">Delay:</label>
+
+											<input class="form-control" style="width:40%;" type="number" title="Sec Before ScreenShot"  name="ssd"  id="screenshotDelta" value="0" >
+											</li>
+
+										</ul>
+								</div>
+
+							</div-->
+
+							<!-- GET STATS -->
+							<div id="statsbtn" class="form-inline pull-right">
 									<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
 							    <!-- <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
 								-->
-									<button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
-
-
+									<button style="background-color : #C8C8C8;" class="btn getJSONFromServer form-control" title="Get number of unique mementos"> Calculate # of Thumbnails </button>
 							</div>
 
-							<div class="form-group pull-right" style="margin-right:1%;">
-								<div class="dropdown">
-								    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" title="Advanced Settings"><i class="fa fa-cog" aria-hidden="true"></i></button>
-								    <ul class="dropdown-menu">
-								      <li class="form-group" style="padding:6%;">
-								      	<label for="hammingDistance">Threshold:</label>
-							    		<input class="form-control" style="width:40%;" type="number" title="Uniqueness Threshold"  name="hdt"  id="hammingDistance" value="4" />
-								      </li>
-
-								    </ul>
-								</div>
-
-							</div>
 					</div>
+
 				</form>
-			</div>
 
-			<div class="statsWrapper row" style="display:none;">
-				<div class="col-lg-9">
-					<p> <b>Stats : </b><span class="collection_stats"></span> &nbsp; <lable class="approxTimeShowingPTag" style="display:none"> </lable></P>
+
+				<!--STATS-->
+				<div class="statsWrapper row" style="display:none;">
+
+					<div class="col-lg-10">
+						<h3> <b>Stats : </b><span class="collection_stats"></span> &nbsp; </h3> <label class="approxTimeShowingPTag"> </label>
+					</div>
+
+
+					<div class="col-lg-2 pull-right">
+					   <button style="background-color : #C8C8C8; float: right;" class="btn getSummary" title="Displays visualizations after screenshots are captured"> Generate Thumbnails </button>
+					</div>
+
 				</div>
 
-				<div class="col-lg-3">
-				   <button class="btn getSummary" title="Displays visualizations after screenshots are captured"> Summarize </button>
-				</div>
+
 			</div>
 
-			<div class="row tabContentWrapper" style="display: none;">
+
+
+
+
+			<div class="row tabContentWrapper" style="display:none; z-index: 100; margin-bottom:1%;">
 				<ul class="nav nav-tabs">
 					<li class="active"><a data-toggle="tab" href="#imageGrid">Grid</a></li>
 				  <li><a data-toggle="tab" href="#imageSlider">Slider</a></li>
@@ -118,7 +146,7 @@
 
 				</ul>
 
-				<div class="tab-content">
+				<div class="tab-content" style="z-index: auto; margin-bottom:1%;" >
 
 					<div id="imageGrid" class="tab-pane fade in active">
 						<div class="grid-container">
@@ -241,7 +269,7 @@
 
 		</div>
 
-		<div id="busy-loader" style="min-width:90%; display: none; z-index:1999">
+		<div id="busy-loader" style="min-width:90%; display:none; z-index:1999">
 		</div>
 
 
@@ -267,8 +295,19 @@
 		    </div>
 		  </div>
 		</div>
-
-
-
 	</body>
+	<div id="footer">
+		<div class="container-fluid" >
+			<div class="well row attributesWrapper" style="margin-top: 1%;">
+				<a href= "http://ws-dl.blogspot.com/2017/10/2017-10-16-visualizing-webpage-changes.html">Full Description of the Project</a>
+				<br>
+				<a href="https://securegrants.neh.gov/publicquery/main.aspx?f=1&gn=HAA-256368-17">Funded by NEH/IMLS Digital Humanities Advancement Grant HAA-256368-17</a>
+
+				<p>With our partners <a href="https://www.odu.edu"> Old Dominion University</a>,
+				<a href="https://www.frick.org/research/library"> Frick Art Reference Library</a>,
+				<a href="http://www.nyarc.org/">New York Art Resources Consortium</a> and
+				<a href="http://library.columbia.edu/">Columbia University Libraries</a></p>
+			</div>
+		</div>
+	</div>
 </html>

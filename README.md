@@ -46,10 +46,22 @@ $ docker image build -t timemapvis .
 In the above command `timemapvis` is the name of the image which can be anything, but the same needs to be used when running the container instance.
 
 ### Running Docker Container
+
+```Running for the first time
+docker run -it --rm timemapvis bash
 ```
-docker run -it --rm -v "$PWD":/app -p 3000:3000 --user=$(id -u):$(id -g) timemapvis bash
+In another terminal
+```
+cd tmvis
+docker cp (CONTAINER ID CREATED ABOVE):/app/node_modules/ ./ 
+```
 
 ```
+docker run -it --rm -v "$PWD":/app -p 3000:3000 --user=$(id -u):$(id -g) timemapvis bash
+node tmvis.js
+
+```
+
 
 In the above command the container is running in detached mode and can be accessed from outside on port `3000` at http://localhost:3000/. If you want to run the service on a different port, say `80` then change `-p 3000:3000` to `-p 80:3000`.
 
