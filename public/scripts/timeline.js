@@ -616,17 +616,34 @@ var curDeepLinkStateArr=[];
           return true;
         }else{
           if(updateDeepLinkStateArr()){
-
-            $('.argumentsForm #uriIP').val(curDeepLinkStateArr[5]);
-            $('.argumentsForm #urirIP').val(curDeepLinkStateArr[5]);
-            $('.argumentsForm #collectionNo').val( curDeepLinkStateArr[2]);
-            var hammingDistance = curDeepLinkStateArr[3];
-            if(hammingDistance == "" || hammingDistance == undefined || hammingDistance == null){
-                hammingDistance = 4;
+            if(curDeepLinkStateArr[4] == "summary"){
+              $('.argumentsForm #uriIP').val(curDeepLinkStateArr[6]);
+              $('.argumentsForm #urirIP').val(curDeepLinkStateArr[6]);
+              $('.argumentsForm #collectionNo').val( curDeepLinkStateArr[2]);
+              var hammingDistance = curDeepLinkStateArr[3];
+              if(hammingDistance == "" || hammingDistance == undefined || hammingDistance == null){
+                  hammingDistance = 4;
+              }
+              var ssd = curDeepLinkStateArr[5];
+              if(ssd == "" || ssd == undefined || ssd == null){
+                  ssd = 0;
+              }
+              $('.argumentsForm #hammingDistance').val(hammingDistance);
+              $('.argumentsForm #screenshotDelta').val(ssd);
+              $('.argumentsForm input[value='+ curDeepLinkStateArr[1] +']').prop("checked",true);
+              getSummary();
+            }else{
+              $('.argumentsForm #uriIP').val(curDeepLinkStateArr[5]);
+              $('.argumentsForm #urirIP').val(curDeepLinkStateArr[5]);
+              $('.argumentsForm #collectionNo').val( curDeepLinkStateArr[2]);
+              var hammingDistance = curDeepLinkStateArr[3];
+              if(hammingDistance == "" || hammingDistance == undefined || hammingDistance == null){
+                  hammingDistance = 4;
+              }
+              $('.argumentsForm #hammingDistance').val(hammingDistance);
+              $('.argumentsForm input[value='+ curDeepLinkStateArr[1] +']').prop("checked",true);
+              getStats();
             }
-            $('.argumentsForm #hammingDistance').val(hammingDistance);
-            $('.argumentsForm input[value='+ curDeepLinkStateArr[1] +']').prop("checked",true);
-            getStats();
           }else{
               return false;
           }
@@ -760,12 +777,16 @@ function getStats(){
   if(hammingDistance == ""){
       hammingDistance = 4;
   }
+  var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
+  if(screenshotDelta == ""){
+      screenshotDelta = 0;
+  }
   var role = "stats";
   if($("body").find("form")[0].checkValidity()){
       startEventNotification();
       event.preventDefault();
       var ENDPOINT = "/alsummarizedtimemap";
-      var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+      var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+screenshotDelta+"/"+$('.argumentsForm #urirIP').val();
       $("#busy-loader").show();
       $('#serverStreamingModal .logsContent').empty();
       $('#serverStreamingModal').modal('show');
@@ -812,6 +833,111 @@ function getStats(){
         });
       }
 }
+
+function getSummary(){
+  //delete_cookie("clientId");
+  var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+  if(collectionIdentifer == ""){
+      collectionIdentifer = "all";
+  }
+  var hammingDistance = $('.argumentsForm #hammingDistance').val();
+  if(hammingDistance == ""){
+      hammingDistance = 4;
+  }
+
+  var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
+  if(screenshotDelta == ""){
+      screenshotDelta = 0;
+  }
+
+  var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
+  if($("body").find("form")[0].checkValidity()){
+        $(".getSummary").hide();
+       event.preventDefault();
+       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+ screenshotDelta+ "/" +$('.argumentsForm #urirIP').val();
+
+       var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
+       changeToSummaryState(summaryStatePath);
+
+       startEventNotification();
+       var ENDPOINT = "/alsummarizedtimemap";
+       var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+       $("#busy-loader").show();
+       $('#serverStreamingModal .logsContent').empty();
+       $('#serverStreamingModal').modal('show');
+      $.ajax({
+        type: "GET",
+        url: address, // uncomment this for deployment
+        dataType: "text",
+         timeout: 0,
+        success: function( data, textStatus, jqXHR) {
+            $("#busy-loader").hide();
+            $('#serverStreamingModal').modal('hide');
+          try{
+              data = $.trim(data).split("...");
+              if(data.length > 1){
+                  if(data [1] == ""){
+                      data = data [0];
+                  }else{
+                      data = data [1];
+                  }
+              }
+              else{
+                  data = data [0];
+              }
+
+              jsonObjRes= $.parseJSON(data);
+              // following code segment makes the screenshot URI got with event_html | event_html_similarto properties to a html fragment
+              jsonObjRes[0].event_html= "<img src='"+jsonObjRes[0].event_html+"' width='300px' />";
+              for(var i=1;i< jsonObjRes.length;i++){
+                  jsonObjRes[i].event_html= "<img src='"+jsonObjRes[i].event_html+"' width='300px' />";
+                  jsonObjRes[i].event_html_similarto= "<img src='"+jsonObjRes[i].event_html_similarto+"' width='300px' />";
+              }
+              $(".statsWrapper").show();
+               window.timeline = new Timeline(jsonObjRes);
+              // place where the notch width is being reduced t0 2px.
+              $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
+              // Color is changed in the Array at 284 line as that is the right place
+              // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
+              new Zoom("in");
+              new Zoom("out");
+              var chooseNext = new Chooser("next");
+              var choosePrev = new Chooser("prev");
+              var chooseUniqueNext = new Chooser("uniquenext");
+              var chooseUniquePrev = new Chooser("uniqueprev");
+              chooseNext.click();
+              $(document).bind('keydown', function(e) {
+                  if (e.keyCode === 39) {
+                      chooseNext.click();
+                  } else if (e.keyCode === 37) {
+                      choosePrev.click();
+                  } else {
+                      return;
+                  }
+              });
+              console.log(jsonObjRes);
+              drawImageGrid(jsonObjRes); // calling Image Grid Function here
+              drawImageSlider(jsonObjRes);
+              $(".modal-backdrop").remove();
+          }
+          catch(err){
+            alert("Some problem fetching the response, Please refresh and try again.");
+            $("#busy-loader").hide();
+            $('#serverStreamingModal').modal('hide');
+              //$(".statsWrapper").hide();
+              $(".tabContentWrapper").hide();
+          }
+        },
+        error: function( data, textStatus, jqXHR) {
+          var errMsg = "Some problem fetching the response, Please refresh try again.";
+          $("#busy-loader").hide();
+          $('#serverStreamingModal').modal('hide');
+          alert(errMsg);
+        }
+      });
+    }
+}
+
 
 
 $(function(){
@@ -876,106 +1002,7 @@ $(function(){
 
     // work around for the timeline setting stuff
     $(".getSummary").click(function(event){
-      //delete_cookie("clientId");
-      var collectionIdentifer = $('.argumentsForm #collectionNo').val();
-      if(collectionIdentifer == ""){
-          collectionIdentifer = "all";
-      }
-      var hammingDistance = $('.argumentsForm #hammingDistance').val();
-      if(hammingDistance == ""){
-          hammingDistance = 4;
-      }
-
-	    var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
-      if(screenshotDelta == ""){
-          screenshotDelta = 0;
-      }
-
-      var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
-      if($("body").find("form")[0].checkValidity()){
-            $(".getSummary").hide();
-            $(".approxTimeShowingPTag").hide();
-           event.preventDefault();
-
-           startEventNotification();
-           var ENDPOINT = "/alsummarizedtimemap";
-           var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+ screenshotDelta+ "/" +$('.argumentsForm #urirIP').val();
-           //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
-
-           $("#busy-loader").show();
-           $('#serverStreamingModal .logsContent').empty();
-           $('#serverStreamingModal').modal('show');
-          $.ajax({
-            type: "GET",
-            url: address, // uncomment this for deployment
-            dataType: "text",
-             timeout: 0,
-            success: function( data, textStatus, jqXHR) {
-                $("#busy-loader").hide();
-                $('#serverStreamingModal').modal('hide');
-              try{
-                  data = $.trim(data).split("...");
-                  if(data.length > 1){
-                      if(data [1] == ""){
-                          data = data [0];
-                      }else{
-                          data = data [1];
-                      }
-                  }
-                  else{
-                      data = data [0];
-                  }
-
-                  jsonObjRes= $.parseJSON(data);
-                  // following code segment makes the screenshot URI got with event_html | event_html_similarto properties to a html fragment
-                  jsonObjRes[0].event_html= "<img src='"+jsonObjRes[0].event_html+"' width='300px' />";
-                  for(var i=1;i< jsonObjRes.length;i++){
-                      jsonObjRes[i].event_html= "<img src='"+jsonObjRes[i].event_html+"' width='300px' />";
-                      jsonObjRes[i].event_html_similarto= "<img src='"+jsonObjRes[i].event_html_similarto+"' width='300px' />";
-                  }
-                  $(".statsWrapper").show();
-                   window.timeline = new Timeline(jsonObjRes);
-                  // place where the notch width is being reduced t0 2px.
-                  $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
-                  // Color is changed in the Array at 284 line as that is the right place
-                  // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
-                  new Zoom("in");
-                  new Zoom("out");
-                  var chooseNext = new Chooser("next");
-                  var choosePrev = new Chooser("prev");
-                  var chooseUniqueNext = new Chooser("uniquenext");
-                  var chooseUniquePrev = new Chooser("uniqueprev");
-                  chooseNext.click();
-                  $(document).bind('keydown', function(e) {
-                      if (e.keyCode === 39) {
-                          chooseNext.click();
-                      } else if (e.keyCode === 37) {
-                          choosePrev.click();
-                      } else {
-                          return;
-                      }
-                  });
-                  console.log(jsonObjRes);
-                  drawImageGrid(jsonObjRes); // calling Image Grid Function here
-                  drawImageSlider(jsonObjRes);
-                  $(".modal-backdrop").remove();
-              }
-              catch(err){
-                alert("Some problem fetching the response, Please refresh and try again.");
-                $("#busy-loader").hide();
-                $('#serverStreamingModal').modal('hide');
-                  //$(".statsWrapper").hide();
-                  $(".tabContentWrapper").hide();
-              }
-            },
-            error: function( data, textStatus, jqXHR) {
-              var errMsg = "Some problem fetching the response, Please refresh try again.";
-              $("#busy-loader").hide();
-              $('#serverStreamingModal').modal('hide');
-              alert(errMsg);
-            }
-          });
-        }
+      getSummary();
     });
   });
 })(window, document);
@@ -1006,6 +1033,17 @@ function generateDeepLinkState(curInputJsobObj){
   return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["urir"];
 }
 
+function generateDeepLinkStateForSummary(curInputJsobObj){
+  return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/" +curInputJsobObj["screenshotDelta"]+"/"+curInputJsobObj["urir"];
+}
+
+function changeToSummaryState(curURLState) {
+    var state = {},
+        title = "Smmary State",
+        path  = curURLState;
+    history.pushState(state, title, path);
+}
+
 function updateDeepLinkStateArr() {
     //format of the deep link: http://localhost:3000/alsummarizedview/archiveit/1068/4/stats/http://4genderjustice.org/
     //curDeepLinkStateArr=[alsummarizedview,archiveIt,1068,4,stats,http://4genderjustice.org];
@@ -1025,10 +1063,18 @@ function updateDeepLinkStateArr() {
       if(isNaN(deepLinkParts[3])){ // hamming distance is not being a number
         alert("The value after 4th backword slash(/) has to be a numeric value, Please correct that !");
         return false;
-      }else{
+      }
+      if(deepLinkParts[4]=="stats"){
         curDeepLinkStateArr[2] = deepLinkParts[2];
         curDeepLinkStateArr[3]= deepLinkParts[3];
         curDeepLinkStateArr[5] = deepLinkStr.split("/"+deepLinkParts[4]+"/")[1];
+        return true;
+      }
+      else if(deepLinkParts[4]=="summary"){
+        curDeepLinkStateArr[2] = deepLinkParts[2];
+        curDeepLinkStateArr[3]= deepLinkParts[3];
+        curDeepLinkStateArr[5] = deepLinkParts[5];
+        curDeepLinkStateArr[6] = deepLinkStr.split("/"+deepLinkParts[4]+"/"+ deepLinkParts[5]+"/")[1];
         return true;
       }
     }else{
