@@ -1353,6 +1353,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
   ConsoleLogIfRequired('Started the process of capturing the screenshots...',curCookieClientId)
 
   constructSSE('Started the process of capturing the screenshots...',curCookieClientId)
+  //constructSSE("streamingStarted",curCookieClientId);
   constructSSE("percentagedone-5",curCookieClientId);
 
   if (noOfThumbnailsSelectedToBeCaptured >= 2) {
