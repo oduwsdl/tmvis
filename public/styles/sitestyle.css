@@ -1,3 +1,51 @@
+//Sliders
+.slidecontainer {
+    width: 100%; /* Width of the outside container */
+}
+
+/* The slider itself */
+.slider {
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    width: 100%; /* Full-width */
+    height: 20px; /* Specified height */
+    border-radius: 5px; 
+    background: #d7dcdb; /* Grey background */
+    outline: none; /* Remove outline */
+    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+    opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */ 
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: #23726D; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+    border-radius: 50%; 
+}
+
+.slider::-moz-range-thumb {
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: #23726D; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+    border-radius: 50%;
+}
+
+
+
+button {
+	background-color : #eef;
+}
 
 	.collection_name{
 		font-size: 16px;
@@ -8,8 +56,53 @@
 		font-size: 12px;
    	 	margin-left: 0.1%
 	}
+ .container-fluid {
+	 max-width:90%;
+ }
+ #collectionNo{
+	 display: none;
+ }
 
+output{
+display:inline;
+}
+	.Title h1{
 
+		text-align: center;
+		font-family: 'Oswald', sans-serif;
+		font-size: 4em;
+	}
+	.Title img{
+		position:absolute;
+		text-align:left;
+		width:10%;
+
+	}
+	.collection_stats{
+		font-family: 'Oswald', sans-serif;
+		font-size: 1em;
+	}
+	#footer{
+		text-align:center;
+		font-family: 'Oswald', sans-serif;
+		width:100%;
+		
+		position:absolute;
+   		bottom:0;
+   		max-height: 110px;
+
+	}
+	html {
+    height: 95%;
+    position: relative;
+}
+body{
+   min-height: 100%;
+    padding-bottom: 100px;
+    position: relative;
+
+}
+	
     #timeline {
         width: 99% !important;
         padding: 0 !important;
@@ -50,6 +143,7 @@
 	.buttonsWrapperSlider{
 		margin-left: 10%;
 	}
+	
 	h2 {
 		font-family: 'Oswald', sans-serif;
 		font-size: 1em;
