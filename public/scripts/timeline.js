@@ -613,7 +613,7 @@ var jsonObjRes = {};
         if(collectionIdentifer == ""){
             collectionIdentifer = "all";
         }
-        var hammingDistance = curInputObj["hammingDistance"];  
+        var hammingDistance = curInputObj["hammingDistance"];
         if(hammingDistance == ""){
             hammingDistance = 4;
         }
@@ -625,7 +625,7 @@ var jsonObjRes = {};
 
         if($("body").find("form")[0].checkValidity()){
             event.preventDefault();
-            var ENDPOINT = "alsummarizedtimemap";
+            var ENDPOINT = "http://localhost:3000/alsummarizedtimemap";
             var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" + screenshotDelta+ "/" +$('.argumentsForm #urirIP').val()
 
             $("#busy-loader").show();
@@ -642,19 +642,19 @@ var jsonObjRes = {};
                       $('#serverStreamingModal').modal('hide');
                       try{
                           jsonObjRes= $.parseJSON(data);
-                          var memStatStr = jsonObjRes["totalmementos"]+" mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
+                          var memStatStr = jsonObjRes["totalmementos"]+" Mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
                           $(".statsWrapper .collection_stats").html(memStatStr);
                           $(".statsWrapper").show();
                           $(".getSummary").show();
 
                           if(jsonObjRes["timetowait"] == 0){
-                            $(".approxTimeShowingPTag").html('Takes no time as the images are already captured, Click on Continue button');
+                            $(".approxTimeShowingPTag").html('Images already captured, Click Generate.');
 
                           }else{
-                            $(".approxTimeShowingPTag").html('Takes about '+ jsonObjRes["timetowait"] +' minutes Approximately, Click on Continue button and please be patient');
+                            $(".approxTimeShowingPTag").html('Takes about '+ jsonObjRes["timetowait"] +' minutes approximately. Generate images?');
                           }
-                          $(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
-                          $(".modal-backdrop").remove();
+                          //$(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
+                          //$(".modal-backdrop").remove();
 
 
                       }catch(err){
@@ -663,6 +663,7 @@ var jsonObjRes = {};
                             $('#serverStreamingModal').modal('hide');
                           $(".statsWrapper").hide();
                           $(".tabContentWrapper").hide();
+                          
                       }
                   },
                   error: function( data, textStatus, jqXHR) {
@@ -728,7 +729,10 @@ var jsonObjRes = {};
         var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
             if(screenshotDelta == ""){
                 screenshotDelta = 0;
+        }else{
+        
         }
+        
         var role = "stats" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
         if($(this).parents("body").find("form")[0].checkValidity()){
             event.preventDefault();
@@ -737,7 +741,7 @@ var jsonObjRes = {};
             curInputJsobObj["urir"]= $("#urirIP").val();
             curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
             curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
-            curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
+            curInputJsobObj["hammingDistance"]= $('.argumentsForm #hammingDistance').val();
             curInputJsobObj["screenshotDelta"]= $('.argumentsForm #screenshotDelta').val();
             curInputJsobObj["role"]= role;
             localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
@@ -767,10 +771,11 @@ var jsonObjRes = {};
       var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
       if($("body").find("form")[0].checkValidity()){
             $(".getSummary").hide();
+            $(".approxTimeShowingPTag").hide();
            event.preventDefault();
-           var ENDPOINT = "alsummarizedtimemap";
+           var ENDPOINT = "http://localhost:3000/alsummarizedtimemap";
            var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+ screenshotDelta+ "/" +$('.argumentsForm #urirIP').val()
-           $("#busy-loader").show(); 
+           $("#busy-loader").show();
            $('#serverStreamingModal .logsContent').empty();
            $('#serverStreamingModal').modal('show');
           $.ajax({
