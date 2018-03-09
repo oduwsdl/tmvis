@@ -606,7 +606,7 @@ var curDeepLinkStateArr=[];
           $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
           $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
           $('.argumentsForm #screenshotDelta').val(curInputObj["screenshotDelta"] );
-          $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true);
+          $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true).trigger("click");
           getStats(); // this makes the call for getting the initial stats.
       }else{
         //alert("doesn't have the local storage set, using the Query parameters");
@@ -632,7 +632,7 @@ var curDeepLinkStateArr=[];
             $('.argumentsForm #hammingdistanceValue').html(hammingDistance);
             $('.argumentsForm #screenshotDelta').val(ssd);
             $('.argumentsForm #screenshotValue').html(ssd);
-            $('.argumentsForm input[value='+ curDeepLinkStateArr[1] +']').prop("checked",true);
+            $('.argumentsForm input[value='+ curDeepLinkStateArr[1] +']').prop("checked",true).trigger("click");
             if(curDeepLinkStateArr[4] == "summary"){
               getSummary();
             }else{
@@ -672,7 +672,7 @@ function uriAnalysisForAttributes(uri){
       }
       $('.argumentsForm #urirIP').val(urir);
       $('.argumentsForm #collectionNo').val(ci);
-      $('.argumentsForm input[value='+primesource+']').prop("checked",true);
+      $('.argumentsForm input[value='+primesource+']').prop("checked",true).trigger("click");
 
     }else{
       urir = uri; // one and the same - case where the URI-R is directly given
@@ -699,13 +699,14 @@ function uriAnalysisForAttributes(uri){
     }
     $('.argumentsForm #urirIP').val(urir);
     $('.argumentsForm #collectionNo').val(ci);
-    $('.argumentsForm input[value='+primesource+']').prop("checked",true);
+    $('.argumentsForm input[value='+primesource+']').prop("checked",true).trigger("click");
   }
 }
 var notificationSrc= null;
 
 function startEventNotification(){
   notificationSrc= new EventSource('/notifications');
+
        notificationSrc.onmessage = function(e) {
            console.log(e.data);
            var streamedObj = JSON.parse(e.data);
@@ -716,10 +717,12 @@ function startEventNotification(){
 
 
            if(streamedObj.data === "streamingStarted"){
+
                $('#serverStreamingModal .logsContent').empty();
                setProgressBar(2);
                // un comment the following line after POC
              $('#serverStreamingModal').modal('show');
+
            }else if (streamedObj.data.indexOf("percentagedone-") == 0) {
              var value = parseInt(streamedObj.data.split("-")[1]);
              setProgressBar(value);
@@ -729,7 +732,6 @@ function startEventNotification(){
            //  $(".getSummary").trigger("click");
              $('#serverStreamingModal .logsContent').empty();
              setProgressBar(2);
-
              $('#serverStreamingModal').modal('hide');
              $(".tabContentWrapper").show();
              if(notificationSrc != null){
@@ -738,7 +740,7 @@ function startEventNotification(){
            }
            else if(streamedObj.data === "statssent"){
                $('#serverStreamingModal .logsContent').empty();
-               setProgressBar(2);
+                setProgressBar(2);
                $('#serverStreamingModal').modal('hide');
                if(notificationSrc != null){
                  notificationSrc.close();
@@ -984,6 +986,8 @@ $(function(){
             }
             delete_cookie("clientId");
             window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
+            
+
         }else{
           if( $("#uriIP").val()==""){
             alert("Please enter an URI-R, required field.");

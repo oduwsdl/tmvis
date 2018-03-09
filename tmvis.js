@@ -141,7 +141,9 @@ function main () {
 
     // set a cookie
   app.use(function (request, response, next) {
-    response.cookie('clientId',Date.now().toString())
+    if(request._parsedUrl.pathname.indexOf("alsummarizedview") > 0 ){
+      response.cookie('clientId',Date.now().toString())
+    }
     next();
   });
 
@@ -241,8 +243,6 @@ function sendSSE(req, res) {
 
 }
 
-
-
 function constructSSE(data,clientIdInCookie) {
   var id = Date.now();
   var streamObj = {};
@@ -262,7 +262,7 @@ function constructSSE(data,clientIdInCookie) {
     console.log("From retrieved Response Obj -->"+curResponseObj);
     curResponseObj.write('id: ' + id + '\n')
     curResponseObj.write("data: " + JSON.stringify(streamObj) + '\n\n')
-    if(data == "readyToDisplay"){
+    if(data === "readyToDisplay" || data === "statssent" ){
         streamedHashMapObj.delete(clientIdInCookie)
     }
   }
@@ -566,6 +566,7 @@ function processWithFileContents (fileContents, response,curCookieClientId) {
   ConsoleLogIfRequired("**************************************************************************************************");
   console.log(JSON.stringify(t));
     if(isToComputeBoth){
+      constructSSE('streamingStarted',curCookieClientId)
         async.series([
           function (callback) {
             t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback)
@@ -828,6 +829,18 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
             constructSSE('Timemap fetched has a total of '+t.mementos.length + ' mementos.',curCookieClientId)
 
             // to respond to the client as the intermediate response, while the server processes huge loads
+           if(t.mementos.length > 5000){
+            ConsoleLogIfRequired('The page you requested has more than 5000 Mementos, Service cannot handle this request right now.')
+            constructSSE('The page you requested has more than 5000 Mementos, Service cannot handle this request right now.',curCookieClientId)
+            constructSSE("percentagedone-100",curCookieClientId);
+             //process.exit(-1)
+             response.write('The page you requested has more than 5000 Mementos, Service cannot handle this request right now..',)
+             response.end()
+             return
+           }
+
+
+            // to respond to the client as the intermediate response, while the server processes huge loads
            if(t.mementos.length > 250){
 
             constructSSE('Might aprroximately take  <h3>  ' + Math.ceil((t.mementos.length)/(60*4))  +' Minutes ...<h3> to compute simhashes',curCookieClientId)
@@ -979,12 +992,18 @@ TimeMap.prototype.calculateSimhashes = function (curCookieClientId,callback) {
   var arrayOfSetSimhashFunctions = []
   var completedSimhashedMementoCount = 0;
   var totalMemetoCount = this.mementos.length;
+  var preVal = 0;
   // the way to get a damper, just 7 requests at a time.
   async.eachLimit(this.mementos,5, function(curMemento, callback){
     curMemento.setSimhash(curCookieClientId,callback)
     completedSimhashedMementoCount++;
+
     var value = (completedSimhashedMementoCount/totalMemetoCount)*70+20;
-    constructSSE("percentagedone-"+value,curCookieClientId);
+    if(value > preVal){ // At times if there is an error while fetching the contents, retry happens and context jumps back there
+      preVal = value;
+    }
+    constructSSE("percentagedone-"+Math.ceil(preVal),curCookieClientId);
+
   //  ConsoleLogIfRequired(curMemento)
   }, function(err) {
     //  ConsoleLogIfRequired("length of arrayOfSetSimhashFunctions: -> " + arrayOfSetSimhashFunctions.length);
@@ -1372,7 +1391,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
       self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
       completedScreenshotCaptures++;
       var value = (completedScreenshotCaptures/noOfThumbnailsSelectedToBeCaptured)*80+5;
-      constructSSE("percentagedone-"+value,curCookieClientId);
+      constructSSE("percentagedone-"+Math.ceil(value),curCookieClientId);
 
     } ,
     function doneCreatingScreenshots (err) {      // When finished, check for errors
