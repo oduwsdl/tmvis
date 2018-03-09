@@ -791,7 +791,8 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
       var req = http.request(options, function (res) {
          ConsoleLogIfRequired("--ByMahee-- Inside the http request call back success, request is made on the following obect:")
         constructSSE('streamingStarted',curCookieClientId)
-        constructSSE('Writing the data response into buffer..',curCookieClientId)
+
+        constructSSE('Fetching the Timemap and writing the data response into buffer..',curCookieClientId)
         // ConsoleLogIfRequired(options);
         // ConsoleLogIfRequired("----------------");
         res.setEncoding('utf8')
