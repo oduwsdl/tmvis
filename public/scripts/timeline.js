@@ -778,7 +778,6 @@ function getStats(){
   var role = "stats";
   if($("body").find("form")[0].checkValidity()){
       startEventNotification();
-      event.preventDefault();
       var ENDPOINT = "/alsummarizedtimemap";
       var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+screenshotDelta+"/"+$('.argumentsForm #urirIP').val();
       $("#busy-loader").show();
@@ -847,7 +846,6 @@ function getSummary(){
   var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
   if($("body").find("form")[0].checkValidity()){
         $(".getSummary").hide();
-       event.preventDefault();
        var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+ screenshotDelta+ "/" +$('.argumentsForm #urirIP').val();
 
        var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
@@ -966,7 +964,6 @@ $(function(){
 
         var role = "stats" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
         if($(this).parents("body").find("form")[0].checkValidity()){
-            event.preventDefault();
             localStorage.setItem("getStatsClicked", "true");
             var curInputJsobObj = {};
             curInputJsobObj["uri"]= $("#uriIP").val();

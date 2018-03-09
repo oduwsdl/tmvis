@@ -181,7 +181,7 @@ function main () {
           headers['Access-Control-Allow-Credentials'] = false
           headers['Access-Control-Max-Age'] = '86400'  // 24 hours
           headers['Access-Control-Allow-Headers'] = 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Accept-Datetime'
-          headers['Content-Type'] = 'application/json' // text/html
+          headers['Content-Type'] = 'text/html' // text/html
             var query = url.parse(request.url, true).query
             console.log(JSON.stringify(query))
           response.writeHead(200, headers)
