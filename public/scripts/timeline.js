@@ -986,8 +986,6 @@ $(function(){
             }
             delete_cookie("clientId");
             window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
-            
-
         }else{
           if( $("#uriIP").val()==""){
             alert("Please enter an URI-R, required field.");

@@ -150,6 +150,12 @@ function main () {
 
 // all the common  requests are logged via here
   app.use(morgan('common',{
+    skip: function (req, res) {
+      if(req._parsedUrl.pathname.indexOf("notifications") > 0){
+        return true;
+      }
+      return false;
+    },
     stream: accessLogStream
   }));
 
@@ -1125,7 +1131,7 @@ TimeMap.prototype.SendThumbSumJSONCalledFromCache= function (response,callback) 
       // mementoJObj_ForTimeline["event_html"] = "<img src='"+localAssetServer+"notcaptured.png' width='300px' />"
       // mementoJObj_ForTimeline["event_html_similarto"] = "<img src='"+localAssetServer+memento.hammingBasisScreenshotURI +"' width='300px' />"
 
-      mementoJObj_ForTimeline["event_html"] = localAssetServer+'notcaptured.png'
+      mementoJObj_ForTimeline["event_html"] = 'notcaptured'
       mementoJObj_ForTimeline["event_html_similarto"] = localAssetServer+memento.hammingBasisScreenshotURI
 
     }else{
@@ -1196,7 +1202,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
     mementoJObj_ForTimeline["timestamp"] = Number(dt)/1000
     if(memento.screenshotURI == null || memento.screenshotURI==''){
       mementoJObj_ForTimeline["event_series"] = "Non-Thumbnail Mementos"
-     mementoJObj_ForTimeline["event_html"] = localAssetServer+"notcaptured.png"
+     mementoJObj_ForTimeline["event_html"] = "notcaptured"
      mementoJObj_ForTimeline["event_html_similarto"] = localAssetServer+memento.hammingBasisScreenshotURI
 
     }else{
@@ -1391,7 +1397,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
       ConsoleLogIfRequired('************curCookieClientId just before calling  createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'************')
       self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
       completedScreenshotCaptures++;
-      var value = (completedScreenshotCaptures/noOfThumbnailsSelectedToBeCaptured)*80+5;
+      var value = ((completedScreenshotCaptures/noOfThumbnailsSelectedToBeCaptured)*80)+5;
       constructSSE("percentagedone-"+Math.ceil(value),curCookieClientId);
 
     } ,
