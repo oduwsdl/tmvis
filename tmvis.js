@@ -1342,12 +1342,14 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
     criteria = withCriteria
   }
 
+  var statsArry =[];
   self.statsHashMapObj.forEach(function(statsObj, hammingDistance) {
     console.log("------------------ selected for screenshots------------")
     console.log(JSON.stringify(self.menentoDetForMultipleKValues.get(hammingDistance).filter(criteria)))
       var noOfThumbnailsSelectedToBeCaptured = getNotExistingCapturesCount(self.menentoDetForMultipleKValues.get(hammingDistance).filter(criteria))
       statsObj["timetowait"] = Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA))
       constructSSE('No of screenshots to be captured -> <h4>'+noOfThumbnailsSelectedToBeCaptured +'</h4>',curCookieClientId)
+      statsArry.push(statsObj);
   });
 
 
@@ -1355,9 +1357,9 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
   if(role == "stats"){
     constructSSE('Stats built and ready to serve...',curCookieClientId)
     constructSSE("percentagedone-100",curCookieClientId);
-    constructSSE('statssent',curCookieClientId)
-    response.write(JSON.stringify(self.statsHashMapObj))
-    response.end()
+    constructSSE('statssent',curCookieClientId);
+    response.write(JSON.stringify(statsArry));
+    response.end();
     return
   }
 
