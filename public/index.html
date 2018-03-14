@@ -18,11 +18,11 @@
 		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-    	<script src="./scripts/imageSliderScript.js"></script>
-    	<script src="./scripts/imageGridScript.js"></script>
-    	<script src="./scripts/timeline.js"></script>
-    	<script src="./scripts/waitforimages.js"></script>
-			<script src="./scripts/formatting.js"></script>
+    	<script src="/scripts/imageSliderScript.js"></script>
+    	<script src="/scripts/imageGridScript.js"></script>
+    	<script src="/scripts/timeline.js"></script>
+    	<script src="/scripts/waitforimages.js"></script>
+			<script src="/scripts/formatting.js"></script>
 
 			<!-- Priorirty is to stabilise the current single step build -->
 			<!-- <script src="./scripts/embedded.js"></script> -->
@@ -35,7 +35,7 @@
 			<div class="well row attributesWrapper" style="margin-top: 1%;">
 
 				<div class = "Title">
-					
+
 					<h1>TimeMap Visualization</h1>
 
 					</div>
@@ -59,20 +59,20 @@
 								<label class="radio"><input type="radio" class ="form-control" checked="checked" name="primesource"  id = "internetarchive" value="internetarchive" onclick="javascript:yesnoCheck();">Internet Archive</label><br/>
 								<label class="radio"><input type="radio" class ="form-control" name="primesource" id = "archiveit" value="archiveit" onclick="javascript:yesnoCheck();">Archive-It</label>
 								<!--label for="collectionNo">Collection Identifier</label-->
-							  <input class="form-control" type="number" class ="form-control" title="Collection Identifier"  name="ci"  id="collectionNo" placeholder="Collection Identifier"
+							  <input class="form-control" type="number" class ="form-control" title="Collection Identifier"  name="ci"  id="collectionNo" placeholder="Collection Identifier" />
 							</div>
 							<!-- THRESHOLD AND DELAY-->
 
 
 						<div class="col-md-3" style="text-align: center;" >
-							
-								<label for="hammingDistance" >Webpage Difference: <span id="hammingdistanceValue">4</span> </label> 
+
+								<label for="hammingDistance" >Webpage Difference: <span id="hammingdistanceValue">4</span> </label>
 								<br/>
-							  
+
 							   <div class="slidecontainer">
-							    <input  id="hammingDistance" name="hdt" class="slider" type="range" min="0" max="10" step="1" value="4" oninput="javascript:updateTextH(value);" onclick="javascript:updateTextH(value);" /> 
+							    <input  id="hammingDistance" name="hdt" class="slider" type="range" min="0" max="10" step="1" value="4" oninput="javascript:updateTextH(value);" onclick="javascript:updateTextH(value);" />
 							    </div>
-							  
+
 							  <p>Larger difference means less thumbnails.</p>
 						</div>
 
@@ -115,13 +115,13 @@
 					</div>
 
 				</form>
-				
-				
+
+
 				<!--STATS-->
 				<div class="statsWrapper row" style="display:none;">
-				
+
 					<div class="col-lg-10">
-						<h3> <b>Stats : </b><span class="collection_stats"></span> &nbsp; </h3> <label class="approxTimeShowingPTag"> </label> 
+						<h3> <b>Stats : </b><span class="collection_stats"></span> &nbsp; </h3> <label class="approxTimeShowingPTag"> </label>
 					</div>
 
 
@@ -130,13 +130,13 @@
 					</div>
 
 				</div>
-			
-			
+
+
 			</div>
 
 
 
-			
+
 
 			<div class="row tabContentWrapper" style="display:none; z-index: 100; margin-bottom:1%;">
 				<ul class="nav nav-tabs">
@@ -311,5 +311,3 @@
 		</div>
 	</div>
 </html>
-
-	

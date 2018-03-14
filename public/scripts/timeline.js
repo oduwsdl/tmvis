@@ -616,32 +616,26 @@ var curDeepLinkStateArr=[];
           return true;
         }else{
           if(updateDeepLinkStateArr()){
+
+            $('.argumentsForm #uriIP').val(curDeepLinkStateArr[6]);
+            $('.argumentsForm #urirIP').val(curDeepLinkStateArr[6]);
+            $('.argumentsForm #collectionNo').val( curDeepLinkStateArr[2]);
+            var hammingDistance = curDeepLinkStateArr[3];
+            if(hammingDistance == "" || hammingDistance == undefined || hammingDistance == null){
+                hammingDistance = 4;
+            }
+            var ssd = curDeepLinkStateArr[5];
+            if(ssd == "" || ssd == undefined || ssd == null){
+                ssd = 0;
+            }
+            $('.argumentsForm #hammingDistance').val(hammingDistance);
+            $('.argumentsForm #hammingdistanceValue').html(hammingDistance);
+            $('.argumentsForm #screenshotDelta').val(ssd);
+            $('.argumentsForm #screenshotValue').html(ssd);
+            $('.argumentsForm input[value='+ curDeepLinkStateArr[1] +']').prop("checked",true);
             if(curDeepLinkStateArr[4] == "summary"){
-              $('.argumentsForm #uriIP').val(curDeepLinkStateArr[6]);
-              $('.argumentsForm #urirIP').val(curDeepLinkStateArr[6]);
-              $('.argumentsForm #collectionNo').val( curDeepLinkStateArr[2]);
-              var hammingDistance = curDeepLinkStateArr[3];
-              if(hammingDistance == "" || hammingDistance == undefined || hammingDistance == null){
-                  hammingDistance = 4;
-              }
-              var ssd = curDeepLinkStateArr[5];
-              if(ssd == "" || ssd == undefined || ssd == null){
-                  ssd = 0;
-              }
-              $('.argumentsForm #hammingDistance').val(hammingDistance);
-              $('.argumentsForm #screenshotDelta').val(ssd);
-              $('.argumentsForm input[value='+ curDeepLinkStateArr[1] +']').prop("checked",true);
               getSummary();
             }else{
-              $('.argumentsForm #uriIP').val(curDeepLinkStateArr[5]);
-              $('.argumentsForm #urirIP').val(curDeepLinkStateArr[5]);
-              $('.argumentsForm #collectionNo').val( curDeepLinkStateArr[2]);
-              var hammingDistance = curDeepLinkStateArr[3];
-              if(hammingDistance == "" || hammingDistance == undefined || hammingDistance == null){
-                  hammingDistance = 4;
-              }
-              $('.argumentsForm #hammingDistance').val(hammingDistance);
-              $('.argumentsForm input[value='+ curDeepLinkStateArr[1] +']').prop("checked",true);
               getStats();
             }
           }else{
@@ -929,7 +923,7 @@ function getSummary(){
           }
         },
         error: function( data, textStatus, jqXHR) {
-          var errMsg = "Some problem fetching the response, Please refresh try again.";
+          var errMsg = "Some problem fetching the response, Please refresh and try again.";
           $("#busy-loader").hide();
           $('#serverStreamingModal').modal('hide');
           alert(errMsg);
@@ -967,9 +961,9 @@ $(function(){
             if(screenshotDelta == ""){
                 screenshotDelta = 0;
         }else{
-        
+
         }
-        
+
         var role = "stats" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
         if($(this).parents("body").find("form")[0].checkValidity()){
             event.preventDefault();
@@ -1030,7 +1024,7 @@ function getParameterByName(name, url) {
 
 
 function generateDeepLinkState(curInputJsobObj){
-  return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["urir"];
+  return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["screenshotDelta"]+"/"+curInputJsobObj["urir"];
 }
 
 function generateDeepLinkStateForSummary(curInputJsobObj){
@@ -1064,13 +1058,7 @@ function updateDeepLinkStateArr() {
         alert("The value after 4th backword slash(/) has to be a numeric value, Please correct that !");
         return false;
       }
-      if(deepLinkParts[4]=="stats"){
-        curDeepLinkStateArr[2] = deepLinkParts[2];
-        curDeepLinkStateArr[3]= deepLinkParts[3];
-        curDeepLinkStateArr[5] = deepLinkStr.split("/"+deepLinkParts[4]+"/")[1];
-        return true;
-      }
-      else if(deepLinkParts[4]=="summary"){
+      else{
         curDeepLinkStateArr[2] = deepLinkParts[2];
         curDeepLinkStateArr[3]= deepLinkParts[3];
         curDeepLinkStateArr[5] = deepLinkParts[5];
