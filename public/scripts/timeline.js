@@ -795,8 +795,16 @@ function getStats(){
                 $('#serverStreamingModal').modal('hide');
                 try{
                     jsonObjRes= $.parseJSON(data);
-                    var memStatStr = jsonObjRes["totalmementos"]+" Mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
+                    var htmlStr="";
+                    jsonObjRes.forEach(function(item,index,arry){
+                      htmlStr+= "&nbsp;<label title='No Of unique thumbnails:"+item['unique'] +"'><input type='radio' name='thresholdDistance' value='"+ item['threshold']+"'>"+item['unique'] +"</label>";
+                    });
+
+                    var memStatStr = "Total Mementos:"+jsonObjRes[0]["totalmementos"] +"; Select no of unique thubnails to view -> " + htmlStr;
+
+                    //var memStatStr = jsonObjRes["totalmementos"]+" Mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
                     $(".statsWrapper .collection_stats").html(memStatStr);
+                    $(".statsWrapper input[type='radio']").eq(0).val()
                     $(".statsWrapper").show();
                     $(".getSummary").show();
 
@@ -835,7 +843,9 @@ function getSummary(){
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
   }
-  var hammingDistance = $('.argumentsForm #hammingDistance').val();
+  //var hammingDistance = $('.argumentsForm #hammingDistance').val();
+  var hammingDistance = $(".statsWrapper input[type='radio']:checked").val();
+
   if(hammingDistance == ""){
       hammingDistance = 4;
   }
@@ -986,8 +996,6 @@ $(function(){
             }
             delete_cookie("clientId");
             window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
-            
-
         }else{
           if( $("#uriIP").val()==""){
             alert("Please enter an URI-R, required field.");
