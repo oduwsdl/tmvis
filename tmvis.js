@@ -85,7 +85,7 @@ var uriR = ''
 var isDebugMode = argv.debug? argv.debug: false
 var HAMMING_DISTANCE_THRESHOLD = argv.hdt?  argv.hdt: 4
 var hammingDistanceForSummary = 2
-var SCREENSHOT_DELTA = argv.ssd? argv.ssd: 0
+var SCREENSHOT_DELTA = argv.ssd? argv.ssd: 2
 var isToOverrideCachedSimHash = argv.oes? argv.oes: false
 // by default the prime src is gonna be Archive-It
 var primeSrc = argv.ait? 1: (argv.ia ? 2:(argv.mg?3:1))
@@ -99,6 +99,7 @@ var totalMementos = 0
 var streamingRes = null
 var curSerReq = null
 var streamedHashMapObj = new HashMap()
+var responseDup = null;
 ConsoleLogIfRequired("Hamming distance threshold set while running the server:"+HAMMING_DISTANCE_THRESHOLD)
 //return
 /* *******************************
@@ -211,7 +212,7 @@ function main () {
             headers['Content-Type'] = 'text/html' // text/html
               var query = url.parse(request.url, true).query
               console.log(JSON.stringify(query))
-              streamedHashMapObj.clear()
+              streamedHashMapObj.clear();
             response.writeHead(200, headers)
             response.write('cleared the streaming hash')
             response.end()
@@ -331,7 +332,7 @@ function PublicEndpoint () {
   */
   this.respondToClient = function (request, response) {
 
-
+    responseDup = response;
     ConsoleLogIfRequired("Cookies------------------>"+request.cookies.clientId)
     constructSSE("streamingStarted",request.cookies.clientId);
     constructSSE("percentagedone-3",request.cookies.clientId);
@@ -434,7 +435,7 @@ function PublicEndpoint () {
     }
 
     if (isNaN(query.ssd)){
-          SCREENSHOT_DELTA = 0; // setting to default screenshot delay time
+          SCREENSHOT_DELTA = 2; // setting to default screenshot delay time
     }else{
           SCREENSHOT_DELTA = parseInt(query.ssd)
     }
@@ -2026,6 +2027,12 @@ process.on('SIGINT', function () {
   ConsoleLogIfRequired('\nGracefully shutting down from SIGINT (Ctrl-C)')
   process.exit()
 })
+
+
+process.on('unhandledRejection', (reason, p) => {
+  ConsoleLogIfRequired('Unhandled Rejection at: Promise');
+  responseDup.end();
+});
 
 // Useful Functions
 function checkBin (n) {
