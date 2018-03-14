@@ -1485,22 +1485,6 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieC
 
   }
 
-
-
-
-  // var options = {
-  //   'phantomConfig': {
-  //     'ignore-ssl-errors': true,
-  //     'local-to-remote-url-access': true // ,
-  //     // 'default-white-background': true,
-  //   },
-  //   // Remove the Wayback UI
-  //   'onLoadFinished': function () {
-  //     document.getElementById('wm-ipp').style.display = 'none'
-  //   }
-  //
-  // }
-
   ConsoleLogIfRequired('About to start screenshot generation process for ' + uri)
   constructSSE('Starting screenshot generation process for -> ' + uri,curCookieClientId)
   constructSSE('....................................',curCookieClientId)
@@ -1679,7 +1663,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
   console.time('Hamming And Filtering, a synchronous operation')
   constructSSE('computing the Hamming Distance and Filtering synchronously...',curCookieClientId)
   var curMementoDetArray = [];
-  for(var i=2; i<= 5; i++ ){ // do the computation fot the threshold from k =3 to k=7
+  for(var i=2; i<= 12; i++ ){ // do the computation fot the threshold from k =3 to k=7
       HAMMING_DISTANCE_THRESHOLD = i;
       curMementoDetArray = [];
       curMementoDetArray =  JSON.parse(JSON.stringify(this.mementos))
@@ -1731,6 +1715,9 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
           curStatObj["totalmementos"] = totalMementos;
           curStatObj["unique"] = noOfUniqueMementos;
           this.statsHashMapObj.set(HAMMING_DISTANCE_THRESHOLD,curStatObj)
+      }
+      if(noOfUniqueMementos == 1){
+        break;
       }
 
   }
