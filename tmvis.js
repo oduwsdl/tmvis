@@ -84,6 +84,7 @@ var isResponseEnded = false
 var uriR = ''
 var isDebugMode = argv.debug? argv.debug: false
 var HAMMING_DISTANCE_THRESHOLD = argv.hdt?  argv.hdt: 4
+var hammingDistanceForSummary = 2
 var SCREENSHOT_DELTA = argv.ssd? argv.ssd: 0
 var isToOverrideCachedSimHash = argv.oes? argv.oes: false
 // by default the prime src is gonna be Archive-It
@@ -196,6 +197,26 @@ function main () {
           response.write('Hello from what ever!')
           response.end()
     })
+
+    //that a work around to clear the streaming realted cache
+     app.get('/clearstreamhash', (request, response) => {
+            var headers = {}
+            // IE8 does not allow domains to be specified, just the *
+            // headers['Access-Control-Allow-Origin'] = req.headers.origin
+            headers['Access-Control-Allow-Origin'] = '*'
+            headers['Access-Control-Allow-Methods'] = 'GET'
+            headers['Access-Control-Allow-Credentials'] = false
+            headers['Access-Control-Max-Age'] = '86400'  // 24 hours
+            headers['Access-Control-Allow-Headers'] = 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Accept-Datetime'
+            headers['Content-Type'] = 'text/html' // text/html
+              var query = url.parse(request.url, true).query
+              console.log(JSON.stringify(query))
+              streamedHashMapObj.clear()
+            response.writeHead(200, headers)
+            response.write('cleared the streaming hash')
+            response.end()
+      })
+
 
 
     //This route is just for testing, testing the SSE
@@ -406,7 +427,8 @@ function PublicEndpoint () {
     if(query.role === "stats"){
       role = "stats"
     }else if(query.role === "summary"){
-        role = "summary"
+      hammingDistanceForSummary = HAMMING_DISTANCE_THRESHOLD
+      role = "summary"
     }else{
         role = "stats" // incase if a dirty value is sent
     }
@@ -512,8 +534,7 @@ function PublicEndpoint () {
 
               processWithFileContents(data, response,request.cookies.clientId)
             }
-          //ByMahee -- UnComment Following Line(UCF)
-         //  processWithFileContents(data, response)
+
         },
         function failed () {
           //ByMahee -- calling the core function responsible for AlSummarization, if the cached file doesn't exist
@@ -575,14 +596,20 @@ function processWithFileContents (fileContents, response,curCookieClientId) {
       constructSSE('streamingStarted',curCookieClientId)
         async.series([
           function (callback) {
-
-              t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback)
-
+            if(role == "stats"){
+              t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback);
+            }else{
+              t.calculateHammingDistancesWithOnlineFilteringForSummary(curCookieClientId,callback);
+            }
             constructSSE("percentagedone-5",curCookieClientId);
-
           },
           function (callback) {
-            t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback)
+            if(role == "stats"){
+              t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback)
+            }else{
+              t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary(callback)
+
+            }
             constructSSE("percentagedone-15",curCookieClientId);
           },
           function (callback) {
@@ -914,7 +941,11 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 
     function (callback) {
         if(isToComputeBoth){
-          t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback);
+          if(role == "stats"){
+            t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback);
+          }else{
+            t.calculateHammingDistancesWithOnlineFilteringForSummary(curCookieClientId,callback);
+          }
         }
         else if (callback) {
           callback('')
@@ -922,7 +953,11 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
     },
     function (callback) {
         if(isToComputeBoth){
-          t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);
+          if(role == "stats"){
+            t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback)
+          }else{
+            t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary(callback)
+          }
         }
         else if (callback) {
           callback('')
@@ -1077,13 +1112,14 @@ TimeMap.prototype.writeJSONToCache = function (callback) {
   var originalURI = this.originalURI;
   var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+originalURI,isDebugMode)
   //cacheFile.writeFileContentsAsJSON(JSON.stringify(this.mementos))
-  cacheFile.writeFileContentsAsJSON(this.mementos)
+  cacheFile.writeFileContentsAsJSON(this.mementos) // write the last HD based content into JSON
 
-  this.menentoDetForMultipleKValues.forEach(function(mementoArrObj, hammingDistance) {
-    HAMMING_DISTANCE_THRESHOLD = hammingDistance;
-    var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+originalURI,isDebugMode)
-    cacheFile.writeFileContentsAsJSON(mementoArrObj)
-  });
+  // in case if the contents have to be written back to JSON
+  // this.menentoDetForMultipleKValues.forEach(function(mementoArrObj, hammingDistance) {
+  //   HAMMING_DISTANCE_THRESHOLD = hammingDistance;
+  //   var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+originalURI,isDebugMode)
+  //   cacheFile.writeFileContentsAsJSON(mementoArrObj)
+  // });
 
   if (callback) {
     callback('')
@@ -1242,6 +1278,46 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
 
 
 
+TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary = function (callback) {
+  // Assuming foreach is faster than for-i, this can be executed out-of-order
+  this.mementos.forEach(function (memento,m) {
+    var uri = memento.uri
+
+
+      //  to replace /12345678912345id_/ to /12345678912345/
+      var regExpForDTStr = /\/\d{14}id_\// // to match something lile /12345678912345id_/
+      var matchedString = uri.match(regExpForDTStr)
+      if(matchedString != null){
+        uri = uri.replace(matchedString[0],(matchedString[0].toString().replace("id_",""))) // by default only the first occurance is replaced
+      }
+
+      //uri = uri.replace("id_/http","/http"); //replaced by above code segment
+    // ConsoleLogIfRequired("Hamming distance = "+memento.hammingDistance)
+    if (memento.hammingDistance < HAMMING_DISTANCE_THRESHOLD  && memento.hammingDistance >= 0) {
+      // ConsoleLogIfRequired(memento.uri+" is below the hamming distance threshold of "+HAMMING_DISTANCE_THRESHOLD)
+      memento.screenshotURI = null
+
+      var regExpForDTStr = /\/\d{14}id_\// // to match something lile /12345678912345id_/
+      var matchedString = memento.hammingBasisURI.match(regExpForDTStr)
+      if(matchedString != null){
+        memento.hammingBasisURI = memento.hammingBasisURI.replace(matchedString[0],(matchedString[0].toString().replace("id_",""))) // by default only the first occurance is replaced
+      }
+      var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ memento.hammingBasisURI.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+
+      //var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ memento.hammingBasisURI.replace("id_/http","/http").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename // replaced by above segment
+      memento.hammingBasisScreenshotURI = filename
+    } else {
+      var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      memento.screenshotURI = filename
+    }
+  })
+
+  ConsoleLogIfRequired('done with supplyChosenMementosBasedOnHammingDistanceAScreenshotURI, calling back')
+  if (callback) {
+    callback('')
+  }
+}
+
 
 
 
@@ -1290,8 +1366,6 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
     })
 
   });
-
-
 
   ConsoleLogIfRequired('done with supplyChosenMementosBasedOnHammingDistanceAScreenshotURI, calling back')
   if (callback) {
@@ -1342,25 +1416,28 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
     criteria = withCriteria
   }
 
-  var statsArry =[];
-  self.statsHashMapObj.forEach(function(statsObj, hammingDistance) {
-    console.log("------------------ selected for screenshots------------")
-    console.log(JSON.stringify(self.menentoDetForMultipleKValues.get(hammingDistance).filter(criteria)))
-      var noOfThumbnailsSelectedToBeCaptured = getNotExistingCapturesCount(self.menentoDetForMultipleKValues.get(hammingDistance).filter(criteria))
-      statsObj["timetowait"] = Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA))
-      constructSSE('No of screenshots to be captured -> <h4>'+noOfThumbnailsSelectedToBeCaptured +'</h4>',curCookieClientId)
-      statsArry.push(statsObj);
-  });
-
+  var noOfThumbnailsSelectedToBeCaptured = 0;
 
   // breaking the control and returning the stats if the the request is made for status
   if(role == "stats"){
+    var statsArry =[];
+    self.statsHashMapObj.forEach(function(statsObj, hammingDistance) {
+      console.log("------------------ selected for screenshots------------")
+      console.log(JSON.stringify(self.menentoDetForMultipleKValues.get(hammingDistance).filter(criteria)))
+       noOfThumbnailsSelectedToBeCaptured = getNotExistingCapturesCount(self.menentoDetForMultipleKValues.get(hammingDistance).filter(criteria))
+        statsObj["timetowait"] = Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA))
+        constructSSE('No of screenshots to be captured -> <h4>'+noOfThumbnailsSelectedToBeCaptured +'</h4>',curCookieClientId)
+        statsArry.push(statsObj);
+    });
+
     constructSSE('Stats built and ready to serve...',curCookieClientId)
     constructSSE("percentagedone-100",curCookieClientId);
     constructSSE('statssent',curCookieClientId);
     response.write(JSON.stringify(statsArry));
     response.end();
     return
+  }else{
+     noOfThumbnailsSelectedToBeCaptured = getNotExistingCapturesCount(self.mementos.filter(criteria))
   }
 
   ConsoleLogIfRequired('Creating screenshots...')
@@ -1659,12 +1736,71 @@ TimeMap.prototype.createScreenshotForMemento = function (memento, callback) {
 
 }
 
+
+
+
+TimeMap.prototype.calculateHammingDistancesWithOnlineFilteringForSummary = function (curCookieClientId,callback) {
+  console.time('Hamming And Filtering, a synchronous operation')
+  constructSSE('computing the Hamming Distance and Filtering synchronously...',curCookieClientId)
+
+  var lastSignificantMementoIndexBasedOnHamming = 0
+  var copyOfMementos = [this.mementos[0]]
+
+  //ConsoleLogIfRequired('Calculate hamming distance of ' + this.mementos.length + ' mementos')
+  for (var m = 0; m < this.mementos.length; m++) {
+    // ConsoleLogIfRequired("Analyzing memento "+m+"/"+this.mementos.length+": "+this.mementos[m].uri)
+    // ConsoleLogIfRequired("...with SimHash: "+this.mementos[m].simhash)
+    if (m > 0) {
+      if ( this.mementos[m].simhash == null || (this.mementos[m].simhash.match(/0/g) || []).length === 32) { // added the null condition if the simhash is set to null because of error in connection
+        ConsoleLogIfRequired('0s, returning')
+        continue
+      }
+      // ConsoleLogIfRequired("Calculating hamming distance")
+      this.mementos[m].hammingDistance = getHamming(this.mementos[m].simhash, this.mementos[lastSignificantMementoIndexBasedOnHamming].simhash)
+      // ConsoleLogIfRequired("Getting hamming basis")
+      this.mementos[m].hammingBasis = this.mementos[lastSignificantMementoIndexBasedOnHamming].datetime
+      this.mementos[m].hammingBasisURI= this.mementos[lastSignificantMementoIndexBasedOnHamming].uri
+
+      // ConsoleLogIfRequired('Comparing hamming distances (simhash,uri) = ' + this.mementos[m].hammingDistance + '\n' +
+      //   ' > testing: ' + this.mementos[m].simhash + ' ' + this.mementos[m].uri + '\n' +
+      //   ' > pivot:   ' + this.mementos[lastSignificantMementoIndexBasedOnHamming].simhash + ' ' + this.mementos[lastSignificantMementoIndexBasedOnHamming].uri)
+
+      if (this.mementos[m].hammingDistance >= HAMMING_DISTANCE_THRESHOLD) { // Filter the mementos if hamming distance is too small
+        lastSignificantMementoIndexBasedOnHamming = m
+
+         copyOfMementos.push(this.mementos[m]) // Only push mementos that pass threshold requirements
+      }
+
+      // ConsoleLogIfRequired(t.mementos[m].uri+" hammed!")
+    } else if (m === 0) {
+      ConsoleLogIfRequired('m==0, continuing')
+    }
+  }
+  noOfUniqueMementos = copyOfMementos.length
+  totalMementos = this.mementos.length;
+  constructSSE('Completed filtering...',curCookieClientId)
+  constructSSE('Out of the total <h3>'+totalMementos+'</h3> eixisting mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique...',curCookieClientId)
+  //ConsoleLogIfRequired((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
+  copyOfMementos = null
+
+  ConsoleLogIfRequired("------------ByMahee-- After the hamming distance is calculated, here is how the mementos with additional details look like ------------------")
+  ConsoleLogIfRequired(JSON.stringify(this.mementos))
+  //ConsoleLogIfRequired(this.mementos)
+  ConsoleLogIfRequired("----------------------------------------------------------------------------------------------------------------------------------------------")
+  if (callback) { callback('') }
+}
+
+
+
+
 TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCookieClientId,callback) {
   console.time('Hamming And Filtering, a synchronous operation')
   constructSSE('computing the Hamming Distance and Filtering synchronously...',curCookieClientId)
   var curMementoDetArray = [];
-  for(var i=2; i<= 12; i++ ){ // do the computation fot the threshold from k =3 to k=7
+
+  for(var i=2; i<= 12; i++ ){ // do the computation fot the threshold from k =3 to k=12
       HAMMING_DISTANCE_THRESHOLD = i;
+
       curMementoDetArray = [];
       curMementoDetArray =  JSON.parse(JSON.stringify(this.mementos))
       var lastSignificantMementoIndexBasedOnHamming = 0
@@ -1706,6 +1842,8 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
       constructSSE('Out of the total <h3>'+totalMementos+'</h3> eixisting mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique for hamming distance:'+ HAMMING_DISTANCE_THRESHOLD +' ...',curCookieClientId)
       //ConsoleLogIfRequired((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
       copyOfMementos = null
+
+
       if( !this.menentoDetForMultipleKValues.has(HAMMING_DISTANCE_THRESHOLD)){
           this.menentoDetForMultipleKValues.set(HAMMING_DISTANCE_THRESHOLD,curMementoDetArray)
       }
@@ -1716,13 +1854,14 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
           curStatObj["unique"] = noOfUniqueMementos;
           this.statsHashMapObj.set(HAMMING_DISTANCE_THRESHOLD,curStatObj)
       }
+
+
       if(noOfUniqueMementos == 1){
         break;
       }
 
   }
-
-  this.mementos =  JSON.parse(JSON.stringify(curMementoDetArray))
+  this.mementos =  JSON.parse(JSON.stringify(this.menentoDetForMultipleKValues.get(hammingDistanceForSummary)))
 
   ConsoleLogIfRequired("------------ByMahee-- After the hamming distance is calculated, here is how the mementos with additional details look like ------------------")
   ConsoleLogIfRequired("--------------------------------------For threshold value 2------------------------------------------------")
