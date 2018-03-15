@@ -174,7 +174,7 @@ function main () {
   app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
 
   //app.get(['/','/index.html','/alsummarizedview/:primesource/:ci/:hdt/:role/*'], (request, response) => {
-  app.get(['/','/index.html','/alsummarizedview/:primesource/:ci/:hdt/stats/*','/alsummarizedview/:primesource/:ci/:hdt/summary/:ssd/*'  ], (request, response) => {
+  app.get(['/','/index.html','/alsummarizedview/:primesource/:ci/:hdt/stats/*','/alsummarizedview/:primesource/:ci/:hdt/summary/*'  ], (request, response) => {
     response.sendFile(__dirname + '/public/index.html')
   })
 
@@ -229,7 +229,7 @@ function main () {
 
   // this is the actually place that hit the main server logic
   //app.get('/alsummarizedtimemap/:primesource/:ci/:urir', endpoint.respondToClient)
-  app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/:role/:ssd/*', endpoint.respondToClient)
+  app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/:role/*', endpoint.respondToClient)
 
 
   app.listen(port, '0.0.0.0', (err) => {
@@ -1176,7 +1176,7 @@ TimeMap.prototype.SendThumbSumJSONCalledFromCache= function (response,callback) 
       mementoJObj_ForTimeline["event_html_similarto"] = localAssetServer+memento.hammingBasisScreenshotURI
 
     }else{
-      var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      var filename = 'timemapSum_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       mementoJObj_ForTimeline["event_series"] = "Thumbnails"
       mementoJObj_ForTimeline["event_html"] = localAssetServer+memento.screenshotURI
 
@@ -1247,7 +1247,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
      mementoJObj_ForTimeline["event_html_similarto"] = localAssetServer+memento.hammingBasisScreenshotURI
 
     }else{
-      var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      var filename = 'timemapSum_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       mementoJObj_ForTimeline["event_series"] = "Thumbnails"
 
       // the two following lines are connented as the JSON object must not contain HTML Fragment
@@ -1303,12 +1303,12 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSum
       if(matchedString != null){
         memento.hammingBasisURI = memento.hammingBasisURI.replace(matchedString[0],(matchedString[0].toString().replace("id_",""))) // by default only the first occurance is replaced
       }
-      var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ memento.hammingBasisURI.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      var filename = 'timemapSum_'+ memento.hammingBasisURI.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
 
       //var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ memento.hammingBasisURI.replace("id_/http","/http").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename // replaced by above segment
       memento.hammingBasisScreenshotURI = filename
     } else {
-      var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      var filename = 'timemapSum_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
       memento.screenshotURI = filename
     }
   })
@@ -1356,12 +1356,12 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
         if(matchedString != null){
           memento.hammingBasisURI = memento.hammingBasisURI.replace(matchedString[0],(matchedString[0].toString().replace("id_",""))) // by default only the first occurance is replaced
         }
-        var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ memento.hammingBasisURI.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+        var filename = 'timemapSum_'+ memento.hammingBasisURI.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
 
         //var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ memento.hammingBasisURI.replace("id_/http","/http").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename // replaced by above segment
         memento.hammingBasisScreenshotURI = filename
       } else {
-        var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+        var filename = 'timemapSum_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
         memento.screenshotURI = filename
       }
     })
@@ -1384,7 +1384,7 @@ TimeMap.prototype.supplySelectedMementosAScreenshotURI = function (strategy,call
   var ii = 0
   for (var m in this.mementos) {
     if (this.mementos[m].selected) {
-      var filename = strategy + '_' + SCREENSHOT_DELTA + '_'+ this.mementos[m].uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'
+      var filename = strategy + '_'+ this.mementos[m].uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'
       this.mementos[m].screenshotURI = filename
       ii++
     }
@@ -1857,7 +1857,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
       }
 
 
-      if(noOfUniqueMementos == 2){
+      if(noOfUniqueMementos <= 2){
         break;
       }
 

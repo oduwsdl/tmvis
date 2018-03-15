@@ -605,7 +605,6 @@ var curDeepLinkStateArr=[];
           $('.argumentsForm #urirIP').val(curInputObj["urir"]);
           $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
           $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
-          $('.argumentsForm #screenshotDelta').val(curInputObj["screenshotDelta"] );
           $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true).trigger("click");
           getStats(); // this makes the call for getting the initial stats.
       }else{
@@ -617,22 +616,17 @@ var curDeepLinkStateArr=[];
         }else{
           if(updateDeepLinkStateArr()){
 
-            $('.argumentsForm #uriIP').val(curDeepLinkStateArr[6]);
-            $('.argumentsForm #urirIP').val(curDeepLinkStateArr[6]);
+            $('.argumentsForm #uriIP').val(curDeepLinkStateArr[5]);
+            $('.argumentsForm #urirIP').val(curDeepLinkStateArr[5]);
             $('.argumentsForm #collectionNo').val( curDeepLinkStateArr[2]);
             var hammingDistance = curDeepLinkStateArr[3];
             if(hammingDistance == "" || hammingDistance == undefined || hammingDistance == null){
                 hammingDistance = 4;
             }
-            var ssd = curDeepLinkStateArr[5];
-            if(ssd == "" || ssd == undefined || ssd == null){
-                ssd = 0;
-            }
+
             $('.argumentsForm #hammingDistance').val(hammingDistance);
             $('.argumentsForm #hammingdistanceValue').html(hammingDistance);
-            $('.argumentsForm #screenshotDelta').val(ssd);
-            $('.argumentsForm #screenshotValue').html(ssd);
-            $('.argumentsForm input[value='+ curDeepLinkStateArr[1] +']').prop("checked",true).trigger("click");
+            $('.argumentsForm .primesrcsection input[type=radio][value='+ curDeepLinkStateArr[1] +']').prop("checked",true).trigger("click");
             if(curDeepLinkStateArr[4] == "summary"){
               getSummary();
             }else{
@@ -773,15 +767,12 @@ function getStats(){
   if(hammingDistance == ""){
       hammingDistance = 4;
   }
-  var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
-  if(screenshotDelta == ""){
-      screenshotDelta = 0;
-  }
+
   var role = "stats";
   if($("body").find("form")[0].checkValidity()){
       startEventNotification();
       var ENDPOINT = "/alsummarizedtimemap";
-      var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+screenshotDelta+"/"+$('.argumentsForm #urirIP').val();
+      var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
       $("#busy-loader").show();
       $('#serverStreamingModal .logsContent').empty();
       $('#serverStreamingModal').modal('show');
@@ -846,19 +837,14 @@ function getSummary(){
   //var hammingDistance = $('.argumentsForm #hammingDistance').val();
   var hammingDistance = $(".statsWrapper input[type='radio']:checked").val();
 
-  if(hammingDistance == ""){
-      hammingDistance = 4;
-  }
-
-  var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
-  if(screenshotDelta == ""){
-      screenshotDelta = 0;
+  if(hammingDistance == "" || hammingDistance===undefined){
+    hammingDistance = $('.argumentsForm #hammingDistance').val();
   }
 
   var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
   if($("body").find("form")[0].checkValidity()){
         $(".getSummary").hide();
-       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+ screenshotDelta+ "/" +$('.argumentsForm #urirIP').val();
+       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val();
 
        var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
        changeToSummaryState(summaryStatePath);
@@ -967,12 +953,6 @@ $(function(){
         if(hammingDistance == ""){
             hammingDistance = 4;
         }
-        var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
-            if(screenshotDelta == ""){
-                screenshotDelta = 0;
-        }else{
-
-        }
 
         var role = "stats" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
         if($(this).parents("body").find("form")[0].checkValidity()){
@@ -986,8 +966,6 @@ $(function(){
               curInputJsobObj["collectionIdentifer"] = "all";
             }
             curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
-
-            curInputJsobObj["screenshotDelta"]= $('.argumentsForm #screenshotDelta').val();
             curInputJsobObj["role"]= role;
             localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
             //window.location.reload();
@@ -1033,11 +1011,11 @@ function getParameterByName(name, url) {
 
 
 function generateDeepLinkState(curInputJsobObj){
-  return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["screenshotDelta"]+"/"+curInputJsobObj["urir"];
+  return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["urir"];
 }
 
 function generateDeepLinkStateForSummary(curInputJsobObj){
-  return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/" +curInputJsobObj["screenshotDelta"]+"/"+curInputJsobObj["urir"];
+  return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["urir"];
 }
 
 function changeToSummaryState(curURLState) {
@@ -1070,8 +1048,7 @@ function updateDeepLinkStateArr() {
       else{
         curDeepLinkStateArr[2] = deepLinkParts[2];
         curDeepLinkStateArr[3]= deepLinkParts[3];
-        curDeepLinkStateArr[5] = deepLinkParts[5];
-        curDeepLinkStateArr[6] = deepLinkStr.split("/"+deepLinkParts[4]+"/"+ deepLinkParts[5]+"/")[1];
+        curDeepLinkStateArr[5] = deepLinkStr.split("/"+deepLinkParts[4]+"/")[1];
         return true;
       }
     }else{
