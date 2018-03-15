@@ -961,7 +961,13 @@ $(function(){
             curInputJsobObj["uri"]= $("#uriIP").val();
             curInputJsobObj["urir"]= $("#urirIP").val();
             curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
-            curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
+            if(curInputJsobObj["primesource"]=="internetarchive"){
+              curInputJsobObj["collectionIdentifer"]= "all";
+
+            }else{
+              curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
+
+            }
             if(!parseInt(curInputJsobObj["collectionIdentifer"])){
               curInputJsobObj["collectionIdentifer"] = "all";
             }
