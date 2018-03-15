@@ -63,46 +63,24 @@
 							</div>
 							<!-- THRESHOLD AND DELAY-->
 
-
-						<div class="col-md-3" style="text-align: center;" >
-
-								<label for="hammingDistance" >Webpage Difference: <span id="hammingdistanceValue">4</span> </label>
-								<br/>
-
-							   <div class="slidecontainer">
-							    <input  id="hammingDistance" name="hdt" class="slider" type="range" min="0" max="10" step="1" value="4" oninput="javascript:updateTextH(value);" onclick="javascript:updateTextH(value);" />
-							    </div>
-
-							  <p>Larger difference means less thumbnails.</p>
-						</div>
-
-						<div class="col-md-3" style="text-align: center;">
-								<label for="screenshotDelta"  >Delay: <span id="screenshotValue">0</span> </label> <br/>
-								<div class="slidecontainer">
-									<input  id="screenshotDelta"  name="ssd" class="slider" type="range" min="0" max="10" step="1" value="0" oninput="javascript:updateTextS(value);" onclick="javascript:updateTextS(value);"/></div>
-								<p>Delay taking screenshot of webpage once it's loaded.</p>
-							</div>
-
-
-							<!--div class="form-group pull-right" style="margin-right:1%;">
-								<div class="dropdown">
-										<button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" title="Advanced Settings"><i class="fa fa-cog" aria-hidden="true"></i></button>
-										<ul class="dropdown-menu">
-											<li class="form-group" style="padding:6%;">
-												<label for="hammingDistance">Threshold:</label>
-											<input class="form-control" style="width:40%;" type="number" title="Uniqueness Threshold"  name="hdt"  id="hammingDistance" value="4" />
-
-											</li>
-											<li class="form-group" style="padding:6%;">
-											<label for="screenshotDelta">Delay:</label>
-
-											<input class="form-control" style="width:40%;" type="number" title="Sec Before ScreenShot"  name="ssd"  id="screenshotDelta" value="0" >
-											</li>
-
-										</ul>
+							<div class="slidersection hidden">
+								<div class="col-md-3" style="text-align: center;" >
+										<label for="hammingDistance" >Webpage Difference: <span id="hammingdistanceValue">4</span> </label>
+										<br/>
+									   <div class="slidecontainer">
+									    <input  id="hammingDistance" name="hdt" class="slider" type="range" min="0" max="10" step="1" value="4" oninput="javascript:updateTextH(value);" onclick="javascript:updateTextH(value);" />
+									    </div>
+									  <p>Larger difference means less thumbnails.</p>
 								</div>
 
-							</div-->
+								<div class="col-md-3" style="text-align: center;">
+										<label for="screenshotDelta"  >Delay: <span id="screenshotValue">0</span> </label> <br/>
+										<div class="slidecontainer">
+											<input  id="screenshotDelta"  name="ssd" class="slider" type="range" min="0" max="10" step="1" value="0" oninput="javascript:updateTextS(value);" onclick="javascript:updateTextS(value);"/></div>
+										<p>Delay taking screenshot of webpage once it's loaded.</p>
+								</div>
+						</div>
+
 
 							<!-- GET STATS -->
 							<div id="statsbtn" class="form-inline pull-right">
@@ -111,6 +89,7 @@
 								-->
 									<button class="btn btn-primary getJSONFromServer form-control" title="Get number of unique mementos"> Calculate # of Thumbnails </button>
 							</div>
+
 					</div>
 				</form>
 
