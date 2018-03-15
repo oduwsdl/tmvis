@@ -1857,7 +1857,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
       }
 
 
-      if(noOfUniqueMementos == 1){
+      if(noOfUniqueMementos == 2){
         break;
       }
 
