@@ -861,6 +861,9 @@ function getSummary(){
       $.ajax({
         type: "GET",
         url: address, // uncomment this for deployment
+        beforeSend: function(xhr) {
+          xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+        },
         dataType: "text",
          timeout: 0,
         success: function( data, textStatus, jqXHR) {
