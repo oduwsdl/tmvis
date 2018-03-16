@@ -2,7 +2,7 @@
 var jsonObjRes = {};
 var curURIUnderFocus=null;
 var curDeepLinkStateArr=[];
-
+var curUniqueUserSessionID = null;
 (function(window, document, undefined){
 
 
@@ -699,7 +699,7 @@ function uriAnalysisForAttributes(uri){
 var notificationSrc= null;
 
 function startEventNotification(){
-  notificationSrc= new EventSource('/notifications');
+  notificationSrc= new EventSource('/notifications/'+getUniqueUserSessionId());
 
        notificationSrc.onmessage = function(e) {
            console.log(e.data);
@@ -779,6 +779,9 @@ function getStats(){
         $.ajax({
             type: "GET",
             url: address, // uncomment this for deployment
+            beforeSend: function(xhr) {
+              xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+            },
             dataType: "text",
             success: function( data, textStatus, jqXHR) {
                 $("#busy-loader").hide();
@@ -1014,6 +1017,16 @@ function getParameterByName(name, url) {
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
+
+function getUniqueUserSessionId() {
+  if(curUniqueUserSessionID == null){
+    curUniqueUserSessionID = Date.now()*Math.floor((Math.random() * 10) + 1);
+    return curUniqueUserSessionID;
+  }else{
+    return curUniqueUserSessionID;
+  }
+}
+
 
 
 function generateDeepLinkState(curInputJsobObj){

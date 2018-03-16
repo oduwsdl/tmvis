@@ -221,7 +221,8 @@ function main () {
 
 
     //This route is just for testing, testing the SSE
-   app.get('/notifications', (request, response) => {
+   app.get('/notifications/:curUniqueUserSessionID', (request, response) => {
+
        sendSSE(request, response);
    })
 
@@ -254,20 +255,9 @@ function sendSSE(req, res) {
   });
 
 
-
-    if(req.cookies.clientId !== "" && req.cookies.clientId !== undefined &&  req.cookies.clientId !== null){
-        if( !streamedHashMapObj.has(req.cookies.clientId)){
-            streamedHashMapObj.set(req.cookies.clientId,res)
-        }
-    }
-
-
-
-  //sends a SSE every 5 seconds on a single connection.
-  // setInterval(function() {
-  //   constructSSE('Started streaming the events happening at the server side to --->'+req.cookies.clientId,req.cookies.clientId);
-  // }, 2500);
-  // constructSSE('streamingStarted',req.cookies.clientId);
+  if( !streamedHashMapObj.has(req.params.curUniqueUserSessionID)){
+      streamedHashMapObj.set(req.params.curUniqueUserSessionID,res)
+  }
 
 }
 
@@ -298,19 +288,6 @@ function constructSSE(data,clientIdInCookie) {
 
 }
 
-function constructSSEForFinsh(data,clientIdInCookie) {
-  var id = Date.now();
-  var streamObj = {};
-  streamObj.data= data;
-  if(clientIdInCookie){
-    streamObj.usid = clientIdInCookie;
-  }else{
-    streamObj.usid = 100;
-  }
-  streamingRes = streamedHashMapObj.get(clientIdInCookie)[1];
-  streamingRes.write('id: ' + id + '\n');
-  streamingRes.write("data: " + JSON.stringify(streamObj) + '\n\n');
-}
 
 
 /**
@@ -331,15 +308,19 @@ function PublicEndpoint () {
   * @param response Currently active HTTP response to the client used to return information to the client based on the request
   */
   this.respondToClient = function (request, response) {
+    ConsoleLogIfRequired("#################### Response header ##########")
+    ConsoleLogIfRequired(request.headers["x-my-curuniqueusersessionid"])
+    ConsoleLogIfRequired("############################################")
+
 
     responseDup = response;
-    ConsoleLogIfRequired("Cookies------------------>"+request.cookies.clientId)
-    constructSSE("streamingStarted",request.cookies.clientId);
-    constructSSE("percentagedone-3",request.cookies.clientId);
+    ConsoleLogIfRequired("Cookies------------------>"+request.headers["x-my-curuniqueusersessionid"])
+    constructSSE("streamingStarted",request.headers["x-my-curuniqueusersessionid"]);
+    constructSSE("percentagedone-3",request.headers["x-my-curuniqueusersessionid"]);
 
      isResponseEnded = false //resetting the responseEnded indicator
      //response.clientId = Math.random() * 101 | 0  // Associate a simple random integer to the user for logging (this is not scalable with the implemented method)
-     response.clientId = request.cookies.clientId
+     response.clientId = request.headers["x-my-curuniqueusersessionid"]
     var headers = {}
 
     // IE8 does not allow domains to be specified, just the *
@@ -513,8 +494,8 @@ function PublicEndpoint () {
       var cacheFile = new SimhashCacheFile( primeSource+"_"+collectionIdentifier+"_"+uriR,isDebugMode)
       cacheFile.path += '.json'
       ConsoleLogIfRequired('Checking if a cache file exists for ' + query['urir'] + '...')
-      constructSSE('Checking if a cache file exists for ' + query['urir'] + '...',request.cookies.clientId)
-      constructSSE("percentagedone-10",request.cookies.clientId);
+      constructSSE('Checking if a cache file exists for ' + query['urir'] + '...',request.headers["x-my-curuniqueusersessionid"])
+      constructSSE("percentagedone-10",request.headers["x-my-curuniqueusersessionid"]);
 
 
     //  ConsoleLogIfRequired('cacheFile: '+JSON.stringify(cacheFile))
@@ -527,22 +508,22 @@ function PublicEndpoint () {
 
             if(isToOverrideCachedSimHash){
               ConsoleLogIfRequired("Responded to compute latest simhahes, Proceeding....");
-              getTimemapGodFunctionForAlSummarization(query['urir'], response,request.cookies.clientId)
+              getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"])
             }else{
               ConsoleLogIfRequired("Responded to continue with the exisitng cached simhashes file. Proceeding..");
-              constructSSE('cached simhashes exist, proceeding with cache...',request.cookies.clientId)
-              constructSSE("percentagedone-60",request.cookies.clientId);
+              constructSSE('cached simhashes exist, proceeding with cache...',request.headers["x-my-curuniqueusersessionid"])
+              constructSSE("percentagedone-60",request.headers["x-my-curuniqueusersessionid"]);
 
-              processWithFileContents(data, response,request.cookies.clientId)
+              processWithFileContents(data, response,request.headers["x-my-curuniqueusersessionid"])
             }
 
         },
         function failed () {
           //ByMahee -- calling the core function responsible for AlSummarization, if the cached file doesn't exist
           ConsoleLogIfRequired("**ByMahee** -- readFileContents : Inside Failed ReadFile Content (meaning file doesn't exist), getTimemapGodFunctionForAlSummarization is called next ")
-          constructSSE("cached simhashes doesn't exist, proceeding to compute the simhashes...",request.cookies.clientId)
+          constructSSE("cached simhashes doesn't exist, proceeding to compute the simhashes...",request.headers["x-my-curuniqueusersessionid"])
 
-          getTimemapGodFunctionForAlSummarization(query['urir'], response,request.cookies.clientId)
+          getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"])
         }
 
       )
