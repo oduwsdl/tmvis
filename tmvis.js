@@ -1046,6 +1046,9 @@ TimeMap.prototype.calculateSimhashes = function (curCookieClientId,callback) {
     if(value > preVal){ // At times if there is an error while fetching the contents, retry happens and context jumps back there
       preVal = value;
     }
+    if(preVal > 100){
+      preVal = 95;
+    }
     constructSSE("percentagedone-"+Math.ceil(preVal),curCookieClientId);
 
   //  ConsoleLogIfRequired(curMemento)
@@ -1457,6 +1460,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
     // isResponseEnded = true
   }
   var completedScreenshotCaptures = 0;
+  var preVal =0;
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
     1,function( memento,callback){
@@ -1464,7 +1468,13 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
       self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
       completedScreenshotCaptures++;
       var value = ((completedScreenshotCaptures/noOfThumbnailsSelectedToBeCaptured)*80)+5;
-      constructSSE("percentagedone-"+Math.ceil(value),curCookieClientId);
+      if(value > preVal){ // At times if there is an error while fetching the contents, retry happens and context jumps back there
+        preVal = value;
+      }
+      if(preVal > 100){
+        preVal = 95;
+      }
+      constructSSE("percentagedone-"+Math.ceil(preVal),curCookieClientId);
 
     } ,
     function doneCreatingScreenshots (err) {      // When finished, check for errors
@@ -1844,20 +1854,21 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
       //ConsoleLogIfRequired((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
       copyOfMementos = null
 
+      if(noOfUniqueMementos >= 1){ // have to change it to minimum threshold based on the feedback from meeting
+        if( !this.menentoDetForMultipleKValues.has(HAMMING_DISTANCE_THRESHOLD)){
+            this.menentoDetForMultipleKValues.set(HAMMING_DISTANCE_THRESHOLD,curMementoDetArray)
+        }
+        if( !this.statsHashMapObj.has(HAMMING_DISTANCE_THRESHOLD)){
 
-      if( !this.menentoDetForMultipleKValues.has(HAMMING_DISTANCE_THRESHOLD)){
-          this.menentoDetForMultipleKValues.set(HAMMING_DISTANCE_THRESHOLD,curMementoDetArray)
+            var curStatObj = {};
+            curStatObj["threshold"] = HAMMING_DISTANCE_THRESHOLD;
+            curStatObj["totalmementos"] = totalMementos;
+            curStatObj["unique"] = noOfUniqueMementos;
+            this.statsHashMapObj.set(HAMMING_DISTANCE_THRESHOLD,curStatObj)
+
+        }
       }
-      if( !this.statsHashMapObj.has(HAMMING_DISTANCE_THRESHOLD)){
-          var curStatObj = {};
-          curStatObj["threshold"] = HAMMING_DISTANCE_THRESHOLD;
-          curStatObj["totalmementos"] = totalMementos;
-          curStatObj["unique"] = noOfUniqueMementos;
-          this.statsHashMapObj.set(HAMMING_DISTANCE_THRESHOLD,curStatObj)
-      }
-
-
-      if(noOfUniqueMementos <= 2){
+      if(noOfUniqueMementos <= 1){
         break;
       }
 
