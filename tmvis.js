@@ -86,11 +86,7 @@ var SCREENSHOT_DELTA = argv.ssd? argv.ssd: 2
 var isToOverrideCachedSimHash = argv.oes? argv.oes: false
 var isToComputeBoth = argv.os? false: true // By default computes both simhash and hamming distance
 var screenshotsLocation = "assets/screenshots/"
-var role = "stats"
-var noOfUniqueMementos = 0
-var totalMementos = 0
 var streamingRes = null
-var curSerReq = null
 var streamedHashMapObj = new HashMap()
 var responseDup = null;
 
@@ -393,11 +389,8 @@ function PublicEndpoint () {
     }
 
     if(query.role === "stats"){
-      role = "stats"
     }else if(query.role === "summary"){
-      role = "summary"
     }else{
-        role = "stats" // incase if a dirty value is sent
         query.role = "stats"
     }
 
@@ -566,7 +559,7 @@ function processWithFileContents (fileContents, response,curCookieClientId) {
       constructSSE('streamingStarted',curCookieClientId)
         async.series([
           function (callback) {
-            if(role == "stats"){
+            if(t.role == "stats"){
               t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback);
             }else{
               t.calculateHammingDistancesWithOnlineFilteringForSummary(curCookieClientId,callback);
@@ -574,7 +567,7 @@ function processWithFileContents (fileContents, response,curCookieClientId) {
             constructSSE("percentagedone-5",curCookieClientId);
           },
           function (callback) {
-            if(role == "stats"){
+            if(t.role == "stats"){
               t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback)
             }else{
               t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary(callback)
@@ -919,7 +912,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 
     function (callback) {
         if(isToComputeBoth){
-          if(role == "stats"){
+          if(t.role == "stats"){
             t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback);
           }else{
             t.calculateHammingDistancesWithOnlineFilteringForSummary(curCookieClientId,callback);
@@ -931,7 +924,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
     },
     function (callback) {
         if(isToComputeBoth){
-          if(role == "stats"){
+          if(t.role == "stats"){
             t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback)
           }else{
             t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary(callback)
@@ -1399,7 +1392,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
   var noOfThumbnailsSelectedToBeCaptured = 0;
 
   // breaking the control and returning the stats if the the request is made for status
-  if(role == "stats"){
+  if(self.role == "stats"){
     var statsArry =[];
     self.statsHashMapObj.forEach(function(statsObj, hammingDistance) {
       console.log("------------------ selected for screenshots------------")
@@ -1763,8 +1756,8 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFilteringForSummary = funct
       ConsoleLogIfRequired('m==0, continuing')
     }
   }
-  noOfUniqueMementos = copyOfMementos.length
-  totalMementos = this.mementos.length;
+  var noOfUniqueMementos = copyOfMementos.length
+  var totalMementos = this.mementos.length;
   constructSSE('Completed filtering...',curCookieClientId)
   constructSSE('Out of the total <h3>'+totalMementos+'</h3> eixisting mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique...',curCookieClientId)
   //ConsoleLogIfRequired((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
@@ -1784,7 +1777,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
   console.time('Hamming And Filtering, a synchronous operation')
   constructSSE('computing the Hamming Distance and Filtering synchronously...',curCookieClientId)
   var curMementoDetArray = [];
-  var hdtRangeVar = 0;
+  var hdtRangeVar = 0,totalMementos=0,noOfUniqueMementos=0;
   for(var i=2; i<= 12; i++ ){ // do the computation fot the threshold from k =3 to k=12
       hdtRangeVar = i;
       curMementoDetArray = [];
