@@ -83,8 +83,6 @@ var localAssetServer = proxy + '/static/'
 var isResponseEnded = false
 var uriR = ''
 var isDebugMode = argv.debug? argv.debug: false
-var HAMMING_DISTANCE_THRESHOLD = argv.hdt?  argv.hdt: 4
-var hammingDistanceForSummary = 2
 var SCREENSHOT_DELTA = argv.ssd? argv.ssd: 2
 var isToOverrideCachedSimHash = argv.oes? argv.oes: false
 // by default the prime src is gonna be Archive-It
@@ -100,7 +98,7 @@ var streamingRes = null
 var curSerReq = null
 var streamedHashMapObj = new HashMap()
 var responseDup = null;
-ConsoleLogIfRequired("Hamming distance threshold set while running the server:"+HAMMING_DISTANCE_THRESHOLD)
+
 //return
 /* *******************************
    TODO: reorder functions (main first) to be more maintainable 20141205
@@ -401,18 +399,18 @@ function PublicEndpoint () {
     }
 
     if (isNaN(query.hdt)){
-          HAMMING_DISTANCE_THRESHOLD = 4; // setting to default hamming distance threshold
+          query.hdt = 4 // setting to default hamming distance threshold
     }else{
-          HAMMING_DISTANCE_THRESHOLD = parseInt(query.hdt)
+          query.hdt = parseInt(query.hdt)
     }
 
     if(query.role === "stats"){
       role = "stats"
     }else if(query.role === "summary"){
-      hammingDistanceForSummary = HAMMING_DISTANCE_THRESHOLD
       role = "summary"
     }else{
         role = "stats" // incase if a dirty value is sent
+        query.role = "stats"
     }
 
     if (isNaN(query.ssd)){
@@ -470,15 +468,19 @@ function PublicEndpoint () {
 
     if ( isNaN(query.ci)){
       collectionIdentifier = 'all'
+      query.ci = 'all';
     }else {
       collectionIdentifier = parseInt(query.ci)
+      query.ci = parseInt(query.ci)
     }
 
     // ByMahee -- setting the  incoming data from request into response Object
     response.thumbnails = [] // Carry the original query parameters over to the eventual response
     response.thumbnails['primesource'] = primeSource
     response.thumbnails['strategy'] = strategy
-    response.thumbnails['collectionidentifier'] = collectionIdentifier
+    response.thumbnails['collectionidentifier'] = query.ci
+    response.thumbnails['hammingdistancethreshold'] = query.hdt
+    response.thumbnails['role'] = query.role
 
     /*TODO: include consideration for strategy parameter supplied here
             If we consider the strategy, we can simply use the TimeMap instead of the cache file
@@ -488,6 +490,10 @@ function PublicEndpoint () {
     var t = new TimeMap()
 
     t.originalURI = query['urir']
+    t.primesource = primeSource
+    t.collectionidentifier = query.ci
+    t.hammingdistancethreshold = query.hdt
+    t.role = query.role
 
     // TODO: optimize this out of the conditional so the functions needed for each strategy are self-contained (and possibly OOP-ified)
     if (strategy === 'alSummarization') {
@@ -568,6 +574,10 @@ function processWithFileContents (fileContents, response,curCookieClientId) {
   var t = createMementosFromJSONFile(fileContents)
    t.curClientId = curCookieClientId
    t.originalURI = uriR
+   t.primesource = response.thumbnails['primesource']
+   t.collectionidentifier = response.thumbnails['collectionidentifier']
+   t.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold']
+   t.role = response.thumbnails['role']
   /* ByMahee -- unnessessary for the current need
   t.printMementoInformation(response, null, false) */
 
@@ -830,6 +840,11 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 
             t = new TimeMap(buffer)
             t.originalURI = uri // Need this for a filename for caching
+            t.primesource = response.thumbnails['primesource']
+            t.collectionidentifier = response.thumbnails['collectionidentifier']
+            t.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold']
+            t.role = response.thumbnails['role']
+
             t.createMementos() // the place where all the mementos are generated
             ConsoleLogIfRequired("-- ByMahee -- Mementos are created by this point, following is the whole timeMap Object")
             ConsoleLogIfRequired(t);
@@ -1245,7 +1260,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
     mementoJObjArrForTimeline.push(mementoJObj_ForTimeline)
   })
 
-  var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+HAMMING_DISTANCE_THRESHOLD+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
+  var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+response.thumbnails['hammingdistancethreshold']+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.writeThumbSumJSONOPContentToFile(mementoJObjArrForTimeline)
 
     if(!isResponseEnded){
@@ -1265,9 +1280,9 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
 
 TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary = function (callback) {
   // Assuming foreach is faster than for-i, this can be executed out-of-order
+  var self = this;
   this.mementos.forEach(function (memento,m) {
     var uri = memento.uri
-
 
       //  to replace /12345678912345id_/ to /12345678912345/
       var regExpForDTStr = /\/\d{14}id_\// // to match something lile /12345678912345id_/
@@ -1278,7 +1293,7 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSum
 
       //uri = uri.replace("id_/http","/http"); //replaced by above code segment
     // ConsoleLogIfRequired("Hamming distance = "+memento.hammingDistance)
-    if (memento.hammingDistance < HAMMING_DISTANCE_THRESHOLD  && memento.hammingDistance >= 0) {
+    if (memento.hammingDistance < self.hammingdistancethreshold  && memento.hammingDistance >= 0) {
       // ConsoleLogIfRequired(memento.uri+" is below the hamming distance threshold of "+HAMMING_DISTANCE_THRESHOLD)
       memento.screenshotURI = null
 
@@ -1316,9 +1331,9 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSum
 TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = function (callback) {
 
   // Assuming foreach is faster than for-i, this can be executed out-of-order
-
-  this.menentoDetForMultipleKValues.forEach(function(mementoArr, hammingDistance) {
-    HAMMING_DISTANCE_THRESHOLD = hammingDistance
+  var self = this;
+  this.menentoDetForMultipleKValues.forEach(function(mementoArr, hammingDistanceThresh) {
+    var currHDT = hammingDistanceThresh // for multiple threshold computation, setting the threshold against the corresponding MementodDetails object
     mementoArr.forEach(function (memento,m) {
       var uri = memento.uri
         //  to replace /12345678912345id_/ to /12345678912345/
@@ -1331,7 +1346,7 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
         //uri = uri.replace("id_/http","/http"); //replaced by above code segment
 
       // ConsoleLogIfRequired("Hamming distance = "+memento.hammingDistance)
-      if (memento.hammingDistance < HAMMING_DISTANCE_THRESHOLD  && memento.hammingDistance >= 0) {
+      if (memento.hammingDistance < currHDT  && memento.hammingDistance >= 0) {
         // ConsoleLogIfRequired(memento.uri+" is below the hamming distance threshold of "+HAMMING_DISTANCE_THRESHOLD)
         memento.screenshotURI = null
 
@@ -1757,7 +1772,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFilteringForSummary = funct
       //   ' > testing: ' + this.mementos[m].simhash + ' ' + this.mementos[m].uri + '\n' +
       //   ' > pivot:   ' + this.mementos[lastSignificantMementoIndexBasedOnHamming].simhash + ' ' + this.mementos[lastSignificantMementoIndexBasedOnHamming].uri)
 
-      if (this.mementos[m].hammingDistance >= HAMMING_DISTANCE_THRESHOLD) { // Filter the mementos if hamming distance is too small
+      if (this.mementos[m].hammingDistance >=  this.hammingdistancethreshold) { // Filter the mementos if hamming distance is too small
         lastSignificantMementoIndexBasedOnHamming = m
 
          copyOfMementos.push(this.mementos[m]) // Only push mementos that pass threshold requirements
@@ -1789,10 +1804,9 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
   console.time('Hamming And Filtering, a synchronous operation')
   constructSSE('computing the Hamming Distance and Filtering synchronously...',curCookieClientId)
   var curMementoDetArray = [];
-
+  var hdtRangeVar = 0;
   for(var i=2; i<= 12; i++ ){ // do the computation fot the threshold from k =3 to k=12
-      HAMMING_DISTANCE_THRESHOLD = i;
-
+      hdtRangeVar = i;
       curMementoDetArray = [];
       curMementoDetArray =  JSON.parse(JSON.stringify(this.mementos))
       var lastSignificantMementoIndexBasedOnHamming = 0
@@ -1817,7 +1831,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
             //   ' > testing: ' + this.mementos[m].simhash + ' ' + this.mementos[m].uri + '\n' +
             //   ' > pivot:   ' + this.mementos[lastSignificantMementoIndexBasedOnHamming].simhash + ' ' + this.mementos[lastSignificantMementoIndexBasedOnHamming].uri)
 
-            if (curMementoDetArray[m].hammingDistance >= HAMMING_DISTANCE_THRESHOLD) { // Filter the mementos if hamming distance is too small
+            if (curMementoDetArray[m].hammingDistance >= hdtRangeVar) { // Filter the mementos if hamming distance is too small
               lastSignificantMementoIndexBasedOnHamming = m
 
                copyOfMementos.push(curMementoDetArray[m]) // Only push mementos that pass threshold requirements
@@ -1831,21 +1845,21 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
       noOfUniqueMementos = copyOfMementos.length
       totalMementos = curMementoDetArray.length;
       constructSSE('Completed filtering...',curCookieClientId)
-      constructSSE('Out of the total <h3>'+totalMementos+'</h3> eixisting mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique for hamming distance:'+ HAMMING_DISTANCE_THRESHOLD +' ...',curCookieClientId)
+      constructSSE('Out of the total <h3>'+totalMementos+'</h3> eixisting mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique for hamming distance:'+ this.hammingdistancethreshold +' ...',curCookieClientId)
       //ConsoleLogIfRequired((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
       copyOfMementos = null
 
       if(noOfUniqueMementos >= 1){ // have to change it to minimum threshold based on the feedback from meeting
-        if( !this.menentoDetForMultipleKValues.has(HAMMING_DISTANCE_THRESHOLD)){
-            this.menentoDetForMultipleKValues.set(HAMMING_DISTANCE_THRESHOLD,curMementoDetArray)
+        if( !this.menentoDetForMultipleKValues.has(hdtRangeVar)){
+            this.menentoDetForMultipleKValues.set(hdtRangeVar,curMementoDetArray)
         }
-        if( !this.statsHashMapObj.has(HAMMING_DISTANCE_THRESHOLD)){
+        if( !this.statsHashMapObj.has(hdtRangeVar)){
 
             var curStatObj = {};
-            curStatObj["threshold"] = HAMMING_DISTANCE_THRESHOLD;
+            curStatObj["threshold"] = hdtRangeVar;
             curStatObj["totalmementos"] = totalMementos;
             curStatObj["unique"] = noOfUniqueMementos;
-            this.statsHashMapObj.set(HAMMING_DISTANCE_THRESHOLD,curStatObj)
+            this.statsHashMapObj.set(hdtRangeVar,curStatObj)
 
         }
       }
@@ -1854,7 +1868,9 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
       }
 
   }
-  this.mementos =  JSON.parse(JSON.stringify(this.menentoDetForMultipleKValues.get(hammingDistanceForSummary)))
+
+
+  this.mementos =  JSON.parse(JSON.stringify(this.menentoDetForMultipleKValues.get(this.hammingdistancethreshold))) // to get the Memento object corresponsing to actual hdt sent
 
   ConsoleLogIfRequired("------------ByMahee-- After the hamming distance is calculated, here is how the mementos with additional details look like ------------------")
   ConsoleLogIfRequired("--------------------------------------For threshold value 2------------------------------------------------")
