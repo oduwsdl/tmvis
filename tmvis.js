@@ -81,15 +81,10 @@ var port = argv.port ? argv.port : '3000'
 var proxy = argv.proxy ? argv.proxy.replace(/\/+$/, '') : ('http://' + host + (port == '80' ? '' : ':' + port))
 var localAssetServer = proxy + '/static/'
 var isResponseEnded = false
-var uriR = ''
 var isDebugMode = argv.debug? argv.debug: false
 var SCREENSHOT_DELTA = argv.ssd? argv.ssd: 2
 var isToOverrideCachedSimHash = argv.oes? argv.oes: false
-// by default the prime src is gonna be Archive-It
-var primeSrc = argv.ait? 1: (argv.ia ? 2:(argv.mg?3:1))
-var primeSource = "archiveit"
 var isToComputeBoth = argv.os? false: true // By default computes both simhash and hamming distance
-var collectionIdentifier = argv.ci?  argv.ci: 'all'
 var screenshotsLocation = "assets/screenshots/"
 var role = "stats"
 var noOfUniqueMementos = 0
@@ -385,17 +380,10 @@ function PublicEndpoint () {
       console.log('urir valid, using query parameter.')
     }
 
-
-    // ByMahee --- Actually URI is being set here
-    uriR = query['urir']
-    ConsoleLogIfRequired("--ByMahee: uriR = "+uriR)
-
-
-    primeSource = theEndPoint.validSource[0] // Not specified? access=interface
     // Override the default access parameter if the user has supplied a value
     //  via query parameters
     if (query.primesource) {
-      primeSource = query.primesource.toLowerCase()
+      query.primesource = query.primesource.toLowerCase()
     }
 
     if (isNaN(query.hdt)){
@@ -419,40 +407,31 @@ function PublicEndpoint () {
           SCREENSHOT_DELTA = parseInt(query.ssd)
     }
 
-    if (!theEndPoint.isAValidSourceParameter(primeSource)) { // A bad access parameter was passed in
-      console.log('Bad source query parameter: ' + primeSource)
+    if (!theEndPoint.isAValidSourceParameter(query.primesource)) { // A bad access parameter was passed in
+      console.log('Bad source query parameter: ' + query.primesource)
       response.writeHead(501, headers)
       response.write('The source parameter was incorrect. Try one of ' + theEndPoint.validSource.join(',') + ' or omit it entirely from the query string\r\n')
       response.end()
       return
     }
 
-    headers['X-Means-Of-Source'] = primeSource
+    headers['X-Means-Of-Source'] = query.primesource
 
     var strategy = "alSummarization"
     headers['X-Summarization-Strategy'] = strategy
 
-    if(primeSource == 'archiveit'){
-      primeSrc = 1
 
-    }else if(primeSource == 'internetarchive'){
-      primeSrc = 2
-    }else{
-        primeSrc = 3
-    }
-
-
-    if (!uriR.match(/^[a-zA-Z]+:\/\//)) {
-      uriR = 'http://' + uriR
+    if (!query['urir'].match(/^[a-zA-Z]+:\/\//)) {
+      query['urir'] = 'http://' + query['urir']
     }// Prepend scheme if missing
 
 
     headers['Content-Type'] = 'application/json' //'text/html'
     response.writeHead(200, headers)
 
-    ConsoleLogIfRequired('New client request urir: ' + query['urir'] + '\r\n> Primesource: ' + primeSource + '\r\n> Strategy: ' + strategy)
+    ConsoleLogIfRequired('New client request urir: ' + query['urir'] + '\r\n> Primesource: ' + query.primesource + '\r\n> Strategy: ' + strategy)
 
-    if (!validator.isURL(uriR)) { // Return "invalid URL"
+    if (!validator.isURL(query['urir'])) { // Return "invalid URL"
 
       consoleLogJSONError('Invalid URI')
       //response.writeHead(200, headers)
@@ -467,20 +446,19 @@ function PublicEndpoint () {
 
 
     if ( isNaN(query.ci)){
-      collectionIdentifier = 'all'
       query.ci = 'all';
     }else {
-      collectionIdentifier = parseInt(query.ci)
       query.ci = parseInt(query.ci)
     }
 
     // ByMahee -- setting the  incoming data from request into response Object
     response.thumbnails = [] // Carry the original query parameters over to the eventual response
-    response.thumbnails['primesource'] = primeSource
+    response.thumbnails['primesource'] = query.primesource
     response.thumbnails['strategy'] = strategy
     response.thumbnails['collectionidentifier'] = query.ci
     response.thumbnails['hammingdistancethreshold'] = query.hdt
     response.thumbnails['role'] = query.role
+    response.thumbnails['urir'] = query.urir
 
     /*TODO: include consideration for strategy parameter supplied here
             If we consider the strategy, we can simply use the TimeMap instead of the cache file
@@ -489,15 +467,15 @@ function PublicEndpoint () {
     */
     var t = new TimeMap()
 
-    t.originalURI = query['urir']
-    t.primesource = primeSource
+    t.originalURI = query.urir
+    t.primesource = query.primesource
     t.collectionidentifier = query.ci
     t.hammingdistancethreshold = query.hdt
     t.role = query.role
 
     // TODO: optimize this out of the conditional so the functions needed for each strategy are self-contained (and possibly OOP-ified)
     if (strategy === 'alSummarization') {
-      var cacheFile = new SimhashCacheFile( primeSource+"_"+collectionIdentifier+"_"+uriR,isDebugMode)
+      var cacheFile = new SimhashCacheFile( query.primesource+"_"+query.ci+"_"+query['urir'],isDebugMode)
       cacheFile.path += '.json'
       ConsoleLogIfRequired('Checking if a cache file exists for ' + query['urir'] + '...')
       constructSSE('Checking if a cache file exists for ' + query['urir'] + '...',request.headers["x-my-curuniqueusersessionid"])
@@ -573,7 +551,7 @@ function processWithFileContents (fileContents, response,curCookieClientId) {
 
   var t = createMementosFromJSONFile(fileContents)
    t.curClientId = curCookieClientId
-   t.originalURI = uriR
+   t.originalURI = response.thumbnails['urir']
    t.primesource = response.thumbnails['primesource']
    t.collectionidentifier = response.thumbnails['collectionidentifier']
    t.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold']
@@ -783,12 +761,15 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
   // var timemapPath = '/web/timemap/link/' + uri
 
   var timemapHost = 'wayback.archive-it.org'
-  var timemapPath = '/'+collectionIdentifier+'/timemap/link/' + uri
-
-  if(primeSrc == 2 ){
+  var timemapPath = '/'+response.thumbnails['collectionidentifier']+'/timemap/link/' + uri
+  if(response.thumbnails['primesource']=="archiveit"){
+     timemapHost = 'wayback.archive-it.org'
+     timemapPath = '/'+response.thumbnails['collectionidentifier']+'/timemap/link/' + uri
+  }
+  else if(response.thumbnails['primesource']=="internetarchive"){
       timemapHost = 'web.archive.org'
       timemapPath = '/web/timemap/link/' + uri
-  }else if(primeSrc == 3){ // must contain the Host and Path for Memento Aggregator
+  }else { // must contain the Host and Path for Memento Aggregator
     ConsoleLogIfRequired("Haven't given the Memgators Host and Path yet")
     return
   }
@@ -1100,7 +1081,7 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
 
   // modified ti accomodate the hdt aswell with in the cache - meaning different hdt will have different cached file from now on
   // Modified it back to original, cause now multiple Hamming distance stats are thrown at once.
-  var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
+  var cacheFile = new SimhashCacheFile(this.primesource+"_"+this.collectionidentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.replaceContentWith(strToWrite)
 
   if (callback) {
@@ -1109,8 +1090,7 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
 }
 
 TimeMap.prototype.writeJSONToCache = function (callback) {
-  var originalURI = this.originalURI;
-  var cacheFile = new SimhashCacheFile(primeSource+"_"+collectionIdentifier+"_"+originalURI,isDebugMode)
+  var cacheFile = new SimhashCacheFile(this.primesource+"_"+this.collectionidentifier+"_"+this.originalURI,isDebugMode)
   //cacheFile.writeFileContentsAsJSON(JSON.stringify(this.mementos))
   cacheFile.writeFileContentsAsJSON(this.mementos) // write the last HD based content into JSON
 
@@ -1260,7 +1240,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
     mementoJObjArrForTimeline.push(mementoJObj_ForTimeline)
   })
 
-  var cacheFile = new SimhashCacheFile(primeSource+"_"+"hdt_"+response.thumbnails['hammingdistancethreshold']+"_"+collectionIdentifier+"_"+this.originalURI,isDebugMode)
+  var cacheFile = new SimhashCacheFile(this.primesource+"_"+"hdt_"+this.hammingdistancethreshold+"_"+this.collectionidentifier+"_"+this.originalURI,isDebugMode)
   cacheFile.writeThumbSumJSONOPContentToFile(mementoJObjArrForTimeline)
 
     if(!isResponseEnded){
@@ -1890,80 +1870,6 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
   //ConsoleLogIfRequired(this.mementos)
   ConsoleLogIfRequired("--------------------------------------End of calculateHammingDistancesWithOnlineFiltering ------------------------------------------------")
   if (callback) { callback('') }
-}
-
-/**
-* Goes to URI-T(?), grabs contents, parses, and associates mementos
-* @param callback The next procedure to execution when this process concludes
-*/
-TimeMap.prototype.setupWithURIR = function (response, uriR, callback) {
-
-  /* ByMahee -- right now hitting only organization : web.archive.org , changing the following Host and Path to http://wayback.archive-it.org. One of the following 2 statement sets to be used */
-
-
-  var timemapHost = 'wayback.archive-it.org'
-  var timemapPath = '/'+collectionIdentifier+'/timemap/link/' + uriR
-
-  if(primeSrc == 2 ){
-      timemapHost = 'web.archive.org'
-      timemapPath = '/web/timemap/link/' + uriR
-  }else if(primeSrc == 3){ // must contain the Host and Path for Memento Aggregator
-    ConsoleLogIfRequired("Haven't given the Memgators Host and Path yet")
-    return
-  }
-  // var timemapHost = 'web.archive.org'
-  // var timemapPath = '/web/timemap/link/' + uriR
-
-  var options = {
-    'host': timemapHost,
-    'path': timemapPath,
-    'port': 80,
-    'method': 'GET'
-  }
-
-  var buffer = ''
-  var retStr = ''
-  ConsoleLogIfRequired('Starting many asynchronous operations...')
-  ConsoleLogIfRequired('Timemap output here')
-  var tmInstance = this
-
-  var req = http.request(options, function (res) {
-    res.setEncoding('utf8')
-
-    res.on('data', function (data) {
-      buffer += data.toString()
-    })
-
-    res.on('end', function () {
-      if (buffer.length > 100) {
-        ConsoleLogIfRequired('X Timemap acquired for ' + uriR + ' from ' + timemapHost + timemapPath)
-        tmInstance.str = buffer
-        tmInstance.originalURI = uriR // Need this for a filename for caching
-        tmInstance.createMementos()
-
-        if (tmInstance.mementos.length === 0) {
-          response.write('There were no mementos for ' + uriR)
-          response.end()
-          return
-        }
-
-        callback()
-      }
-    })
-  })
-
-  req.on('error', function (e) { // Houston...
-    ConsoleLogIfRequired('problem with request: ' + e.message)
-    ConsoleLogIfRequired(e)
-    if (e.message === 'connect ETIMEDOUT') { // Error experienced when IA went down on 20141211
-      response.writeHead(500, headers)
-      response.write('Hmm, the connection timed out. Internet Archive might be down.')
-      response.end()
-    }
-
-  })
-
-  req.end()
 }
 
 
