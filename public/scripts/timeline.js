@@ -791,23 +791,23 @@ function getStats(){
                     jsonObjRes= $.parseJSON(data);
                     var htmlStr="";
                     jsonObjRes.forEach(function(item,index,arry){
-                      htmlStr+= "&nbsp;<label title='No Of unique thumbnails:"+item['unique'] +"'><input type='radio' name='thresholdDistance' value='"+ item['threshold']+"'>"+item['unique'] +"</label>";
+                      htmlStr+= "&nbsp;<label title='No Of unique thumbnails:"+item['unique'] +"'><input type='radio' name='thresholdDistance' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</label>";
                     });
 
-                    var memStatStr = "Total Mementos:"+jsonObjRes[0]["totalmementos"] +"; Select no of unique thubnails to view -> " + htmlStr;
+                    var memStatStr = "Total Mementos: "+jsonObjRes[0]["totalmementos"] +"; Select no.of unique thubnails to view -> " + htmlStr;
 
                     //var memStatStr = jsonObjRes["totalmementos"]+" Mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
                     $(".statsWrapper .collection_stats").html(memStatStr);
-                    $(".statsWrapper input[type='radio']").eq(0).val()
+                    if(  $(".statsWrapper input[type='radio']").eq(1).length != 0){
+                      $(".statsWrapper input[type='radio']").eq(1).trigger("click");
+                    }else{
+                      $(".statsWrapper input[type='radio']").eq(0).trigger("click");
+                    }
+
                     $(".statsWrapper").show();
                     $(".getSummary").show();
 
-                    if(jsonObjRes["timetowait"] == 0){
-                      $(".approxTimeShowingPTag").html('Images already captured, Click Generate.');
 
-                    }else{
-                      $(".approxTimeShowingPTag").html('Takes about '+ jsonObjRes["timetowait"] +' minutes approximately. Generate images?');
-                    }
                     //$(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
                     //$(".modal-backdrop").remove();
 
@@ -997,6 +997,15 @@ $(function(){
     $(".getSummary").click(function(event){
       getSummary();
     });
+
+    $(document).on("click","input[name=thresholdDistance]",function(){
+      if($(this).attr("timetowait") == 0){
+        $(".approxTimeShowingPTag").html('Images already captured, Click Generate.');
+      }else{
+        $(".approxTimeShowingPTag").html('Takes about <label class="timetowait">'+$(this).attr("timetowait") +'</label> minutes approximately. Generate images?');
+      }
+    });
+
   });
 })(window, document);
 
