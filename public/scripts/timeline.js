@@ -814,7 +814,7 @@ function getStats(){
 
 
                     //$(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
-                    //$(".modal-backdrop").remove();
+                    $(".modal-backdrop").remove();
 
                 }catch(err){
                     alert($.trim(data));
