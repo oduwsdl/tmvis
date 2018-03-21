@@ -4,7 +4,7 @@ var fs = require('fs-extra');
 const puppeteer = require('puppeteer');
 const SCREENSHOT_DELTA =2;
 var async = require('async');
-var uri = 'http://wayback.archive-it.org/1068/20160104194954if_/http://4genderjustice.org/';
+var uri = 'http://wayback.archive-it.org/1068/20160104194954if_/http://4genderjustice.org/'; // the URI that crashes the page
 //var uri = 'http://wayback.archive-it.org/1068/20170114205127if_/http://4genderjustice.org/';
 
 var phantom = require('node-phantom')
@@ -97,6 +97,7 @@ async function headless(uri,filepath) {
 
         page.on('error', error => {
             console.log("Error appeared");
+            console.log(error);
             //throw error;
         });
 
