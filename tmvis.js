@@ -1398,7 +1398,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
       console.log("------------------ selected for screenshots------------")
       console.log(JSON.stringify(self.menentoDetForMultipleKValues.get(hammingDistance).filter(criteria)))
        noOfThumbnailsSelectedToBeCaptured = getNotExistingCapturesCount(self.menentoDetForMultipleKValues.get(hammingDistance).filter(criteria))
-        statsObj["timetowait"] = Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA))
+        statsObj["timetowait"] = Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA)/60)
         constructSSE('No of screenshots to be captured -> <h4>'+noOfThumbnailsSelectedToBeCaptured +'</h4>',curCookieClientId)
         statsArry.push(statsObj);
     });
