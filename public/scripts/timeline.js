@@ -771,7 +771,7 @@ function getStats(){
   var role = "stats";
   if($("body").find("form")[0].checkValidity()){
       startEventNotification();
-      var ENDPOINT = "/alsummarizedtimemap";
+      var ENDPOINT = "http://localhost:3000/alsummarizedtimemap";
       var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
       $("#busy-loader").show();
       $('#serverStreamingModal .logsContent').empty();
@@ -791,17 +791,17 @@ function getStats(){
                     jsonObjRes= $.parseJSON(data);
                     var htmlStr="";
                     jsonObjRes.forEach(function(item,index,arry){
-                      htmlStr+= "&nbsp;<label title='No Of unique thumbnails:"+item['unique'] +"'><input type='radio' name='thresholdDistance' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</label>";
+                      htmlStr+= "&nbsp;<label title='No Of unique thumbnails:"+item['unique'] +"'><button type='button' class='btn btn-secondary' name='thresholdDistance' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</label>";
                     });
 
-                    var memStatStr = "Total Mementos: "+jsonObjRes[0]["totalmementos"] +"; Select no.of unique thubnails to view -> " + htmlStr;
+                    var memStatStr = jsonObjRes[0]["totalmementos"]+" Total Mementos. Select Unique Thumbnails: " + htmlStr;
 
                     //var memStatStr = jsonObjRes["totalmementos"]+" Mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
                     $(".statsWrapper .collection_stats").html(memStatStr);
-                    if(  $(".statsWrapper input[type='radio']").eq(1).length != 0){
-                      $(".statsWrapper input[type='radio']").eq(1).trigger("click");
+                    if(  $(".statsWrapper button[type='button']").eq(1).length != 0){
+                      $(".statsWrapper button[type='button']").eq(1).trigger("click");
                     }else{
-                      $(".statsWrapper input[type='radio']").eq(0).trigger("click");
+                      $(".statsWrapper button[type='button']").eq(0).trigger("click");
                     }
 
                     $(".statsWrapper").show();
@@ -853,7 +853,7 @@ function getSummary(){
        changeToSummaryState(summaryStatePath);
 
        startEventNotification();
-       var ENDPOINT = "/alsummarizedtimemap";
+       var ENDPOINT = "http://localhost:3000/alsummarizedtimemap";
        var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
        $("#busy-loader").show();
        $('#serverStreamingModal .logsContent').empty();
@@ -998,11 +998,13 @@ $(function(){
       getSummary();
     });
 
-    $(document).on("click","input[name=thresholdDistance]",function(){
+    $(document).on("click","button[name=thresholdDistance]",function(){
+      $('button[name=thresholdDistance].on').removeClass('on')
+      $(this).addClass("on");
       if($(this).attr("timetowait") == 0){
-        $(".approxTimeShowingPTag").html('Images already captured, Click Generate.');
+        $(".approxTimeShowingPTag").html('0 minutes to generate thumbnails.');
       }else{
-        $(".approxTimeShowingPTag").html('Takes about <label class="timetowait">'+$(this).attr("timetowait") +'</label> minutes approximately. Generate images?');
+        $(".approxTimeShowingPTag").html('<label class="timetowait">'+$(this).attr("timetowait") +'</label> minutes to generate thumbnails.');
       }
     });
 
