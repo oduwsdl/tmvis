@@ -771,7 +771,7 @@ function getStats(){
   var role = "stats";
   if($("body").find("form")[0].checkValidity()){
       startEventNotification();
-      var ENDPOINT = "http://localhost:3000/alsummarizedtimemap";
+      var ENDPOINT = "/alsummarizedtimemap";
       var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
       $("#busy-loader").show();
       $('#serverStreamingModal .logsContent').empty();
@@ -790,8 +790,12 @@ function getStats(){
                 try{
                     jsonObjRes= $.parseJSON(data);
                     var htmlStr="";
+                    var curUniqThumbCount = 0;
                     jsonObjRes.forEach(function(item,index,arry){
-                      htmlStr+= "&nbsp;<label title='No Of unique thumbnails:"+item['unique'] +"'><button type='button' class='btn btn-secondary' name='thresholdDistance' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</label>";
+                      if(curUniqThumbCount != item['unique']){
+                        htmlStr+= "&nbsp;<label title='No Of unique thumbnails:"+item['unique'] +"'><button type='button' class='btn btn-secondary' name='thresholdDistance' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</label>";
+                      }
+                        curUniqThumbCount = item['unique'];
                     });
 
                     var memStatStr = jsonObjRes[0]["totalmementos"]+" Total Mementos. Select Unique Thumbnails: " + htmlStr;
@@ -838,7 +842,7 @@ function getSummary(){
       collectionIdentifer = "all";
   }
   //var hammingDistance = $('.argumentsForm #hammingDistance').val();
-  var hammingDistance = $(".statsWrapper input[type='radio']:checked").val();
+  var hammingDistance = $(".statsWrapper .on").val();
 
   if(hammingDistance == "" || hammingDistance===undefined){
     hammingDistance = $('.argumentsForm #hammingDistance').val();
@@ -854,7 +858,7 @@ function getSummary(){
        changeToSummaryState(summaryStatePath);
 
        startEventNotification();
-       var ENDPOINT = "http://localhost:3000/alsummarizedtimemap";
+       var ENDPOINT = "/alsummarizedtimemap";
        var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
        $("#busy-loader").show();
        $('#serverStreamingModal .logsContent').empty();
