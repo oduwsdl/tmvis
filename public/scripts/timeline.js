@@ -791,18 +791,22 @@ function getStats(){
                 try{
                     jsonObjRes= $.parseJSON(data);
                     var htmlStr="";
+                    var curUniqThumbCount = 0;
                     jsonObjRes.forEach(function(item,index,arry){
-                      htmlStr+= "&nbsp;<label title='No Of unique thumbnails:"+item['unique'] +"'><input type='radio' name='thresholdDistance' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</label>";
+                      if(curUniqThumbCount != item['unique']){
+                        htmlStr+= "&nbsp;<label title='No Of unique thumbnails:"+item['unique'] +"'><button type='button' class='btn btn-secondary' name='thresholdDistance' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</label>";
+                      }
+                        curUniqThumbCount = item['unique'];
                     });
 
-                    var memStatStr = "Total Mementos: "+jsonObjRes[0]["totalmementos"] +"; Select no.of unique thubnails to view -> " + htmlStr;
+                    var memStatStr = jsonObjRes[0]["totalmementos"]+" Total Mementos. Select Unique Thumbnails: " + htmlStr;
 
                     //var memStatStr = jsonObjRes["totalmementos"]+" Mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
                     $(".statsWrapper .collection_stats").html(memStatStr);
-                    if(  $(".statsWrapper input[type='radio']").eq(1).length != 0){
-                      $(".statsWrapper input[type='radio']").eq(1).trigger("click");
+                    if(  $(".statsWrapper button[type='button']").eq(1).length != 0){
+                      $(".statsWrapper button[type='button']").eq(1).trigger("click");
                     }else{
-                      $(".statsWrapper input[type='radio']").eq(0).trigger("click");
+                      $(".statsWrapper button[type='button']").eq(0).trigger("click");
                     }
 
                     $(".statsWrapper").show();
@@ -839,7 +843,7 @@ function getSummary(){
       collectionIdentifer = "all";
   }
   //var hammingDistance = $('.argumentsForm #hammingDistance').val();
-  var hammingDistance = $(".statsWrapper input[type='radio']:checked").val();
+  var hammingDistance = $(".statsWrapper .on").val();
 
   if(hammingDistance == "" || hammingDistance===undefined){
     hammingDistance = $('.argumentsForm #hammingDistance').val();
@@ -847,7 +851,8 @@ function getSummary(){
 
   var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
   if($("body").find("form")[0].checkValidity()){
-        $(".getSummary").hide();
+        $(".time_container").hide();
+        $(".Explain_Threshold").hide();
        var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val();
 
        var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
@@ -999,11 +1004,13 @@ $(function(){
       getSummary();
     });
 
-    $(document).on("click","input[name=thresholdDistance]",function(){
+    $(document).on("click","button[name=thresholdDistance]",function(){
+      $('button[name=thresholdDistance].on').removeClass('on')
+      $(this).addClass("on");
       if($(this).attr("timetowait") == 0){
-        $(".approxTimeShowingPTag").html('Images already captured, Click Generate.');
+        $(".approxTimeShowingPTag").html('0 minutes to generate thumbnails.');
       }else{
-        $(".approxTimeShowingPTag").html('Takes about <label class="timetowait">'+$(this).attr("timetowait") +'</label> minutes approximately. Generate images?');
+        $(".approxTimeShowingPTag").html('<label class="timetowait">'+$(this).attr("timetowait") +'</label> minutes to generate thumbnails.');
       }
     });
 
