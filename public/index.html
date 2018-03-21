@@ -42,9 +42,17 @@
 				<form action="#" class="argumentsForm">
 
 					<div class="row URIWrapper" >
-							<div class="form-group">
-								<label for="uriIP">Enter URI-R | URI-M | URI-TM:</label>
+						<label for="uriIP">Enter URI-R | URI-M | URI-TM:</label>
+							<div class="input-group">
+
 								<input class="form-control" name="URI" id="uriIP" required placeholder="http://4genderjustice.org/">
+								<!-- GET STATS -->
+								<span id="statsbtn" class="input-group-btn">
+										<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
+								    <!-- <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
+									-->
+										<button class="btn btn-primary getJSONFromServer form-control" title="Get number of unique mementos"> Calculate # of Thumbnails </button>
+								</span>
 							</div>
 							<div class="form-group hidden">
 						    <label for="urirIP">Enter URI-R:</label>
@@ -82,13 +90,7 @@
 						</div>
 
 
-							<!-- GET STATS -->
-							<div id="statsbtn" class="form-inline pull-right">
-									<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
-							    <!-- <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
-								-->
-									<button class="btn btn-primary getJSONFromServer form-control" title="Get number of unique mementos"> Calculate # of Thumbnails </button>
-							</div>
+
 
 					</div>
 				</form>
@@ -96,7 +98,7 @@
 
 				<!--STATS-->
 				<div class="statsWrapper row" style="display:none;">
-					<div class="col-lg-10">
+					<div class="col-lg-12">
 						<h3 class="collection_stats_container"><span class="collection_stats"></span> &nbsp; </h3>
 						<p class="Explain_Threshold">Selecting more thumbnails means showing increasingly minor changes.</p>
 						<div class="time_container">

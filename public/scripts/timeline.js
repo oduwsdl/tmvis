@@ -846,7 +846,8 @@ function getSummary(){
 
   var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
   if($("body").find("form")[0].checkValidity()){
-        $(".getSummary").hide();
+        $(".time_container").hide();
+        $(".Explain_Threshold").hide();
        var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val();
 
        var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
