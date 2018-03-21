@@ -16,4 +16,3 @@ function updateTextH(value) {
 function updateTextS(value) {
 	document.getElementById("screenshotValue").innerHTML = value;
 }
-

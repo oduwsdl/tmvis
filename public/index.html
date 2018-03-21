@@ -20,9 +20,9 @@
 
     	<script src="/scripts/imageSliderScript.js"></script>
     	<script src="/scripts/imageGridScript.js"></script>
-    	<script src="/scripts/timeline.js"></script>
+    	<script src="/scripts/timeline.js?version=1002"></script>
     	<script src="/scripts/waitforimages.js"></script>
-			<script src="/scripts/formatting.js"></script>
+			<script src="/scripts/formatting.js?version=1002"></script>
 
 			<!-- Priorirty is to stabilise the current single step build -->
 			<!-- <script src="./scripts/embedded.js"></script> -->
@@ -55,83 +55,54 @@
 
 					<div class="row orgAndCollNoWrapper form-inline" style="vertical-align:middle;" >
 						<!--ARCHIVE OPTIONS -->
-							<div class="pull-left" style="min-width:25%;">
-								<label class="radio"><input type="radio" class ="form-control" checked="checked" name="primesource"  id = "internetarchive" value="internetarchive" onclick="javascript:yesnoCheck();">Internet Archive</label><br/>
+							<div class="pull-left primesrcsection" style="min-width:25%; margin-left:40%">
+								<label class="radio"><input type="radio" class ="form-control" checked="checked" name="primesource"  id = "internetarchive" value="internetarchive" onclick="javascript:yesnoCheck();">Internet Archive</label>&nbsp;
 								<label class="radio"><input type="radio" class ="form-control" name="primesource" id = "archiveit" value="archiveit" onclick="javascript:yesnoCheck();">Archive-It</label>
 								<!--label for="collectionNo">Collection Identifier</label-->
 							  <input class="form-control" type="number" class ="form-control" title="Collection Identifier"  name="ci"  id="collectionNo" placeholder="Collection Identifier" />
 							</div>
 							<!-- THRESHOLD AND DELAY-->
 
-
-						<div class="col-md-3" style="text-align: center;" >
-
-								<label for="hammingDistance" >Webpage Difference: <span id="hammingdistanceValue">4</span> </label>
-								<br/>
-
-							   <div class="slidecontainer">
-							    <input  id="hammingDistance" name="hdt" class="slider" type="range" min="0" max="10" step="1" value="4" oninput="javascript:updateTextH(value);" onclick="javascript:updateTextH(value);" />
-							    </div>
-
-							  <p>Larger difference means less thumbnails.</p>
-						</div>
-
-						<div class="col-md-3" style="text-align: center;">
-								<label for="screenshotDelta"  >Delay: <span id="screenshotValue">0</span> </label> <br/>
-								<div class="slidecontainer">
-									<input  id="screenshotDelta"  name="ssd" class="slider" type="range" min="0" max="10" step="1" value="0" oninput="javascript:updateTextS(value);" onclick="javascript:updateTextS(value);"/></div>
-								<p>Delay taking screenshot of webpage once it's loaded.</p>
-							</div>
-
-
-							<!--div class="form-group pull-right" style="margin-right:1%;">
-								<div class="dropdown">
-										<button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" title="Advanced Settings"><i class="fa fa-cog" aria-hidden="true"></i></button>
-										<ul class="dropdown-menu">
-											<li class="form-group" style="padding:6%;">
-												<label for="hammingDistance">Threshold:</label>
-											<input class="form-control" style="width:40%;" type="number" title="Uniqueness Threshold"  name="hdt"  id="hammingDistance" value="4" />
-
-											</li>
-											<li class="form-group" style="padding:6%;">
-											<label for="screenshotDelta">Delay:</label>
-
-											<input class="form-control" style="width:40%;" type="number" title="Sec Before ScreenShot"  name="ssd"  id="screenshotDelta" value="0" >
-											</li>
-
-										</ul>
+							<div class="slidersection hidden">
+								<div class="col-md-3" style="text-align: center;" >
+										<label for="hammingDistance" >Webpage Difference: <span id="hammingdistanceValue">4</span> </label>
+										<br/>
+									   <div class="slidecontainer">
+									    <input  id="hammingDistance" name="hdt" class="slider" type="range" min="0" max="10" step="1" value="4" oninput="javascript:updateTextH(value);" onclick="javascript:updateTextH(value);" />
+									    </div>
+									  <p>Larger difference means less thumbnails.</p>
 								</div>
 
-							</div-->
+								<div class="col-md-3" style="text-align: center;">
+										<label for="screenshotDelta"  >Delay: <span id="screenshotValue">0</span> </label> <br/>
+										<div class="slidecontainer">
+											<input  id="screenshotDelta"  name="ssd" class="slider" type="range" min="0" max="10" step="1" value="0" oninput="javascript:updateTextS(value);" onclick="javascript:updateTextS(value);"/></div>
+										<p>Delay taking screenshot of webpage once it's loaded.</p>
+								</div>
+						</div>
+
 
 							<!-- GET STATS -->
 							<div id="statsbtn" class="form-inline pull-right">
 									<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
 							    <!-- <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
 								-->
-									<button style="background-color : #C8C8C8;" class="btn getJSONFromServer form-control" title="Get number of unique mementos"> Calculate # of Thumbnails </button>
+									<button class="btn btn-primary getJSONFromServer form-control" title="Get number of unique mementos"> Calculate # of Thumbnails </button>
 							</div>
 
 					</div>
-
 				</form>
 
 
 				<!--STATS-->
 				<div class="statsWrapper row" style="display:none;">
-
 					<div class="col-lg-10">
 						<h3> <b>Stats : </b><span class="collection_stats"></span> &nbsp; </h3> <label class="approxTimeShowingPTag"> </label>
 					</div>
-
-
 					<div class="col-lg-2 pull-right">
-					   <button style="background-color : #C8C8C8; float: right;" class="btn getSummary" title="Displays visualizations after screenshots are captured"> Generate Thumbnails </button>
+					   <button style="float: right;" class="btn btn-primary getSummary" title="Displays visualizations after screenshots are captured"> Generate Thumbnails </button>
 					</div>
-
 				</div>
-
-
 			</div>
 
 

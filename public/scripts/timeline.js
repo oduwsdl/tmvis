@@ -2,7 +2,7 @@
 var jsonObjRes = {};
 var curURIUnderFocus=null;
 var curDeepLinkStateArr=[];
-
+var curUniqueUserSessionID = null;
 (function(window, document, undefined){
 
 
@@ -605,8 +605,7 @@ var curDeepLinkStateArr=[];
           $('.argumentsForm #urirIP').val(curInputObj["urir"]);
           $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
           $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
-          $('.argumentsForm #screenshotDelta').val(curInputObj["screenshotDelta"] );
-          $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true);
+          $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true).trigger("click");
           getStats(); // this makes the call for getting the initial stats.
       }else{
         //alert("doesn't have the local storage set, using the Query parameters");
@@ -617,22 +616,17 @@ var curDeepLinkStateArr=[];
         }else{
           if(updateDeepLinkStateArr()){
 
-            $('.argumentsForm #uriIP').val(curDeepLinkStateArr[6]);
-            $('.argumentsForm #urirIP').val(curDeepLinkStateArr[6]);
+            $('.argumentsForm #uriIP').val(curDeepLinkStateArr[5]);
+            $('.argumentsForm #urirIP').val(curDeepLinkStateArr[5]);
             $('.argumentsForm #collectionNo').val( curDeepLinkStateArr[2]);
             var hammingDistance = curDeepLinkStateArr[3];
             if(hammingDistance == "" || hammingDistance == undefined || hammingDistance == null){
                 hammingDistance = 4;
             }
-            var ssd = curDeepLinkStateArr[5];
-            if(ssd == "" || ssd == undefined || ssd == null){
-                ssd = 0;
-            }
+
             $('.argumentsForm #hammingDistance').val(hammingDistance);
             $('.argumentsForm #hammingdistanceValue').html(hammingDistance);
-            $('.argumentsForm #screenshotDelta').val(ssd);
-            $('.argumentsForm #screenshotValue').html(ssd);
-            $('.argumentsForm input[value='+ curDeepLinkStateArr[1] +']').prop("checked",true);
+            $('.argumentsForm .primesrcsection input[type=radio][value='+ curDeepLinkStateArr[1] +']').prop("checked",true).trigger("click");
             if(curDeepLinkStateArr[4] == "summary"){
               getSummary();
             }else{
@@ -672,7 +666,7 @@ function uriAnalysisForAttributes(uri){
       }
       $('.argumentsForm #urirIP').val(urir);
       $('.argumentsForm #collectionNo').val(ci);
-      $('.argumentsForm input[value='+primesource+']').prop("checked",true);
+      $('.argumentsForm input[value='+primesource+']').prop("checked",true).trigger("click");
 
     }else{
       urir = uri; // one and the same - case where the URI-R is directly given
@@ -699,13 +693,14 @@ function uriAnalysisForAttributes(uri){
     }
     $('.argumentsForm #urirIP').val(urir);
     $('.argumentsForm #collectionNo').val(ci);
-    $('.argumentsForm input[value='+primesource+']').prop("checked",true);
+    $('.argumentsForm input[value='+primesource+']').prop("checked",true).trigger("click");
   }
 }
 var notificationSrc= null;
 
 function startEventNotification(){
-  notificationSrc= new EventSource('/notifications');
+  notificationSrc= new EventSource('/notifications/'+getUniqueUserSessionId());
+
        notificationSrc.onmessage = function(e) {
            console.log(e.data);
            var streamedObj = JSON.parse(e.data);
@@ -716,10 +711,12 @@ function startEventNotification(){
 
 
            if(streamedObj.data === "streamingStarted"){
+
                $('#serverStreamingModal .logsContent').empty();
                setProgressBar(2);
                // un comment the following line after POC
              $('#serverStreamingModal').modal('show');
+
            }else if (streamedObj.data.indexOf("percentagedone-") == 0) {
              var value = parseInt(streamedObj.data.split("-")[1]);
              setProgressBar(value);
@@ -729,7 +726,6 @@ function startEventNotification(){
            //  $(".getSummary").trigger("click");
              $('#serverStreamingModal .logsContent').empty();
              setProgressBar(2);
-
              $('#serverStreamingModal').modal('hide');
              $(".tabContentWrapper").show();
              if(notificationSrc != null){
@@ -738,7 +734,7 @@ function startEventNotification(){
            }
            else if(streamedObj.data === "statssent"){
                $('#serverStreamingModal .logsContent').empty();
-               setProgressBar(2);
+                setProgressBar(2);
                $('#serverStreamingModal').modal('hide');
                if(notificationSrc != null){
                  notificationSrc.close();
@@ -771,22 +767,21 @@ function getStats(){
   if(hammingDistance == ""){
       hammingDistance = 4;
   }
-  var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
-  if(screenshotDelta == ""){
-      screenshotDelta = 0;
-  }
+
   var role = "stats";
   if($("body").find("form")[0].checkValidity()){
       startEventNotification();
-      event.preventDefault();
       var ENDPOINT = "/alsummarizedtimemap";
-      var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+screenshotDelta+"/"+$('.argumentsForm #urirIP').val();
+      var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
       $("#busy-loader").show();
       $('#serverStreamingModal .logsContent').empty();
       $('#serverStreamingModal').modal('show');
         $.ajax({
             type: "GET",
             url: address, // uncomment this for deployment
+            beforeSend: function(xhr) {
+              xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+            },
             dataType: "text",
             success: function( data, textStatus, jqXHR) {
                 $("#busy-loader").hide();
@@ -794,17 +789,25 @@ function getStats(){
                 $('#serverStreamingModal').modal('hide');
                 try{
                     jsonObjRes= $.parseJSON(data);
-                    var memStatStr = jsonObjRes["totalmementos"]+" Mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
+                    var htmlStr="";
+                    jsonObjRes.forEach(function(item,index,arry){
+                      htmlStr+= "&nbsp;<label title='No Of unique thumbnails:"+item['unique'] +"'><input type='radio' name='thresholdDistance' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</label>";
+                    });
+
+                    var memStatStr = "Total Mementos: "+jsonObjRes[0]["totalmementos"] +"; Select no.of unique thubnails to view -> " + htmlStr;
+
+                    //var memStatStr = jsonObjRes["totalmementos"]+" Mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
                     $(".statsWrapper .collection_stats").html(memStatStr);
+                    if(  $(".statsWrapper input[type='radio']").eq(1).length != 0){
+                      $(".statsWrapper input[type='radio']").eq(1).trigger("click");
+                    }else{
+                      $(".statsWrapper input[type='radio']").eq(0).trigger("click");
+                    }
+
                     $(".statsWrapper").show();
                     $(".getSummary").show();
 
-                    if(jsonObjRes["timetowait"] == 0){
-                      $(".approxTimeShowingPTag").html('Images already captured, Click Generate.');
 
-                    }else{
-                      $(".approxTimeShowingPTag").html('Takes about '+ jsonObjRes["timetowait"] +' minutes approximately. Generate images?');
-                    }
                     //$(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
                     //$(".modal-backdrop").remove();
 
@@ -834,21 +837,17 @@ function getSummary(){
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
   }
-  var hammingDistance = $('.argumentsForm #hammingDistance').val();
-  if(hammingDistance == ""){
-      hammingDistance = 4;
-  }
+  //var hammingDistance = $('.argumentsForm #hammingDistance').val();
+  var hammingDistance = $(".statsWrapper input[type='radio']:checked").val();
 
-  var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
-  if(screenshotDelta == ""){
-      screenshotDelta = 0;
+  if(hammingDistance == "" || hammingDistance===undefined){
+    hammingDistance = $('.argumentsForm #hammingDistance').val();
   }
 
   var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
   if($("body").find("form")[0].checkValidity()){
         $(".getSummary").hide();
-       event.preventDefault();
-       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+ screenshotDelta+ "/" +$('.argumentsForm #urirIP').val();
+       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val();
 
        var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
        changeToSummaryState(summaryStatePath);
@@ -862,6 +861,9 @@ function getSummary(){
       $.ajax({
         type: "GET",
         url: address, // uncomment this for deployment
+        beforeSend: function(xhr) {
+          xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+        },
         dataType: "text",
          timeout: 0,
         success: function( data, textStatus, jqXHR) {
@@ -957,28 +959,25 @@ $(function(){
         if(hammingDistance == ""){
             hammingDistance = 4;
         }
-        var screenshotDelta = $('.argumentsForm #screenshotDelta').val();
-            if(screenshotDelta == ""){
-                screenshotDelta = 0;
-        }else{
-
-        }
 
         var role = "stats" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
         if($(this).parents("body").find("form")[0].checkValidity()){
-            event.preventDefault();
             localStorage.setItem("getStatsClicked", "true");
             var curInputJsobObj = {};
             curInputJsobObj["uri"]= $("#uriIP").val();
             curInputJsobObj["urir"]= $("#urirIP").val();
             curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
-            curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
+            if(curInputJsobObj["primesource"]=="internetarchive"){
+              curInputJsobObj["collectionIdentifer"]= "all";
+
+            }else{
+              curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
+
+            }
             if(!parseInt(curInputJsobObj["collectionIdentifer"])){
               curInputJsobObj["collectionIdentifer"] = "all";
             }
             curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
-
-            curInputJsobObj["screenshotDelta"]= $('.argumentsForm #screenshotDelta').val();
             curInputJsobObj["role"]= role;
             localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
             //window.location.reload();
@@ -998,6 +997,15 @@ $(function(){
     $(".getSummary").click(function(event){
       getSummary();
     });
+
+    $(document).on("click","input[name=thresholdDistance]",function(){
+      if($(this).attr("timetowait") == 0){
+        $(".approxTimeShowingPTag").html('Images already captured, Click Generate.');
+      }else{
+        $(".approxTimeShowingPTag").html('Takes about <label class="timetowait">'+$(this).attr("timetowait") +'</label> minutes approximately. Generate images?');
+      }
+    });
+
   });
 })(window, document);
 
@@ -1022,13 +1030,23 @@ function getParameterByName(name, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
+function getUniqueUserSessionId() {
+  if(curUniqueUserSessionID == null){
+    curUniqueUserSessionID = Date.now()*Math.floor((Math.random() * 10) + 1);
+    return curUniqueUserSessionID;
+  }else{
+    return curUniqueUserSessionID;
+  }
+}
+
+
 
 function generateDeepLinkState(curInputJsobObj){
-  return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["screenshotDelta"]+"/"+curInputJsobObj["urir"];
+  return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["urir"];
 }
 
 function generateDeepLinkStateForSummary(curInputJsobObj){
-  return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/" +curInputJsobObj["screenshotDelta"]+"/"+curInputJsobObj["urir"];
+  return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["urir"];
 }
 
 function changeToSummaryState(curURLState) {
@@ -1061,8 +1079,7 @@ function updateDeepLinkStateArr() {
       else{
         curDeepLinkStateArr[2] = deepLinkParts[2];
         curDeepLinkStateArr[3]= deepLinkParts[3];
-        curDeepLinkStateArr[5] = deepLinkParts[5];
-        curDeepLinkStateArr[6] = deepLinkStr.split("/"+deepLinkParts[4]+"/"+ deepLinkParts[5]+"/")[1];
+        curDeepLinkStateArr[5] = deepLinkStr.split("/"+deepLinkParts[4]+"/")[1];
         return true;
       }
     }else{
