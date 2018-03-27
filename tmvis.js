@@ -863,7 +863,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
             // }
             var tempMemetoArr=[];
             var tempStackOfMementos = new Stack();
-            var numOfMementosToConsider = 50;
+            var numOfMementosToConsider = 500;
             for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--){
                 tempStackOfMementos.push(t.mementos[i]);
             }
@@ -876,7 +876,6 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
             ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']')
 
             tempMemetoArr[0]["rel"] = "first memento";
-            console.log('datetime of first memento :----------------->'+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"])
 
             t.mementos = tempMemetoArr;
 
@@ -899,8 +898,8 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
             // to respond to the client as the intermediate response, while the server processes huge loads
            if(t.mementos.length > 250){
 
-            constructSSE('Might aprroximately take  <h3>  ' + Math.ceil((t.mementos.length)/(60*4))  +' Minutes ...<h3> to compute simhashes',curCookieClientId)
-            constructSSE("percentagedone-20",curCookieClientId);
+
+             constructSSE("percentagedone-20",curCookieClientId);
             // now that streaming is in place, dont bother about sending an intermediate response
             //  response.write('Request being processed, Please retry approximately after ( ' + Math.ceil(((t.mementos.length/50)  * 10)/60)  +' Minutes ) and request again...')
             //  response.end()
@@ -1832,6 +1831,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
       hdtRangeVar = i;
       curMementoDetArray = [];
       curMementoDetArray =  JSON.parse(JSON.stringify(this.mementos))
+
       var lastSignificantMementoIndexBasedOnHamming = 0
       var copyOfMementos = [this.mementos[0]]
 
@@ -1891,9 +1891,12 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
       }
 
   }
+ if(this.menentoDetForMultipleKValues.has(this.hammingdistancethreshold)){
+   this.mementos =  JSON.parse(JSON.stringify(this.menentoDetForMultipleKValues.get(this.hammingdistancethreshold))) // to get the Memento object corresponsing to actual hdt sent
 
-
-  this.mementos =  JSON.parse(JSON.stringify(this.menentoDetForMultipleKValues.get(this.hammingdistancethreshold))) // to get the Memento object corresponsing to actual hdt sent
+ }else{
+   this.mementos =  JSON.parse(JSON.stringify(this.menentoDetForMultipleKValues.get(2))) // to get the Memento object corresponsing to actual hdt sent
+ }
 
   ConsoleLogIfRequired("------------ByMahee-- After the hamming distance is calculated, here is how the mementos with additional details look like ------------------")
   ConsoleLogIfRequired("--------------------------------------For threshold value 2------------------------------------------------")
