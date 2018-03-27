@@ -863,7 +863,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
             // }
             var tempMemetoArr=[];
             var tempStackOfMementos = new Stack();
-            var numOfMementosToConsider = 500;
+            var numOfMementosToConsider = 100;
             for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--){
                 tempStackOfMementos.push(t.mementos[i]);
             }
@@ -1449,6 +1449,9 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
        noOfThumbnailsSelectedToBeCaptured = getNotExistingCapturesCount(self.menentoDetForMultipleKValues.get(hammingDistance).filter(criteria))
         statsObj["timetowait"] = Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA)/60)
         constructSSE('No of screenshots to be captured -> <h4>'+noOfThumbnailsSelectedToBeCaptured +'</h4>',curCookieClientId)
+        statsObj["fromdate"] = self.mementos[0]["datetime"]
+        statsObj["todate"] = self.mementos[self.mementos.length-1]["datetime"]
+
         statsArry.push(statsObj);
     });
 
