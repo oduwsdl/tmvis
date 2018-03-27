@@ -2,17 +2,25 @@
 
 var fs = require('fs-extra');
 const puppeteer = require('puppeteer');
-const SCREENSHOT_DELTA =2;
+const SCREENSHOT_DELTA =30;
 var async = require('async');
-var uri = 'http://wayback.archive-it.org/1068/20160104194954if_/http://4genderjustice.org/'; // the URI that crashes the page
-//var uri = 'http://wayback.archive-it.org/1068/20170114205127if_/http://4genderjustice.org/';
+var urllib = require('url')
+var http = require('http')
+var simhash = require('simhash')('md5')
+
+//var uri = 'http://wayback.archive-it.org/1068/20160104194954if_/http://4genderjustice.org/'; // the URI that crashes the page
+var uri = 'http://wayback.archive-it.org/1068/20170114205127if_/http://4genderjustice.org/';
 
 var phantom = require('node-phantom')
 //var phantom = require('phantomjs')
-var webshot = require('webshot') // PhantomJS wrapper
+var webshot = require('webshot') //phantomJS wrapper
+var sh ="";
 
+
+getHTMLContent(uri,usingPupeteer)
+//readFileContents(__dirname+"/dummy.html",uri,usingPupeteer);
 //usingPanthom(uri)
-usingPupeteer(uri)
+//usingPupeteer(uri)
 
 function usingPanthom(uri){
   try{
@@ -47,9 +55,6 @@ function usingPanthom(uri){
 
 }
 
-
-
-
 function usingPupeteer(uri){
   console.log('Puppeteer : About to start screenshot generation process for ' + uri)
   headless(uri, __dirname+'/assets/screenshots/dummy.png').then(v => {
@@ -65,6 +70,66 @@ function usingPupeteer(uri){
   });
 }
 
+function getHTMLContent(uri,callback){
+  var mOptions = urllib.parse(uri)
+  var buffer2 = ''
+  console.log("making http call for "+mOptions.host+mOptions.path+"...")
+
+  var req = http.request({
+    'host': mOptions.host,
+    'path': mOptions.path,
+    'port':80,
+    'headers': {'User-Agent': 'TimeMap Summarization instance - Contact (@WebSciDL)Twitter, (@maheedhargunnam)Twitter'}
+  }, function (res) {
+
+    var outputBuffer;
+    // res.setEncoding('utf8')
+    if( res.headers['content-encoding'] == 'gzip' ) {
+       var gzip = zlib.createGunzip();
+       res.pipe(gzip);
+       outputBuffer = gzip;
+     } else {
+       outputBuffer = res;
+     }
+
+    outputBuffer.setEncoding('utf8')
+    outputBuffer.on('data', function (data) {
+      buffer2 += data.toString()
+    })
+    outputBuffer.on('end', function (d) {
+      if (buffer2.indexOf('Got an HTTP 302 response at crawl time') === -1 ) {
+      //  sh = simhash((buffer2).split('')).join('')
+        sh = buffer2;
+        console.log("<-----------------------------------------------------------> ")
+        console.log(sh);
+        console.log("<-----------------------------------------------------------> ")
+        callback(uri);
+
+      }
+    })
+    outputBuffer.on('error', function (err) {
+      return "error";
+      console.log('Error generating Simhash in Response')
+    })
+  })
+}
+
+
+function readFileContents(path,uri, callback) {
+  console.log("Inside readFileContents");
+  fs.readFile(path, 'utf-8', function(err,data){
+    if(err) {
+        console.log("Error reading contents on the file path ->"+ path);
+    }
+    sh = data;
+    console.log("<-----------------------------------------------------------> ")
+    console.log(sh);
+    console.log("<-----------------------------------------------------------> ")
+    callback(uri);
+  });
+};
+
+
 
 async function headless(uri,filepath) {
     const browser = await puppeteer.launch({
@@ -72,6 +137,10 @@ async function headless(uri,filepath) {
           args: ['--no-sandbox']
         // headless: false,
     });
+
+    // var sh = await getHTMLContent(uri);
+    // console.log("simhash string = "+ sh);
+
     const page = await browser.newPage();
     page.emulate({
         viewport: {
@@ -103,10 +172,13 @@ async function headless(uri,filepath) {
 
 
         // timeout at 5 minutes (5 * 60 * 1000ms), wait until all dom content is loaded
-        await page.goto(uri, {
-            waitUntil: 'networkidle0',
-            timeout: 0,
-        });
+        // await page.goto(uri, {
+        //     waitUntil: 'networkidle0',
+        //     timeout: 0,
+        // });
+      //  var html="<html><body><h3>Hello there :) <br/>"+ sh +"</h3></body></html>";
+        var html= sh;
+        await page.setContent(html);
 
       	//Set wait time before screenshotURI
       	await page.waitFor(SCREENSHOT_DELTA * 1000); //convert to seconds
