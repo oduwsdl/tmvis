@@ -484,7 +484,7 @@ function PublicEndpoint () {
           ConsoleLogIfRequired("**ByMahee** -- readFileContents : Inside Success ReadFile Content, processWithFileContents is called next ")
 
             if(isToOverrideCachedSimHash){
-              ConsoleLogIfRequired("Responded to compute latest simhahes, Proceeding....");
+              ConsoleLogIfRequired("Responded to compute latest simhahes, Proceeding...");
               getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"])
             }else{
               ConsoleLogIfRequired("Responded to continue with the exisitng cached simhashes file. Proceeding..");
@@ -1421,7 +1421,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
   constructSSE("percentagedone-5",curCookieClientId);
 
   if (noOfThumbnailsSelectedToBeCaptured >= 2) {
-    constructSSE('Might approximately take <h3>' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA))  +' Minutes <h3> to capture screen shots. Please be patient....')
+    constructSSE('Might approximately take <h3>' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA))  +' Minutes <h3> to capture screen shots. Please be patient...')
 
     // now that streaming is in place, dont bother about sending an intermediate response
     // response.write('Request being processed, Please retry approximately after ( ' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)  +' Minutes ) and request again...')
@@ -1544,7 +1544,7 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieC
 
   ConsoleLogIfRequired('About to start screenshot generation process for ' + uri)
   constructSSE('Starting screenshot generation process for -> ' + uri,curCookieClientId)
-  constructSSE('....................................',curCookieClientId)
+  constructSSE('...',curCookieClientId)
 
   headless(uri, screenshotsLocation + filename).then(v => {
       // Once all the async parts finish this prints.
@@ -1759,7 +1759,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFilteringForSummary = funct
   var noOfUniqueMementos = copyOfMementos.length
   var totalMementos = this.mementos.length;
   constructSSE('Completed filtering...',curCookieClientId)
-  constructSSE('Out of the total <h3>'+totalMementos+'</h3> eixisting mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique...',curCookieClientId)
+  constructSSE('Out of the total <h3>'+totalMementos+'</h3> existing mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique...',curCookieClientId)
   //ConsoleLogIfRequired((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
   copyOfMementos = null
 
@@ -1818,7 +1818,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
       noOfUniqueMementos = copyOfMementos.length
       totalMementos = curMementoDetArray.length;
       constructSSE('Completed filtering...',curCookieClientId)
-      constructSSE('Out of the total <h3>'+totalMementos+'</h3> eixisting mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique for hamming distance:'+ this.hammingdistancethreshold +' ...',curCookieClientId)
+      constructSSE('Out of the total <h3>'+totalMementos+'</h3> existing mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique for hamming distance:'+ this.hammingdistancethreshold +' ...',curCookieClientId)
       //ConsoleLogIfRequired((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
       copyOfMementos = null
 
