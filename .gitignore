@@ -64,6 +64,7 @@ cache/
 headless_test.js
 headless_test1.js
 test/
+dummy.html
 
 # TODO: We might want to include it in the repo and Dockerfile
 package-lock.json
