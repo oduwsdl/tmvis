@@ -817,6 +817,7 @@ function getStats(){
 
                     //$(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
                     $(".modal-backdrop").remove();
+                    $('#serverStreamingModal').modal('hide');
 
                 }catch(err){
                     alert($.trim(data));
@@ -922,6 +923,7 @@ function getSummary(){
               drawImageGrid(jsonObjRes); // calling Image Grid Function here
               drawImageSlider(jsonObjRes);
               $(".modal-backdrop").remove();
+              $('#serverStreamingModal').modal('hide');
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");

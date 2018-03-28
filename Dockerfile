@@ -29,13 +29,13 @@ RUN     apt-get update && apt-get install -y \
         && rm -rf /var/lib/apt/lists/*
 
 
-# ARG     PHANTOMJS_VERSION=2.1.1
-# RUN     cd /tmp \
-#       #  && wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 \
-#        && wget https://npm.taobao.org/mirrors/phantomjs/phantomjs-2.1.1-linux-x86_64.tar.bz2  \
-#        && tar -xvjf phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin/phantomjs \
-#        && mv phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin/phantomjs /usr/local/bin/ \
-#        && rm -rf phantomjs-*
+ARG     PHANTOMJS_VERSION=2.1.1
+RUN     cd /tmp \
+      #  && wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 \
+       && wget https://npm.taobao.org/mirrors/phantomjs/phantomjs-2.1.1-linux-x86_64.tar.bz2  \
+       && tar -xvjf phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin/phantomjs \
+       && mv phantomjs-$PHANTOMJS_VERSION-linux-x86_64/bin/phantomjs /usr/local/bin/ \
+       && rm -rf phantomjs-*
 
 
 WORKDIR /app
