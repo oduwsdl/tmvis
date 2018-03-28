@@ -1678,7 +1678,7 @@ async function headless(uri,filepath) {
 
 TimeMap.prototype.createScreenshotForMementoWithPhantom = function (curCookieClientId,memento, callback) {
   var uri = memento.uri
-  ConsoleLogIfRequired('********** curCookieClientId in createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'***************')
+  ConsoleLogIfRequired('********** curCookieClientId in createScreenshotForMementoWithPhantom -> '+curCookieClientId+'***************')
 
   var regExpForDTStr = /\/\d{14}id_\/|\d{14}\// //to match something lile /12345678912345id_/
   var matchedString = uri.match(regExpForDTStr)
