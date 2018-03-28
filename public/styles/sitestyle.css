@@ -80,6 +80,12 @@ display:inline;
 		font-size: 1em;
     cursor: pointer;
 	}
+  .timelinesetter_card_heading{
+		font-family: 'Oswald', sans-serif;
+		font-size: 1em;
+    cursor: pointer;
+	}
+
   .collection_stats_container{
     text-align: center;
     margin-top: 0px;
