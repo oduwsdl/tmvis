@@ -2,14 +2,14 @@
 
 var fs = require('fs-extra');
 const puppeteer = require('puppeteer');
-const SCREENSHOT_DELTA =30;
+const SCREENSHOT_DELTA = 60;
 var async = require('async');
 var urllib = require('url')
 var http = require('http')
 var simhash = require('simhash')('md5')
 
-//var uri = 'http://wayback.archive-it.org/1068/20160104194954if_/http://4genderjustice.org/'; // the URI that crashes the page
-var uri = 'http://wayback.archive-it.org/1068/20170114205127if_/http://4genderjustice.org/';
+var uri = 'http://wayback.archive-it.org/1068/20160104194954if_/http://4genderjustice.org/'; // the URI that crashes the page
+//var uri = 'http://wayback.archive-it.org/1068/20170114205127if_/http://4genderjustice.org/';
 
 var phantom = require('node-phantom')
 //var phantom = require('phantomjs')
@@ -17,10 +17,10 @@ var webshot = require('webshot') //phantomJS wrapper
 var sh ="";
 
 
-getHTMLContent(uri,usingPupeteer)
+//getHTMLContent(uri,usingPupeteer)
 //readFileContents(__dirname+"/dummy.html",uri,usingPupeteer);
 //usingPanthom(uri)
-//usingPupeteer(uri)
+usingPupeteer(uri)
 
 function usingPanthom(uri){
   try{
@@ -172,13 +172,13 @@ async function headless(uri,filepath) {
 
 
         // timeout at 5 minutes (5 * 60 * 1000ms), wait until all dom content is loaded
-        // await page.goto(uri, {
-        //     waitUntil: 'networkidle0',
-        //     timeout: 0,
-        // });
-      //  var html="<html><body><h3>Hello there :) <br/>"+ sh +"</h3></body></html>";
-        var html= sh;
-        await page.setContent(html);
+        await page.goto(uri, {
+            waitUntil: 'networkidle0',
+            timeout: 0,
+        });
+
+        // var html= sh;
+        // await page.setContent(html);
 
       	//Set wait time before screenshotURI
       	await page.waitFor(SCREENSHOT_DELTA * 1000); //convert to seconds

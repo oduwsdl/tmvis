@@ -1447,11 +1447,10 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
       console.log("------------------ selected for screenshots------------")
       console.log(JSON.stringify(self.menentoDetForMultipleKValues.get(hammingDistance).filter(criteria)))
        noOfThumbnailsSelectedToBeCaptured = getNotExistingCapturesCount(self.menentoDetForMultipleKValues.get(hammingDistance).filter(criteria))
-        statsObj["timetowait"] = Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA)/60)
+        statsObj["timetowait"] = Math.ceil((noOfThumbnailsSelectedToBeCaptured * 30)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA)/60)
         constructSSE('No of screenshots to be captured -> <h4>'+noOfThumbnailsSelectedToBeCaptured +'</h4>',curCookieClientId)
         statsObj["fromdate"] = self.mementos[0]["datetime"]
         statsObj["todate"] = self.mementos[self.mementos.length-1]["datetime"]
-
         statsArry.push(statsObj);
     });
 
@@ -1473,7 +1472,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
   constructSSE("percentagedone-5",curCookieClientId);
 
   if (noOfThumbnailsSelectedToBeCaptured >= 2) {
-    constructSSE('Might approximately take <h3>' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA))  +' Minutes <h3> to capture screen shots. Please be patient...')
+    constructSSE('Might approximately take <h3>' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 30)/60 + (noOfThumbnailsSelectedToBeCaptured*SCREENSHOT_DELTA))  +' Minutes <h3> to capture screen shots. Please be patient...')
 
     // now that streaming is in place, dont bother about sending an intermediate response
     // response.write('Request being processed, Please retry approximately after ( ' + Math.ceil((noOfThumbnailsSelectedToBeCaptured * 40)/60)  +' Minutes ) and request again...')
