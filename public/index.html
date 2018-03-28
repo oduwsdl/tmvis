@@ -182,7 +182,7 @@
 									</div>
 							</script>
 
-							<!-- ByMAhee-- Added another class that could tell what type of notch series it is  -->
+							<!-- ByMAhee Added another class that could tell what type of notch series it is  -->
 							<script id="notch_tmpl" type="text/jst">
 									<div style="background:<%= topcolor %>" data-notch-series="<%= event_series %>" class="timeline_notch notch_<%= timestamp %>  notch_<%= event_series %> " data-timestamp="<%= timestamp %>"></div>
 							</script>
@@ -206,23 +206,21 @@
 
 
 												<% if (event_series=='Thumbnails'){%>
-				                                    <% if (!_.isEmpty(event_html)){ %>
-				                                        <div class="item_user_html">
-				                                            <%= event_html %>
+                              <% if (!_.isEmpty(event_html)){ %>
+                                  <div class="item_user_html">
+                                      <%= event_html %>
+                                  </div>
+                              <% } %>
+				                 <% } %>
 
-				                                        </div>
-				                                        <% } %>
-				                                <% } %>
-
-				                                <% if (event_series=='Non-Thumbnail Mementos'){%>
-				                                    <% if (!_.isEmpty(event_html_similarto)){ %>
-				                                        <div class="item_user_html similarToPictureEle">
-				                                        	<h2> Similar To </h2>
-				                                            <%= event_html_similarto %>
-
-				                                        </div>
-				                                        <% } %>
-				                                <% } %>
+                          <% if (event_series=='Non-Thumbnail Mementos'){%>
+                              <% if (!_.isEmpty(event_html_similarto)){ %>
+                                  <div class="item_user_html similarToPictureEle">
+                                  	<h3> <span class='timelinesetter_card_heading'> Similar To </span></h3>
+                                      <%= event_html_similarto %>
+                                  </div>
+                              <% } %>
+                          <% } %>
 
 
 
