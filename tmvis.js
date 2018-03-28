@@ -1485,8 +1485,8 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
     1,function( memento,callback){
       ConsoleLogIfRequired('************curCookieClientId just before calling  createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'************')
-      //self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
-      self.createScreenshotForMementoWithPhantom(curCookieClientId,memento,callback)
+      self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
+      //self.createScreenshotForMementoWithPhantom(curCookieClientId,memento,callback)
       completedScreenshotCaptures++;
       var value = ((completedScreenshotCaptures/noOfThumbnailsSelectedToBeCaptured)*80)+5;
       if(value > preVal){ // At times if there is an error while fetching the contents, retry happens and context jumps back there
@@ -1543,8 +1543,8 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (curCookieCl
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
     1,
     function( memento,callback){
-      //self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
-      self.createScreenshotForMementoWithPhantom(curCookieClientId,memento,callback)
+      self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
+      //self.createScreenshotForMementoWithPhantom(curCookieClientId,memento,callback)
     },
 
     function doneCreatingScreenshots (err) {      // When finished, check for errors
