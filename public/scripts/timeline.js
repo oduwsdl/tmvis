@@ -1010,7 +1010,7 @@ $(function(){
       $('button[name=thresholdDistance].on').removeClass('on')
       $(this).addClass("on");
       if($(this).attr("timetowait") == 0){
-        $(".approxTimeShowingPTag").html('0 minutes to generate thumbnails.');
+        $(".approxTimeShowingPTag").html('<1 minute to generate thumbnails.');
       }else{
         $(".approxTimeShowingPTag").html('<label class="timetowait">'+$(this).attr("timetowait") +'</label> minutes to generate thumbnails.');
       }
