@@ -37,8 +37,10 @@
 				<div class = "Title">
 
 					<h1>TimeMap Visualization</h1>
-
+					<img src="/images/columbiaLibrary.png" alt="graph">
 					</div>
+					<!--hack to fix formatting-->
+					<div style="clear: both;"></div>
 				<form action="#" class="argumentsForm">
 
 					<div class="row URIWrapper" >
@@ -143,7 +145,7 @@
 						<button type="button" class="btn" id='pause'>Pause</button>
 						&nbsp;<label> <input type="checkbox" class="playinloop" value=""> Play In Loop</label>
 						</div>
-							<div class="gridImagePlusContentWrapper" style="margin-left: 5%;">
+							<div class="gridImagePlusContentWrapper">
 								<img id="myImage" class="heightSet"/>
 								<p id="myContent"></p>
 							</div>
@@ -206,21 +208,24 @@
 
 
 												<% if (event_series=='Thumbnails'){%>
-                              <% if (!_.isEmpty(event_html)){ %>
-                                  <div class="item_user_html">
-                                      <%= event_html %>
-                                  </div>
-                              <% } %>
-				                 <% } %>
+				                                    <% if (!_.isEmpty(event_html)){ %>
+				                                        <div class="item_user_html">
+																									<h2> Unique Memento</h2>
+				                                            <%= event_html %>
 
-                          <% if (event_series=='Non-Thumbnail Mementos'){%>
-                              <% if (!_.isEmpty(event_html_similarto)){ %>
-                                  <div class="item_user_html similarToPictureEle">
-                                  	<h3> <span class='timelinesetter_card_heading'> Similar To </span></h3>
-                                      <%= event_html_similarto %>
-                                  </div>
-                              <% } %>
-                          <% } %>
+				                                        </div>
+				                                        <% } %>
+				                                <% } %>
+
+				                                <% if (event_series=='Non-Thumbnail Mementos'){%>
+				                                    <% if (!_.isEmpty(event_html_similarto)){ %>
+				                                        <div class="item_user_html similarToPictureEle">
+				                                        	<h2> Similar To </h2>
+				                                            <%= event_html_similarto %>
+
+				                                        </div>
+				                                        <% } %>
+				                                <% } %>
 
 
 
