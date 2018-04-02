@@ -9,6 +9,7 @@ var http = require('http')
 var simhash = require('simhash')('md5')
 
 var uri = 'http://wayback.archive-it.org/1068/20160104194954if_/http://4genderjustice.org/'; // the URI that crashes the page
+//var uri = 'https://www.myvue.com/';
 //var uri = 'http://wayback.archive-it.org/1068/20170114205127if_/http://4genderjustice.org/';
 
 var phantom = require('node-phantom')
