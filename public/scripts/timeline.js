@@ -804,7 +804,10 @@ function getStats(){
 
                     var dateRangeStr= new Date(jsonObjRes[0].fromdate).toDateString() + " To " + new Date(jsonObjRes[0].todate).toDateString()
                     $(".statsWrapper .collection_stats").html(memStatStr);
-                      $(".statsWrapper .collection_stats").attr("title","Date Range: "+dateRangeStr)
+
+                    $(".statsWrapper .Mementos_Considered").html("Date Range of mementos considered: "+dateRangeStr)
+
+                    //  $(".statsWrapper .collection_stats").attr("title","Date Range: "+dateRangeStr)
                     if(  $(".statsWrapper button[type='button']").eq(1).length != 0){
                       $(".statsWrapper button[type='button']").eq(1).trigger("click");
                     }else{
