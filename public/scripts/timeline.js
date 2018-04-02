@@ -893,10 +893,14 @@ function getSummary(){
               jsonObjRes= $.parseJSON(data);
               // following code segment makes the screenshot URI got with event_html | event_html_similarto properties to a html fragment
               jsonObjRes[0].event_html= "<img src='"+jsonObjRes[0].event_html+"' width='300px' />";
+              var noOfUniqueMementos = 1;
               for(var i=1;i< jsonObjRes.length;i++){
                   jsonObjRes[i].event_html= "<img src='"+jsonObjRes[i].event_html+"' width='300px' />";
                   jsonObjRes[i].event_html_similarto= "<img src='"+jsonObjRes[i].event_html_similarto+"' width='300px' />";
               }
+
+
+
               $(".statsWrapper").show();
                window.timeline = new Timeline(jsonObjRes);
               // place where the notch width is being reduced t0 2px.
@@ -1010,7 +1014,7 @@ $(function(){
       $('button[name=thresholdDistance].on').removeClass('on')
       $(this).addClass("on");
       if($(this).attr("timetowait") == 0){
-        $(".approxTimeShowingPTag").html('<1 minute to generate thumbnails.');
+        $(".approxTimeShowingPTag").html('0 minutes to generate thumbnails.');
       }else{
         $(".approxTimeShowingPTag").html('<label class="timetowait">'+$(this).attr("timetowait") +'</label> minutes to generate thumbnails.');
       }
