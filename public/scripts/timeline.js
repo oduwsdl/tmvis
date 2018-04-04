@@ -596,7 +596,6 @@ var curUniqueUserSessionID = null;
   window.onload = function() {
       //window.location.href = window.location.origin;
       //alert("Windows loaded back");
-    //  delete_cookie("clientId");
       if(localStorage.getItem("getStatsClicked") == "true"){
 
           localStorage.setItem("getStatsClicked","false");
@@ -802,7 +801,10 @@ function getStats(){
                     var memStatStr = jsonObjRes[0]["totalmementos"]+" Total Mementos. Select Unique Thumbnails: " + htmlStr;
 
                     //var memStatStr = jsonObjRes["totalmementos"]+" Mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
+
+                    var dateRangeStr= new Date(jsonObjRes[0].fromdate).toDateString() + " To " + new Date(jsonObjRes[0].todate).toDateString()
                     $(".statsWrapper .collection_stats").html(memStatStr);
+                      $(".statsWrapper .collection_stats").attr("title","Date Range: "+dateRangeStr)
                     if(  $(".statsWrapper button[type='button']").eq(1).length != 0){
                       $(".statsWrapper button[type='button']").eq(1).trigger("click");
                     }else{
@@ -814,7 +816,8 @@ function getStats(){
 
 
                     //$(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
-                    //$(".modal-backdrop").remove();
+                    $(".modal-backdrop").remove();
+                    $('#serverStreamingModal').modal('hide');
 
                 }catch(err){
                     alert($.trim(data));
@@ -837,7 +840,6 @@ function getStats(){
 }
 
 function getSummary(){
-  //delete_cookie("clientId");
   var collectionIdentifer = $('.argumentsForm #collectionNo').val();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
@@ -921,6 +923,7 @@ function getSummary(){
               drawImageGrid(jsonObjRes); // calling Image Grid Function here
               drawImageSlider(jsonObjRes);
               $(".modal-backdrop").remove();
+              $('#serverStreamingModal').modal('hide');
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
@@ -990,7 +993,6 @@ $(function(){
             if(notificationSrc != null){
               notificationSrc.close();
             }
-            delete_cookie("clientId");
             window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
         }else{
           if( $("#uriIP").val()==""){
