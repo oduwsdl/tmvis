@@ -66,20 +66,21 @@ display:inline;
 .Title{
   text-align: center;
   height:auto;
+  position: relative;
 
 }
 	.Title h1{
-    display:inline-block;
-		text-align: center;
 		font-family: 'Oswald', sans-serif !important;
 		font-size: 4em;
-    margin-left: 15%;
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 	}
 	.Title img{
-		display:inline-block;
-		width:15%;
-
-    float:right;
+		width:100%;
+    opacity: 0.5;
+    float:center;
 
 	}
 	.collection_stats{
@@ -120,9 +121,13 @@ display:inline;
 
 		position:absolute;
    		bottom:0;
-   		max-height: 110px;
+   		max-height: 5%;
 
 	}
+  .wsdlIcon img{
+    display:inline-block;
+    max-width: 40%;
+  }
 	html {
     height: 95%;
     position: relative;
