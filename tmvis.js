@@ -863,7 +863,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
             // }
             var tempMemetoArr=[];
             var tempStackOfMementos = new Stack();
-            var numOfMementosToConsider = 5000;
+            var numOfMementosToConsider = 1000; // only latest 1000 mementos are considered
             for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--){
                 tempStackOfMementos.push(t.mementos[i]);
             }
@@ -1485,8 +1485,8 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
     1,function( memento,callback){
       ConsoleLogIfRequired('************curCookieClientId just before calling  createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'************')
-      //self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
-      self.createScreenshotForMementoWithPhantom(curCookieClientId,memento,callback)
+      self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
+      //self.createScreenshotForMementoWithPhantom(curCookieClientId,memento,callback)
       completedScreenshotCaptures++;
       var value = ((completedScreenshotCaptures/noOfThumbnailsSelectedToBeCaptured)*80)+5;
       if(value > preVal){ // At times if there is an error while fetching the contents, retry happens and context jumps back there
@@ -1543,8 +1543,8 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (curCookieCl
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
     1,
     function( memento,callback){
-      //self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
-      self.createScreenshotForMementoWithPhantom(curCookieClientId,memento,callback)
+      self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback)
+      //self.createScreenshotForMementoWithPhantom(curCookieClientId,memento,callback)
     },
 
     function doneCreatingScreenshots (err) {      // When finished, check for errors
@@ -1678,7 +1678,7 @@ async function headless(uri,filepath) {
 
 TimeMap.prototype.createScreenshotForMementoWithPhantom = function (curCookieClientId,memento, callback) {
   var uri = memento.uri
-  ConsoleLogIfRequired('********** curCookieClientId in createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'***************')
+  ConsoleLogIfRequired('********** curCookieClientId in createScreenshotForMementoWithPhantom -> '+curCookieClientId+'***************')
 
   var regExpForDTStr = /\/\d{14}id_\/|\d{14}\// //to match something lile /12345678912345id_/
   var matchedString = uri.match(regExpForDTStr)
