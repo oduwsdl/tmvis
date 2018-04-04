@@ -108,10 +108,12 @@ display:inline;
     display: inline-block;
     margin-bottom: 0px;
   }
-  .Explain_Threshold{
+  .Explain_Threshold,.Mementos_Considered{
     text-align: center;
     color:dimgrey;
   }
+
+
   .btn-secondary.on{
     background-color: #3379b7;
     color:white !important;
