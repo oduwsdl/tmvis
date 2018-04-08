@@ -880,6 +880,7 @@ function getSummary(){
         success: function( data, textStatus, jqXHR) {
             $("#busy-loader").hide();
             $('#serverStreamingModal').modal('hide');
+            $('#serverStreamingModal').hide();
           try{
               data = $.trim(data).split("...");
               if(data.length > 1){
@@ -936,8 +937,7 @@ function getSummary(){
             alert("Some problem fetching the response, Please refresh and try again.");
             $("#busy-loader").hide();
             $('#serverStreamingModal').modal('hide');
-              //$(".statsWrapper").hide();
-              $(".tabContentWrapper").hide();
+            $(".tabContentWrapper").hide();
           }
         },
         error: function( data, textStatus, jqXHR) {
