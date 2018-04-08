@@ -882,7 +882,6 @@ function getSummary(){
         success: function( data, textStatus, jqXHR) {
             $("#busy-loader").hide();
             $('#serverStreamingModal').modal('hide');
-            $('#serverStreamingModal').hide());
           try{
               data = $.trim(data).split("...");
               if(data.length > 1){
