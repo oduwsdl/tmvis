@@ -714,7 +714,9 @@ function startEventNotification(){
                $('#serverStreamingModal .logsContent').empty();
                setProgressBar(2);
                // un comment the following line after POC
-             $('#serverStreamingModal').modal('show');
+               if($(".tabContentWrapper").css("display") == "none"){
+                 $('#serverStreamingModal').modal('show');
+               }
 
            }else if (streamedObj.data.indexOf("percentagedone-") == 0) {
              var value = parseInt(streamedObj.data.split("-")[1]);
@@ -880,7 +882,7 @@ function getSummary(){
         success: function( data, textStatus, jqXHR) {
             $("#busy-loader").hide();
             $('#serverStreamingModal').modal('hide');
-            $('#serverStreamingModal').hide();
+            $('#serverStreamingModal').hide());
           try{
               data = $.trim(data).split("...");
               if(data.length > 1){
