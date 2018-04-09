@@ -714,7 +714,9 @@ function startEventNotification(){
                $('#serverStreamingModal .logsContent').empty();
                setProgressBar(2);
                // un comment the following line after POC
-             $('#serverStreamingModal').modal('show');
+               if($(".tabContentWrapper").css("display") == "none"){
+                 $('#serverStreamingModal').modal('show');
+               }
 
            }else if (streamedObj.data.indexOf("percentagedone-") == 0) {
              var value = parseInt(streamedObj.data.split("-")[1]);
@@ -936,8 +938,7 @@ function getSummary(){
             alert("Some problem fetching the response, Please refresh and try again.");
             $("#busy-loader").hide();
             $('#serverStreamingModal').modal('hide');
-              //$(".statsWrapper").hide();
-              $(".tabContentWrapper").hide();
+            $(".tabContentWrapper").hide();
           }
         },
         error: function( data, textStatus, jqXHR) {
