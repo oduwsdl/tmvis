@@ -648,7 +648,7 @@ Memento.prototype.simhashIndicatorForHTTP302 = '00000000'
 /**
 * Fetch URI-M HTML contents and generate a Simhash
 */
-Memento.prototype.setSimhash = function (curCookieClientId,callback) {
+Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,callback) {
   // Retain the urir for reference in the promise (this context lost with async)
   var thaturi = this.uri
   var thatmemento = this
@@ -719,8 +719,20 @@ Memento.prototype.setSimhash = function (curCookieClientId,callback) {
           buffer2 = null
 
         //  ConsoleLogIfRequired("Hex Code for Simhash:"+retStr + ' & urir:' + mOptions.host + mOptions.path)
+          thatmemento.simhash = retStr;
 
-          thatmemento.simhash = retStr
+          // the following code to compute the percentages
+          theTimeMap.completedSimhashedMementoCount = theTimeMap.completedSimhashedMementoCount+1;
+          var value = (theTimeMap.completedSimhashedMementoCount/theTimeMap.mementos.length)*70+20;
+          if(value > theTimeMap.prevCompletionVal){ // At times if there is an error while fetching the contents, retry happens and context jumps back there
+            theTimeMap.prevCompletionVal = value;
+          }
+          if(theTimeMap.prevCompletionVal > 100){
+            theTimeMap.prevCompletionVal = 95;
+          }
+          console.log("theTimeMap completedSimhashedMementoCount -> "+theTimeMap.completedSimhashedMementoCount)
+          constructSSE("percentagedone-"+Math.ceil(theTimeMap.prevCompletionVal),curCookieClientId);
+
           callback()
         //  resolve(retStr)
         } else {
@@ -1051,28 +1063,20 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 TimeMap.prototype.calculateSimhashes = function (curCookieClientId,callback) {
   //ConsoleLogIfRequired("--- By Mahee - For my understanding")
   //ConsoleLogIfRequired("Inside CalculateSimhashes")
-  var theTimeMap = this
+  var theTimeMap = this;
+  theTimeMap.completedSimhashedMementoCount =0
+  theTimeMap.prevCompletionVal = 0
   var arrayOfSetSimhashFunctions = []
-  var completedSimhashedMementoCount = 0;
   var totalMemetoCount = this.mementos.length;
   var preVal = 0;
   // the way to get a damper, just 7 requests at a time.
   async.eachLimit(this.mementos,5, function(curMemento, callback){
-    curMemento.setSimhash(curCookieClientId,callback)
-    completedSimhashedMementoCount++;
 
-    var value = (completedSimhashedMementoCount/totalMemetoCount)*70+20;
-    if(value > preVal){ // At times if there is an error while fetching the contents, retry happens and context jumps back there
-      preVal = value;
-    }
-    if(preVal > 100){
-      preVal = 95;
-    }
-    constructSSE("percentagedone-"+Math.ceil(preVal),curCookieClientId);
+    curMemento.setSimhash(theTimeMap,curCookieClientId,callback)
 
   //  ConsoleLogIfRequired(curMemento)
   }, function(err) {
-    //  ConsoleLogIfRequired("length of arrayOfSetSimhashFunctions: -> " + arrayOfSetSimhashFunctions.length);
+    //  ConsoleLogIfRequired("length of arr ayOfSetSimhashFunctions: -> " + arrayOfSetSimhashFunctions.length);
       if(err){
         ConsoleLogIfRequired("Inside async Each Limit")
         ConsoleLogIfRequired(err)
@@ -1100,6 +1104,9 @@ TimeMap.prototype.calculateSimhashes = function (curCookieClientId,callback) {
       }
       // console.timeEnd('simhashing')
       ConsoleLogIfRequired(mementosRemoved + ' mementos removed due to Wayback "soft 3xxs"')
+
+        constructSSE("percentagedone-"+Math.ceil(90),curCookieClientId);
+
       if (callback) {
         callback('')
       }
@@ -1489,6 +1496,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
       //self.createScreenshotForMementoWithPhantom(curCookieClientId,memento,callback)
       completedScreenshotCaptures++;
       var value = ((completedScreenshotCaptures/noOfThumbnailsSelectedToBeCaptured)*80)+5;
+
       if(value > preVal){ // At times if there is an error while fetching the contents, retry happens and context jumps back there
         preVal = value;
       }
