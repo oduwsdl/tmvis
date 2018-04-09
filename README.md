@@ -26,7 +26,7 @@ Follow the following steps:
 $ git clone https://github.com/mgunn001/tmvis.git
 $ cd tmvis
 $ docker image build -t timemapvis .
-$ docker container run -it --rm -p 3000:3000 timemapvis node tmvis.js
+$ docker container run --shm-size=1G -it --rm -p 3000:3000 timemapvis node tmvis.js
 ```
 
 
@@ -57,7 +57,8 @@ docker cp (CONTAINER ID CREATED ABOVE):/app/node_modules/ ./
 ```
 
 ```
-docker run -it --rm -v "$PWD":/app -p 3000:3000 --user=$(id -u):$(id -g) timemapvis bash
+
+docker run --shm-size=1G -it --rm -v "$PWD":/app -p 3000:3000 --user=$(id -u):$(id -g) timemapvis bash
 node tmvis.js
 
 ```
@@ -75,8 +76,9 @@ In case if you want to make changes in the `tmvis` code itself, you might want t
 $ git clone https://github.com/mgunn001/tmvis.git
 $ cd tmvis
 $ docker image build -t timemapvis .
-$ docker container run -it --rm -v "$PWD":/app --user=$(id -u):$(id -g) timemapvis npm install
-$ docker container run -it --rm -v "$PWD":/app -p 3000:3000 --user=$(id -u):$(id -g) timemapvis
+$ docker container run --shm-size=1G -it --rm -v "$PWD":/app --user=$(id -u):$(id -g) timemapvis npm install
+$ docker container run --shm-size=1G -it --rm -v "$PWD":/app -p 3000:3000 --user=$(id -u):$(id -g) timemapvis
+
 ```
 
 Once the image is built and dependencies are installed locally under the `node_modules` directory of the local clone, only the last command would be needed for continuous development. Since the default container runs under the `root` user, there might be permission related issues on the `npm install` step. If so, then try to manually create the `node_modules` directory and change its permissions to world writable (`chmod -R a+w node_modules`) then run the command to install dependencies again.
