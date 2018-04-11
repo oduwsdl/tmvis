@@ -784,7 +784,7 @@ function getStats(){
               xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
             },
             dataType: "text",
-            timeout: 0,
+            timeout: 90000000,
             success: function( data, textStatus, jqXHR) {
                 $("#busy-loader").hide();
                 $('#serverStreamingModal .logsContent').empty();
