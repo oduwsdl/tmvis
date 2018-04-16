@@ -712,6 +712,8 @@ function startEventNotification(){
            if(streamedObj.data === "streamingStarted"){
 
                $('#serverStreamingModal .logsContent').empty();
+               $('#logtab .logsContent').empty();
+
                setProgressBar(2);
                // un comment the following line after POC
                if($(".tabContentWrapper").css("display") == "none"){
@@ -726,6 +728,7 @@ function startEventNotification(){
            //  alert(" Ready for display");
            //  $(".getSummary").trigger("click");
              $('#serverStreamingModal .logsContent').empty();
+
              setProgressBar(2);
              $('#serverStreamingModal').modal('hide');
              $(".tabContentWrapper").show();
@@ -743,6 +746,7 @@ function startEventNotification(){
              }
            else{
              $("#serverStreamingModal .logsContent").prepend(curLog);
+              $('#logtab .logsContent').prepend(curLog);
              // $('#serverStreamingModal .modal-body').animate({
              //      scrollTop: $("#bottomModal").offset().top
              //  }, 20);
@@ -776,6 +780,8 @@ function getStats(){
       var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
       $("#busy-loader").show();
       $('#serverStreamingModal .logsContent').empty();
+       $('#logtab .logsContent').empty();
+
       $('#serverStreamingModal').modal('show');
         $.ajax({
             type: "GET",
