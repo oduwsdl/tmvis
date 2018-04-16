@@ -855,7 +855,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 
             var originalMemetosLengthFromTM = t.mementos.length;
             // to respond to the client as the intermediate response, while the server processes huge loads
-           if(t.mementos.length > 5000){
+           if(t.mementos.length > 2500){
              // commented code block will be handy if we look for particular years
             // var tempMemetoArr=[];
             // var curYear = (new Date()).getFullYear();
@@ -875,7 +875,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
             // }
             var tempMemetoArr=[];
             var tempStackOfMementos = new Stack();
-            var numOfMementosToConsider = 5000; // only latest 1000 mementos are considered
+            var numOfMementosToConsider = 2500; // only latest 1000 mementos are considered
             for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--){
                 tempStackOfMementos.push(t.mementos[i]);
             }

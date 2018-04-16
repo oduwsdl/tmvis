@@ -43,7 +43,7 @@ function getHTMLContent(uri,callback){
     })
     outputBuffer.on('end', function (d) {
       if (buffer2.indexOf('Got an HTTP 302 response at crawl time') === -1 ) {
-        //sh = simhash((buffer2).split('')).join('')
+        sh = simhash((buffer2).split('')).join('')
         console.log("<-----------------------------------------------------------> ")
         console.log(sh);
         console.log("<-----------------------------------------------------------> ")
