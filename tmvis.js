@@ -68,10 +68,6 @@ const puppeteer = require('puppeteer');
 var HashMap = require('hashmap');
 var cookieParser = require("cookie-parser");
 
-//var faye = require('faye') // For status-based notifications to client
-
-// Faye's will not allow a URI-* as the channel name, hash it for Faye
-//var md5 = require('md5')
 
 var zlib = require('zlib')
 var app = express()
@@ -855,7 +851,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 
             var originalMemetosLengthFromTM = t.mementos.length;
             // to respond to the client as the intermediate response, while the server processes huge loads
-           if(t.mementos.length > 2500){
+           if(t.mementos.length > 5000){
              // commented code block will be handy if we look for particular years
             // var tempMemetoArr=[];
             // var curYear = (new Date()).getFullYear();
@@ -875,7 +871,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
             // }
             var tempMemetoArr=[];
             var tempStackOfMementos = new Stack();
-            var numOfMementosToConsider = 2500; // only latest 1000 mementos are considered
+            var numOfMementosToConsider = 5000; // only latest 1000 mementos are considered
             for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--){
                 tempStackOfMementos.push(t.mementos[i]);
             }
@@ -1068,7 +1064,6 @@ TimeMap.prototype.calculateSimhashes = function (curCookieClientId,callback) {
   theTimeMap.prevCompletionVal = 0
   var arrayOfSetSimhashFunctions = []
   var totalMemetoCount = this.mementos.length;
-  var preVal = 0;
   // the way to get a damper, just 7 requests at a time.
   async.eachLimit(this.mementos,5, function(curMemento, callback){
 

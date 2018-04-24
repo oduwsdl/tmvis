@@ -699,7 +699,7 @@ var notificationSrc= null;
 
 function startEventNotification(){
   notificationSrc= new EventSource('/notifications/'+getUniqueUserSessionId());
-
+  var preVal = 2;
        notificationSrc.onmessage = function(e) {
            console.log(e.data);
            var streamedObj = JSON.parse(e.data);
@@ -721,8 +721,14 @@ function startEventNotification(){
                }
 
            }else if (streamedObj.data.indexOf("percentagedone-") == 0) {
-             var value = parseInt(streamedObj.data.split("-")[1]);
-             setProgressBar(value);
+              value = parseInt(streamedObj.data.split("-")[1]);
+              if (value > preVal){
+                preVal = value;
+              }
+              if(preVal > 100){
+                preVal = 95;
+              }
+             setProgressBar(preVal);
            }
            else if( streamedObj.data === "readyToDisplay"){
            //  alert(" Ready for display");
