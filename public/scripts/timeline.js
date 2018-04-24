@@ -734,7 +734,7 @@ function startEventNotification(){
            //  alert(" Ready for display");
            //  $(".getSummary").trigger("click");
              $('#serverStreamingModal .logsContent').empty();
-
+             window.location.reload();
              setProgressBar(2);
              $('#serverStreamingModal').modal('hide');
              $(".tabContentWrapper").show();
@@ -745,6 +745,7 @@ function startEventNotification(){
            else if(streamedObj.data === "statssent"){
                $('#serverStreamingModal .logsContent').empty();
                 setProgressBar(2);
+                window.location.reload();
                $('#serverStreamingModal').modal('hide');
                if(notificationSrc != null){
                  notificationSrc.close();
@@ -846,11 +847,11 @@ function getStats(){
                 }
             },
             error: function( data, textStatus, jqXHR) {
-              $("#busy-loader").hide();
-              $('#serverStreamingModal .logsContent').empty();
-                $('#serverStreamingModal').modal('hide');
-              var errMsg = "Some problem fetching the response, Please refresh and try again.";
-              alert(errMsg);
+              // $("#busy-loader").hide();
+              // $('#serverStreamingModal .logsContent').empty();
+              //   $('#serverStreamingModal').modal('hide');
+              // var errMsg = "Some problem fetching the response, Please refresh and try again.";
+              // alert(errMsg);
             }
         });
       }
@@ -954,10 +955,10 @@ function getSummary(){
           }
         },
         error: function( data, textStatus, jqXHR) {
-          var errMsg = "Some problem fetching the response, Please refresh and try again.";
-          $("#busy-loader").hide();
-          $('#serverStreamingModal').modal('hide');
-          alert(errMsg);
+          // var errMsg = "Some problem fetching the response, Please refresh and try again.";
+          // $("#busy-loader").hide();
+          // $('#serverStreamingModal').modal('hide');
+          // alert(errMsg);
         }
       });
     }
