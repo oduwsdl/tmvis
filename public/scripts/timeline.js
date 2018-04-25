@@ -699,7 +699,7 @@ var notificationSrc= null;
 
 function startEventNotification(){
   notificationSrc= new EventSource('/notifications/'+getUniqueUserSessionId());
-
+  var preVal = 2;
        notificationSrc.onmessage = function(e) {
            console.log(e.data);
            var streamedObj = JSON.parse(e.data);
@@ -712,6 +712,8 @@ function startEventNotification(){
            if(streamedObj.data === "streamingStarted"){
 
                $('#serverStreamingModal .logsContent').empty();
+               $('#logtab .logsContent').empty();
+
                setProgressBar(2);
                // un comment the following line after POC
                if($(".tabContentWrapper").css("display") == "none"){
@@ -719,13 +721,20 @@ function startEventNotification(){
                }
 
            }else if (streamedObj.data.indexOf("percentagedone-") == 0) {
-             var value = parseInt(streamedObj.data.split("-")[1]);
-             setProgressBar(value);
+              value = parseInt(streamedObj.data.split("-")[1]);
+              if (value > preVal){
+                preVal = value;
+              }
+              if(preVal > 100){
+                preVal = 95;
+              }
+             setProgressBar(preVal);
            }
            else if( streamedObj.data === "readyToDisplay"){
            //  alert(" Ready for display");
            //  $(".getSummary").trigger("click");
              $('#serverStreamingModal .logsContent').empty();
+             window.location.reload();
              setProgressBar(2);
              $('#serverStreamingModal').modal('hide');
              $(".tabContentWrapper").show();
@@ -736,6 +745,7 @@ function startEventNotification(){
            else if(streamedObj.data === "statssent"){
                $('#serverStreamingModal .logsContent').empty();
                 setProgressBar(2);
+                window.location.reload();
                $('#serverStreamingModal').modal('hide');
                if(notificationSrc != null){
                  notificationSrc.close();
@@ -743,6 +753,7 @@ function startEventNotification(){
              }
            else{
              $("#serverStreamingModal .logsContent").prepend(curLog);
+              $('#logtab .logsContent').prepend(curLog);
              // $('#serverStreamingModal .modal-body').animate({
              //      scrollTop: $("#bottomModal").offset().top
              //  }, 20);
@@ -776,6 +787,8 @@ function getStats(){
       var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
       $("#busy-loader").show();
       $('#serverStreamingModal .logsContent').empty();
+       $('#logtab .logsContent').empty();
+
       $('#serverStreamingModal').modal('show');
         $.ajax({
             type: "GET",
@@ -784,7 +797,7 @@ function getStats(){
               xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
             },
             dataType: "text",
-            timeout: 0,
+            timeout: 90000000,
             success: function( data, textStatus, jqXHR) {
                 $("#busy-loader").hide();
                 $('#serverStreamingModal .logsContent').empty();
@@ -834,11 +847,11 @@ function getStats(){
                 }
             },
             error: function( data, textStatus, jqXHR) {
-              $("#busy-loader").hide();
-              $('#serverStreamingModal .logsContent').empty();
-                $('#serverStreamingModal').modal('hide');
-              var errMsg = "Some problem fetching the response, Please refresh and try again.";
-              alert(errMsg);
+              // $("#busy-loader").hide();
+              // $('#serverStreamingModal .logsContent').empty();
+              //   $('#serverStreamingModal').modal('hide');
+              // var errMsg = "Some problem fetching the response, Please refresh and try again.";
+              // alert(errMsg);
             }
         });
       }
@@ -942,10 +955,10 @@ function getSummary(){
           }
         },
         error: function( data, textStatus, jqXHR) {
-          var errMsg = "Some problem fetching the response, Please refresh and try again.";
-          $("#busy-loader").hide();
-          $('#serverStreamingModal').modal('hide');
-          alert(errMsg);
+          // var errMsg = "Some problem fetching the response, Please refresh and try again.";
+          // $("#busy-loader").hide();
+          // $('#serverStreamingModal').modal('hide');
+          // alert(errMsg);
         }
       });
     }

@@ -20,9 +20,9 @@
 
     	<script src="/scripts/imageSliderScript.js"></script>
     	<script src="/scripts/imageGridScript.js"></script>
-    	<script src="/scripts/timeline.js?version=1002"></script>
+    	<script src="/scripts/timeline.js?version=1003"></script>
     	<script src="/scripts/waitforimages.js"></script>
-			<script src="/scripts/formatting.js?version=1002"></script>
+			<script src="/scripts/formatting.js?version=1003"></script>
 
 			<!-- Priorirty is to stabilise the current single step build -->
 			<!-- <script src="./scripts/embedded.js"></script> -->
@@ -126,7 +126,7 @@
 					<li class="active"><a data-toggle="tab" href="#imageGrid">Grid</a></li>
 				  <li><a data-toggle="tab" href="#imageSlider">Slider</a></li>
 					<li ><a data-toggle="tab" href="#timeLine">TimeLine</a></li>
-
+					<li ><a data-toggle="tab" href="#logtab">Log</a></li>
 				</ul>
 
 				<div class="tab-content" style="z-index: auto; margin-bottom:1%;" >
@@ -247,18 +247,23 @@
 					</div>
 				  </div>
 
+					 <div id="logtab" class="tab-pane fade">
+						 <div class="logContainer logsContent">
+						 </div>
+					 </div>
+
 
 				</div>
 			</div>
 
 		</div>
 
-		<div id="busy-loader" style="min-width:90%; display:none; z-index:1999">
+		<div id="busy-loader" style="min-width:90%; display:none; z-index:999">
 		</div>
 
 
 		<!-- Modal -->
-		<div class="modal fade" id="serverStreamingModal" tabindex="-1" role="dialog"  aria-hidden="true">
+		<div class="modal fade" id="serverStreamingModal" tabindex="-1" data-backdrop="static" role="dialog"  aria-hidden="true">
 		  <div class="modal-dialog modal-lg" role="document">
 		    <div class="modal-content">
 		      <!-- <div class="modal-header">

@@ -68,10 +68,6 @@ const puppeteer = require('puppeteer');
 var HashMap = require('hashmap');
 var cookieParser = require("cookie-parser");
 
-//var faye = require('faye') // For status-based notifications to client
-
-// Faye's will not allow a URI-* as the channel name, hash it for Faye
-//var md5 = require('md5')
 
 var zlib = require('zlib')
 var app = express()
@@ -875,7 +871,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
             // }
             var tempMemetoArr=[];
             var tempStackOfMementos = new Stack();
-            var numOfMementosToConsider = 500; // only latest 1000 mementos are considered
+            var numOfMementosToConsider = 5000; // only latest 1000 mementos are considered
             for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--){
                 tempStackOfMementos.push(t.mementos[i]);
             }
@@ -1068,7 +1064,6 @@ TimeMap.prototype.calculateSimhashes = function (curCookieClientId,callback) {
   theTimeMap.prevCompletionVal = 0
   var arrayOfSetSimhashFunctions = []
   var totalMemetoCount = this.mementos.length;
-  var preVal = 0;
   // the way to get a damper, just 7 requests at a time.
   async.eachLimit(this.mementos,5, function(curMemento, callback){
 
@@ -1610,7 +1605,7 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieC
   headless(uri, screenshotsLocation + filename).then(v => {
       // Once all the async parts finish this prints.
       console.log("Finished Headless");
-      constructSSE('Done capturing the screenshot..',curCookieClientId)
+      constructSSE('Done capturing the screenshot.',curCookieClientId)
 
       fs.chmodSync('./'+screenshotsLocation + filename, '755')
       im.convert(['./'+screenshotsLocation + filename, '-thumbnail', '200',
@@ -1738,7 +1733,7 @@ TimeMap.prototype.createScreenshotForMementoWithPhantom = function (curCookieCli
       ConsoleLogIfRequired(err)
       callback('Screenshot failed!')
     } else {
-      constructSSE('Done capturing the screenshot..',curCookieClientId)
+      constructSSE('Done capturing the screenshot.',curCookieClientId)
       fs.chmodSync('./'+screenshotsLocation + filename, '755')
       im.convert(['./'+screenshotsLocation + filename, '-thumbnail', '200',
             './'+screenshotsLocation + (filename.replace('.png', '_200.png'))],
