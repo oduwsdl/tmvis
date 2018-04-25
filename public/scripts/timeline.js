@@ -804,11 +804,11 @@ function getStats(){
                 $('#serverStreamingModal').modal('hide');
                 try{
                     jsonObjRes= $.parseJSON(data);
-                    var htmlStr="";
+                    var htmlStr="&nbsp;";
                     var curUniqThumbCount = 0;
                     jsonObjRes.forEach(function(item,index,arry){
                       if(curUniqThumbCount != item['unique']){
-                        htmlStr+= "&nbsp;<label title='No Of unique thumbnails:"+item['unique'] +"'><button type='button' class='btn btn-secondary' name='thresholdDistance' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</label>";
+                        htmlStr+= "<button type='button' class='btn btn-secondary' name='thresholdDistance' title='No Of unique thumbnails:"+item['unique'] +"' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</button>";
                       }
                         curUniqThumbCount = item['unique'];
                     });
