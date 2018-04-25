@@ -734,7 +734,10 @@ function startEventNotification(){
            //  alert(" Ready for display");
            //  $(".getSummary").trigger("click");
              $('#serverStreamingModal .logsContent').empty();
-             window.location.reload();
+
+             //if( $(".tabContentWrapper").css("display")=="none" ){
+               window.location.reload();
+             //}
              setProgressBar(2);
              $('#serverStreamingModal').modal('hide');
              $(".tabContentWrapper").show();
@@ -813,14 +816,21 @@ function getStats(){
                         curUniqThumbCount = item['unique'];
                     });
 
-                    var memStatStr = jsonObjRes[0]["totalmementos"]+" Total Mementos. Select Unique Thumbnails: " + htmlStr;
+                    var memStatStr = htmlStr;
+                    var toDisplay= "Internet Archive";
+                    if($("input[name='primesource']:checked").val() == "archiveit" ){
+                      toDisplay= "Archive-It";
+                    }
+                    var fromDate= new Date(jsonObjRes[0].fromdate);
+                    var fromDateStr= fromDate.getFullYear()+"-"+fromDate.getMonth() +"-"+fromDate.getDate();
+                    var toDate = new Date(jsonObjRes[0].todate);
+                    var toDateStr= toDate.getFullYear()+"-"+toDate.getMonth() +"-"+toDate.getDate();
+                    var dateRangeStr= fromDateStr + " - " + toDateStr;
+                    $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
+                    $(".paraOnlyOnStatsResults").show();
 
-                    //var memStatStr = jsonObjRes["totalmementos"]+" Mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
-
-                    var dateRangeStr= new Date(jsonObjRes[0].fromdate).toDateString() + " To " + new Date(jsonObjRes[0].todate).toDateString()
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
-                    $(".statsWrapper .Mementos_Considered").html("Date Range of mementos considered: "+dateRangeStr)
 
                     //  $(".statsWrapper .collection_stats").attr("title","Date Range: "+dateRangeStr)
                     if(  $(".statsWrapper button[type='button']").eq(1).length != 0){
@@ -839,7 +849,6 @@ function getStats(){
 
                 }catch(err){
                     alert($.trim(data));
-
                     $('#serverStreamingModal .logsContent').empty();
                       $('#serverStreamingModal').modal('hide');
                     $(".statsWrapper").hide();
@@ -918,8 +927,16 @@ function getSummary(){
               }
 
 
+              var dateRangeStr= jsonObjRes[0].event_display_date.split(",")[0] + " - " + jsonObjRes[jsonObjRes.length-1].event_display_date.split(",")[0];
+              var toDisplay= "Internet Archive";
+              if($("input[name='primesource']:checked").val() == "archiveit" ){
+                toDisplay= "Archive-It";
+              }
+
+              $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes.length +" mementos | "+dateRangeStr);
 
               $(".statsWrapper").show();
+
                window.timeline = new Timeline(jsonObjRes);
               // place where the notch width is being reduced t0 2px.
               $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
@@ -1031,9 +1048,9 @@ $(function(){
       $('button[name=thresholdDistance].on').removeClass('on')
       $(this).addClass("on");
       if($(this).attr("timetowait") == 0){
-        $(".approxTimeShowingPTag").html('<1 minutes to generate thumbnails.');
+        $(".approxTimeShowingPTag").html(' <1 minute ');
       }else{
-        $(".approxTimeShowingPTag").html('<label class="timetowait">'+$(this).attr("timetowait") +'</label> minutes to generate thumbnails.');
+        $(".approxTimeShowingPTag").html('<label class="timetowait">'+$(this).attr("timetowait") +'</label> minutes ');
       }
     });
 

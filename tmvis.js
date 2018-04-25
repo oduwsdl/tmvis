@@ -1205,7 +1205,7 @@ TimeMap.prototype.SendThumbSumJSONCalledFromCache= function (response,callback) 
 
     }
 
-    mementoJObj_ForTimeline["event_date"] =  month_names_short[ parseInt(month)]+". "+date +", "+ dt.getUTCFullYear()
+    mementoJObj_ForTimeline["event_date"] =  month_names_short[ parseInt(month)-1]+". "+date +", "+ dt.getUTCFullYear()
     mementoJObj_ForTimeline["event_display_date"] = eventDisplayDate
     mementoJObj_ForTimeline["event_description"] = ""
     mementoJObj_ForTimeline["event_link"] = uri
@@ -1277,7 +1277,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
       mementoJObj_ForTimeline["event_html"] = localAssetServer+memento.screenshotURI
     }
 
-    mementoJObj_ForTimeline["event_date"] =  month_names_short[ parseInt(month)]+". "+date +", "+ dt.getUTCFullYear()
+    mementoJObj_ForTimeline["event_date"] =  month_names_short[ parseInt(month)-1]+". "+date +", "+ dt.getUTCFullYear()
     mementoJObj_ForTimeline["event_display_date"] = eventDisplayDate
     mementoJObj_ForTimeline["event_description"] = ""
     mementoJObj_ForTimeline["event_link"] = uri

@@ -45,7 +45,7 @@
 				<form action="#" class="argumentsForm">
 
 					<div class="row URIWrapper" >
-						<label for="uriIP">Enter URI-R | URI-M | URI-TM:</label>
+						<label for="uriIP">Enter URI-R <span class='uriexample'>(ex: http://4genderjustice.org)</span> or  URI-M <span class='uriexample'>(ex: http://wayback.archive-it.org/1068/20150701215641/http://4genderjustice.org/)</span> or URI-TM <span class='uriexample'>(ex: http://web.archive.org/web/timemap/link/http://4genderjustice.org</span></label>
 							<div class="input-group">
 
 								<input class="form-control" name="URI" id="uriIP" required placeholder="http://4genderjustice.org/">
@@ -71,7 +71,7 @@
 								<label class="radio"><input type="radio" class ="form-control" name="primesource" id = "archiveit" value="archiveit" onclick="javascript:yesnoCheck();">Archive-It</label>
 								<!--label for="collectionNo">Collection Identifier</label-->
 							  <input class="form-control" type="number" class ="form-control" title="Collection Identifier"  name="ci"  id="collectionNo" placeholder="Collection Identifier" />
-							</div>
+							</div
 							<!-- THRESHOLD AND DELAY-->
 
 							<div class="slidersection hidden">
@@ -103,13 +103,23 @@
 				<div class="statsWrapper row" style="display:none;">
 					<div class="col-lg-12">
 						<p class="Mementos_Considered"></p>
-						<h3 class="collection_stats_container"><span class="collection_stats_daterange"></span><span class="collection_stats"></span> &nbsp; </h3>
-						<p class="Explain_Threshold">Selecting more thumbnails means showing increasingly minor changes.</p>
-						<div class="time_container">
-							<p class="approxTimeShowingPTag"> </p>&nbsp;
-							<button class="btn btn-primary getSummary" title="Displays visualizations after screenshots are captured"> Generate Thumbnails </button>
-					</div>
+						<p class="paraOnlyOnStatsResults algodesctag" style="display:none;"> Our algorithm will generate thumbnails of the most unique mementos. The options shown below are based on the amount of difference between the mementos.</p>
 
+						<div class="paraOnlyOnStatsResults row" style="display:none;">
+							<div class="col-lg-4">
+								<p class="thubnailselectiontag Explain_Threshold">
+									Select a target number of thumbnails to generate:
+									<span>(a larger number may take more time to generate and may produce more similar thumbnails)</span>
+								</p>
+							</div>
+							<div class="col-lg-8">
+								<h3 class="collection_stats_container"><span class="collection_stats"></span> &nbsp; <button class="btn btn-primary getSummary" title="Displays visualizations after screenshots are captured"> Generate Thumbnails </button>
+</h3>
+								<div class="time_container">
+									<p>(estimated <span class="approxTimeShowingPTag"> </span> to generate)</p>
+								</div>
+							</div>
+						</div>
 					</div>
 					<!--div class="col-lg-2 pull-right">
 					   <button style="float: right;" class="btn btn-primary getSummary" title="Displays visualizations after screenshots are captured"> Generate Thumbnails </button>
