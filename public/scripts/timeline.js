@@ -735,10 +735,10 @@ function startEventNotification(){
            //  $(".getSummary").trigger("click");
              $('#serverStreamingModal .logsContent').empty();
 
-             //if( $(".tabContentWrapper").css("display")=="none" ){
-               window.location.reload();
-             //}
-             setProgressBar(2);
+
+              // window.location.reload();
+
+              // setProgressBar(2);
              $('#serverStreamingModal').modal('hide');
              $(".tabContentWrapper").show();
              if(notificationSrc != null){
@@ -934,7 +934,7 @@ function getSummary(){
               }
 
               $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes.length +" mementos | "+dateRangeStr);
-
+              $(".paraOnlyOnStatsResults").hide();
               $(".statsWrapper").show();
 
                window.timeline = new Timeline(jsonObjRes);
@@ -972,10 +972,10 @@ function getSummary(){
           }
         },
         error: function( data, textStatus, jqXHR) {
-          // var errMsg = "Some problem fetching the response, Please refresh and try again.";
-          // $("#busy-loader").hide();
-          // $('#serverStreamingModal').modal('hide');
-          // alert(errMsg);
+          var errMsg = "Some problem fetching the response, Please refresh and try again.";
+          $("#busy-loader").hide();
+          $('#serverStreamingModal').modal('hide');
+          alert(errMsg);
         }
       });
     }
