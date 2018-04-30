@@ -849,36 +849,31 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
                 return
             }
 
-            var originalMemetosLengthFromTM = t.mementos.length;
+           var originalMemetosLengthFromTM = t.mementos.length;
             // code segment to consider only last 5000 mementos for the huge TimeMaps
            if(t.mementos.length > 5000){
-//                var tempMemetoArr=[];
-//                var tempStackOfMementos = new Stack();
-//                var numOfMementosToConsider = 5000; // only latest 1000 mementos are considered
-//                for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--){
-//                    tempStackOfMementos.push(t.mementos[i]);
-//                }
+               var tempMemetoArr=[];
+               var tempStackOfMementos = new Stack();
+               var numOfMementosToConsider = 5000; // only latest 1000 mementos are considered
+               for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--){
+                   tempStackOfMementos.push(t.mementos[i]);
+               }
+               for(var i=0;i< numOfMementosToConsider; i++){
+                   tempMemetoArr.push(tempStackOfMementos.pop())
+               }
+               constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']',curCookieClientId)
+               ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']')
+               tempMemetoArr[0]["rel"] = "first memento";
+               t.mementos = tempMemetoArr;
+               ConsoleLogIfRequired("-----------Mementos under consideration, Length -> "+t.mementos.length +"  -------")
+               ConsoleLogIfRequired(JSON.stringify(t.mementos))
+               ConsoleLogIfRequired("---------------------------------------------------")
+            }
 
-//                for(var i=0;i< numOfMementosToConsider; i++){
-//                    tempMemetoArr.push(tempStackOfMementos.pop())
-//                }
-
-//                constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']',curCookieClientId)
-//                ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']')
-
-//                tempMemetoArr[0]["rel"] = "first memento";
-
-//                t.mementos = tempMemetoArr;
-
-//                ConsoleLogIfRequired("-----------Mementos under consideration, Length -> "+t.mementos.length +"  -------")
-//                ConsoleLogIfRequired(JSON.stringify(t.mementos))
-//                ConsoleLogIfRequired("---------------------------------------------------")
-//               }
-
-//               ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
-//               constructSSE('Timemap fetched has a total of '+t.mementos.length + ' mementos.',curCookieClientId)
-//               constructSSE("percentagedone-20",curCookieClientId);
-//               callback('')
+            ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
+            constructSSE('Timemap fetched has a total of '+t.mementos.length + ' mementos.',curCookieClientId)
+            constructSSE("percentagedone-20",curCookieClientId);
+            callback('')
           }else{
             ConsoleLogIfRequired('The page you requested has not been archived.')
             constructSSE('The page requested has not been archived.',curCookieClientId)
@@ -886,8 +881,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
              //process.exit(-1)
              response.write('The page you requested has not been archived.',)
              response.end()
-               return
-
+             return
           }
         })
       })
