@@ -850,11 +850,11 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
             }
 
             var originalMemetosLengthFromTM = t.mementos.length;
-            // to respond to the client as the intermediate response, while the server processes huge loads
+            // to limit the number of mementos to consider is latest 5000 of the TimeMap
            if(t.mementos.length > 5000){
                var tempMemetoArr=[];
                var tempStackOfMementos = new Stack();
-               var numOfMementosToConsider = 5000; // only latest 1000 mementos are considered
+               var numOfMementosToConsider = 5000; // only latest 5000 mementos are considered
                for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--){
                    tempStackOfMementos.push(t.mementos[i]);
                }
