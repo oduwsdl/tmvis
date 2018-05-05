@@ -26,18 +26,7 @@ os -> Only Simhash
 
 
 
-## Running as a Docker Container (Non development mode: Recommended for naive users)
-Follow the following steps:
-```
-$ git clone https://github.com/mgunn001/ArchiveThumbnails.git
-$ cd ArchiveThumbnails
-$ docker image build -t timemapvis .
-$ docker container run --shm-size=1G -it --rm timemapvis 
-node AlSummarization_OPT_CLI_JSON.js
-```
-
-
-## Running as a Docker Container (experimental)
+## Running as a Docker Container
 
 Running the server in a [Docker](https://www.docker.com/) container can make the process of dependency management easier. The code is shipped with a `Dockerfile` to build a Docker image that will run the service when started. This document assumes that you have Docker setup already, if not then follow the [official guide](https://docs.docker.com/installation/).
 
@@ -46,7 +35,7 @@ Clone the repository and change working directory (if not already) then build th
 
 ```
 $ git clone https://github.com/mgunn001/ArchiveThumbnails.git
-$ cd tmvis
+$ cd ArchiveThumbnails
 $ docker image build -t timemapvis .
 ```
 
@@ -55,6 +44,6 @@ In the above command `timemapvis` is the name of the image which can be anything
 ### Running Docker Container
 
 ```Running for the first time
-docker run -it --rm timemapvis bash
+$ docker container run --shm-size=1G -it --rm timemapvis 
 node AlSummarization_OPT_CLI_JSON.js
 ```
