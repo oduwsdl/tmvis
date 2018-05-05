@@ -56,11 +56,5 @@ In the above command `timemapvis` is the name of the image which can be anything
 
 ```Running for the first time
 docker run -it --rm timemapvis bash
-```
-In another terminal
-```
-cd ArchiveThumbnails
-docker cp (CONTAINER ID CREATED ABOVE):/app/node_modules/ ./ 
-docker run --shm-size=1G -it --rm -v "$PWD":/app --user=$(id -u):$(id -g) timemapvis bash
 node AlSummarization_OPT_CLI_JSON.js
 ```
