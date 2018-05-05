@@ -61,11 +61,6 @@ In another terminal
 ```
 cd ArchiveThumbnails
 docker cp (CONTAINER ID CREATED ABOVE):/app/node_modules/ ./ 
-```
-
-```
-
 docker run --shm-size=1G -it --rm -v "$PWD":/app --user=$(id -u):$(id -g) timemapvis bash
 node AlSummarization_OPT_CLI_JSON.js
-
 ```
