@@ -11,10 +11,13 @@ Archives"](http://www.cs.odu.edu/~mln/pubs/ecir-2014/ecir-2014.pdf) for the Web 
 ## Usage
 
 The following command shows the way of executing the command line tool and the possible options:
- 
+
+
+```
 node AlSummarization_OPT_CLI_JSON.js URI-R [--debug] [--hdt 4] [--ia || --ait] [--oes] [--ci 1068] [-os]
 
 Here is the single line description of what each option stands for
+
 URI-R -> ex: http://4genderjustice.org/
 debug -> Run in debug mode
 hdt -> Hamming distance Threshold
@@ -24,6 +27,7 @@ oes -> Override Existing Simhashes
 ci -> Collection Identifi
 os -> Only Simhash
 
+```
 
 
 ## Running as a Docker Container
