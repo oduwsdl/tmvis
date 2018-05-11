@@ -729,6 +729,9 @@ function startEventNotification(){
                 preVal = 95;
               }
              setProgressBar(preVal);
+               if(preVal == 100){
+                    $('#serverStreamingModal').hide();	
+               }
            }
            else if( streamedObj.data === "readyToDisplay"){
            //  alert(" Ready for display");
