@@ -23,7 +23,7 @@ To query the server instance generated using your browser visit `http://localhos
 ## Running as a Docker Container (Non development mode: Recommended for naive users)
 Follow the following steps:
 ```
-$ git clone https://github.com/mgunn001/tmvis.git
+$ git clone https://github.com/oduwsdl/tmvis.git
 $ cd tmvis
 $ docker image build -t timemapvis .
 $ docker container run --shm-size=1G -it --rm -p 3000:3000 timemapvis node tmvis.js
@@ -38,7 +38,7 @@ Running the server in a [Docker](https://www.docker.com/) container can make the
 Clone the repository and change working directory (if not already) then build the image.
 
 ```
-$ git clone https://github.com/mgunn001/tmvis.git
+$ git clone https://github.com/oduwsdl/tmvis.git
 $ cd tmvis
 $ docker image build -t timemapvis .
 ```
@@ -73,7 +73,7 @@ Container is completely transparent from the outside and it will be accessed as 
 In case if you want to make changes in the `tmvis` code itself, you might want to run it in the development mode by mounting the code from the host machine inside the container so that changes are reflected immediately, without requiring an image rebuild. Here is a possible workflow:
 
 ```
-$ git clone https://github.com/mgunn001/tmvis.git
+$ git clone https://github.com/oduwsdl/tmvis.git
 $ cd tmvis
 $ docker image build -t timemapvis .
 $ docker container run --shm-size=1G -it --rm -v "$PWD":/app --user=$(id -u):$(id -g) timemapvis npm install
@@ -91,7 +91,7 @@ Though GPL Licensing was used for base (https://github.com/machawk1/ArchiveThumb
 
 ### Usage of the service
 
-Running this service gives provides an user with the array of JSON object as the response (webservice model), which then has to be visualized with the UI tool deployed at http://tmvis.cs.odu.edu/ for which the code is available at https://github.com/mgunn001/tmvis/ under public folder
+Running this service gives provides an user with the array of JSON object as the response (webservice model), which then has to be visualized with the UI tool deployed at http://tmvis.cs.odu.edu/ for which the code is available at https://github.com/oduwsdl/tmvis/ under public folder
 
 
 ## Request format (Role -> stats)
