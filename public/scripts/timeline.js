@@ -738,10 +738,10 @@ function startEventNotification(){
            //  $(".getSummary").trigger("click");
              $('#serverStreamingModal .logsContent').empty();
 
-
+             // Temparory disabled for this step: for avoiding the refresh issue... automatically refreshing the page when the results are available
               // window.location.reload();
 
-              // setProgressBar(2);
+            setProgressBar(2);
              $('#serverStreamingModal').modal('hide');
              $(".tabContentWrapper").show();
              if(notificationSrc != null){
@@ -751,6 +751,7 @@ function startEventNotification(){
            else if(streamedObj.data === "statssent"){
                $('#serverStreamingModal .logsContent').empty();
                 setProgressBar(2);
+                // for avoiding the refresh issue... automatically refreshing the page when the results are available
                 window.location.reload();
                $('#serverStreamingModal').modal('hide');
                if(notificationSrc != null){
