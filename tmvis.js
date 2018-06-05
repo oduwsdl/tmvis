@@ -700,12 +700,12 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,callback) 
          ConsoleLogIfRequired("ByMahee -- computed simhash for "+mOptions.host+mOptions.path+" -> "+ sh)
          constructSSE('computed simhash for '+mOptions.host+mOptions.path +' -> '+ sh,curCookieClientId)
           var retStr = getHexString(sh)
-
           //|| (retStr == null)
+        //  if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302 || retStr == null || (retStr.match(/0/g) || []).length === 32) {
+
           if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302 || retStr == null) {
             // Normalize so not undefined
             retStr = Memento.prototype.simhashIndicatorForHTTP302
-
             // Gateway timeout from the archives, remove from consideration
             // resolve('isA302DeleteMe')
             callback()
@@ -716,7 +716,6 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,callback) 
 
         //  ConsoleLogIfRequired("Hex Code for Simhash:"+retStr + ' & urir:' + mOptions.host + mOptions.path)
           thatmemento.simhash = retStr;
-
           // the following code to compute the percentages
           theTimeMap.completedSimhashedMementoCount = theTimeMap.completedSimhashedMementoCount+1;
           var value = (theTimeMap.completedSimhashedMementoCount/theTimeMap.mementos.length)*70+20;
@@ -1049,7 +1048,7 @@ TimeMap.prototype.calculateSimhashes = function (curCookieClientId,callback) {
          * doing the same: just changed the above condition as to follow
         */
 
-        if(theTimeMap.mementos[i].simhash === Memento.prototype.simhashIndicatorForHTTP302 || theTimeMap.mementos[i].simhash  == null){
+        if(theTimeMap.mementos[i].simhash === Memento.prototype.simhashIndicatorForHTTP302 || theTimeMap.mementos[i].simhash  == null|| (theTimeMap.mementos[i].simhash.match(/0/g) || []).length === 32){
           theTimeMap.mementos.splice(i, 1)
           mementosRemoved++
         }
@@ -1289,9 +1288,9 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSum
       memento.hammingBasisScreenshotURI = filename
     } else {
         var filename = null;
-        if(memento.hammingDistance != undefined){
+        //if(memento.hammingDistance != undefined){
           filename = 'timemapSum_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
-        }
+      //  }
         memento.screenshotURI = filename
     }
   })
@@ -1345,9 +1344,9 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
         memento.hammingBasisScreenshotURI = filename
       } else {
         var filename = null;
-        if(memento.hammingDistance != undefined){
+        //if(memento.hammingDistance != undefined){
           filename = 'timemapSum_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
-        }
+        //}
         memento.screenshotURI = filename
       }
     })
