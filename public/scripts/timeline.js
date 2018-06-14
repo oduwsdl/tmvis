@@ -730,7 +730,7 @@ function startEventNotification(){
               }
              setProgressBar(preVal);
                if(preVal == 100){
-                    $('#serverStreamingModal').hide();	
+                    $('#serverStreamingModal').hide();
                }
            }
            else if( streamedObj.data === "readyToDisplay"){
@@ -871,7 +871,7 @@ function getStats(){
 }
 
 function getSummary(){
-  var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+  var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
   }
@@ -886,7 +886,7 @@ function getSummary(){
   if($("body").find("form")[0].checkValidity()){
         $(".time_container").hide();
         $(".Explain_Threshold").hide();
-       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val();
+       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
 
        var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
        changeToSummaryState(summaryStatePath);
@@ -999,14 +999,14 @@ $(function(){
      // following is commented to first stabilise the single step process
     $(".getJSONFromServer").click(function(event){
         event.preventDefault();
-        uriAnalysisForAttributes($("#uriIP").val());
+        uriAnalysisForAttributes($("#uriIP").val().trim());
         $(".tabContentWrapper").hide();
         $(".statsWrapper").hide();
-        var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+        var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
         if(collectionIdentifer == ""){
             collectionIdentifer = "all";
         }
-        var hammingDistance = $('.argumentsForm #hammingDistance').val();
+        var hammingDistance = $('.argumentsForm #hammingDistance').val().trim();
         if(hammingDistance == ""){
             hammingDistance = 4;
         }
@@ -1015,14 +1015,14 @@ $(function(){
         if($(this).parents("body").find("form")[0].checkValidity()){
             localStorage.setItem("getStatsClicked", "true");
             var curInputJsobObj = {};
-            curInputJsobObj["uri"]= $("#uriIP").val();
-            curInputJsobObj["urir"]= $("#urirIP").val();
+            curInputJsobObj["uri"]= $("#uriIP").val().trim();
+            curInputJsobObj["urir"]= $("#urirIP").val().trim();
             curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
             if(curInputJsobObj["primesource"]=="internetarchive"){
               curInputJsobObj["collectionIdentifer"]= "all";
 
             }else{
-              curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
+              curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val().trim();
 
             }
             if(!parseInt(curInputJsobObj["collectionIdentifer"])){
@@ -1037,7 +1037,7 @@ $(function(){
             }
             window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
         }else{
-          if( $("#uriIP").val()==""){
+          if( $("#uriIP").val().trim()==""){
             alert("Please enter an URI-R, required field.");
           }
         }
