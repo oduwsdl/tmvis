@@ -95,25 +95,41 @@ display:inline;
 	}
 
   .collection_stats_container{
-    text-align: center;
     margin-top: 0px;
     margin-bottom: 5px;
   }
   .time_container{
-    text-align: center;
+
   }
   .approxTimeShowingPTag{
-    font-size: 1.8em;
+    /*font-size: 1.8em;*/
     font-family: 'Oswald', sans-serif !important;
     text-align: center;
     display: inline-block;
     margin-bottom: 0px;
   }
-  .Explain_Threshold,.Mementos_Considered{
-    text-align: center;
+  .Explain_Threshold span{
     color:dimgrey;
   }
+  .Mementos_Considered{
+      font-weight: bold;
+  }
+  .paraOnlyOnStatsResults{
 
+  }
+
+  .uriexample{
+     font-weight: initial;
+  }
+
+  .statsWrapper p{
+    font-family: inherit !important;
+
+  }
+
+  .time_container{
+    color:dimgrey;
+  }
 
   .btn-secondary.on{
     background-color: #3379b7;
@@ -302,4 +318,11 @@ body{
 	max-height: 800px !important;
     overflow-y: scroll;
 		overflow-x: hidden;
+}
+
+
+.logContainer{
+  max-height: 350px;
+  overflow-y: auto;
+  padding: 2%;
 }

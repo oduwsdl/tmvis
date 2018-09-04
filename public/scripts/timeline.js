@@ -699,7 +699,7 @@ var notificationSrc= null;
 
 function startEventNotification(){
   notificationSrc= new EventSource('/notifications/'+getUniqueUserSessionId());
-
+  var preVal = 2;
        notificationSrc.onmessage = function(e) {
            console.log(e.data);
            var streamedObj = JSON.parse(e.data);
@@ -712,6 +712,8 @@ function startEventNotification(){
            if(streamedObj.data === "streamingStarted"){
 
                $('#serverStreamingModal .logsContent').empty();
+               $('#logtab .logsContent').empty();
+
                setProgressBar(2);
                // un comment the following line after POC
                if($(".tabContentWrapper").css("display") == "none"){
@@ -719,14 +721,27 @@ function startEventNotification(){
                }
 
            }else if (streamedObj.data.indexOf("percentagedone-") == 0) {
-             var value = parseInt(streamedObj.data.split("-")[1]);
-             setProgressBar(value);
+              value = parseInt(streamedObj.data.split("-")[1]);
+              if (value > preVal){
+                preVal = value;
+              }
+              if(preVal > 100){
+                preVal = 95;
+              }
+             setProgressBar(preVal);
+               if(preVal == 100){
+                    $('#serverStreamingModal').hide();
+               }
            }
            else if( streamedObj.data === "readyToDisplay"){
            //  alert(" Ready for display");
            //  $(".getSummary").trigger("click");
              $('#serverStreamingModal .logsContent').empty();
-             setProgressBar(2);
+
+             // Temparory disabled for this step: for avoiding the refresh issue... automatically refreshing the page when the results are available
+              // window.location.reload();
+
+            setProgressBar(2);
              $('#serverStreamingModal').modal('hide');
              $(".tabContentWrapper").show();
              if(notificationSrc != null){
@@ -736,6 +751,8 @@ function startEventNotification(){
            else if(streamedObj.data === "statssent"){
                $('#serverStreamingModal .logsContent').empty();
                 setProgressBar(2);
+                // for avoiding the refresh issue... automatically refreshing the page when the results are available
+                window.location.reload();
                $('#serverStreamingModal').modal('hide');
                if(notificationSrc != null){
                  notificationSrc.close();
@@ -743,6 +760,7 @@ function startEventNotification(){
              }
            else{
              $("#serverStreamingModal .logsContent").prepend(curLog);
+              $('#logtab .logsContent').prepend(curLog);
              // $('#serverStreamingModal .modal-body').animate({
              //      scrollTop: $("#bottomModal").offset().top
              //  }, 20);
@@ -776,6 +794,8 @@ function getStats(){
       var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
       $("#busy-loader").show();
       $('#serverStreamingModal .logsContent').empty();
+       $('#logtab .logsContent').empty();
+
       $('#serverStreamingModal').modal('show');
         $.ajax({
             type: "GET",
@@ -784,30 +804,37 @@ function getStats(){
               xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
             },
             dataType: "text",
-            timeout: 0,
+            timeout: 90000000,
             success: function( data, textStatus, jqXHR) {
                 $("#busy-loader").hide();
                 $('#serverStreamingModal .logsContent').empty();
                 $('#serverStreamingModal').modal('hide');
                 try{
                     jsonObjRes= $.parseJSON(data);
-                    var htmlStr="";
+                    var htmlStr="&nbsp;";
                     var curUniqThumbCount = 0;
                     jsonObjRes.forEach(function(item,index,arry){
                       if(curUniqThumbCount != item['unique']){
-                        htmlStr+= "&nbsp;<label title='No Of unique thumbnails:"+item['unique'] +"'><button type='button' class='btn btn-secondary' name='thresholdDistance' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</label>";
+                        htmlStr+= "<button type='button' class='btn btn-secondary' name='thresholdDistance' title='No Of unique thumbnails:"+item['unique'] +"' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</button>";
                       }
                         curUniqThumbCount = item['unique'];
                     });
 
-                    var memStatStr = jsonObjRes[0]["totalmementos"]+" Total Mementos. Select Unique Thumbnails: " + htmlStr;
+                    var memStatStr = htmlStr;
+                    var toDisplay= "Internet Archive";
+                    if($("input[name='primesource']:checked").val() == "archiveit" ){
+                      toDisplay= "Archive-It";
+                    }
+                    var fromDate= new Date(jsonObjRes[0].fromdate);
+                    var fromDateStr= fromDate.getFullYear()+"-"+fromDate.getMonth() +"-"+fromDate.getDate();
+                    var toDate = new Date(jsonObjRes[0].todate);
+                    var toDateStr= toDate.getFullYear()+"-"+toDate.getMonth() +"-"+toDate.getDate();
+                    var dateRangeStr= fromDateStr + " - " + toDateStr;
+                    $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
+                    $(".paraOnlyOnStatsResults").show();
 
-                    //var memStatStr = jsonObjRes["totalmementos"]+" Mementos, "+jsonObjRes["unique"]+" Unique Thumbnails";
-
-                    var dateRangeStr= new Date(jsonObjRes[0].fromdate).toDateString() + " To " + new Date(jsonObjRes[0].todate).toDateString()
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
-                    $(".statsWrapper .Mementos_Considered").html("Date Range of mementos considered: "+dateRangeStr)
 
                     //  $(".statsWrapper .collection_stats").attr("title","Date Range: "+dateRangeStr)
                     if(  $(".statsWrapper button[type='button']").eq(1).length != 0){
@@ -826,7 +853,6 @@ function getStats(){
 
                 }catch(err){
                     alert($.trim(data));
-
                     $('#serverStreamingModal .logsContent').empty();
                       $('#serverStreamingModal').modal('hide');
                     $(".statsWrapper").hide();
@@ -834,18 +860,18 @@ function getStats(){
                 }
             },
             error: function( data, textStatus, jqXHR) {
-              $("#busy-loader").hide();
-              $('#serverStreamingModal .logsContent').empty();
-                $('#serverStreamingModal').modal('hide');
-              var errMsg = "Some problem fetching the response, Please refresh and try again.";
-              alert(errMsg);
+              // $("#busy-loader").hide();
+              // $('#serverStreamingModal .logsContent').empty();
+              //   $('#serverStreamingModal').modal('hide');
+              // var errMsg = "Some problem fetching the response, Please refresh and try again.";
+              // alert(errMsg);
             }
         });
       }
 }
 
 function getSummary(){
-  var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+  var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
   }
@@ -860,7 +886,7 @@ function getSummary(){
   if($("body").find("form")[0].checkValidity()){
         $(".time_container").hide();
         $(".Explain_Threshold").hide();
-       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val();
+       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
 
        var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
        changeToSummaryState(summaryStatePath);
@@ -905,8 +931,16 @@ function getSummary(){
               }
 
 
+              var dateRangeStr= jsonObjRes[0].event_display_date.split(",")[0] + " - " + jsonObjRes[jsonObjRes.length-1].event_display_date.split(",")[0];
+              var toDisplay= "Internet Archive";
+              if($("input[name='primesource']:checked").val() == "archiveit" ){
+                toDisplay= "Archive-It";
+              }
 
+              $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes.length +" mementos | "+dateRangeStr);
+              $(".paraOnlyOnStatsResults").hide();
               $(".statsWrapper").show();
+
                window.timeline = new Timeline(jsonObjRes);
               // place where the notch width is being reduced t0 2px.
               $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
@@ -965,14 +999,14 @@ $(function(){
      // following is commented to first stabilise the single step process
     $(".getJSONFromServer").click(function(event){
         event.preventDefault();
-        uriAnalysisForAttributes($("#uriIP").val());
+        uriAnalysisForAttributes($("#uriIP").val().trim());
         $(".tabContentWrapper").hide();
         $(".statsWrapper").hide();
-        var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+        var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
         if(collectionIdentifer == ""){
             collectionIdentifer = "all";
         }
-        var hammingDistance = $('.argumentsForm #hammingDistance').val();
+        var hammingDistance = $('.argumentsForm #hammingDistance').val().trim();
         if(hammingDistance == ""){
             hammingDistance = 4;
         }
@@ -981,14 +1015,14 @@ $(function(){
         if($(this).parents("body").find("form")[0].checkValidity()){
             localStorage.setItem("getStatsClicked", "true");
             var curInputJsobObj = {};
-            curInputJsobObj["uri"]= $("#uriIP").val();
-            curInputJsobObj["urir"]= $("#urirIP").val();
+            curInputJsobObj["uri"]= $("#uriIP").val().trim();
+            curInputJsobObj["urir"]= $("#urirIP").val().trim();
             curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
             if(curInputJsobObj["primesource"]=="internetarchive"){
               curInputJsobObj["collectionIdentifer"]= "all";
 
             }else{
-              curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val();
+              curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val().trim();
 
             }
             if(!parseInt(curInputJsobObj["collectionIdentifer"])){
@@ -1003,7 +1037,7 @@ $(function(){
             }
             window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
         }else{
-          if( $("#uriIP").val()==""){
+          if( $("#uriIP").val().trim()==""){
             alert("Please enter an URI-R, required field.");
           }
         }
@@ -1018,9 +1052,9 @@ $(function(){
       $('button[name=thresholdDistance].on').removeClass('on')
       $(this).addClass("on");
       if($(this).attr("timetowait") == 0){
-        $(".approxTimeShowingPTag").html('<1 minutes to generate thumbnails.');
+        $(".approxTimeShowingPTag").html(' <1 minute ');
       }else{
-        $(".approxTimeShowingPTag").html('<label class="timetowait">'+$(this).attr("timetowait") +'</label> minutes to generate thumbnails.');
+        $(".approxTimeShowingPTag").html('<label class="timetowait">'+$(this).attr("timetowait") +'</label> minutes ');
       }
     });
 

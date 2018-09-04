@@ -68,10 +68,6 @@ const puppeteer = require('puppeteer');
 var HashMap = require('hashmap');
 var cookieParser = require("cookie-parser");
 
-//var faye = require('faye') // For status-based notifications to client
-
-// Faye's will not allow a URI-* as the channel name, hash it for Faye
-//var md5 = require('md5')
 
 var zlib = require('zlib')
 var app = express()
@@ -499,7 +495,7 @@ function PublicEndpoint () {
             }else{
               ConsoleLogIfRequired("Responded to continue with the exisitng cached simhashes file. Proceeding..");
               constructSSE('cached simhashes exist, proceeding with cache...',request.headers["x-my-curuniqueusersessionid"])
-              constructSSE("percentagedone-60",request.headers["x-my-curuniqueusersessionid"]);
+              constructSSE("percentagedone-15",request.headers["x-my-curuniqueusersessionid"]);
 
               processWithFileContents(data, response,request.headers["x-my-curuniqueusersessionid"])
             }
@@ -704,12 +700,12 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,callback) 
          ConsoleLogIfRequired("ByMahee -- computed simhash for "+mOptions.host+mOptions.path+" -> "+ sh)
          constructSSE('computed simhash for '+mOptions.host+mOptions.path +' -> '+ sh,curCookieClientId)
           var retStr = getHexString(sh)
-
           //|| (retStr == null)
+        //  if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302 || retStr == null || (retStr.match(/0/g) || []).length === 32) {
+
           if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302 || retStr == null) {
             // Normalize so not undefined
             retStr = Memento.prototype.simhashIndicatorForHTTP302
-
             // Gateway timeout from the archives, remove from consideration
             // resolve('isA302DeleteMe')
             callback()
@@ -720,7 +716,6 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,callback) 
 
         //  ConsoleLogIfRequired("Hex Code for Simhash:"+retStr + ' & urir:' + mOptions.host + mOptions.path)
           thatmemento.simhash = retStr;
-
           // the following code to compute the percentages
           theTimeMap.completedSimhashedMementoCount = theTimeMap.completedSimhashedMementoCount+1;
           var value = (theTimeMap.completedSimhashedMementoCount/theTimeMap.mementos.length)*70+20;
@@ -853,72 +848,30 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
                 return
             }
 
-            var originalMemetosLengthFromTM = t.mementos.length;
-            // to respond to the client as the intermediate response, while the server processes huge loads
+           var originalMemetosLengthFromTM = t.mementos.length;
+            // code segment to consider only last 5000 mementos for the huge TimeMaps
            if(t.mementos.length > 5000){
-             // commented code block will be handy if we look for particular years
-            // var tempMemetoArr=[];
-            // var curYear = (new Date()).getFullYear();
-            // var yearsUnderConsideration = [];
-            //  for (var i=0;i<1;i++){
-            //    yearsUnderConsideration.push(curYear-i);
-            //  }
-            //  t.yearConsideredOnTimeMap = yearsUnderConsideration;
-            // //console.log(JSON.stringify(yearsUnderConsideration))
-            // constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos over years [ '+yearsUnderConsideration.toString() +' ]',curCookieClientId)
-            //
-            // for (let idx in t.mementos) { // considering the last 4 years of mementos
-            //   var curMemento = t.mementos[idx];
-            //   if(doesBelongInCollection(yearsUnderConsideration,curMemento) ){
-            //     tempMemetoArr.push(curMemento)
-            //   }
-            // }
-            var tempMemetoArr=[];
-            var tempStackOfMementos = new Stack();
-            var numOfMementosToConsider = 500; // only latest 1000 mementos are considered
-            for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--){
-                tempStackOfMementos.push(t.mementos[i]);
+               var tempMemetoArr=[];
+               var tempStackOfMementos = new Stack();
+               var numOfMementosToConsider = 5000; // only latest 1000 mementos are considered
+               for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--){
+                   tempStackOfMementos.push(t.mementos[i]);
+               }
+               for(var i=0;i< numOfMementosToConsider; i++){
+                   tempMemetoArr.push(tempStackOfMementos.pop())
+               }
+               constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']',curCookieClientId)
+               ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']')
+               tempMemetoArr[0]["rel"] = "first memento";
+               t.mementos = tempMemetoArr;
+               ConsoleLogIfRequired("-----------Mementos under consideration, Length -> "+t.mementos.length +"  -------")
+               ConsoleLogIfRequired(JSON.stringify(t.mementos))
+               ConsoleLogIfRequired("---------------------------------------------------")
             }
 
-            for(var i=0;i< numOfMementosToConsider; i++){
-                tempMemetoArr.push(tempStackOfMementos.pop())
-            }
-
-            constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']',curCookieClientId)
-            ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']')
-
-            tempMemetoArr[0]["rel"] = "first memento";
-
-            t.mementos = tempMemetoArr;
-
-            ConsoleLogIfRequired("-----------Mementos under consideration, Length -> "+t.mementos.length +"  -------")
-            ConsoleLogIfRequired(JSON.stringify(t.mementos))
-            ConsoleLogIfRequired("---------------------------------------------------")
-
-          //  constructSSE('Finshed considering the mementos only from years [ '+yearsUnderConsideration.toString() +' ] and has total of '+t.mementos.length+' memetos taken into account.',curCookieClientId)
-
-             //Commented the following block as CNN type sites are handled with last few years mementos
-            //  response.write('The page you requested has more than 5000 Mementos, Service cannot handle this request right now..',)
-            //  response.end()
-            //  return
-           }
-
-           ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
-           constructSSE('Timemap fetched has a total of '+t.mementos.length + ' mementos.',curCookieClientId)
-
-
-            // to respond to the client as the intermediate response, while the server processes huge loads
-           if(t.mementos.length > 250){
-
-
-             constructSSE("percentagedone-20",curCookieClientId);
-            // now that streaming is in place, dont bother about sending an intermediate response
-            //  response.write('Request being processed, Please retry approximately after ( ' + Math.ceil(((t.mementos.length/50)  * 10)/60)  +' Minutes ) and request again...')
-            //  response.end()
-            //  isResponseEnded = true
-           }
-
-
+            ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
+            constructSSE('Timemap fetched has a total of '+t.mementos.length + ' mementos.',curCookieClientId)
+            constructSSE("percentagedone-20",curCookieClientId);
             callback('')
           }else{
             ConsoleLogIfRequired('The page you requested has not been archived.')
@@ -927,8 +880,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
              //process.exit(-1)
              response.write('The page you requested has not been archived.',)
              response.end()
-               return
-
+             return
           }
         })
       })
@@ -1068,7 +1020,6 @@ TimeMap.prototype.calculateSimhashes = function (curCookieClientId,callback) {
   theTimeMap.prevCompletionVal = 0
   var arrayOfSetSimhashFunctions = []
   var totalMemetoCount = this.mementos.length;
-  var preVal = 0;
   // the way to get a damper, just 7 requests at a time.
   async.eachLimit(this.mementos,5, function(curMemento, callback){
 
@@ -1097,7 +1048,7 @@ TimeMap.prototype.calculateSimhashes = function (curCookieClientId,callback) {
          * doing the same: just changed the above condition as to follow
         */
 
-        if(theTimeMap.mementos[i].simhash === Memento.prototype.simhashIndicatorForHTTP302 || theTimeMap.mementos[i].simhash  == null){
+        if(theTimeMap.mementos[i].simhash === Memento.prototype.simhashIndicatorForHTTP302 || theTimeMap.mementos[i].simhash  == null|| (theTimeMap.mementos[i].simhash.match(/0/g) || []).length === 32){
           theTimeMap.mementos.splice(i, 1)
           mementosRemoved++
         }
@@ -1210,7 +1161,7 @@ TimeMap.prototype.SendThumbSumJSONCalledFromCache= function (response,callback) 
 
     }
 
-    mementoJObj_ForTimeline["event_date"] =  month_names_short[ parseInt(month)]+". "+date +", "+ dt.getUTCFullYear()
+    mementoJObj_ForTimeline["event_date"] =  month_names_short[ parseInt(month)-1]+". "+date +", "+ dt.getUTCFullYear()
     mementoJObj_ForTimeline["event_display_date"] = eventDisplayDate
     mementoJObj_ForTimeline["event_description"] = ""
     mementoJObj_ForTimeline["event_link"] = uri
@@ -1282,7 +1233,7 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
       mementoJObj_ForTimeline["event_html"] = localAssetServer+memento.screenshotURI
     }
 
-    mementoJObj_ForTimeline["event_date"] =  month_names_short[ parseInt(month)]+". "+date +", "+ dt.getUTCFullYear()
+    mementoJObj_ForTimeline["event_date"] =  month_names_short[ parseInt(month)-1]+". "+date +", "+ dt.getUTCFullYear()
     mementoJObj_ForTimeline["event_display_date"] = eventDisplayDate
     mementoJObj_ForTimeline["event_description"] = ""
     mementoJObj_ForTimeline["event_link"] = uri
@@ -1336,8 +1287,11 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSum
       //var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ memento.hammingBasisURI.replace("id_/http","/http").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename // replaced by above segment
       memento.hammingBasisScreenshotURI = filename
     } else {
-      var filename = 'timemapSum_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
-      memento.screenshotURI = filename
+        var filename = null;
+        //if(memento.hammingDistance != undefined){
+          filename = 'timemapSum_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+      //  }
+        memento.screenshotURI = filename
     }
   })
 
@@ -1375,7 +1329,7 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
         //uri = uri.replace("id_/http","/http"); //replaced by above code segment
 
       // ConsoleLogIfRequired("Hamming distance = "+memento.hammingDistance)
-      if (memento.hammingDistance < currHDT  && memento.hammingDistance >= 0) {
+      if (memento.hammingDistance < currHDT  && memento.hammingDistance >= 0){
         // ConsoleLogIfRequired(memento.uri+" is below the hamming distance threshold of "+HAMMING_DISTANCE_THRESHOLD)
         memento.screenshotURI = null
 
@@ -1389,7 +1343,10 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
         //var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ memento.hammingBasisURI.replace("id_/http","/http").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename // replaced by above segment
         memento.hammingBasisScreenshotURI = filename
       } else {
-        var filename = 'timemapSum_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+        var filename = null;
+        //if(memento.hammingDistance != undefined){
+          filename = 'timemapSum_'+ uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename
+        //}
         memento.screenshotURI = filename
       }
     })
@@ -1610,7 +1567,7 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieC
   headless(uri, screenshotsLocation + filename).then(v => {
       // Once all the async parts finish this prints.
       console.log("Finished Headless");
-      constructSSE('Done capturing the screenshot..',curCookieClientId)
+      constructSSE('Done capturing the screenshot.',curCookieClientId)
 
       fs.chmodSync('./'+screenshotsLocation + filename, '755')
       im.convert(['./'+screenshotsLocation + filename, '-thumbnail', '200',
@@ -1738,7 +1695,7 @@ TimeMap.prototype.createScreenshotForMementoWithPhantom = function (curCookieCli
       ConsoleLogIfRequired(err)
       callback('Screenshot failed!')
     } else {
-      constructSSE('Done capturing the screenshot..',curCookieClientId)
+      constructSSE('Done capturing the screenshot.',curCookieClientId)
       fs.chmodSync('./'+screenshotsLocation + filename, '755')
       im.convert(['./'+screenshotsLocation + filename, '-thumbnail', '200',
             './'+screenshotsLocation + (filename.replace('.png', '_200.png'))],
@@ -1766,13 +1723,13 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFilteringForSummary = funct
 
   var lastSignificantMementoIndexBasedOnHamming = 0
   var copyOfMementos = [this.mementos[0]]
-
+  var dummySimhash = "00000000000000000000000000000000"
   //ConsoleLogIfRequired('Calculate hamming distance of ' + this.mementos.length + ' mementos')
   for (var m = 0; m < this.mementos.length; m++) {
     // ConsoleLogIfRequired("Analyzing memento "+m+"/"+this.mementos.length+": "+this.mementos[m].uri)
     // ConsoleLogIfRequired("...with SimHash: "+this.mementos[m].simhash)
     if (m > 0) {
-      if ( this.mementos[m].simhash == null || (this.mementos[m].simhash.match(/0/g) || []).length === 32) { // added the null condition if the simhash is set to null because of error in connection
+      if ( this.mementos[m].simhash == null || this.mementos[m].simhash == dummySimhash  ||(this.mementos[m].simhash.match(/0/g) || []).length === 32) { // added the null condition if the simhash is set to null because of error in connection
         ConsoleLogIfRequired('0s, returning')
         continue
       }
@@ -1802,6 +1759,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFilteringForSummary = funct
   constructSSE('Completed filtering...',curCookieClientId)
   constructSSE('Out of the total <h3>'+totalMementos+'</h3> existing mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique...',curCookieClientId)
   //ConsoleLogIfRequired((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
+  //this.mementos = copyOfMementos; // currentchange 04 june 18
   copyOfMementos = null
 
   ConsoleLogIfRequired("------------ByMahee-- After the hamming distance is calculated, here is how the mementos with additional details look like ------------------")
@@ -1819,6 +1777,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
   constructSSE('computing the Hamming Distance and Filtering synchronously...',curCookieClientId)
   var curMementoDetArray = [];
   var hdtRangeVar = 0,totalMementos=0,noOfUniqueMementos=0;
+  var dummySimhash = "00000000000000000000000000000000";
   for(var i=2; i<= 12; i++ ){ // do the computation fot the threshold from k =3 to k=12
       hdtRangeVar = i;
       curMementoDetArray = [];
@@ -1832,7 +1791,7 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
           // ConsoleLogIfRequired("Analyzing memento "+m+"/"+this.mementos.length+": "+this.mementos[m].uri)
           // ConsoleLogIfRequired("...with SimHash: "+this.mementos[m].simhash)
           if (m > 0) {
-            if ( curMementoDetArray[m].simhash == null || (curMementoDetArray[m].simhash.match(/0/g) || []).length === 32) { // added the null condition if the simhash is set to null because of error in connection
+            if ( curMementoDetArray[m].simhash == null || curMementoDetArray[m].simhash == dummySimhash || (curMementoDetArray[m].simhash.match(/0/g) || []).length == 32) { // added the null condition if the simhash is set to null because of error in connection
               ConsoleLogIfRequired('0s, returning')
               continue
             }
