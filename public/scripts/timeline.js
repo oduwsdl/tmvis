@@ -871,6 +871,8 @@ function getStats(){
 }
 
 function getSummary(){
+
+
   var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
@@ -988,6 +990,12 @@ function getSummary(){
 
 
 $(function(){
+  $(".cancelProcess").click(function(event){
+
+    console.log("Cancel clicked");
+
+
+  });
 
     // Analyses the input pattern and finds all the parameters
     $(document).on('focusout','#uriIP',function(){
@@ -998,6 +1006,8 @@ $(function(){
 
      // following is commented to first stabilise the single step process
     $(".getJSONFromServer").click(function(event){
+
+
         event.preventDefault();
         uriAnalysisForAttributes($("#uriIP").val().trim());
         $(".tabContentWrapper").hide();
