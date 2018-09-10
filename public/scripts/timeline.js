@@ -752,7 +752,7 @@ function startEventNotification(){
                $('#serverStreamingModal .logsContent').empty();
                 setProgressBar(2);
                 // for avoiding the refresh issue... automatically refreshing the page when the results are available
-                window.location.reload();
+                //window.location.reload();
                $('#serverStreamingModal').modal('hide');
                if(notificationSrc != null){
                  notificationSrc.close();
