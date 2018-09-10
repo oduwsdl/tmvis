@@ -992,9 +992,28 @@ function getSummary(){
 $(function(){
   $(".cancelProcess").click(function(event){
 
-    console.log("Cancel clicked");
-
-
+    //console.log("Cancel clicked");
+    localStorage.setItem("getStatsClicked", "false");
+    var curInputJsobObj = {};
+    localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
+    //window.location.reload();
+    window.location.href = window.location.origin+"/index.html";
+    $.ajax({
+        type: "GET",
+        url: "/index.html",
+        beforeSend: function(xhr) {
+          xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+        },
+        dataType: "text",
+        timeout: 900000,
+        cache: false,
+        success: function( data, textStatus, jqXHR) {
+            $("#busy-loader").hide();
+            $('#serverStreamingModal .logsContent').empty();
+            $(".modal-backdrop").remove();
+            $('#serverStreamingModal').modal('hide');
+          }
+    });
   });
 
     // Analyses the input pattern and finds all the parameters
