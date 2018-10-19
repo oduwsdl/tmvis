@@ -91,7 +91,7 @@ Though GPL Licensing was used for base (https://github.com/machawk1/ArchiveThumb
 
 ### Usage of the service
 
-Running this service gives provides an user with the array of JSON object as the response (webservice model), which then has to be visualized with the UI tool deployed at http://tmvis.cs.odu.edu/ for which the code is available at https://github.com/oduwsdl/tmvis/ under public folder
+Running this service provides a user with the array of JSON object as the response (webservice model), which then has to be visualized with the UI tool deployed at http://tmvis.cs.odu.edu/ for which the code is available at https://github.com/oduwsdl/tmvis/ under the public folder.
 
 
 ## Request format (Role -> stats)
