@@ -21,9 +21,32 @@ $(document).ready(function{
 
 			var interval = document.getElementById("interval").value;
 
-			create(imageLinks, interval);
+			//create(imageLinks, interval);
+	
+			var all = ['https://i.imgur.com/YiOWGYW.jpg',
+				'https://i.imgur.com/yWh0K3Q.jpg',
+				'https://i.imgur.com/ddrHwef.jpg',
+				'https://i.imgur.com/sptDxw4.jpg',
+				'https://i.imgur.com/kpfvVHr.jpg',
+				'https://i.imgur.com/GWtiJFA.jpg',
+				'https://i.imgur.com/GcscISf.jpg',
+				'https://i.imgur.com/RlZDKhp.jpg',
+				'https://i.imgur.com/92aMyyI.jpg',
+				'https://i.imgur.com/qhD0lTl.jpg',
+				'https://i.imgur.com/Pr3SN.jpg',
+				'https://i.imgur.com/L4tUONy.jpg',
+				'https://i.imgur.com/ua5dHQ8.jpg',
+				'https://i.imgur.com/ypcGpcf.jpg',
+				'https://i.imgur.com/qjOOur1.jpg',
+				'https://i.imgur.com/MvwKG.jpg',
+				'https://i.imgur.com/CeQWjg9.jpg',
+				'https://i.imgur.com/vEgajTc.jpg',
+				'https://i.imgur.com/UlPaqaG.jpg',
+				'https://i.imgur.co/o6bfcka.jpg'];
+	
+			
 		}
-		  
+		  create(all,0.7);
 		  });
 
 
