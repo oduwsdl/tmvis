@@ -152,6 +152,17 @@
 							</ul>
 						</div>
 					</div>
+					
+					<div id="gif" class="tab-pane fade">
+						<div id="gifContent">		
+							<label class="inputTitle">Interval Time</label>
+							<input type="number" name="in" min=".1" step=".1" value="0.1" id="interval">
+							<div class="inputControl-addon">sec</div>	
+							<button onclick="getImageArray();">Create GIF</button>
+							<div class ="gifApp"></div>
+						</div>
+					</div>
+					
 
 					<div id="imageSlider" class="tab-pane fade">
 				  	<div class="imageslider_wrapper content_focusedWrapper" style="margin-top: 1%;">
@@ -196,18 +207,6 @@
 							</div>
 						
 						
-							<div id="gif" class="tab-pane fade">
-								<div id="gifContent">
-									<div>
-										<label class="inputTitle">Interval Time</label>
-										<input type="number" name="in" min=".1" step=".1" value="0.1" id="interval">
-										<div class="inputControl-addon">sec</div>
-									</div>
-									<button onclick="getImageArray();">Create GIF</button>
-									<div class ="gifApp"></div>
-								</div>
-
-							</div>
 
 							<script id="year_notch_tmpl" type="text/jst">
 									<div class="timeline_year_notch year_notch_<%= timestamp %>" data-timestamp="<%= timestamp %>">
