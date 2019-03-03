@@ -328,7 +328,15 @@ body{
 }
 
 //GIF tab
-.inputTitle, #interval, .inputControl-addon{
+.inputTitle{
+	display: inline-block;
+}
+
+#interval{
+	display: inline-block;
+}
+
+.inputControl-addon{
 	display: inline-block;
 }
 
@@ -338,8 +346,7 @@ body{
 }
 
 #gifButton{
-	left:80px; 
-	top:10px;
+	display: block; 
 }
 
 .gifApp{
