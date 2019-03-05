@@ -967,6 +967,7 @@ function getSummary(){
               console.log(jsonObjRes);
               drawImageGrid(jsonObjRes); // calling Image Grid Function here
               drawImageSlider(jsonObjRes);
+              getImageArray(jsonObjRes); //calling GIF function
               $(".modal-backdrop").remove();
               $('#serverStreamingModal').modal('hide');
           }
