@@ -1,10 +1,10 @@
+var imagesData = [];
+var imageLinks = [];
 
 function getImageArray(data){
-	var imagesData = [];
-	var imageLinks = [];
 
 	imagesData = [];
-	$("#gif .gifContent").empty();
+	$("#gif #gifContent #gifApp").empty();
 	$.each(data, function (index, obj) {
 		if($(obj.event_html).attr("src").indexOf("notcaptured") < 0){
 		imagesData.push(obj);
@@ -14,10 +14,19 @@ function getImageArray(data){
 	for(var i = 0; i<imagesData.length; i++)
 	{
 		imageLinks[i] = $(imagesData[i].event_html).attr('src');
+		console.log(imageLinks[i]);
 	}
 
 	var interval = document.getElementById("interval").value;
 
+	create(imageLinks, interval);
+
+	document.getElementById("gifButton").addEventListener("click", updateGif);
+}
+
+function updateGif(){
+	$("#gifApp").empty();
+	var interval = document.getElementById("interval").value;
 	create(imageLinks, interval);
 }
 	
@@ -27,8 +36,8 @@ function getImageArray(data){
 function create(image, int)
 {
 	gifshot.createGIF({
-   	gifWidth: 200,
-	gifHeight: 200,
+   	gifWidth: 450,
+	gifHeight: 450,
 	interval: int,
 	numFrames: 10,
 	images: image,
