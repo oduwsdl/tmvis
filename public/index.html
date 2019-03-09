@@ -154,11 +154,13 @@
 					</div>
 					
 					<div id="gif" class="tab-pane fade">
-						<div id="gifContent">		
-							<label class="inputTitle">Interval Time</label>
-							<input type="number" name="in" min=".1" step=".1" value="0.5" id="interval">
-							<div class="inputControl-addon">sec</div>	
-							<button id="gifButton" onclick="getImageArray();">Update GIF</button>
+						<div id="gifContent">
+							<div class="intervalTab">		
+								<label class="inputTitle">Interval Time</label>
+								<input type="number" name="in" min=".1" step=".1" value="0.5" id="interval">
+								<div class="inputControl-addon">sec</div>	
+								<br><button class="btn btn-primary" id="gifButton">Update GIF</button>
+							</div>
 							<div id ="gifApp"></div>
 						</div>
 					</div>
