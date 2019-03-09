@@ -13,8 +13,7 @@ function getImageArray(data){
 
 	for(var i = 0; i<imagesData.length; i++)
 	{
-		imageLinks[i] = imagesData[i].event_html;
-		console.log(imageLinks[i]);
+		imageLinks[i] = $(imagesData[i].event_html).attr('src');
 	}
 
 	var interval = document.getElementById("interval").value;
