@@ -46,7 +46,7 @@ function create(image, int)
 		if (!obj.error) {
 		var image = obj.image, animatedImage = document.createElement('img');
 		animatedImage.src = image;
-		document.getElementsByClassName("gifApp").appendChild(animatedImage);
+		document.getElementById("gifApp").appendChild(animatedImage);
 		//$("#gif div").appendChild(animatedImage);
 		}
 	});
