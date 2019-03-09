@@ -20,7 +20,7 @@ function getImageArray(data){
 	var interval = document.getElementById("interval").value;
 
 	create(imageLinks, interval);
-	}
+}
 	
 
 
