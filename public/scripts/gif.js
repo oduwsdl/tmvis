@@ -19,7 +19,7 @@ function getImageArray(data){
 
 	var interval = document.getElementById("interval").value;
 
-	create(imageLinks, interval);
+	createGif(imageLinks, interval);
 
 	document.getElementById("gifButton").addEventListener("click", updateGif);
 }
@@ -27,18 +27,18 @@ function getImageArray(data){
 function updateGif(){
 	$("#gifApp").empty();
 	var interval = document.getElementById("interval").value;
-	create(imageLinks, interval);
+	createGif(imageLinks, interval);
 }
 	
 
 
 
-function create(image, int)
+function createGif(image, Interval)
 {
 	gifshot.createGIF({
    	gifWidth: 450,
 	gifHeight: 450,
-	interval: int,
+	interval: Interval,
 	numFrames: 10,
 	images: image,
 	frameDuration: 1,
