@@ -333,10 +333,13 @@ body{
 }
 
 #gifButton{
-	margin: 10px 0 10px;
-}
-
-.intervalTab{
 	margin: 0 0 10px;
 }
 
+.intervalTab{
+	margin: 10px 0 10px;
+}
+
+.inputTitle, #interval, .inputControl-addon {
+    display: inline-block;
+}
