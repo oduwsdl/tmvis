@@ -54,6 +54,7 @@ function create(image, int)
 		if (!obj.error) {
 		var image = obj.image, animatedImage = document.createElement('img');
 		animatedImage.src = image;
+		animatedImage.style.border = "1px solid black";
 		document.getElementById("gifApp").appendChild(animatedImage);
 		//$("#gif div").appendChild(animatedImage);
 		}
