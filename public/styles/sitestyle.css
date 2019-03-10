@@ -328,9 +328,6 @@ body{
 }
 
 //GIF tab
-#gifContent{
-	text-align: center;
-}
 
 #gifButton{
 	margin: 10px 0 10px;
@@ -342,4 +339,13 @@ body{
 
 .inputTitle, #interval, .inputControl-addon {
     display: inline-block;
+    margin: 20px 0 10px;
+}
+
+#interval{
+	width: 45px;
+}
+
+#gifApp{
+	margin: 10px 0 0;
 }
