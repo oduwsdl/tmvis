@@ -22,6 +22,8 @@
     	<script src="/scripts/imageGridScript.js"></script>
     	<script src="/scripts/timeline.js?version=1005"></script>
     	<script src="/scripts/waitforimages.js"></script>
+    	<script src="/scripts/gifshot.min.js"></script>
+    	<script src="/scripts/gif.js"></script>
 			<script src="/scripts/formatting.js?version=1005"></script>
 
 			<!-- Priorirty is to stabilise the current single step build -->
@@ -137,6 +139,7 @@
 					<li class="active"><a data-toggle="tab" href="#imageGrid">Grid</a></li>
 				  <li><a data-toggle="tab" href="#imageSlider">Slider</a></li>
 					<li ><a data-toggle="tab" href="#timeLine">TimeLine</a></li>
+					<li ><a data-toggle="tab" href="#gif">GIF</a></li>
 					<!-- <li ><a data-toggle="tab" href="#logtab">Log</a></li> -->
 				</ul>
 
@@ -148,6 +151,19 @@
 							</ul>
 						</div>
 					</div>
+					
+					<div id="gif" class="tab-pane fade">
+						<div id="gifContent" style="text-align: center">
+							<div class="intervalTab">		
+								<label class="inputTitle">Animation Interval</label>
+								<input type="number" name="in" min=".1" step=".1" value="0.5" id="interval">
+								<div class="inputControl-addon">sec</div>	
+								<br><button class="btn btn-primary" id="gifButton">Update GIF</button>
+							</div>
+							<div id ="gifApp"></div>
+						</div>
+					</div>
+					
 
 					<div id="imageSlider" class="tab-pane fade">
 				  	<div class="imageslider_wrapper content_focusedWrapper" style="margin-top: 1%;">
@@ -190,6 +206,8 @@
 									</div>
 								</div>
 							</div>
+						
+						
 
 							<script id="year_notch_tmpl" type="text/jst">
 									<div class="timeline_year_notch year_notch_<%= timestamp %>" data-timestamp="<%= timestamp %>">
@@ -325,3 +343,4 @@
 	</div>
 	</div>
 </html>
+
