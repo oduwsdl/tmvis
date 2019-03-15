@@ -36,8 +36,8 @@ function updateGif(){
 function createGif(image, interval)
 {
 	gifshot.createGIF({
-   	gifWidth: 450,
-	gifHeight: 450,
+   	gifWidth: 400,
+	gifHeight: 300,
 	interval: interval,
 	numFrames: 10,
 	images: image,
