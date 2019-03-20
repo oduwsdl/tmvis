@@ -56,7 +56,8 @@ function createGif(image, interval)
 		animatedImage.src = image;
 		animatedImage.style.border = "1px solid black";
 		document.getElementById("gifApp").appendChild(animatedImage);
-		//$("#gif div").appendChild(animatedImage);
+			
+		document.getElementById("gifDownload").href = image;
 		}
 	});
 
