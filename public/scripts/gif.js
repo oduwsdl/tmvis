@@ -1,24 +1,18 @@
-var imagesData = [];
 var imageLinks = [];
+var stampedImages = [];
 
 function getImageArray(data){
 
-	imagesData = [];
+	
 	$("#gif #gifContent #gifApp").empty();
-	$.each(data, function (index, obj) {
-		if($(obj.event_html).attr("src").indexOf("notcaptured") < 0){
-		imagesData.push(obj);
-		}
-	});
-
-	for(var i = 0; i<imagesData.length; i++)
+	for(var i = 0; i<imagesData_IG.length; i++)
 	{
-		imageLinks[i] = $(imagesData[i].event_html).attr('src');
+		imageLinks[i] = $(imagesData_IG[i].event_html).attr('src');
 		console.log(imageLinks[i]);
 	}
-
 	var interval = document.getElementById("interval").value;
 
+	watermark();
 	createGif(imageLinks, interval);
 
 	document.getElementById("gifButton").addEventListener("click", updateGif);
@@ -26,33 +20,30 @@ function getImageArray(data){
 
 function updateGif(){
 	$("#gifApp").empty();
+	var interval = document.getElementById("interval").value;
+
 	if(document.getElementById("watermarkOption").checked == true)
 	{
-		watermark();
+		createGif(stampedImages,interval);
 	}
 	else{
-		var interval = document.getElementById("interval").value;
 		createGif(imageLinks, interval);
 	}
 }
 	
-function watermark(){
-	
-	var stampedImages = [];
-	for(var i = 0; i<imagesData.length; i++)
+function watermark(){	
+	for(var i = 0; i<imagesData_IG.length; i++)
 	{
-		var stamp = imagesData[i].event_display_date;
+		
+		var stamp = imagesData_IG[i].event_display_date;
 		var img= new Image();
 		img.src = imageLinks[i];
-		stampedImages[i] = watermarkImage(img,stamp);
+		watermarkImage(img,stamp,i);
 	}
-	var interval = document.getElementById("interval").value;
-	createGif(stampedImages,interval);
-
 }
 
 
-function watermarkImage(elemImage, text) {
+function watermarkImage(elemImage, text, counter) {
 	var testImage = new Image();
 	testImage.onload = function() {
 		var h = testImage.height, w = testImage.width, img = new Image();
@@ -66,8 +57,8 @@ function watermarkImage(elemImage, text) {
 					      
 			try {
 					elemImage.src = canvas.toDataURL('image/png');
+					stampedImages[counter] = elemImage.src;
 					//console.log(elemImage.src);
-					return elemImage.src;
 			}
 			catch (e) {
 					console.error('Cannot watermark image with text:', {src: elemImage.src, text: text, error: e});
@@ -99,8 +90,6 @@ function watermarkImage(elemImage, text) {
 }
 
 
-
-
 function createGif(image, interval)
 {
 	gifshot.createGIF({
@@ -124,7 +113,7 @@ function createGif(image, interval)
 		animatedImage.src = image;
 		animatedImage.style.border = "1px solid black";
 		document.getElementById("gifApp").appendChild(animatedImage);
-			
+		
 		document.getElementById("gifDownload").href = image;
 		}
 	});
