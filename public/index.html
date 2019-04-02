@@ -158,7 +158,13 @@
 								<label class="inputTitle">Animation Interval</label>
 								<input type="number" name="in" min=".1" step=".1" value="1" id="interval">
 								<div class="inputControl-addon">sec</div>	
-								<button class="btn btn-primary" id="gifButton">Update GIF</button>
+
+								<label id= "watermarkLabel">
+									<input type="checkbox" id="watermarkOption">
+									Add date and time stamps
+								</label>
+
+								<br><button class="btn btn-primary" id="gifButton">Update GIF</button>
 								<a class="btn btn-primary" id="gifDownload" download="download.gif">Download GIF</a>
 							</div>
 							<div id ="gifApp"></div>
