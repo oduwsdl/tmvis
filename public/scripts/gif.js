@@ -43,8 +43,8 @@ function watermark(){
 	{
 		var stamp = imagesData[i].event_display_date;
 		var img= new Image();
-		img.src = watermarkImage(imageLinks[i],stamp);
-		stampedImages[i] = img.src;
+		img.src = imageLinks[i];
+		stampedImages[i] = watermarkImage(img,stamp);
 	}
 	var interval = document.getElementById("interval").value;
 	createGif(stampedImages,interval);
