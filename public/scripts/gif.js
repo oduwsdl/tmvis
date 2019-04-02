@@ -43,8 +43,7 @@ function watermark(){
 	{
 		var stamp = imagesData[i].event_display_date;
 		var img= new Image();
-		img.src = imageLinks[i];
-		watermarkImage(imageLinks[i],stamp);
+		img.src = watermarkImage(imageLinks[i],stamp);
 		stampedImages[i] = img.src;
 	}
 	var interval = document.getElementById("interval").value;
@@ -67,6 +66,8 @@ function watermarkImage(elemImage, text) {
 					      
 			try {
 					elemImage.src = canvas.toDataURL('image/png');
+					//console.log(elemImage.src);
+					return elemImage.src;
 			}
 			catch (e) {
 					console.error('Cannot watermark image with text:', {src: elemImage.src, text: text, error: e});
