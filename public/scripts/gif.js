@@ -1,7 +1,7 @@
 var imageLinks = [];
 var stampedImages = [];
 
-function getImageArray(data){
+function getImageArray(){
 
 	
 	$("#gif #gifContent #gifApp").empty();
