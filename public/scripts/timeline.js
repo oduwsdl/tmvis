@@ -903,7 +903,7 @@ function getStats(){
                     var toDateStr= toDate.getFullYear()+"-"+toDate.getMonth() +"-"+toDate.getDate();
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
-                    getHistogram(histoData);
+                    //getHistogram(histoData);
                     $(".paraOnlyOnStatsResults").show();
 
                     $(".statsWrapper .collection_stats").html(memStatStr);
