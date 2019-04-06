@@ -830,9 +830,12 @@ function getStats(){
                     var toDateStr= toDate.getFullYear()+"-"+toDate.getMonth() +"-"+toDate.getDate();
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
-                    //getHistogram(histoData);
                     $(".paraOnlyOnStatsResults").show();
-                    getHistoData(fromDate, toDate);
+                    
+                    //Get the data into an array for the histogram
+                    //From and to dates are passed for the domain
+                    getHistoData(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+                    
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
 
@@ -870,7 +873,7 @@ function getStats(){
       }
 }
     
-function getHistoData(fromDate, toDate){
+function getHistoData(fromY, fromM, fromD, toY, toM, toD){
  var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
@@ -916,7 +919,7 @@ function getHistoData(fromDate, toDate){
               }
 
               histoData= $.parseJSON(data);
-              getHistogram(fromDate, toDate, histoData);
+              getHistogram(fromY, fromM, fromD, toY, toM, toD, histoData);
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
