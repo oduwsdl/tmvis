@@ -873,7 +873,7 @@ function getStats(){
       }
 }
     
-function getHistoData(fromY, fromM, fromD, toY, toM, toD){
+function getHistoData(fromYear, fromMonth, fromDate, toYear, toMonth, toDate){
  var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
@@ -919,7 +919,7 @@ function getHistoData(fromY, fromM, fromD, toY, toM, toD){
               }
 
               histoData= $.parseJSON(data);
-              getHistogram(fromY, fromM, fromD, toY, toM, toD, histoData);
+              getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, histoData);
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
