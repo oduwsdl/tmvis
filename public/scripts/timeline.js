@@ -776,77 +776,6 @@ function setProgressBar(value){
   $(".progress-bar-space .progress-bar-striped").css("width",value+"%");
 }
 
-function getHistoData(){
- var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
-  if(collectionIdentifer == ""){
-      collectionIdentifer = "all";
-  }
-  //var hammingDistance = $('.argumentsForm #hammingDistance').val();
-  var hammingDistance = $(".statsWrapper .on").val();
-
-  if(hammingDistance == "" || hammingDistance===undefined){
-    hammingDistance = $('.argumentsForm #hammingDistance').val();
-  }
-
-  var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
-  if($("body").find("form")[0].checkValidity()){
-        $(".time_container").hide();
-        $(".Explain_Threshold").hide();
-       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
-
-       /*var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
-       changeToSummaryState(summaryStatePath);*/
-
-       startEventNotification();
-       var ENDPOINT = "/alsummarizedtimemap";
-       var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
-       $("#busy-loader").show();
-       $('#serverStreamingModal .logsContent').empty();
-       $('#serverStreamingModal').modal('show');
-      $.ajax({
-        type: "GET",
-        url: address, // uncomment this for deployment
-        /*beforeSend: function(xhr) {
-          xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
-        },*/
-        dataType: "text",
-        timeout: 0,
-        success: function( data, textStatus, jqXHR) {
-            $("#busy-loader").hide();
-            $('#serverStreamingModal').modal('hide');
-          try{
-              data = $.trim(data).split("...");
-              if(data.length > 1){
-                  if(data [1] == ""){
-                      data = data [0];
-                  }else{
-                      data = data [1];
-                  }
-              }
-              else{
-                  data = data [0];
-              }
-
-              histoData= $.parseJSON(data);
-              getHistogram(histoData);
-          }
-          catch(err){
-            alert("Some problem fetching the response, Please refresh and try again.");
-            $("#busy-loader").hide();
-            $('#serverStreamingModal').modal('hide');
-            $(".tabContentWrapper").hide();
-          }
-        },
-        error: function( data, textStatus, jqXHR) {
-          var errMsg = "Some problem fetching the response, Please refresh and try again.";
-          $("#busy-loader").hide();
-          $('#serverStreamingModal').modal('hide');
-          alert(errMsg);
-        }
-      });
-    }
-}
-
 function getStats(){
   var collectionIdentifer = $('.argumentsForm #collectionNo').val();
   if(collectionIdentifer == ""){
@@ -903,7 +832,7 @@ function getStats(){
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
                     //getHistogram(histoData);
                     $(".paraOnlyOnStatsResults").show();
-                    getHistoData();
+                    getHistoData(fromDate, toDate);
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
 
@@ -939,6 +868,71 @@ function getStats(){
             }
         });
       }
+}
+    
+function getHistoData(fromDate, toDate){
+ var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
+  if(collectionIdentifer == ""){
+      collectionIdentifer = "all";
+  }
+  //var hammingDistance = $('.argumentsForm #hammingDistance').val();
+  var hammingDistance = $(".statsWrapper .on").val();
+
+  if(hammingDistance == "" || hammingDistance===undefined){
+    hammingDistance = $('.argumentsForm #hammingDistance').val();
+  }
+
+  var role = "summary"; // set to summary to get timestamps
+  if($("body").find("form")[0].checkValidity()){
+        $(".time_container").hide();
+        $(".Explain_Threshold").hide();
+       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
+
+       startEventNotification();
+       var ENDPOINT = "/alsummarizedtimemap";
+       var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+       $("#busy-loader").show();
+       $('#serverStreamingModal .logsContent').empty();
+       $('#serverStreamingModal').modal('show');
+      $.ajax({
+        type: "GET",
+        url: address, // uncomment this for deployment
+        dataType: "text",
+        timeout: 0,
+        success: function( data, textStatus, jqXHR) {
+            $("#busy-loader").hide();
+            $('#serverStreamingModal').modal('hide');
+          try{
+              data = $.trim(data).split("...");
+              if(data.length > 1){
+                  if(data [1] == ""){
+                      data = data [0];
+                  }else{
+                      data = data [1];
+                  }
+              }
+              else{
+                  data = data [0];
+              }
+
+              histoData= $.parseJSON(data);
+              getHistogram(fromDate, toDate, histoData);
+          }
+          catch(err){
+            alert("Some problem fetching the response, Please refresh and try again.");
+            $("#busy-loader").hide();
+            $('#serverStreamingModal').modal('hide');
+            $(".tabContentWrapper").hide();
+          }
+        },
+        error: function( data, textStatus, jqXHR) {
+          var errMsg = "Some problem fetching the response, Please refresh and try again.";
+          $("#busy-loader").hide();
+          $('#serverStreamingModal').modal('hide');
+          alert(errMsg);
+        }
+      });
+    }
 }
 
 function getSummary(){
