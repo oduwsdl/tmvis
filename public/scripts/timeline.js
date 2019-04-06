@@ -606,8 +606,6 @@ var curUniqueUserSessionID = null;
           $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
           $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
           $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true).trigger("click");
-          getHistoData();
-          console.log(histoData);
           getStats(); // this makes the call for getting the initial stats.
       }else{
         //alert("doesn't have the local storage set, using the Query parameters");
@@ -632,8 +630,6 @@ var curUniqueUserSessionID = null;
             if(curDeepLinkStateArr[4] == "summary"){
               getSummary();
             }else{
-              getHistoData();
-              console.log(histoData);
               getStats();
             }
           }else{
@@ -906,7 +902,7 @@ function getStats(){
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
                     //getHistogram(histoData);
                     $(".paraOnlyOnStatsResults").show();
-
+                    getHistoData();
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
 
