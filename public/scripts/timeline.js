@@ -1,5 +1,6 @@
 
 var jsonObjRes = {};
+var histoData = {};
 var curURIUnderFocus=null;
 var curDeepLinkStateArr=[];
 var curUniqueUserSessionID = null;
@@ -605,6 +606,7 @@ var curUniqueUserSessionID = null;
           $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
           $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
           $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true).trigger("click");
+          getHistoData();
           getStats(); // this makes the call for getting the initial stats.
       }else{
         //alert("doesn't have the local storage set, using the Query parameters");
@@ -629,6 +631,7 @@ var curUniqueUserSessionID = null;
             if(curDeepLinkStateArr[4] == "summary"){
               getSummary();
             }else{
+              getHistoData();
               getStats();
             }
           }else{
@@ -775,7 +778,76 @@ function setProgressBar(value){
   $(".progress-bar-space .progress-bar-striped").css("width",value+"%");
 }
 
+function getHistoData(){
+ var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
+  if(collectionIdentifer == ""){
+      collectionIdentifer = "all";
+  }
+  //var hammingDistance = $('.argumentsForm #hammingDistance').val();
+  var hammingDistance = $(".statsWrapper .on").val();
 
+  if(hammingDistance == "" || hammingDistance===undefined){
+    hammingDistance = $('.argumentsForm #hammingDistance').val();
+  }
+
+  var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
+  if($("body").find("form")[0].checkValidity()){
+        $(".time_container").hide();
+        $(".Explain_Threshold").hide();
+       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
+
+       var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
+       changeToSummaryState(summaryStatePath);
+
+       startEventNotification();
+       var ENDPOINT = "/alsummarizedtimemap";
+       var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+       $("#busy-loader").show();
+       $('#serverStreamingModal .logsContent').empty();
+       $('#serverStreamingModal').modal('show');
+      $.ajax({
+        type: "GET",
+        url: address, // uncomment this for deployment
+        beforeSend: function(xhr) {
+          xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+        },
+        dataType: "text",
+        timeout: 0,
+        success: function( data, textStatus, jqXHR) {
+            $("#busy-loader").hide();
+            $('#serverStreamingModal').modal('hide');
+          try{
+              data = $.trim(data).split("...");
+              if(data.length > 1){
+                  if(data [1] == ""){
+                      data = data [0];
+                  }else{
+                      data = data [1];
+                  }
+              }
+              else{
+                  data = data [0];
+              }
+
+              jsonObjRes= $.parseJSON(data);
+              histoData = jsonObjRes;
+          }
+          catch(err){
+            alert("Some problem fetching the response, Please refresh and try again.");
+            $("#busy-loader").hide();
+            $('#serverStreamingModal').modal('hide');
+            $(".tabContentWrapper").hide();
+          }
+        },
+        error: function( data, textStatus, jqXHR) {
+          var errMsg = "Some problem fetching the response, Please refresh and try again.";
+          $("#busy-loader").hide();
+          $('#serverStreamingModal').modal('hide');
+          alert(errMsg);
+        }
+      });
+    }
+}
 
 function getStats(){
   var collectionIdentifer = $('.argumentsForm #collectionNo').val();
