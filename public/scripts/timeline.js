@@ -607,6 +607,7 @@ var curUniqueUserSessionID = null;
           $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
           $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true).trigger("click");
           getHistoData();
+          console.log(histoData);
           getStats(); // this makes the call for getting the initial stats.
       }else{
         //alert("doesn't have the local storage set, using the Query parameters");
@@ -632,6 +633,7 @@ var curUniqueUserSessionID = null;
               getSummary();
             }else{
               getHistoData();
+              console.log(histoData);
               getStats();
             }
           }else{
@@ -830,7 +832,6 @@ function getHistoData(){
               }
 
               histoData= $.parseJSON(data);
-              console.log(histoData);
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
