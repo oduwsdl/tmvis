@@ -794,10 +794,10 @@ function getHistoData(){
         $(".Explain_Threshold").hide();
        var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
 
-       var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
-       changeToSummaryState(summaryStatePath);
+       /*var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
+       changeToSummaryState(summaryStatePath);*/
 
-       //startEventNotification();
+       startEventNotification();
        var ENDPOINT = "/alsummarizedtimemap";
        var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
        $("#busy-loader").show();
