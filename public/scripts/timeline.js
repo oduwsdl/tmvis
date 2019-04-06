@@ -828,6 +828,7 @@ function getHistoData(){
               }
 
               histoData= $.parseJSON(data);
+              getHistogram(histoData);
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
