@@ -1,4 +1,4 @@
-function getHistogram(dateArray){
+function getHistogram(fromDate, toDate, dateArray){
 	// set the dimensions and margins of the graph
 	var margin = {top: 10, right: 30, bottom: 30, left: 110},
 	    width = 1000 - margin.left - margin.right,
@@ -10,7 +10,7 @@ function getHistogram(dateArray){
 
 	// set the ranges
 	var x = d3.scaleTime()
-		  .domain([new Date(2015, 1, 1), new Date(2019, 1, 1)])
+		  .domain([new Date(fromDate.getYear(), fromDate.getMonth(), fromDate.getDate()), new Date(toDate.getYear(), toDate.getMonth(), toDate.getDate())])
 		  .rangeRound([0, width]);
 	var y = d3.scaleLinear()
 		  .range([height, 0]);
