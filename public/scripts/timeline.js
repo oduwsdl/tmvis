@@ -939,8 +939,10 @@ function getHistoData(fromYear, fromMonth, fromDate, toYear, toMonth, toDate){
 }
 
 function getSummary(){
-
-
+    
+  //Remove histogram
+  document.getElementById("histogram").style.display = "none";
+    
   var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
