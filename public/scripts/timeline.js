@@ -1,5 +1,6 @@
 
 var jsonObjRes = {};
+var histoData = {};
 var curURIUnderFocus=null;
 var curDeepLinkStateArr=[];
 var curUniqueUserSessionID = null;
@@ -775,8 +776,6 @@ function setProgressBar(value){
   $(".progress-bar-space .progress-bar-striped").css("width",value+"%");
 }
 
-
-
 function getStats(){
   var collectionIdentifer = $('.argumentsForm #collectionNo').val();
   if(collectionIdentifer == ""){
@@ -832,7 +831,11 @@ function getStats(){
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
                     $(".paraOnlyOnStatsResults").show();
-
+                    
+                    //Get the data into an array for the histogram
+                    //From and to dates are passed for the domain
+                    getHistoData(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+                    
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
 
@@ -869,10 +872,77 @@ function getStats(){
         });
       }
 }
+    
+function getHistoData(fromYear, fromMonth, fromDate, toYear, toMonth, toDate){
+ var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
+  if(collectionIdentifer == ""){
+      collectionIdentifer = "all";
+  }
+  //var hammingDistance = $('.argumentsForm #hammingDistance').val();
+  var hammingDistance = $(".statsWrapper .on").val();
+
+  if(hammingDistance == "" || hammingDistance===undefined){
+    hammingDistance = $('.argumentsForm #hammingDistance').val();
+  }
+
+  var role = "summary"; // set to summary to get timestamps
+  if($("body").find("form")[0].checkValidity()){
+        $(".time_container").hide();
+        $(".Explain_Threshold").hide();
+       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
+
+       startEventNotification();
+       var ENDPOINT = "/alsummarizedtimemap";
+       var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+       $("#busy-loader").show();
+       $('#serverStreamingModal .logsContent').empty();
+       $('#serverStreamingModal').modal('show');
+      $.ajax({
+        type: "GET",
+        url: address, // uncomment this for deployment
+        dataType: "text",
+        timeout: 0,
+        success: function( data, textStatus, jqXHR) {
+            $("#busy-loader").hide();
+            $('#serverStreamingModal').modal('hide');
+          try{
+              data = $.trim(data).split("...");
+              if(data.length > 1){
+                  if(data [1] == ""){
+                      data = data [0];
+                  }else{
+                      data = data [1];
+                  }
+              }
+              else{
+                  data = data [0];
+              }
+
+              histoData= $.parseJSON(data);
+              getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, histoData);
+          }
+          catch(err){
+            alert("Some problem fetching the response, Please refresh and try again.");
+            $("#busy-loader").hide();
+            $('#serverStreamingModal').modal('hide');
+            $(".tabContentWrapper").hide();
+          }
+        },
+        error: function( data, textStatus, jqXHR) {
+          var errMsg = "Some problem fetching the response, Please refresh and try again.";
+          $("#busy-loader").hide();
+          $('#serverStreamingModal').modal('hide');
+          alert(errMsg);
+        }
+      });
+    }
+}
 
 function getSummary(){
-
-
+    
+  //Remove histogram
+  document.getElementById("histogram").style.display = "none";
+    
   var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
