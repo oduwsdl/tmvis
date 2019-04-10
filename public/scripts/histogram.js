@@ -72,13 +72,13 @@ function getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, da
 	  var select = document.getElementById("menu1");
 	  for(var i = data.length - 1; i >= 0; --i) {
 	        var option = document.createElement('option');
-	        option.text = option.value = data[i].dtg;
+	        option.text = option.value = data[i].event_display_date;
 	        select.add(option, 0);
 	  }
 	  var select = document.getElementById("menu2");
 	  for(var i = data.length - 1; i >= 0; --i) {
 	        var option = document.createElement('option');
-	        option.text = option.value = data[i].dtg;
+	        option.text = option.value = data[i].event_display_date;
 	        select.add(option, 0);
 	  }
 }
