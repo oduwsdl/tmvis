@@ -68,4 +68,17 @@ function getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, da
 	  // add the y Axis
 	  /*svg.append("g")
 	      .call(d3.axisLeft(y));*/
+	
+	  var select = document.getElementById("menu1");
+	  for(var i = data.length - 1; i >= 0; --i) {
+	        var option = document.createElement('option');
+	        option.text = option.value = data[i].dtg;
+	        select.add(option, 0);
+	  }
+	  var select = document.getElementById("menu2");
+	  for(var i = data.length - 1; i >= 0; --i) {
+	        var option = document.createElement('option');
+	        option.text = option.value = data[i].dtg;
+	        select.add(option, 0);
+	  }
 }
