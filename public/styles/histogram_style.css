@@ -13,8 +13,3 @@ rect.bar { fill: steelblue; }
 }
 
 .aMenu{ padding: 5px; }
-
-#histogram{
-	margin: auto;
-	width: 800px;
-}
