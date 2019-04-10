@@ -1,1 +1,20 @@
 rect.bar { fill: steelblue; }
+
+.dateMenu{
+	margin: auto;
+	width: 500px;
+	font-family: inherit !import;
+}
+
+.dateMenu p{
+	display: inline;
+	margin: 5px 0px 5px 60px;
+	font-family: inherit !import;
+}
+
+.aMenu{ padding: 5px; }
+
+#histogram{
+	margin: auto;
+	width: 800px;
+}
