@@ -838,6 +838,11 @@ function getStats(){
                     
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
+                    if (jsonObjRes[0].totalmementos <= 12) {
+                        var generateAll = document.getElementById("generateAllThumbnails");
+                        generateAll.style.display = "inline-block";
+                        
+                     }
 
                     //  $(".statsWrapper .collection_stats").attr("title","Date Range: "+dateRangeStr)
                     if(  $(".statsWrapper button[type='button']").eq(1).length != 0){
