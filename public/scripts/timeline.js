@@ -874,7 +874,7 @@ function getStats(){
 }
     
 function getHistoData(fromYear, fromMonth, fromDate, toYear, toMonth, toDate){
- //document.getElementId("histoWrapper").style.display = "block";
+ document.getElementById("histoWrapper").style.display = "block";
  var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
@@ -903,9 +903,9 @@ function getHistoData(fromYear, fromMonth, fromDate, toYear, toMonth, toDate){
       $.ajax({
         type: "GET",
         url: address, // uncomment this for deployment
-        beforesend: function(){
+        /*beforesend: function(){
             document.getElementById("histoWrapper").style.display = "block";
-        }
+        }*/
         dataType: "text",
         timeout: 0,
         success: function( data, textStatus, jqXHR) {
