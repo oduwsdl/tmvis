@@ -37,6 +37,7 @@
 	<body>
 
 		<div class="container-fluid">
+			
 			<div class="well row attributesWrapper" style="margin-top: 1%;">
 
 				<div class = "Title">
@@ -104,12 +105,30 @@
 					</div>
 				</form>
 
+				<!--HISTO-->
+				<div class="histoWrapper row" style="display:none">
+					<div class="col-lg-12">
+						<p class="Mementos_Considered"></p>
+						
+						<div id="histogram"></div>
+						
+						<div class='dateMenu'>
+							<form>
+								<p>To date:</p>
+								<select class='aMenu' id='menu1'></select>
 
-				<!--STATS-->
+								<p>From date:</p>
+								<select  class='aMenu' id='menu2'></select>
+								<button class="btn btn-primary getSummary" title="Displays visualizations after screenshots are captured">Generate</button>
+							</form>
+						</div>
+					</div>
+				</div>
+				
+				<!--STATS
 				<div class="statsWrapper row" style="display:none;">
 					<div class="col-lg-12">
 						<p class="Mementos_Considered"></p>
-						<div id="histogram"></div>
 						
 						<div class='dateMenu'>
 							<form>
@@ -142,8 +161,8 @@
 					</div>
 					<!--div class="col-lg-2 pull-right">
 					   <button style="float: right;" class="btn btn-primary getSummary" title="Displays visualizations after screenshots are captured"> Generate Thumbnails </button>
-					</div-->
-				</div>
+					</div>
+				</div-->
 			</div>
 
 
