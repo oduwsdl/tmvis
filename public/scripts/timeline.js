@@ -903,6 +903,9 @@ function getHistoData(fromYear, fromMonth, fromDate, toYear, toMonth, toDate){
       $.ajax({
         type: "GET",
         url: address, // uncomment this for deployment
+        beforesend: function(){
+            document.getElementById("histoWrapper").style.display = "block";
+        }
         dataType: "text",
         timeout: 0,
         success: function( data, textStatus, jqXHR) {
