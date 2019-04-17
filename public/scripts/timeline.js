@@ -874,7 +874,7 @@ function getStats(){
 }
     
 function getHistoData(fromYear, fromMonth, fromDate, toYear, toMonth, toDate){
- document.getElementsByClassName("histoWrapper row").style.display = "block";
+ document.getElementsId("histoWrapper").style.display = "block";
  var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
