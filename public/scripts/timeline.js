@@ -834,7 +834,7 @@ function getStats(){
                     
                     //Get the data into an array for the histogram
                     //From and to dates are passed for the domain
-                    //getHistoData(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+                    getHistoData(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
                     
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
@@ -890,9 +890,9 @@ function getHistoData(fromYear, fromMonth, fromDate, toYear, toMonth, toDate){
         $(".time_container").hide();
         $(".Explain_Threshold").hide();
        var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
-       //var pathForURL = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+"histogram"+"/" +$('.argumentsForm #urirIP').val().trim();
-       //var histoStatePath = "/alsummarizedview" + pathForURL;
-       //changeToHistogramState(histoStatePath);
+       var pathForURL = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+"histogram"+"/" +$('.argumentsForm #urirIP').val().trim();
+       var histoStatePath = "/alsummarizedview" + pathForURL;
+       changeToHistogramState(histoStatePath);
        startEventNotification();
        var ENDPOINT = "/alsummarizedtimemap";
        var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
