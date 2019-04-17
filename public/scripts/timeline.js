@@ -606,7 +606,8 @@ var curUniqueUserSessionID = null;
           $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
           $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
           $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true).trigger("click");
-          getStats(); // this makes the call for getting the initial stats.
+          //getStats(); // this makes the call for getting the initial stats.
+          getHistoData(2015, 1, 1, 2019, 1, 1);
       }else{
         //alert("doesn't have the local storage set, using the Query parameters");
         //GET Request-> "http://localhost:3000/GetResponse/?URI-R=http://4genderjustice.org/&ci=1068&primesource=archiveit&hdt=4"
@@ -630,7 +631,8 @@ var curUniqueUserSessionID = null;
             if(curDeepLinkStateArr[4] == "summary"){
               getSummary();
             }else{
-              getStats();
+                getHistoData(2015, 1, 1, 2019, 1, 1);
+              //getStats();
             }
           }else{
               return false;
