@@ -1,4 +1,4 @@
-function getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, dateArray){
+function getHistogram(dateArray){
 	// set the dimensions and margins of the graph
 	var margin = {top: 10, right: 30, bottom: 30, left: 110},
 	    width = 1000 - margin.left - margin.right,
@@ -18,7 +18,17 @@ function getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, da
 	data.forEach(function(d) {
 	    d.date = parseDate(d.event_display_date);
 	});
+	
+	var endPoint = date.length - 1;
 
+	var fromYear = date[0].event_display_date.substring(0,4);
+	var fromMonth = date[0].event_display_date.substring(5,2);
+	var fromDate = date[0].event_display_date.substring(8,2);
+	
+	var toYear = date[endPoint].event_display_date.substring(0,4);
+	var toMonth = date[endPoint].event_display_date.substring(5,2);
+	var toDate = date[endPoint].event_display_date.substring(8,2);
+	
 	// set the ranges
 	var x = d3.scaleTime()
 		  .domain([new Date(fromYear, fromMonth, fromDate), new Date(toYear, toMonth, toDate)])
