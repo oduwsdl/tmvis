@@ -29,13 +29,6 @@ function getHistogram(dateArray){
 	var toMonth = data[endPoint].event_display_date.substring(5,7);
 	var toDate = data[endPoint].event_display_date.substring(8,10);
 	
-	console.log(fromYear);
-	console.log(fromMonth);
-	console.log(fromDate);
-	console.log(toYear);
-	console.log(toMonth);
-	console.log(toDate);
-	
 	// set the ranges
 	var x = d3.scaleTime()
 		  .domain([new Date(fromYear, fromMonth, fromDate), new Date(toYear, toMonth, toDate)])
