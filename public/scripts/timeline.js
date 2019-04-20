@@ -607,7 +607,7 @@ var curUniqueUserSessionID = null;
           $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
           $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true).trigger("click");
           //getStats(); // this makes the call for getting the initial stats.
-          getHistoData(2015, 1, 1, 2019, 1, 1);
+          getHistoData();
       }else{
         //alert("doesn't have the local storage set, using the Query parameters");
         //GET Request-> "http://localhost:3000/GetResponse/?URI-R=http://4genderjustice.org/&ci=1068&primesource=archiveit&hdt=4"
@@ -631,7 +631,7 @@ var curUniqueUserSessionID = null;
             if(curDeepLinkStateArr[4] == "summary"){
               getSummary();
             }else{
-                getHistoData(2015, 1, 1, 2019, 1, 1);
+                getHistoData();
               //getStats();
             }
           }else{
@@ -836,7 +836,7 @@ function getStats(){
                     
                     //Get the data into an array for the histogram
                     //From and to dates are passed for the domain
-                    getHistoData(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+                    getHistoData();
                     
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
@@ -875,7 +875,7 @@ function getStats(){
       }
 }
     
-function getHistoData(fromYear, fromMonth, fromDate, toYear, toMonth, toDate){
+function getHistoData(){
  document.getElementById("histoWrapper").style.display = "block";
  var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
@@ -927,7 +927,7 @@ function getHistoData(fromYear, fromMonth, fromDate, toYear, toMonth, toDate){
               }
 
               histoData= $.parseJSON(data);
-              getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, histoData);
+              getHistogram(histoData);
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
