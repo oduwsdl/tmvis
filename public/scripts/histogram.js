@@ -7,6 +7,17 @@ function getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, da
 	// parse the date / time
 	var parseDate = d3.timeParse("%Y-%m-%d");
 
+	var data = dateArray;
+	
+	// get the data
+	for(i = 0; i < data.length; i++){
+		data[i].event_display_date = data[i].event_display_date.substring(0, 10);
+	}
+
+	// format the data
+	data.forEach(function(d) {
+	    d.date = parseDate(d.event_display_date);
+	});
 
 	// set the ranges
 	var x = d3.scaleTime()
@@ -30,18 +41,6 @@ function getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, da
 	    .append("g")
 	    .attr("transform", 
 		  "translate(" + margin.left + "," + margin.top + ")");
-
-	var data = dateArray;
-	
-	// get the data
-	for(i = 0; i < data.length; i++){
-		data[i].event_display_date = data[i].event_display_date.substring(0, 10);
-	}
-
-	  // format the data
-	  data.forEach(function(d) {
-	      d.date = parseDate(d.event_display_date);
-	  });
 
 	  // group the data for the bars
 	  var bins = histogram(data);
