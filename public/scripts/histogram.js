@@ -22,12 +22,12 @@ function getHistogram(dateArray){
 	var endPoint = data.length - 1;
 
 	var fromYear = data[0].event_display_date.substring(0,4);
-	var fromMonth = data[0].event_display_date.substring(5,2);
-	var fromDate = data[0].event_display_date.substring(8,2);
+	var fromMonth = data[0].event_display_date.substring(5,7);
+	var fromDate = data[0].event_display_date.substring(8,10);
 	
 	var toYear = data[endPoint].event_display_date.substring(0,4);
-	var toMonth = data[endPoint].event_display_date.substring(5,2);
-	var toDate = data[endPoint].event_display_date.substring(8,2);
+	var toMonth = data[endPoint].event_display_date.substring(5,7);
+	var toDate = data[endPoint].event_display_date.substring(8,10);
 	
 	console.log(fromYear);
 	console.log(fromMonth);
@@ -38,7 +38,7 @@ function getHistogram(dateArray){
 	
 	// set the ranges
 	var x = d3.scaleTime()
-		  .domain([new Date(2015, 1, 1), new Date(2019, 1, 1)])
+		  .domain([new Date(fromYear, fromMonth, fromDate), new Date(toYear, toMonth, toDate)])
 		  .rangeRound([0, width]);
 	var y = d3.scaleLinear()
 		  .range([height, 0]);
