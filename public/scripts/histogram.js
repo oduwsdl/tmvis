@@ -19,7 +19,7 @@ function getHistogram(dateArray){
 	    d.date = parseDate(d.event_display_date);
 	});
 	
-	var endPoint = date.length - 1;
+	var endPoint = data.length - 1;
 
 	/*var fromYear = date[0].event_display_date.substring(0,4);
 	var fromMonth = date[0].event_display_date.substring(5,2);
