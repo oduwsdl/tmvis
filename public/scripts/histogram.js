@@ -21,13 +21,13 @@ function getHistogram(dateArray){
 	
 	var endPoint = date.length - 1;
 
-	var fromYear = date[0].event_display_date.substring(0,4);
+	/*var fromYear = date[0].event_display_date.substring(0,4);
 	var fromMonth = date[0].event_display_date.substring(5,2);
 	var fromDate = date[0].event_display_date.substring(8,2);
 	
 	var toYear = date[endPoint].event_display_date.substring(0,4);
 	var toMonth = date[endPoint].event_display_date.substring(5,2);
-	var toDate = date[endPoint].event_display_date.substring(8,2);
+	var toDate = date[endPoint].event_display_date.substring(8,2);*/
 	
 	// set the ranges
 	var x = d3.scaleTime()
