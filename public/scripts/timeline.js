@@ -788,7 +788,7 @@ function getStats(){
       hammingDistance = 4;
   }
 
-  var role = "stats";
+  var role = "summary";
   if($("body").find("form")[0].checkValidity()){
       startEventNotification();
       var ENDPOINT = "/alsummarizedtimemap";
@@ -811,7 +811,7 @@ function getStats(){
                 $('#serverStreamingModal .logsContent').empty();
                 $('#serverStreamingModal').modal('hide');
                 try{
-                    jsonObjRes= $.parseJSON(data);
+                    /*jsonObjRes= $.parseJSON(data);
                     var htmlStr="&nbsp;";
                     var curUniqThumbCount = 0;
                     jsonObjRes.forEach(function(item,index,arry){
@@ -832,13 +832,29 @@ function getStats(){
                     var toDateStr= toDate.getFullYear()+"-"+toDate.getMonth() +"-"+toDate.getDate();
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
-                    $(".paraOnlyOnStatsResults").show();
+                    $(".paraOnlyOnStatsResults").show();*/
+                    
+                      data = $.trim(data).split("...");
+                      if(data.length > 1){
+                          if(data [1] == ""){
+                              data = data [0];
+                          }else{
+                              data = data [1];
+                          }
+                      }
+                      else{
+                          data = data [0];
+                      }
+
+                      histoData= $.parseJSON(data);
+                      getHistogram(histoData);
                     
                     //Get the data into an array for the histogram
                     //From and to dates are passed for the domain
-                    getHistoData();
+                    //getHistoData();
+                    //getHistogram();
                     
-                    $(".statsWrapper .collection_stats").html(memStatStr);
+                   /* $(".statsWrapper .collection_stats").html(memStatStr);
 
 
                     //  $(".statsWrapper .collection_stats").attr("title","Date Range: "+dateRangeStr)
@@ -854,7 +870,7 @@ function getStats(){
 
                     //$(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
                     $(".modal-backdrop").remove();
-                    $('#serverStreamingModal').modal('hide');
+                    $('#serverStreamingModal').modal('hide');*/
 
                 }catch(err){
                     alert($.trim(data));
