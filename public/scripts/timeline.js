@@ -632,7 +632,6 @@ var curUniqueUserSessionID = null;
               getSummary();
             }else{
                 getHistoData();
-              //getStats();
             }
           }else{
               return false;
