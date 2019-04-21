@@ -788,7 +788,7 @@ function getStats(){
       hammingDistance = 4;
   }
 
-  var role = "summary";
+  var role = "stats";
   if($("body").find("form")[0].checkValidity()){
       startEventNotification();
       var ENDPOINT = "/alsummarizedtimemap";
@@ -801,9 +801,9 @@ function getStats(){
         $.ajax({
             type: "GET",
             url: address, // uncomment this for deployment
-            /*beforeSend: function(xhr) {
+            beforeSend: function(xhr) {
               xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
-            },*/
+            },
             dataType: "text",
             timeout: 90000000,
             success: function( data, textStatus, jqXHR) {
@@ -811,7 +811,7 @@ function getStats(){
                 $('#serverStreamingModal .logsContent').empty();
                 $('#serverStreamingModal').modal('hide');
                 try{
-                    /*jsonObjRes= $.parseJSON(data);
+                    jsonObjRes= $.parseJSON(data);
                     var htmlStr="&nbsp;";
                     var curUniqThumbCount = 0;
                     jsonObjRes.forEach(function(item,index,arry){
@@ -831,38 +831,23 @@ function getStats(){
                     var toDate = new Date(jsonObjRes[0].todate);
                     var toDateStr= toDate.getFullYear()+"-"+toDate.getMonth() +"-"+toDate.getDate();
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
-                    $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);*/
+                    $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
                     $(".paraOnlyOnStatsResults").show();
-                    
-                      data = $.trim(data).split("...");
-                      if(data.length > 1){
-                          if(data [1] == ""){
-                              data = data [0];
-                          }else{
-                              data = data [1];
-                          }
-                      }
-                      else{
-                          data = data [0];
-                      }
-
-                      histoData= $.parseJSON(data);
-                      getHistogram(histoData);
                     
                     //Get the data into an array for the histogram
                     //From and to dates are passed for the domain
-                    //getHistoData();
+                    getHistoData();
                     //getHistogram();
                     
-                    //$(".statsWrapper .collection_stats").html(memStatStr);
+                    $(".statsWrapper .collection_stats").html(memStatStr);
 
 
                     //  $(".statsWrapper .collection_stats").attr("title","Date Range: "+dateRangeStr)
-                    /*if(  $(".statsWrapper button[type='button']").eq(1).length != 0){
+                    if(  $(".statsWrapper button[type='button']").eq(1).length != 0){
                       $(".statsWrapper button[type='button']").eq(1).trigger("click");
                     }else{
                       $(".statsWrapper button[type='button']").eq(0).trigger("click");
-                    }*/
+                    }
 
                     $(".statsWrapper").show();
                     $(".getSummary").show();
