@@ -833,7 +833,7 @@ function getStats(){
                     
                     //Get the data into an array for the histogram
                     //From and to dates are passed for the domain
-                    getHistoData(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+                    getHistoData();
                     
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
@@ -872,7 +872,7 @@ function getStats(){
       }
 }
     
-function getHistoData(fromYear, fromMonth, fromDate, toYear, toMonth, toDate){
+function getHistoData(){
  var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
@@ -918,7 +918,7 @@ function getHistoData(fromYear, fromMonth, fromDate, toYear, toMonth, toDate){
               }
 
               histoData= $.parseJSON(data);
-              getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, histoData);
+              getHistogram(histoData);
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
