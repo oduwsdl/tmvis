@@ -1,4 +1,3 @@
-
 var jsonObjRes = {};
 var histoData = {};
 var curURIUnderFocus=null;
@@ -607,7 +606,6 @@ var curUniqueUserSessionID = null;
           $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
           $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true).trigger("click");
           getStats(); // this makes the call for getting the initial stats.
-          //getHistoData();
       }else{
         //alert("doesn't have the local storage set, using the Query parameters");
         //GET Request-> "http://localhost:3000/GetResponse/?URI-R=http://4genderjustice.org/&ci=1068&primesource=archiveit&hdt=4"
@@ -631,8 +629,7 @@ var curUniqueUserSessionID = null;
             if(curDeepLinkStateArr[4] == "summary"){
               getSummary();
             }else{
-                getStats();
-                //getHistoData();
+              getStats();
             }
           }else{
               return false;
@@ -836,7 +833,7 @@ function getStats(){
                     
                     //Get the data into an array for the histogram
                     //From and to dates are passed for the domain
-                    getHistoData();
+                    getHistoData(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
                     
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
@@ -875,8 +872,7 @@ function getStats(){
       }
 }
     
-function getHistoData(){
- document.getElementById("histoWrapper").style.display = "block";
+function getHistoData(fromYear, fromMonth, fromDate, toYear, toMonth, toDate){
  var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
@@ -893,9 +889,7 @@ function getHistoData(){
         $(".time_container").hide();
         $(".Explain_Threshold").hide();
        var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
-       var pathForURL = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+"histogram"+"/" +$('.argumentsForm #urirIP').val().trim();
-       var histoStatePath = "/alsummarizedview" + pathForURL;
-       changeToHistogramState(histoStatePath);
+
        startEventNotification();
        var ENDPOINT = "/alsummarizedtimemap";
        var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
@@ -905,9 +899,6 @@ function getHistoData(){
       $.ajax({
         type: "GET",
         url: address, // uncomment this for deployment
-        /*beforesend: function(){
-            document.getElementById("histoWrapper").style.display = "block";
-        }*/
         dataType: "text",
         timeout: 0,
         success: function( data, textStatus, jqXHR) {
@@ -927,7 +918,7 @@ function getHistoData(){
               }
 
               histoData= $.parseJSON(data);
-              getHistogram(histoData);
+              getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, histoData);
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
@@ -1191,13 +1182,6 @@ function generateDeepLinkState(curInputJsobObj){
 
 function generateDeepLinkStateForSummary(curInputJsobObj){
   return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["urir"];
-}
-
-function changeToHistogramState(curURLState) {
-    var state = {},
-        title = "Histo State",
-        path = curURLState;
-    history.pushState(state, title, path);
 }
 
 function changeToSummaryState(curURLState) {
