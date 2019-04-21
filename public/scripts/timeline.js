@@ -836,7 +836,7 @@ function getStats(){
                     
                     //Get the data into an array for the histogram
                     //From and to dates are passed for the domain
-                    getHistoData(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+                    getHistoData();
                     
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
