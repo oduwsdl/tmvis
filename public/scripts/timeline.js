@@ -776,6 +776,7 @@ function setProgressBar(value){
 }
 
 function getStats(){
+  document.getElementById("histoWrapper row").style.display = "block";
   var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
