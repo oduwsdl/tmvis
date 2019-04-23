@@ -776,7 +776,7 @@ function setProgressBar(value){
 }
 
 function getStats(){
-  document.getElementById("histoWrapper").style.display = "block";
+  /*document.getElementById("histoWrapper").style.display = "block";
   var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
@@ -839,8 +839,8 @@ function getStats(){
           alert(errMsg);
         }
       });
-    }
-  /*var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+    }*/
+  var collectionIdentifer = $('.argumentsForm #collectionNo').val();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
   }
@@ -933,7 +933,7 @@ function getStats(){
               // alert(errMsg);
             }
         });
-      }*/
+      }
 }
     
 function getHistoData(){
