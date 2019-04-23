@@ -936,69 +936,101 @@ function getStats(){
       }*/
 }
     
-function getHistoData(){
- var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
+function getTheNewStats(){
+  var collectionIdentifer = $('.argumentsForm #collectionNo').val();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
   }
-  //var hammingDistance = $('.argumentsForm #hammingDistance').val();
-  var hammingDistance = $(".statsWrapper .on").val();
-
-  if(hammingDistance == "" || hammingDistance===undefined){
-    hammingDistance = $('.argumentsForm #hammingDistance').val();
+  var hammingDistance = $('.argumentsForm #hammingDistance').val();
+  if(hammingDistance == ""){
+      hammingDistance = 4;
   }
 
-  var role = "summary"; // set to summary to get timestamps
+  var role = "stats";
   if($("body").find("form")[0].checkValidity()){
-        $(".time_container").hide();
-        $(".Explain_Threshold").hide();
-       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
+      startEventNotification();
+      var ENDPOINT = "/alsummarizedtimemap";
+      var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
+      $("#busy-loader").show();
+      $('#serverStreamingModal .logsContent').empty();
+       $('#logtab .logsContent').empty();
 
-       startEventNotification();
-       var ENDPOINT = "/alsummarizedtimemap";
-       var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
-       $("#busy-loader").show();
-       $('#serverStreamingModal .logsContent').empty();
-       $('#serverStreamingModal').modal('show');
-      $.ajax({
-        type: "GET",
-        url: address, // uncomment this for deployment
-        dataType: "text",
-        timeout: 0,
-        success: function( data, textStatus, jqXHR) {
-            $("#busy-loader").hide();
-            $('#serverStreamingModal').modal('hide');
-          try{
-              data = $.trim(data).split("...");
-              if(data.length > 1){
-                  if(data [1] == ""){
-                      data = data [0];
-                  }else{
-                      data = data [1];
-                  }
-              }
-              else{
-                  data = data [0];
-              }
+      $('#serverStreamingModal').modal('show');
+        $.ajax({
+            type: "GET",
+            url: address, // uncomment this for deployment
+            beforeSend: function(xhr) {
+              xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+            },
+            dataType: "text",
+            timeout: 90000000,
+            success: function( data, textStatus, jqXHR) {
+                $("#busy-loader").hide();
+                $('#serverStreamingModal .logsContent').empty();
+                $('#serverStreamingModal').modal('hide');
+                try{
+                    jsonObjRes= $.parseJSON(data);
+                    var htmlStr="&nbsp;";
+                    var curUniqThumbCount = 0;
+                    jsonObjRes.forEach(function(item,index,arry){
+                      if(curUniqThumbCount != item['unique']){
+                        htmlStr+= "<button type='button' class='btn btn-secondary' name='thresholdDistance' title='No Of unique thumbnails:"+item['unique'] +"' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</button>";
+                      }
+                        curUniqThumbCount = item['unique'];
+                    });
 
-              histoData= $.parseJSON(data);
-              getHistogram(histoData);
-          }
-          catch(err){
-            alert("Some problem fetching the response, Please refresh and try again.");
-            $("#busy-loader").hide();
-            $('#serverStreamingModal').modal('hide');
-            $(".tabContentWrapper").hide();
-          }
-        },
-        error: function( data, textStatus, jqXHR) {
-          var errMsg = "Some problem fetching the response, Please refresh and try again.";
-          $("#busy-loader").hide();
-          $('#serverStreamingModal').modal('hide');
-          alert(errMsg);
-        }
-      });
-    }
+                    var memStatStr = htmlStr;
+                    var toDisplay= "Internet Archive";
+                    if($("input[name='primesource']:checked").val() == "archiveit" ){
+                      toDisplay= "Archive-It";
+                    }
+                    var fromDate= new Date(jsonObjRes[0].fromdate);
+                    var fromDateStr= fromDate.getFullYear()+"-"+fromDate.getMonth() +"-"+fromDate.getDate();
+                    var toDate = new Date(jsonObjRes[0].todate);
+                    var toDateStr= toDate.getFullYear()+"-"+toDate.getMonth() +"-"+toDate.getDate();
+                    var dateRangeStr= fromDateStr + " - " + toDateStr;
+                    $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
+                    $(".paraOnlyOnStatsResults").show();
+                    
+                    //Get the data into an array for the histogram
+                    //From and to dates are passed for the domain
+                    getHistoData();
+                    
+                    $(".statsWrapper .collection_stats").html(memStatStr);
+
+
+                    //  $(".statsWrapper .collection_stats").attr("title","Date Range: "+dateRangeStr)
+                    if(  $(".statsWrapper button[type='button']").eq(1).length != 0){
+                      $(".statsWrapper button[type='button']").eq(1).trigger("click");
+                    }else{
+                      $(".statsWrapper button[type='button']").eq(0).trigger("click");
+                    }
+
+                    $(".statsWrapper").show();
+                    $(".getSummary").show();
+
+
+                    //$(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
+                    $(".modal-backdrop").remove();
+                    $('#serverStreamingModal').modal('hide');
+
+                }catch(err){
+                    alert($.trim(data));
+                    $('#serverStreamingModal .logsContent').empty();
+                      $('#serverStreamingModal').modal('hide');
+                    $(".statsWrapper").hide();
+                    $(".tabContentWrapper").hide();
+                }
+            },
+            error: function( data, textStatus, jqXHR) {
+              // $("#busy-loader").hide();
+              // $('#serverStreamingModal .logsContent').empty();
+              //   $('#serverStreamingModal').modal('hide');
+              // var errMsg = "Some problem fetching the response, Please refresh and try again.";
+              // alert(errMsg);
+            }
+        });
+      }
 }
 
 function getSummary(){
@@ -1189,6 +1221,10 @@ $(function(){
           }
         }
       });
+    
+    $(".getTheNewStats").click(function(event){
+      getTheNewStats();
+    });
 
     // work around for the timeline setting stuff
     $(".getSummary").click(function(event){
