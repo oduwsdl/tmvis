@@ -1236,7 +1236,7 @@ $(function(){
             hammingDistance = 4;
         }
 
-        var role = "summary" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
+        var role = "stats" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
         if($(this).parents("body").find("form")[0].checkValidity()){
             localStorage.setItem("getStatsClicked", "true");
             var curInputJsobObj = {};
