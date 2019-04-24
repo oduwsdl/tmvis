@@ -1223,7 +1223,50 @@ $(function(){
       });
     
     $(".getTheNewStats").click(function(event){
-      getTheNewStats();
+        event.preventDefault();
+        uriAnalysisForAttributes($("#uriIP").val().trim());
+        $(".tabContentWrapper").hide();
+        $(".statsWrapper").hide();
+        var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
+        if(collectionIdentifer == ""){
+            collectionIdentifer = "all";
+        }
+        var hammingDistance = $('.argumentsForm #hammingDistance').val().trim();
+        if(hammingDistance == ""){
+            hammingDistance = 4;
+        }
+
+        var role = "summary" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
+        if($(this).parents("body").find("form")[0].checkValidity()){
+            localStorage.setItem("getStatsClicked", "true");
+            var curInputJsobObj = {};
+            curInputJsobObj["uri"]= $("#uriIP").val().trim();
+            curInputJsobObj["urir"]= $("#urirIP").val().trim();
+            curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
+            if(curInputJsobObj["primesource"]=="internetarchive"){
+              curInputJsobObj["collectionIdentifer"]= "all";
+
+            }else{
+              curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val().trim();
+
+            }
+            if(!parseInt(curInputJsobObj["collectionIdentifer"])){
+              curInputJsobObj["collectionIdentifer"] = "all";
+            }
+            curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
+            curInputJsobObj["role"]= role;
+            localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
+            //window.location.reload();
+            if(notificationSrc != null){
+              notificationSrc.close();
+            }
+            window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
+        }else{
+          if( $("#uriIP").val().trim()==""){
+            alert("Please enter an URI-R, required field.");
+          }
+        }
+        getTheNewStats();
     });
 
     // work around for the timeline setting stuff
