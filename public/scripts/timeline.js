@@ -1224,6 +1224,8 @@ $(function(){
       });
     
     $(".getTheNewStats").click(function(event){
+        //Remove histogram
+        document.getElementById("histogram").style.display = "none";
         event.preventDefault();
         uriAnalysisForAttributes($("#uriIP").val().trim());
         $(".tabContentWrapper").hide();
