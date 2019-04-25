@@ -938,7 +938,7 @@ function getStats(){
     
 function getTheNewStats(){
   document.getElementById("histoWrapper").style.display = "none";
-  var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+  /*var collectionIdentifer = $('.argumentsForm #collectionNo').val();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
   }
@@ -1031,7 +1031,7 @@ function getTheNewStats(){
               // alert(errMsg);
             }
         });
-      }
+      }*/
 }
 
 function getSummary(){
@@ -1225,7 +1225,7 @@ $(function(){
     
     $(".getTheNewStats").click(function(event){
         //Remove histogram
-        document.getElementById("histoWrapper").style.display = "none";
+        /*document.getElementById("histoWrapper").style.display = "none";
         event.preventDefault();
         uriAnalysisForAttributes($("#uriIP").val().trim());
         $(".tabContentWrapper").hide();
@@ -1268,7 +1268,7 @@ $(function(){
           if( $("#uriIP").val().trim()==""){
             alert("Please enter an URI-R, required field.");
           }
-        }
+        }*/
         getTheNewStats();
     });
 
