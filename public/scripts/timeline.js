@@ -788,7 +788,7 @@ function getStats(){
     hammingDistance = $('.argumentsForm #hammingDistance').val();
   }
 
-  var role = "summary"; // set to summary to get timestamps
+  var role = "histogram"; // set to summary to get timestamps
   if($("body").find("form")[0].checkValidity()){
         startEventNotification();
         $(".time_container").hide();
