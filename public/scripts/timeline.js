@@ -3,6 +3,7 @@ var histoData = {};
 var curURIUnderFocus=null;
 var curDeepLinkStateArr=[];
 var curUniqueUserSessionID = null;
+var generateAllClicked = false;
 (function(window, document, undefined){
 
 
@@ -943,11 +944,14 @@ function getStats(){
     
 function getTheNewStats(){
   document.getElementById("histoWrapper").style.display = "none";
-  /*var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+  var collectionIdentifer = $('.argumentsForm #collectionNo').val();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
   }
   var hammingDistance = $('.argumentsForm #hammingDistance').val();
+  if (generateAllClicked == true) {
+    hammingDistance = "0";
+  }
   if(hammingDistance == ""){
       hammingDistance = 4;
   }
@@ -1036,7 +1040,7 @@ function getTheNewStats(){
               // alert(errMsg);
             }
         });
-      }*/
+      }
 }
 
 function getSummary(){
@@ -1229,51 +1233,6 @@ $(function(){
       });
     
     $(".getTheNewStats").click(function(event){
-        //Remove histogram
-        /*document.getElementById("histoWrapper").style.display = "none";
-        event.preventDefault();
-        uriAnalysisForAttributes($("#uriIP").val().trim());
-        $(".tabContentWrapper").hide();
-        $(".statsWrapper").hide();
-        var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
-        if(collectionIdentifer == ""){
-            collectionIdentifer = "all";
-        }
-        var hammingDistance = $('.argumentsForm #hammingDistance').val().trim();
-        if(hammingDistance == ""){
-            hammingDistance = 4;
-        }
-
-        var role = "stats" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
-        if($(this).parents("body").find("form")[0].checkValidity()){
-            localStorage.setItem("getStatsClicked", "true");
-            var curInputJsobObj = {};
-            curInputJsobObj["uri"]= $("#uriIP").val().trim();
-            curInputJsobObj["urir"]= $("#urirIP").val().trim();
-            curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
-            if(curInputJsobObj["primesource"]=="internetarchive"){
-              curInputJsobObj["collectionIdentifer"]= "all";
-
-            }else{
-              curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val().trim();
-
-            }
-            if(!parseInt(curInputJsobObj["collectionIdentifer"])){
-              curInputJsobObj["collectionIdentifer"] = "all";
-            }
-            curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
-            curInputJsobObj["role"]= role;
-            localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
-            //window.location.reload();
-            if(notificationSrc != null){
-              notificationSrc.close();
-            }
-            window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
-        }else{
-          if( $("#uriIP").val().trim()==""){
-            alert("Please enter an URI-R, required field.");
-          }
-        }*/
         getTheNewStats();
     });
 
@@ -1281,6 +1240,12 @@ $(function(){
     $(".getSummary").click(function(event){
       getSummary();
     });
+    
+    $("#generateAllThumbnails").click(function(event){
+        generateAllClicked = true;
+        getSummary();
+    });
+
 
     $(document).on("click","button[name=thresholdDistance]",function(){
       $('button[name=thresholdDistance].on').removeClass('on')
