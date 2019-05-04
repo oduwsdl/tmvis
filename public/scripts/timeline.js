@@ -1,9 +1,11 @@
 
+
 var jsonObjRes = {};
 var histoData = {};
 var curURIUnderFocus=null;
 var curDeepLinkStateArr=[];
 var curUniqueUserSessionID = null;
+var generateAllClicked = false;
 (function(window, document, undefined){
 
 
@@ -841,8 +843,7 @@ function getStats(){
                     if (jsonObjRes[0].totalmementos <= 12) {
                         var generateAll = document.getElementById("generateAllThumbnails");
                         generateAll.style.display = "inline-block";
-                        
-                     }
+                    }
 
                     //  $(".statsWrapper .collection_stats").attr("title","Date Range: "+dateRangeStr)
                     if(  $(".statsWrapper button[type='button']").eq(1).length != 0){
@@ -862,7 +863,7 @@ function getStats(){
                 }catch(err){
                     alert($.trim(data));
                     $('#serverStreamingModal .logsContent').empty();
-                      $('#serverStreamingModal').modal('hide');
+                    $('#serverStreamingModal').modal('hide');
                     $(".statsWrapper").hide();
                     $(".tabContentWrapper").hide();
                 }
@@ -954,6 +955,10 @@ function getSummary(){
   }
   //var hammingDistance = $('.argumentsForm #hammingDistance').val();
   var hammingDistance = $(".statsWrapper .on").val();
+
+  if (generateAllClicked == true) {
+    hammingDistance = "0";
+  }
 
   if(hammingDistance == "" || hammingDistance===undefined){
     hammingDistance = $('.argumentsForm #hammingDistance').val();
@@ -1135,6 +1140,11 @@ $(function(){
     // work around for the timeline setting stuff
     $(".getSummary").click(function(event){
       getSummary();
+    });
+
+    $("#generateAllThumbnails").click(function(event){
+        generateAllClicked = true;
+        getSummary();
     });
 
     $(document).on("click","button[name=thresholdDistance]",function(){
