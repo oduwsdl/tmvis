@@ -788,14 +788,14 @@ function getStats(){
     hammingDistance = $('.argumentsForm #hammingDistance').val();
   }
 
-  var role = "histogram"; // set to summary to get timestamps
+  var role = "summary"; // set to summary to get timestamps
   if($("body").find("form")[0].checkValidity()){
         startEventNotification();
         $(".time_container").hide();
         $(".Explain_Threshold").hide();
        var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
 
-       //startEventNotification();
+       startEventNotification();
        var ENDPOINT = "/alsummarizedtimemap";
        var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
        $("#busy-loader").show();
