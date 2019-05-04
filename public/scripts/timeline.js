@@ -824,6 +824,11 @@ function getStats(){
 
               histoData= $.parseJSON(data);
               getHistogram(histoData);
+              if (jsonObjRes[0].totalmementos <= 12) {
+                        var generateAll = document.getElementById("generateAllThumbnails");
+                        generateAll.style.display = "inline-block";
+                        
+              }
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
