@@ -777,8 +777,12 @@ function setProgressBar(value){
 }
 
 function getStats(){
-  /*document.getElementById("histoWrapper").style.display = "block";
-  var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
+    document.getElementById("histoWrapper").style.display = "block";
+    getHistoData();
+}
+    
+function getHistoData(){
+ var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
   }
@@ -791,12 +795,11 @@ function getStats(){
 
   var role = "summary"; // set to summary to get timestamps
   if($("body").find("form")[0].checkValidity()){
-        startEventNotification();
         $(".time_container").hide();
         $(".Explain_Threshold").hide();
        var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
 
-       //startEventNotification();
+       startEventNotification();
        var ENDPOINT = "/alsummarizedtimemap";
        var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
        $("#busy-loader").show();
@@ -824,12 +827,7 @@ function getStats(){
               }
 
               histoData= $.parseJSON(data);
-              getHistogram(histoData);
-              if (jsonObjRes[0].totalmementos <= 12) {
-                        var generateAll = document.getElementById("generateAllThumbnails");
-                        generateAll.style.display = "inline-block";
-                        
-              }
+              getHistogram();
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
@@ -845,71 +843,9 @@ function getStats(){
           alert(errMsg);
         }
       });
-    }*/
-  var collectionIdentifer = $('.argumentsForm #collectionNo').val();
-  if(collectionIdentifer == ""){
-      collectionIdentifer = "all";
-  }
-  var hammingDistance = $('.argumentsForm #hammingDistance').val();
-  if(hammingDistance == ""){
-      hammingDistance = 4;
-  }
-
-  var role = "summary";
-  if($("body").find("form")[0].checkValidity()){
-      startEventNotification();
-      var ENDPOINT = "/alsummarizedtimemap";
-      var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
-      $("#busy-loader").show();
-      $('#serverStreamingModal .logsContent').empty();
-       $('#logtab .logsContent').empty();
-
-      $('#serverStreamingModal').modal('show');
-        $.ajax({
-        type: "GET",
-        url: address, // uncomment this for deployment
-        dataType: "text",
-        timeout: 0,
-        success: function( data, textStatus, jqXHR) {
-            $("#busy-loader").hide();
-            $('#serverStreamingModal').modal('hide');
-          try{
-              data = $.trim(data).split("...");
-              if(data.length > 1){
-                  if(data [1] == ""){
-                      data = data [0];
-                  }else{
-                      data = data [1];
-                  }
-              }
-              else{
-                  data = data [0];
-              }
-
-              histoData= $.parseJSON(data);
-              getHistogram(histoData);
-              if (jsonObjRes[0].totalmementos <= 12) {
-                        var generateAll = document.getElementById("generateAllThumbnails");
-                        generateAll.style.display = "inline-block";
-                        
-              }
-          }
-          catch(err){
-            alert("Some problem fetching the response, Please refresh and try again.");
-            $("#busy-loader").hide();
-            $('#serverStreamingModal').modal('hide');
-            $(".tabContentWrapper").hide();
-          }
-        },
-        error: function( data, textStatus, jqXHR) {
-          var errMsg = "Some problem fetching the response, Please refresh and try again.";
-          $("#busy-loader").hide();
-          $('#serverStreamingModal').modal('hide');
-          alert(errMsg);
-        }
-      });
-      }
+    }
 }
+
     
 function getTheNewStats(){
   document.getElementById("histoWrapper").style.display = "none";
@@ -1023,6 +959,10 @@ function getSummary(){
   }
   //var hammingDistance = $('.argumentsForm #hammingDistance').val();
   var hammingDistance = $(".statsWrapper .on").val();
+    
+  if (generateAllClicked == true) {
+    hammingDistance = "0";
+  }
 
   if(hammingDistance == "" || hammingDistance===undefined){
     hammingDistance = $('.argumentsForm #hammingDistance').val();
