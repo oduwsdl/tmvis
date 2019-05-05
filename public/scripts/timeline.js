@@ -779,6 +779,9 @@ function setProgressBar(value){
 function getStats(){
     document.getElementById("histoWrapper").style.display = "block";
     getHistoData();
+    $(".getTheNewStats").click(function(event){
+       getTheNewStats();
+    });
 }
     
 function getHistoData(){
@@ -849,7 +852,7 @@ function getHistoData(){
     
 function getTheNewStats(){
   document.getElementById("histoWrapper").style.display = "none";
-  /*var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+  var collectionIdentifer = $('.argumentsForm #collectionNo').val();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
   }
@@ -945,7 +948,7 @@ function getTheNewStats(){
               // alert(errMsg);
             }
         });
-      }*/
+      }
 }
 
 function getSummary(){
