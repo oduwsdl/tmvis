@@ -831,6 +831,17 @@ function getHistoData(){
 
               histoData= $.parseJSON(data);
               getHistogram(histoData);
+              var generateAll = document.getElementById("generateAllThumbnails");
+              if(jsonObjRes[0].totalmementos <= 12){
+                  generateAll.style.display = "inline-block";
+              }
+              var dateRange = document.getElementById("dateRangeOptions");
+              if (dateRange.class == "btn btn-secondary on") {
+                  dateRange.style.display = "block";
+              }
+              else{
+                  dateRange.style.display = "none";
+              }
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
