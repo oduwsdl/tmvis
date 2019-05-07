@@ -78,22 +78,4 @@ function getHistogram(dateArray){
 	  /*svg.append("g")
 	      .call(d3.axisLeft(y));*/
 	
-	  var category = data;
-	
-	  for(var i = 0; i < category.length; i++){
-		  category[i].event_display_date = data[i].event_display_date.substring(0,4);
-	  }
-	
-	  var select = document.getElementById("menu1");
-	  for(var i = category.length - 1; i >= 0; --i) {
-	        var option = document.createElement('option');
-	        option.text = option.value = category[i].event_display_date;
-	        select.add(option, 0);
-	  }
-	  var select = document.getElementById("menu2");
-	  for(var i = category.length - 1; i >= 0; --i) {
-	        var option = document.createElement('option');
-	        option.text = option.value = category[i].event_display_date;
-	        select.add(option, 0);
-	  }
 }
