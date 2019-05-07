@@ -112,22 +112,14 @@
 						
 						<div id="histogram"></div>
 						
-						<div id="histogramSwitch">
-						<span class="histogramSwitchButtons">
-							<button type="button" class="btn btn-secondary" name="switchOption" id="dateRange">Date Range</button>
-							<button type="button" class="btn btn-secondary" name="switchOption" id="generateAllThumbnails" style="display: none;">Generate All</button>
-							<button type="button" class="btn btn-secondary on" name="switchOption" id="calculateUnique">Calculate Unique</button>	
-						</span>
-						 &nbsp; 
-						<button id="histogramNextStep" class="btn btn-primary">Proceed</button>
-
-							<div id="dateRangeOptions" style="display:none;">
-								<div id="from_dateRange">
-									<p class="inputTitle">From: </p><input type="text" placeholder="mm/dd/yyyy" id="from_dateRange_input">
-								</div>
-								<div id="to_dateRange">
-									<p class="inputTitle">To: </p><input type="text" placeholder="mm/dd/yyyy" id="to_dateRange_input">
-								</div>
+						<div class="col-lg-8">
+								<h3 class="collection_stats_container">
+									<span class="collection_stats">
+										<button type="button" class="btn btn-secondary" name="thresholdDistance" title="No Of unique thumbnails:23" timetowait="0" value="2">23</button>
+									</span> &nbsp; <button class="btn btn-primary getSummary" title="Displays visualizations after screenshots are captured"> Generate Thumbnails </button>
+</h3>
+								<div class="time_container">
+								<p>(estimated <span class="approxTimeShowingPTag"> </span> to generate)</p>
 							</div>
 						</div>
 						
