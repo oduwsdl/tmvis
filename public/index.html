@@ -112,8 +112,27 @@
 						
 						<div id="histogram"></div>
 						
-						<button class="btn btn-primary getTheNewStats" title="Displays visualizations after screenshots are captured">New Stats</button>
-						<button class="btn btn-primary" id="generateAllThumbnails">Generate All Thumbnails</button>
+						<div id="histogramSwitch">
+						<span class="histogramSwitchButtons">
+							<button type="button" class="btn btn-secondary" name="switchOption" id="dateRange">Date Range</button>
+							<button type="button" class="btn btn-secondary" name="switchOption" id="generateAllThumbnails" style="display: none;">Generate All</button>
+							<button type="button" class="btn btn-secondary on" name="switchOption" id="calculateUnique">Calculate Unique</button>	
+						</span>
+						 &nbsp; 
+						<button id="histogramNextStep" class="btn btn-primary">Proceed</button>
+
+							<div id="dateRangeOptions" style="display:none;">
+								<div id="from_dateRange">
+									<p class="inputTitle">From: </p><input type="text" placeholder="mm/dd/yyyy" id="from_dateRange_input">
+								</div>
+								<div id="to_dateRange">
+									<p class="inputTitle">To: </p><input type="text" placeholder="mm/dd/yyyy" id="to_dateRange_input">
+								</div>
+							</div>
+						</div>
+						
+						<!--button class="btn btn-primary getTheNewStats" title="Displays visualizations after screenshots are captured">New Stats</button>
+						<button class="btn btn-primary" id="generateAllThumbnails">Generate All Thumbnails</button-->
 					</div>
 				</div>
 				
