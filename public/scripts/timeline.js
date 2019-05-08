@@ -857,8 +857,8 @@ function getTheNewStats(){
       collectionIdentifer = "all";
   }
   var hammingDistance = $('.argumentsForm #hammingDistance').val();
-  if (generateAllClicked == true) {
-    hammingDistance = "0";
+  if(document.getElementById('proceed').value == "0") {
+     hammingDistance = 0;
   }
   if(hammingDistance == ""){
       hammingDistance = 4;
