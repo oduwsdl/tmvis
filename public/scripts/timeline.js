@@ -779,8 +779,8 @@ function setProgressBar(value){
 function getStats(){
     document.getElementById("histoWrapper").style.display = "block";
     getHistoData();
-    $(".getTheNewStats").click(function(event){
-       getTheNewStats();
+    $(".statsPage").click(function(event){
+       statsPage();
     });
 }
     
@@ -855,7 +855,7 @@ function getHistoData(){
 }
 
     
-function getTheNewStats(){
+function statsPage(){
   document.getElementById("histoWrapper").style.display = "none";
   var collectionIdentifer = $('.argumentsForm #collectionNo').val();
   if(collectionIdentifer == ""){
@@ -1149,8 +1149,8 @@ $(function(){
         }
       });
     
-    $(".getTheNewStats").click(function(event){
-        getTheNewStats();
+    $(".statsPage").click(function(event){
+        statsPage();
     });
 
     // work around for the timeline setting stuff
