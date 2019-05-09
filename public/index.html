@@ -112,14 +112,16 @@
 						
 						<div id="histogram"></div>
 						
-							<div id="switch">
-								<span class="switchButtons">
-									<button type="button" class="btn btn-secondary" name="option" id="dateRange">Date Range</button>
-									<button type="button" class="btn btn-secondary" name="option" id="generateAllThumbnails" style="display: none;">Generate All</button>
-									<button type="button" class="btn btn-secondary" name="option" id="calculateUnique">Calculate Unique</button>	
-								</span>
-								 &nbsp; 
-								<button id="proceed" class="btn btn-primary">Proceed</button>
+							<div class="col-lg-8">
+								<h3 class="collection_stats_container>
+									<span class="collection_stats">
+										<button type="button" class="btn btn-secondary" name="option" id="dateRange">Date Range</button>
+										<button type="button" class="btn btn-secondary" name="option" id="generateAllThumbnails" style="display: none;">Generate All</button>
+										<button type="button" class="btn btn-secondary" name="option" id="calculateUnique">Calculate Unique</button>	
+									</span>
+									 &nbsp; 
+									<button id="proceed" class="btn btn-primary">Proceed</button>
+								</h3>
 								<script type="text/javascript">
 									//shows the date range options when date range is toggled on
 									$(document).on("click","button[name=option]",function(){
