@@ -832,7 +832,7 @@ function getHistoData(){
               histoData= $.parseJSON(data);
               getHistogram(histoData);
               var generateAll = document.getElementById("generateAllThumbnails");
-              if(histoData[0].totalmementos <= 12){
+              if(histoData.length <= 12){
                  generateAll.style.display = "inline-block";
               }
 
