@@ -111,34 +111,9 @@
 						<p class="Mementos_Considered"></p>
 						
 						<div id="histogram"></div>
-						
-							<div class="col-lg-8">
-								<button type="button" class="btn btn-secondary" name="option" id="dateRange">Date Range</button>
-								<button type="button" class="btn btn-secondary" name="option" id="generateAllThumbnails" style="display: none;">Generate All</button>
-								<button class="btn btn-secondary statsPage" title="Displays visualizations after screenshots are captured">Calculate Unique</button>	
-								<script type="text/javascript">
-									//shows the date range options when date range is toggled on
-									$(document).on("click","button[name=option]",function(){
-									$('button[name=option].on').removeClass('on')
-									$(this).addClass("on");
-									if ($(this).attr("id") == "dateRange") {
-										$("#dateBox").show();
-									}
-									else{
-										$("#dateBox").hide();
-									}
-								});
-								</script>
-
-								<div id="dateBox" style="display:none;">
-									<div id="fromBox">
-										<p class="dateTitle">From: </p><input type="text" placeholder="mm/dd/yyyy" id="fromInput">
-									</div>
-									<div id="toBox">
-										<p class="dateTitle">To: </p><input type="text" placeholder="mm/dd/yyyy" id="toInput">
-									</div>
-								</div>
-							</div>
+						<div class="col-lg-8">
+							<button class="btn btn-primary statsPage"> Calculate Unique </button>
+						</div>
 					</div>
 				</div>
 				
