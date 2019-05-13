@@ -851,6 +851,18 @@ function getHistoData(){
       });
     }
 }
+    
+function showData(){
+	var from, to;
+	var fromMonth. fromDate, fromYear;
+	var toMonth, toDate, toYear;
+
+	from = document.getElementById("fromInput").value;
+	to = document.getElementById("toInput").value;
+
+	document.getElementById("dateOne").innerHTML = from;
+	document.getElementById("dateTwo").innerHTML = to;
+}
 
     
 function getTheNewStats(){
