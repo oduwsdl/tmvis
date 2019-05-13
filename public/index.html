@@ -111,35 +111,36 @@
 						<p class="Mementos_Considered"></p>
 						
 						<div id="histogram"></div>
-						
-						<button class="btn btn-primary getTheNewStats" title="Displays visualizations after screenshots are captured"> Calculate Unique </button>
-						<button class="btn btn-primary" id="generateAllThumbnails"> Generate All Thumbnails </button>
-						<button type="button" class="btn btn-primary" name="option" id="dateRange">Date Range</button>
+						<div class="paraOnlyOnStatsResults row">
+							<button class="btn btn-primary getTheNewStats" title="Displays visualizations after screenshots are captured"> Calculate Unique </button>
+							<button class="btn btn-primary" id="generateAllThumbnails"> Generate All Thumbnails </button>
+							<button type="button" class="btn btn-primary" name="option" id="dateRange">Date Range</button>
 
-						<script type="text/javascript">
-							//shows the date range options when date range is toggled on
-							$(document).on("click","button[name=option]",function(){
-							if ($(this).attr("id") == "dateRange") {
-								$(this).addClass("on");
-								document.getElementById('dateRange').id = 'dateRangeShow'
-								$("#dateBox").show();
-							}
-							else{
-								$('button[name=option].on').removeClass('on')
-								document.getElementById('dateRangeShow').id = 'dateRange'
-								$("#dateBox").hide();
-							}
-						});
-						</script>
+							<script type="text/javascript">
+								//shows the date range options when date range is toggled on
+								$(document).on("click","button[name=option]",function(){
+								if ($(this).attr("id") == "dateRange") {
+									$(this).addClass("on");
+									document.getElementById('dateRange').id = 'dateRangeShow'
+									$("#dateBox").show();
+								}
+								else{
+									$('button[name=option].on').removeClass('on')
+									document.getElementById('dateRangeShow').id = 'dateRange'
+									$("#dateBox").hide();
+								}
+							});
+							</script>
 
-						<div id="dateBox" style="display:none;">
-							<div id="fromBox">
-								<p class="dateTitle">From: </p><input type="text" placeholder="mm/dd/yyyy" id="fromInput">
+							<div id="dateBox" style="display:none;">
+								<div id="fromBox">
+									<p class="dateTitle">From: </p><input type="text" placeholder="mm/dd/yyyy" id="fromInput">
+								</div>
+								<div id="toBox">
+									<p class="dateTitle">To: </p><input type="text" placeholder="mm/dd/yyyy" id="toInput">
+								</div>
+								<button type="button" class="btn btn-primary" name="option" id="submitRange">Submit</button>
 							</div>
-							<div id="toBox">
-								<p class="dateTitle">To: </p><input type="text" placeholder="mm/dd/yyyy" id="toInput">
-							</div>
-							<button type="button" class="btn btn-primary" name="option" id="submitRange">Submit</button>
 						</div>
 
 					</div>
