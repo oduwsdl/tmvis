@@ -114,11 +114,11 @@
 						
 						<button class="btn btn-primary getTheNewStats" title="Displays visualizations after screenshots are captured"> Calculate Unique </button>
 						<button class="btn btn-primary" id="generateAllThumbnails"> Generate All Thumbnails </button>
-						<button type="button" class="btn btn-secondary" name="option" id="dateRange">Date Range</button>
+						<button type="button" class="btn btn-primary" name="option" id="dateRange">Date Range</button>
 
 						<script type="text/javascript">
-								//shows the date range options when date range is toggled on
-								$(document).on("click","button[name=option]",function(){
+							//shows the date range options when date range is toggled on
+							$(document).on("click","button[name=option]",function(){
 							if ($(this).attr("id") == "dateRange") {
 								$(this).addClass("on");
 								document.getElementById('dateRange').id = 'dateRangeShow'
@@ -139,12 +139,9 @@
 							<div id="toBox">
 								<p class="dateTitle">To: </p><input type="text" placeholder="mm/dd/yyyy" id="toInput">
 							</div>
-							<button onclick="showData()" type="button" class="btn btn-primary" name="option" id="submitRange">Submit</button>
+							<button type="button" class="btn btn-primary" name="option" id="submitRange">Submit</button>
 						</div>
 
-						<div id="dateOne"></div>
-
-						<div id="dateTwo"></div>
 					</div>
 				</div>
 				
