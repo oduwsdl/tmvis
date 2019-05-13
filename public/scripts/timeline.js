@@ -828,11 +828,6 @@ function getHistoData(){
 
               histoData= $.parseJSON(data);
               getHistogram(histoData);
-              var generateAll = document.getElementById("generateAllThumbnails");
-              if(histoData.length <= 12){
-                 generateAll.style.display = "inline-block";
-              }
-
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
@@ -1155,10 +1150,10 @@ $(function(){
       getSummary();
     });
     
-    $("#generateAllThumbnails").click(function(event){
+    /*$("#generateAllThumbnails").click(function(event){
         generateAllClicked = true;
         getSummary();
-    });
+    });*/
 
 
     $(document).on("click","button[name=thresholdDistance]",function(){
