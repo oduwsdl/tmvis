@@ -852,7 +852,7 @@ function getHistoData(){
     }
 }
     
-function showData(){
+/*function showData(){
 	var from, to;
 	var fromMonth. fromDate, fromYear;
 	var toMonth, toDate, toYear;
@@ -862,7 +862,7 @@ function showData(){
 
 	document.getElementById("dateOne").innerHTML = from;
 	document.getElementById("dateTwo").innerHTML = to;
-}
+}*/
 
     
 function getTheNewStats(){
