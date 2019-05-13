@@ -1146,10 +1146,10 @@ $(function(){
       getSummary();
     });
     
-    /*$("#generateAllThumbnails").click(function(event){
+    $("#generateAllThumbnails").click(function(event){
         generateAllClicked = true;
         getSummary();
-    });*/
+    });
 
 
     $(document).on("click","button[name=thresholdDistance]",function(){
