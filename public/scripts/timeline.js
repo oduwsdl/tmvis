@@ -779,6 +779,9 @@ function setProgressBar(value){
 function getStats(){
     document.getElementById("histoWrapper").style.display = "block";
     getHistoData();
+    $(".statsPage").click(function(event){
+        statsPage();
+    });
 }
     
 function getHistoData(){
@@ -1140,10 +1143,6 @@ $(function(){
           }
         }
       });
-    
-    $(".statsPage").click(function(event){
-        statsPage();
-    });
 
     // work around for the timeline setting stuff
     $(".getSummary").click(function(event){
