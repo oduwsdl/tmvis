@@ -779,9 +779,6 @@ function setProgressBar(value){
 function getStats(){
     document.getElementById("histoWrapper").style.display = "block";
     getHistoData();
-    $(".statsPage").click(function(event){
-       statsPage();
-    });
 }
     
 function getHistoData(){
