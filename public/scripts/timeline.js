@@ -830,6 +830,9 @@ function getHistoData(){
               }
 
               histoData= $.parseJSON(data);
+              if(histoData.length > 12){
+                  document.getElementById('generateAllThumbnails').style.display = "none";
+              }
               getHistogram(histoData);
           }
           catch(err){
