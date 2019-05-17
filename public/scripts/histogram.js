@@ -63,7 +63,7 @@ function getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, da
 	      .attr("transform", function(d) {
 			  return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
 	      .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
-	      .attr("height", function(d) { return height - y(d.length); });
+	      .attr("height", function(d) { return height - y(d.length); })
  	      .on("mouseover", function(d) {    
 		    div .transition()    
 			.duration(200)    
