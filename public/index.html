@@ -37,7 +37,6 @@
 	<body>
 
 		<div class="container-fluid">
-			
 			<div class="well row attributesWrapper" style="margin-top: 1%;">
 
 				<div class = "Title">
@@ -58,9 +57,9 @@
 								<!-- GET STATS -->
 								<span id="statsbtn" class="input-group-btn">
 										<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
-								    <!--<button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>-->
-					
-										<button class="btn btn-primary getJSONFromServer form-control" title="Get number of unique mementos"> Calculate Mementos </button>
+								    <!-- <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
+									-->
+										<button class="btn btn-primary getJSONFromServer form-control" title="Get number of unique mementos"> Calculate # of Thumbnails </button>
 								</span>
 							</div>
 							<div class="form-group hidden">
@@ -105,53 +104,12 @@
 					</div>
 				</form>
 
-				<!--HISTOGRAM-->
-				<div class="histoWrapper row" id="histoWrapper" style="display:none;">
-					<div class="col-lg-12">
-						<p class="Mementos_Considered"></p>
-						
-						<div id="histogram"></div>
-						<div class="histogramOptions row">
-							<div class="col-lg-8">
-								<button class="btn btn-primary getTheNewStats" title="Displays visualizations after screenshots are captured"> Calculate Unique </button>
-								<button class="btn btn-primary" id="generateAllThumbnails"> Generate All Thumbnails </button>
-								<button type="button" class="btn btn-primary" name="option" id="dateRange">Date Range</button>
 
-								<script type="text/javascript">
-									//shows the date range options when date range is toggled on
-									$(document).on("click","button[name=option]",function(){
-									if ($(this).attr("id") == "dateRange") {
-										$(this).addClass("on");
-										document.getElementById('dateRange').id = 'dateRangeShow'
-										$("#dateBox").show();
-									}
-									else{
-										$('button[name=option].on').removeClass('on')
-										document.getElementById('dateRangeShow').id = 'dateRange'
-										$("#dateBox").hide();
-									}
-								});
-								</script>
-
-								<div id="dateBox" style="display:none;">
-									<div id="box">
-										<p class="dateTitle">From: </p><input type="text" placeholder="mm/dd/yyyy" id="fromInput">
-										<p class="dateTitle">To: </p><input type="text" placeholder="mm/dd/yyyy" id="toInput">
-										<button type="button" class="btn btn-primary" name="option" id="submitRange">Submit</button>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				
 				<!--STATS-->
 				<div class="statsWrapper row" style="display:none;">
-
 					<div class="col-lg-12">
 						<p class="Mementos_Considered"></p>
 						<div id="histogram"></div>
-					
 						<p class="paraOnlyOnStatsResults algodesctag" style="display:none;"> Our algorithm will generate thumbnails of the most unique mementos. The options shown below are based on the amount of difference between the mementos.</p>
 
 						<div class="paraOnlyOnStatsResults row" style="display:none;">
@@ -276,7 +234,6 @@
 							<script id="series_legend_tmpl" type="text/jst">
 									<!-- <div class="series_legend_item" data-series="<%= name %>"><span class="series_legend_swatch" style="background-color:<%= color %>">&nbsp;</span> <span class="series_legend_text"><%= name %></span></div> -->
 								<div class="series_legend_item"><span class="series_legend_swatch" style="background-color:<%= color %>">&nbsp;</span> <span class="series_legend_text"><%= name %></span></div>
-
 							</script>
 							<script id="card_tmpl" type="text/jst">
 									<div class="timeline_card_container">
@@ -289,36 +246,27 @@
 														<%= event_html %>
 													</div>
 												<% } %> -->
-
-
 												<% if (event_series=='Thumbnails'){%>
 				                                    <% if (!_.isEmpty(event_html)){ %>
 				                                        <div class="item_user_html">
 																									<h2> Unique Memento</h2>
 				                                            <%= event_html %>
-
 				                                        </div>
 				                                        <% } %>
 				                                <% } %>
-
 				                                <% if (event_series=='Non-Thumbnail Mementos'){%>
 				                                    <% if (!_.isEmpty(event_html_similarto)){ %>
 				                                        <div class="item_user_html similarToPictureEle">
 				                                        	<h2> Similar To </h2>
 				                                            <%= event_html_similarto %>
-
 				                                        </div>
 				                                        <% } %>
 				                                <% } %>
-
-
-
 												<%= event_description %>
 											</div>
 											<% if (!_.isEmpty(event_link)){ %>
 												<div class="read_btn"><a target="_blank" href="<%= event_link %>">Open Archived Page</a></div>
 												<% } %>
-
 													<div class="item_year">
 														<span class="series_legend_text">Datetime: </span> <%= event_display_date %>
 													</div>
@@ -396,4 +344,3 @@
 	</div>
 	</div>
 </html>
-
