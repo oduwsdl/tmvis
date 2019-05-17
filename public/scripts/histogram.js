@@ -43,6 +43,7 @@ function getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, da
 	      d.date = parseDate(d.event_display_date);
 	  });
 	
+	  // create tooltip
 	  var div = d3.select("body").append("div") 
 	      .attr("class", "tooltip")       
 	      .style("opacity", 0);
@@ -64,7 +65,7 @@ function getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, da
 	      .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
 	      .attr("height", function(d) { return height - y(d.length); });
  	      .on("mouseover", function(d) {    
-		    div.transition()    
+		    div .transition()    
 			.duration(200)    
 			.style("opacity", .8);    
 		    div .html("Number of Mementos: " + d.length + "<br/>" + d.x0.toString().substring(4,7) + " " + d.x0.toString().substring(11,15))  
@@ -72,7 +73,7 @@ function getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, da
 			.style("top", (d3.event.pageY - 28) + "px");  
 		    })          
 	      .on("mouseout", function(d) {   
-		    div.transition()    
+		    div .transition()    
 			.duration(500)    
 			.style("opacity", 0); 
 	       });
