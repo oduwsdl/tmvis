@@ -1,5 +1,21 @@
 rect.bar { fill: steelblue; }
 
+rect.bar:hover { fill: orange; }
+
+div.tooltip { 
+    color: white;
+    position: absolute;     
+    text-align: center;     
+    width: 130px;          
+    height: 25px;         
+    padding: 8px;       
+    font: 11px sans-serif;    
+    background: rgba(0, 0, 0, 0.8);
+    border: 0px;    
+    border-radius: 8px;     
+    pointer-events: none;     
+}
+
 /*.dateMenu{
 	margin: auto;
 	width: 500px;
