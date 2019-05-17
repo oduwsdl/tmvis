@@ -3,7 +3,6 @@ var histoData = {};
 var curURIUnderFocus=null;
 var curDeepLinkStateArr=[];
 var curUniqueUserSessionID = null;
-var generateAllClicked = false;
 (function(window, document, undefined){
 
 
@@ -777,96 +776,6 @@ function setProgressBar(value){
 }
 
 function getStats(){
-    document.getElementById("histoWrapper").style.display = "block";
-    getHistoData();
-    $(".getTheNewStats").click(function(event){
-        getTheNewStats();
-    });
-}
-    
-function getHistoData(){
- var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
-  if(collectionIdentifer == ""){
-      collectionIdentifer = "all";
-  }
-  //var hammingDistance = $('.argumentsForm #hammingDistance').val();
-  var hammingDistance = $(".statsWrapper .on").val();
-
-  if(hammingDistance == "" || hammingDistance===undefined){
-    hammingDistance = $('.argumentsForm #hammingDistance').val();
-  }
-
-  var role = "summary"; // set to summary to get timestamps
-  if($("body").find("form")[0].checkValidity()){
-        $(".time_container").hide();
-        $(".Explain_Threshold").hide();
-       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
-
-       startEventNotification();
-       var ENDPOINT = "/alsummarizedtimemap";
-       var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
-       $("#busy-loader").show();
-       $('#serverStreamingModal .logsContent').empty();
-       $('#serverStreamingModal').modal('show');
-      $.ajax({
-        type: "GET",
-        url: address, // uncomment this for deployment
-        dataType: "text",
-        timeout: 0,
-        success: function( data, textStatus, jqXHR) {
-            $("#busy-loader").hide();
-            $('#serverStreamingModal').modal('hide');
-          try{
-              data = $.trim(data).split("...");
-              if(data.length > 1){
-                  if(data [1] == ""){
-                      data = data [0];
-                  }else{
-                      data = data [1];
-                  }
-              }
-              else{
-                  data = data [0];
-              }
-
-              histoData= $.parseJSON(data);
-              if(histoData.length > 12){
-                  document.getElementById('generateAllThumbnails').style.display = "none";
-              }
-              getHistogram(histoData);
-          }
-          catch(err){
-            alert("Some problem fetching the response, Please refresh and try again.");
-            $("#busy-loader").hide();
-            $('#serverStreamingModal').modal('hide');
-            $(".tabContentWrapper").hide();
-          }
-        },
-        error: function( data, textStatus, jqXHR) {
-          var errMsg = "Some problem fetching the response, Please refresh and try again.";
-          $("#busy-loader").hide();
-          $('#serverStreamingModal').modal('hide');
-          alert(errMsg);
-        }
-      });
-    }
-}
-    
-/*function showData(){
-	var from, to;
-	var fromMonth. fromDate, fromYear;
-	var toMonth, toDate, toYear;
-
-	from = document.getElementById("fromInput").value;
-	to = document.getElementById("toInput").value;
-
-	document.getElementById("dateOne").innerHTML = from;
-	document.getElementById("dateTwo").innerHTML = to;
-}*/
-
-    
-function getTheNewStats(){
-  document.getElementById("histoWrapper").style.display = "none";
   var collectionIdentifer = $('.argumentsForm #collectionNo').val();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
@@ -924,7 +833,7 @@ function getTheNewStats(){
                     
                     //Get the data into an array for the histogram
                     //From and to dates are passed for the domain
-                    getHistoData();
+                    getHistoData(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
                     
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
@@ -962,6 +871,71 @@ function getTheNewStats(){
         });
       }
 }
+    
+function getHistoData(fromYear, fromMonth, fromDate, toYear, toMonth, toDate){
+ var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
+  if(collectionIdentifer == ""){
+      collectionIdentifer = "all";
+  }
+  //var hammingDistance = $('.argumentsForm #hammingDistance').val();
+  var hammingDistance = $(".statsWrapper .on").val();
+
+  if(hammingDistance == "" || hammingDistance===undefined){
+    hammingDistance = $('.argumentsForm #hammingDistance').val();
+  }
+
+  var role = "summary"; // set to summary to get timestamps
+  if($("body").find("form")[0].checkValidity()){
+        $(".time_container").hide();
+        $(".Explain_Threshold").hide();
+       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
+
+       startEventNotification();
+       var ENDPOINT = "/alsummarizedtimemap";
+       var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+       $("#busy-loader").show();
+       $('#serverStreamingModal .logsContent').empty();
+       $('#serverStreamingModal').modal('show');
+      $.ajax({
+        type: "GET",
+        url: address, // uncomment this for deployment
+        dataType: "text",
+        timeout: 0,
+        success: function( data, textStatus, jqXHR) {
+            $("#busy-loader").hide();
+            $('#serverStreamingModal').modal('hide');
+          try{
+              data = $.trim(data).split("...");
+              if(data.length > 1){
+                  if(data [1] == ""){
+                      data = data [0];
+                  }else{
+                      data = data [1];
+                  }
+              }
+              else{
+                  data = data [0];
+              }
+
+              histoData= $.parseJSON(data);
+              getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, histoData);
+          }
+          catch(err){
+            alert("Some problem fetching the response, Please refresh and try again.");
+            $("#busy-loader").hide();
+            $('#serverStreamingModal').modal('hide');
+            $(".tabContentWrapper").hide();
+          }
+        },
+        error: function( data, textStatus, jqXHR) {
+          var errMsg = "Some problem fetching the response, Please refresh and try again.";
+          $("#busy-loader").hide();
+          $('#serverStreamingModal').modal('hide');
+          alert(errMsg);
+        }
+      });
+    }
+}
 
 function getSummary(){
     
@@ -974,10 +948,6 @@ function getSummary(){
   }
   //var hammingDistance = $('.argumentsForm #hammingDistance').val();
   var hammingDistance = $(".statsWrapper .on").val();
-    
-  if (generateAllClicked == true) {
-    hammingDistance = "0";
-  }
 
   if(hammingDistance == "" || hammingDistance===undefined){
     hammingDistance = $('.argumentsForm #hammingDistance').val();
@@ -1124,7 +1094,7 @@ $(function(){
             hammingDistance = 4;
         }
 
-        var role = "summary" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
+        var role = "stats" // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
         if($(this).parents("body").find("form")[0].checkValidity()){
             localStorage.setItem("getStatsClicked", "true");
             var curInputJsobObj = {};
@@ -1160,12 +1130,6 @@ $(function(){
     $(".getSummary").click(function(event){
       getSummary();
     });
-    
-    $("#generateAllThumbnails").click(function(event){
-        generateAllClicked = true;
-        getSummary();
-    });
-
 
     $(document).on("click","button[name=thresholdDistance]",function(){
       $('button[name=thresholdDistance].on').removeClass('on')
