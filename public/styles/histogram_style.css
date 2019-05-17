@@ -1,1 +1,17 @@
 rect.bar { fill: steelblue; }
+
+rect.bar:hover { fill: orange; }
+
+div.tooltip { 
+    color: white;
+    position: absolute;     
+    text-align: center;     
+    width: 150px;          
+    height: 32px;         
+    padding: 4px;       
+    font: 11px sans-serif;    
+    background: rgba(0, 0, 0, 0.8);
+    border: 0px;    
+    border-radius: 8px;     
+    pointer-events: none;     
+}

@@ -234,7 +234,6 @@
 							<script id="series_legend_tmpl" type="text/jst">
 									<!-- <div class="series_legend_item" data-series="<%= name %>"><span class="series_legend_swatch" style="background-color:<%= color %>">&nbsp;</span> <span class="series_legend_text"><%= name %></span></div> -->
 								<div class="series_legend_item"><span class="series_legend_swatch" style="background-color:<%= color %>">&nbsp;</span> <span class="series_legend_text"><%= name %></span></div>
-
 							</script>
 							<script id="card_tmpl" type="text/jst">
 									<div class="timeline_card_container">
@@ -247,36 +246,27 @@
 														<%= event_html %>
 													</div>
 												<% } %> -->
-
-
 												<% if (event_series=='Thumbnails'){%>
 				                                    <% if (!_.isEmpty(event_html)){ %>
 				                                        <div class="item_user_html">
 																									<h2> Unique Memento</h2>
 				                                            <%= event_html %>
-
 				                                        </div>
 				                                        <% } %>
 				                                <% } %>
-
 				                                <% if (event_series=='Non-Thumbnail Mementos'){%>
 				                                    <% if (!_.isEmpty(event_html_similarto)){ %>
 				                                        <div class="item_user_html similarToPictureEle">
 				                                        	<h2> Similar To </h2>
 				                                            <%= event_html_similarto %>
-
 				                                        </div>
 				                                        <% } %>
 				                                <% } %>
-
-
-
 												<%= event_description %>
 											</div>
 											<% if (!_.isEmpty(event_link)){ %>
 												<div class="read_btn"><a target="_blank" href="<%= event_link %>">Open Archived Page</a></div>
 												<% } %>
-
 													<div class="item_year">
 														<span class="series_legend_text">Datetime: </span> <%= event_display_date %>
 													</div>
@@ -354,4 +344,3 @@
 	</div>
 	</div>
 </html>
-

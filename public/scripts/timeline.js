@@ -1,4 +1,3 @@
-
 var jsonObjRes = {};
 var histoData = {};
 var curURIUnderFocus=null;
