@@ -1,4 +1,4 @@
-function getHistogram(dateArray){
+function getHistogram(fromYear, fromMonth, fromDate, toYear, toMonth, toDate, dateArray){
 	// set the dimensions and margins of the graph
 	var margin = {top: 10, right: 30, bottom: 30, left: 110},
 	    width = 1000 - margin.left - margin.right,
@@ -7,28 +7,7 @@ function getHistogram(dateArray){
 	// parse the date / time
 	var parseDate = d3.timeParse("%Y-%m-%d");
 
-	var data = dateArray;
-	
-	// get the data
-	for(i = 0; i < data.length; i++){
-		data[i].event_display_date = data[i].event_display_date.substring(0, 10);
-	}
 
-	// format the data
-	data.forEach(function(d) {
-	    d.date = parseDate(d.event_display_date);
-	});
-	
-	var endPoint = data.length - 1;
-
-	var fromYear = data[0].event_display_date.substring(0,4);
-	var fromMonth = data[0].event_display_date.substring(5,7);
-	var fromDate = data[0].event_display_date.substring(8,10);
-	
-	var toYear = data[endPoint].event_display_date.substring(0,4);
-	var toMonth = data[endPoint].event_display_date.substring(5,7);
-	var toDate = data[endPoint].event_display_date.substring(8,10);
-	
 	// set the ranges
 	var x = d3.scaleTime()
 		  .domain([new Date(fromYear, fromMonth, fromDate), new Date(toYear, toMonth, toDate)])
@@ -51,6 +30,18 @@ function getHistogram(dateArray){
 	    .append("g")
 	    .attr("transform", 
 		  "translate(" + margin.left + "," + margin.top + ")");
+
+	var data = dateArray;
+	
+	// get the data
+	for(i = 0; i < data.length; i++){
+		data[i].event_display_date = data[i].event_display_date.substring(0, 10);
+	}
+
+	  // format the data
+	  data.forEach(function(d) {
+	      d.date = parseDate(d.event_display_date);
+	  });
 
 	  // group the data for the bars
 	  var bins = histogram(data);
@@ -77,5 +68,4 @@ function getHistogram(dateArray){
 	  // add the y Axis
 	  /*svg.append("g")
 	      .call(d3.axisLeft(y));*/
-	
 }
