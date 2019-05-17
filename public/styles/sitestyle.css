@@ -353,21 +353,3 @@ body{
 .inputControl-addon{
 	margin-right: 30px;
 }
-
-//Histogram page
-.histogramOptions{
-	width: 500px;
-	margin: auto;
-}
-
-//Date range input boxes
-.dateBox{
-	margin: 20px 0px 0px 0px;
-}
-.dateTitle{
-	display: inline-block;
-	margin: 0px 10px 0px 15px;
-}
-.box{
-	display: inline-block;
-}
