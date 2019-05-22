@@ -778,6 +778,7 @@ function setProgressBar(value){
   $(".progress-bar-space .progress-bar-striped").css("width",value+"%");
 }
 
+/*
 function getStats(){
   var collectionIdentifer = $('.argumentsForm #collectionNo').val();
   if(collectionIdentifer == ""){
@@ -878,7 +879,136 @@ function getStats(){
         });
       }
 }
-    
+ 
+*/
+
+function getStats(){
+    var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+  if(collectionIdentifer == ""){
+      collectionIdentifer = "all";
+  }
+  var hammingDistance = $('.argumentsForm #hammingDistance').val();
+  if(hammingDistance == ""){
+      hammingDistance = 4;
+  }
+
+  var role = "stats";
+  if($("body").find("form")[0].checkValidity()){
+      startEventNotification();
+      var ENDPOINT = "/alsummarizedtimemap";
+      var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
+      $("#busy-loader").show();
+      $('#serverStreamingModal .logsContent').empty();
+       $('#logtab .logsContent').empty();
+
+      $('#serverStreamingModal').modal('show');
+        $.ajax({
+            type: "GET",
+            url: address, // uncomment this for deployment
+            beforeSend: function(xhr) {
+              xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+            },
+            dataType: "text",
+            timeout: 90000000,
+            success: function( data, textStatus, jqXHR) {
+                $("#busy-loader").hide();
+                $('#serverStreamingModal .logsContent').empty();
+                $('#serverStreamingModal').modal('hide');
+                try{
+                    jsonObjRes= $.parseJSON(data);
+                    var toDisplay= "Internet Archive";
+                    if($("input[name='primesource']:checked").val() == "archiveit" ){
+                      toDisplay= "Archive-It";
+                    }
+                    var fromDate= new Date(jsonObjRes[0].fromdate);
+                    var fromDateStr= fromDate.getFullYear()+"-"+fromDate.getMonth() +"-"+fromDate.getDate();
+                    var toDate = new Date(jsonObjRes[0].todate);
+                    var toDateStr= toDate.getFullYear()+"-"+toDate.getMonth() +"-"+toDate.getDate();
+                    var dateRangeStr= fromDateStr + " - " + toDateStr;
+                    
+                    
+                    //Get the data into an array for the histogram
+                    //From and to dates are passed for the domain
+                    getHistoData(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+                    
+
+                    //Generate all button to appear when <= 12 mementos
+                    /*if (jsonObjRes[0].totalmementos <= 12) {
+                        var generateAll = document.getElementById("generateAllThumbnails");
+                        generateAll.style.display = "inline-block";
+                    }*/
+
+                    //  $(".statsWrapper .collection_stats").attr("title","Date Range: "+dateRangeStr)
+                    
+                    $(".histoWrapper").show();
+
+
+                    //Generate Unique Button event listener
+                    $(".getTheNewStats").click(function(event){
+                        $(".histoWrapper").hide();
+                        $(".statsWrapper").show();
+                        $(".getSummary").show();
+                        $(".paraOnlyOnStatsResults").show();
+                        $(".time_container").show();
+                        var htmlStr="&nbsp;";
+                        var curUniqThumbCount = 0;
+                        jsonObjRes.forEach(function(item,index,arry){
+                          if(curUniqThumbCount != item['unique']){
+                            htmlStr+= "<button type='button' class='btn btn-secondary' name='thresholdDistance' title='No Of unique thumbnails:"+item['unique'] +"' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</button>";
+                          }
+                            curUniqThumbCount = item['unique'];
+                        });
+
+                        var memStatStr = htmlStr;
+                        $(".statsWrapper .collection_stats").html(memStatStr);
+
+                        $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
+                        $(".paraOnlyOnStatsResults").show();
+
+                        if(  $(".statsWrapper button[type='button']").eq(1).length != 0){
+                          $(".statsWrapper button[type='button']").eq(1).trigger("click");
+                        }else{
+                          $(".statsWrapper button[type='button']").eq(0).trigger("click");
+                        }     
+                    });
+                    
+
+                    //Generate All button clicked
+                    $("#generateAllThumbnails").click(function(event){
+                        generateAllClicked = true;
+                        getSummary();
+                    });
+
+
+                    //date range click event
+                    $("#submitRange").click(function(event){
+                        getSummary();
+                    });
+
+
+                    //$(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
+                    $(".modal-backdrop").remove();
+                    $('#serverStreamingModal').modal('hide');
+
+                }catch(err){
+                    alert($.trim(data));
+                    $('#serverStreamingModal .logsContent').empty();
+                    $('#serverStreamingModal').modal('hide');
+                    $(".statsWrapper").hide();
+                    $(".tabContentWrapper").hide();
+                }
+            },
+            error: function( data, textStatus, jqXHR) {
+              // $("#busy-loader").hide();
+              // $('#serverStreamingModal .logsContent').empty();
+              //   $('#serverStreamingModal').modal('hide');
+              // var errMsg = "Some problem fetching the response, Please refresh and try again.";
+              // alert(errMsg);
+            }
+        });
+      }
+}
+
 function getHistoData(fromYear, fromMonth, fromDate, toYear, toMonth, toDate){
  var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
@@ -948,7 +1078,8 @@ function getSummary(){
     
   //Remove histogram
   document.getElementById("histogram").style.display = "none";
-    
+  $(".histoWrapper").hide();
+
   var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
@@ -1066,6 +1197,9 @@ function getSummary(){
         }
       });
     }
+
+    //resetting this back to false so that the user can view unique thumbnails
+    generateAllThumbnails = false;
 }
 
 
@@ -1239,3 +1373,7 @@ function updateDeepLinkStateArr() {
     }
 
 }
+
+window.addEventListener('popstate', function(e) {
+    location.reload();
+});
