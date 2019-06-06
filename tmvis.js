@@ -160,7 +160,7 @@ function main () {
   app.use('/static', express.static(path.join(__dirname, 'assets/screenshots')))
 
   //app.get(['/','/index.html','/alsummarizedview/:primesource/:ci/:hdt/:role/*'], (request, response) => {
-  app.get(['/','/index.html','/alsummarizedview/:primesource/:ci/:hdt/stats/*','/alsummarizedview/:primesource/:ci/:hdt/summary/*'  ], (request, response) => {
+  app.get(['/','/index.html','/alsummarizedview/:primesource/:ci/:hdt/histogram/*','/index.html','/alsummarizedview/:primesource/:ci/:hdt/stats/*','/alsummarizedview/:primesource/:ci/:hdt/summary/*'  ], (request, response) => {
     response.sendFile(__dirname + '/public/index.html')
   })
 
@@ -396,8 +396,9 @@ function PublicEndpoint () {
 
     if(query.role === "stats"){
     }else if(query.role === "summary"){
+    }else if(query.role === "histogram"){
     }else{
-        query.role = "stats"
+        query.role = "histogram"
     }
 
     if (isNaN(query.ssd)){
@@ -567,6 +568,8 @@ function processWithFileContents (fileContents, response,curCookieClientId) {
           function (callback) {
             if(t.role == "stats"){
               t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback);
+            }else if(t.role == "histogram"){
+              callback('');
             }else{
               t.calculateHammingDistancesWithOnlineFilteringForSummary(curCookieClientId,callback);
             }
@@ -575,6 +578,8 @@ function processWithFileContents (fileContents, response,curCookieClientId) {
           function (callback) {
             if(t.role == "stats"){
               t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback)
+            }else if(t.role == "histogram"){
+              callback('');
             }else{
               t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary(callback)
 
@@ -584,12 +589,16 @@ function processWithFileContents (fileContents, response,curCookieClientId) {
           function (callback) {
             ConsoleLogIfRequired('****************curCookieClientId from processWithFileContents ->'+curCookieClientId +' *********')
             constructSSE("percentagedone-20",curCookieClientId);
-            t.createScreenshotsForMementos(curCookieClientId,response,callback)
+            if (t.role == "histogram") {t.getDatesForHistogram(callback,response,curCookieClientId);}
+            else
+              t.createScreenshotsForMementos(curCookieClientId,response,callback)
           },
           function (callback) {
             constructSSE('Writing the data into cache file for future use...',curCookieClientId)
             constructSSE("percentagedone-95",curCookieClientId);
-            t.writeThumbSumJSONOPToCache(response)
+            if (t.role == "histogram") {callback('');}
+            else
+              t.writeThumbSumJSONOPToCache(response)
           }
         ],
         function (err, result) {
@@ -868,7 +877,6 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
                ConsoleLogIfRequired(JSON.stringify(t.mementos))
                ConsoleLogIfRequired("---------------------------------------------------")
             }
-
             ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
             constructSSE('Timemap fetched has a total of '+t.mementos.length + ' mementos.',curCookieClientId)
             constructSSE("percentagedone-20",curCookieClientId);
@@ -916,17 +924,27 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 
     // -- ByMahee -- Uncomment one by one for CLI_JSON
     function (callback) {
-      t.calculateSimhashes(curCookieClientId,callback);
+      if (t.role != "histogram") {
+        t.calculateSimhashes(curCookieClientId,callback);
+      }
+      else
+        callback('');
     },
     function (callback) {
       constructSSE("percentagedone-75",curCookieClientId);
-      t.saveSimhashesToCache(callback);
+      if (t.role != "histogram") {
+        t.saveSimhashesToCache(callback);
+      }
+      else
+        callback('');
     },
 
     function (callback) {
         if(isToComputeBoth){
           if(t.role == "stats"){
             t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback);
+          }else if(t.role == "histogram"){
+            callback('');
           }else{
             t.calculateHammingDistancesWithOnlineFilteringForSummary(curCookieClientId,callback);
           }
@@ -939,6 +957,8 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
         if(isToComputeBoth){
           if(t.role == "stats"){
             t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback)
+          }else if(t.role == "histogram"){
+            callback('');
           }else{
             t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary(callback)
           }
@@ -949,19 +969,26 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
     },
     function (callback) {
       constructSSE("percentagedone-90",curCookieClientId);
-      t.writeJSONToCache(callback)
+      if(t.role == "histogram"){t.getDatesForHistogram(callback,response,curCookieClientId);}
+      else{
+        t.writeJSONToCache(callback)
+      }
     },
     function (callback) {
-
         if(isToComputeBoth){
-
-          t.createScreenshotsForMementos(curCookieClientId,response,callback);
+          if ( t.role == "histogram") {callback('')}
+          else
+            t.createScreenshotsForMementos(curCookieClientId,response,callback);
         }
         else if (callback) {
           callback('')
         }
     },
-    function (callback) {t.writeThumbSumJSONOPToCache(response,callback)}
+    function (callback) {
+      if(t.role == "histogram"){callback('')}
+      else
+        t.writeThumbSumJSONOPToCache(response,callback)
+    }
 
   ],
   function (err, result) {
@@ -1089,6 +1116,8 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
   }
 }
 
+
+
 TimeMap.prototype.writeJSONToCache = function (callback) {
   var cacheFile = new SimhashCacheFile(this.primesource+"_"+this.collectionidentifier+"_"+this.originalURI,isDebugMode)
   //cacheFile.writeFileContentsAsJSON(JSON.stringify(this.mementos))
@@ -1106,6 +1135,38 @@ TimeMap.prototype.writeJSONToCache = function (callback) {
   }
 }
 
+TimeMap.prototype.getDatesForHistogram = function (callback,response,curCookieClientId){
+  var month_names_short= ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  var mementoJObjArr=[];
+  var length = this.mementos.length -1;
+  this.mementos.forEach(function(memento, m) {
+    var mementoJObj ={}
+    var dt =  new Date(memento["datetime"].split(",")[1])
+     var date = dt.getDate()
+     var month = dt.getMonth() + 1
+     if(date <10){
+       date = "0"+date
+     }
+
+     if(month < 10){
+       month = "0"+month
+     }
+
+     var eventDisplayDate = dt.getUTCFullYear()+"-"+ month+"-"+date+", "+ memento["datetime"].split(" ")[4]
+
+
+     mementoJObj["event_display_date"] = eventDisplayDate;
+     mementoJObjArr.push(mementoJObj);
+  })
+  ConsoleLogIfRequired(mementoJObjArr)
+  ConsoleLogIfRequired("-------------------------------------------------------------------------")
+
+  var cacheFile = new SimhashCacheFile(this.primesource+"_"+this.collectionidentifier+"_"+this.originalURI,isDebugMode)
+  cacheFile.writeThumbSumJSONOPContentToFile(mementoJObjArr);
+  response.write(JSON.stringify(mementoJObjArr));
+  response.end();
+  callback('');
+}
 
 /**
 * Constructs the JSON in the needed format and sends it over to Client, this method is called only if the request comes from a Cached mode
@@ -1300,8 +1361,6 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSum
     callback('')
   }
 }
-
-
 
 
 
