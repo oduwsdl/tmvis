@@ -631,6 +631,8 @@ var generateAllClicked = false;
             $('.argumentsForm .primesrcsection input[type=radio][value='+ curDeepLinkStateArr[1] +']').prop("checked",true).trigger("click");
             if(curDeepLinkStateArr[4] == "summary"){
               getSummary();
+            }else if(curDeepLinkStateArr[4] == "stats"){
+                getTheNewStats();
             }else{
               getStats();
             }
@@ -816,7 +818,7 @@ function getHistoData(toDisplay){
     hammingDistance = $('.argumentsForm #hammingDistance').val();
   }
 
-  var role = "histogram"; // set to summary to get timestamps
+  var role = "histogram";
   if($("body").find("form")[0].checkValidity()){
         $(".time_container").hide();
         $(".Explain_Threshold").hide();
@@ -905,7 +907,8 @@ function getTheNewStats(){
       $("#busy-loader").show();
       $('#serverStreamingModal .logsContent').empty();
        $('#logtab .logsContent').empty();
-
+       var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
+       history.pushState({},"Stats State",path);
       $('#serverStreamingModal').modal('show');
         $.ajax({
             type: "GET",
@@ -935,6 +938,7 @@ function getTheNewStats(){
                     if($("input[name='primesource']:checked").val() == "archiveit" ){
                       toDisplay= "Archive-It";
                     }
+                    getHistoData(toDisplay);
                     var fromDate= new Date(jsonObjRes[0].fromdate);
                     var fromDateStr= fromDate.getFullYear()+"-"+fromDate.getMonth() +"-"+fromDate.getDate();
                     var toDate = new Date(jsonObjRes[0].todate);

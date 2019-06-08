@@ -1,4 +1,3 @@
-
 //Sliders
 .slidecontainer {
     width: 100%; /* Width of the outside container */
@@ -113,6 +112,12 @@ display:inline;
   }
   .Mementos_Considered{
       font-weight: bold;
+      display: inline-block;
+  }
+  .Memento_Date_Range{
+      font-weight: bold;
+      display: inline-block;
+      margin-left: 28%;
   }
   .paraOnlyOnStatsResults{
 
@@ -123,6 +128,11 @@ display:inline;
   }
 
   .statsWrapper p{
+    font-family: inherit !important;
+
+  }
+
+  .histoWrapper p{
     font-family: inherit !important;
 
   }
@@ -354,3 +364,21 @@ body{
 	margin-right: 30px;
 }
 
+.histogramOptions{
+	text-align: center;
+	margin-top: 25px;
+}
+
+.dateTitle{
+	display: inline-block;
+	margin: 10px 10px 0px 20px;
+	font-weight: bold;
+}
+
+#dateBox{
+	margin-top: 25px;
+}
+
+#date_error{
+	color: red;
+}
