@@ -77,7 +77,7 @@ var port = argv.port ? argv.port : '3000'
 var proxy = argv.proxy ? argv.proxy.replace(/\/+$/, '') : ('http://' + host + (port == '80' ? '' : ':' + port))
 var localAssetServer = proxy + '/static/'
 var isResponseEnded = false
-var isDebugMode = argv.debug? argv.debug: true
+var isDebugMode = argv.debug? argv.debug: false
 var SCREENSHOT_DELTA = argv.ssd? argv.ssd: 2
 var isToOverrideCachedSimHash = argv.oes? argv.oes: false
 var isToComputeBoth = argv.os? false: true // By default computes both simhash and hamming distance
