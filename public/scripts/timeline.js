@@ -859,6 +859,7 @@ function getHistoData(toDisplay){
               if(histoData.length > 12){
                 $("#generateAllThumbnails").hide();
               }
+
               getHistogram(toDisplay, histoData);
               $(".histoWrapper").show();
               
@@ -890,6 +891,7 @@ function getHistoData(toDisplay){
 
 
 function getTheNewStats(){
+    $(".histoWrapper").hide();
   var collectionIdentifer = $('.argumentsForm #collectionNo').val();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
@@ -938,7 +940,8 @@ function getTheNewStats(){
                     if($("input[name='primesource']:checked").val() == "archiveit" ){
                       toDisplay= "Archive-It";
                     }
-                    getHistoData(toDisplay);
+                    
+
                     var fromDate= new Date(jsonObjRes[0].fromdate);
                     var fromDateStr= fromDate.getFullYear()+"-"+fromDate.getMonth() +"-"+fromDate.getDate();
                     var toDate = new Date(jsonObjRes[0].todate);
@@ -946,6 +949,7 @@ function getTheNewStats(){
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
                     $(".paraOnlyOnStatsResults").show();
+                    $(".time_container").show();
                     
                     //Get the data into an array for the histogram
                     //From and to dates are passed for the domain
