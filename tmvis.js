@@ -87,6 +87,8 @@ var streamedHashMapObj = new HashMap()
 var responseDup = null;
 var Stack = require('stackjs');
 
+var dateRange = false;
+
 //return
 /* *******************************
    TODO: reorder functions (main first) to be more maintainable 20141205
@@ -216,6 +218,7 @@ function main () {
 
   // this is the actually place that hit the main server logic
   //app.get('/alsummarizedtimemap/:primesource/:ci/:urir', endpoint.respondToClient)
+
   app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/:role/*', endpoint.respondToClient)
 
 
@@ -333,20 +336,35 @@ function PublicEndpoint () {
       return
     }
 
-
   //  var response ={}
     var URIRFromCLI = "";
 
     //var query = url.parse(request.url, true).query
 
+      console.log(request.params);
       var query ={};
       query['urir'] = request.params["0"] + (request._parsedUrl.search != null ? request._parsedUrl.search : '');
+      console.log(query['urir']);
       query['ci']= request.params.ci;
       query['primesource']= request.params.primesource;
       query['hdt']= request.params.hdt;
       // for the intermediate step of involving user to decide the value of k
       query['role']= request.params.role;
+      console.log(query['role']);
+      if(query['role'].length > 9) // if date range was passed with role
+      {
+        query['from'] = query['role'].substring(7,17); // extract from date
+        query['to'] = query['role'].substring(17,27); // extract to date
+        query['role'] = query['role'].substring(0,7); // set role back to summary
+      }
+      else
+      {
+        query['from'] = 0 // extract from date
+        query['to'] = 0
+      }
+      
       query['ssd']=request.params.ssd;
+
     ConsoleLogIfRequired("--- ByMahee: Query URL from client = "+ JSON.stringify(query))
 
     /******************************
@@ -387,7 +405,6 @@ function PublicEndpoint () {
     if (query.primesource) {
       query.primesource = query.primesource.toLowerCase()
     }
-
     if (isNaN(query.hdt)){
           query.hdt = 4 // setting to default hamming distance threshold
     }else{
@@ -425,14 +442,13 @@ function PublicEndpoint () {
       query['urir'] = 'http://' + query['urir']
     }// Prepend scheme if missing
 
-
     headers['Content-Type'] = 'application/json' //'text/html'
     response.writeHead(200, headers)
-
+;
     ConsoleLogIfRequired('New client request urir: ' + query['urir'] + '\r\n> Primesource: ' + query.primesource + '\r\n> Strategy: ' + strategy)
 
     if (!validator.isURL(query['urir'])) { // Return "invalid URL"
-
+      console.log(query['urir']);
       consoleLogJSONError('Invalid URI')
       //response.writeHead(200, headers)
       response.write('Invalid urir \r\n')
@@ -450,7 +466,6 @@ function PublicEndpoint () {
     }else {
       query.ci = parseInt(query.ci)
     }
-
     // ByMahee -- setting the  incoming data from request into response Object
     response.thumbnails = [] // Carry the original query parameters over to the eventual response
     response.thumbnails['primesource'] = query.primesource
@@ -459,7 +474,16 @@ function PublicEndpoint () {
     response.thumbnails['hammingdistancethreshold'] = query.hdt
     response.thumbnails['role'] = query.role
     response.thumbnails['urir'] = query.urir
-
+    if(query['from'] != 0) // if a from date was given
+    {
+      response.thumbnails['from'] = query['from'];
+      response.thumbnails['to'] = query['to'];
+    }
+    else
+    {
+      response.thumbnails['from'] = 0;
+      response.thumbnails['to'] = 0;
+    }
     /*TODO: include consideration for strategy parameter supplied here
             If we consider the strategy, we can simply use the TimeMap instead of the cache file
             Either way, the 'response' should be passed to the function representing the chosen strategy
@@ -498,7 +522,7 @@ function PublicEndpoint () {
               constructSSE('cached simhashes exist, proceeding with cache...',request.headers["x-my-curuniqueusersessionid"])
               constructSSE("percentagedone-15",request.headers["x-my-curuniqueusersessionid"]);
 
-              processWithFileContents(query['urir'],data, response,request.headers["x-my-curuniqueusersessionid"])
+              processWithFileContents(query['urir'], data, response,request.headers["x-my-curuniqueusersessionid"])
             }
 
         },
@@ -548,21 +572,33 @@ function cleanSystemData (cb) {
 * @param response handler to client's browser interface
 */
 function processWithFileContents (uri, fileContents, response,curCookieClientId) {
-
   var t = createMementosFromJSONFile(fileContents)
-   t.curClientId = curCookieClientId
-   t.originalURI = response.thumbnails['urir']
-   t.primesource = response.thumbnails['primesource']
-   t.collectionidentifier = response.thumbnails['collectionidentifier']
-   t.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold']
-   t.role = response.thumbnails['role']
+  t.curClientId = curCookieClientId
+  t.originalURI = response.thumbnails['urir']
+  t.primesource = response.thumbnails['primesource']
+  t.collectionidentifier = response.thumbnails['collectionidentifier']
+  t.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold']
+  t.role = response.thumbnails['role']
   /* ByMahee -- unnessessary for the current need
   t.printMementoInformation(response, null, false) */
 
-  if(t.mementos.simhash === 'undefined'){
+  /**
+  * If a date range is passed, generate all is requested,
+  * or date range was previously requested then
+  * run the TimeMapGodFunction
+  */
+  if(response.thumbnails['from'] != 0)
+  {
     getTimemapGodFunctionForAlSummarization(uri, response,curCookieClientId);
   }
-  else{
+  else if(t.mementos.simhash === 'undefined' || dateRange == true)
+  {
+    dateRange = false;
+    getTimemapGodFunctionForAlSummarization(uri, response,curCookieClientId);
+  }
+  else
+  {
+    dateRange = false;
     ConsoleLogIfRequired("Existing file contents are as follows:")
     ConsoleLogIfRequired("**************************************************************************************************");
     console.log(JSON.stringify(t));
@@ -620,7 +656,7 @@ function processWithFileContents (uri, fileContents, response,curCookieClientId)
           }
         )
       }
-  }
+    }
 }
 
 /**
@@ -882,6 +918,12 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
                ConsoleLogIfRequired(JSON.stringify(t.mementos))
                ConsoleLogIfRequired("---------------------------------------------------")
             }
+
+            if(response.thumbnails['from'] != 0) // if from date was given
+            {
+              t.mementos = t.filterMementosForDateRange(response);
+            }
+
             ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
             constructSSE('Timemap fetched has a total of '+t.mementos.length + ' mementos.',curCookieClientId)
             constructSSE("percentagedone-20",curCookieClientId);
@@ -1043,7 +1085,6 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 /*****************************************
    // SUPPLEMENTAL TIMEMAP FUNCTIONALITY
 ***************************************** */
-
 TimeMap.prototype.calculateSimhashes = function (curCookieClientId,callback) {
   //ConsoleLogIfRequired("--- By Mahee - For my understanding")
   //ConsoleLogIfRequired("Inside CalculateSimhashes")
@@ -1171,6 +1212,39 @@ TimeMap.prototype.getDatesForHistogram = function (callback,response,curCookieCl
   response.write(JSON.stringify(mementoJObjArr));
   response.end();
   callback('');
+}
+
+/**
+* Filters memento array to contain just the requested date interval
+*/
+TimeMap.prototype.filterMementosForDateRange = function(response)
+{
+  dateRange = true;
+  var theFromDate = new Date(response.thumbnails['from']);
+  var theToDate = new Date(response.thumbnails['to']);
+
+  var resizedMementosLength = this.mementos.length;
+  var tempMementoArr = [];
+  var tempStackOfMementos = new Stack();
+  var mementoCount = 0;
+
+  // Only consider mementos in the given date range
+  for(var i = resizedMementosLength - 1; i > 0; i--)
+  {
+    var tryDate = new Date(this.mementos[i].datetime);
+    if(tryDate > theFromDate && tryDate < theToDate)
+    {
+      tempStackOfMementos.push(this.mementos[i]);
+      mementoCount++;
+    }
+  }
+  for(var i = 0;i < mementoCount; i++)
+  {
+    tempMementoArr.push(tempStackOfMementos.pop())
+  }
+  tempMementoArr[0]["rel"] = "first memento";
+
+  return tempMementoArr;
 }
 
 /**
@@ -1422,7 +1496,6 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
     callback('')
   }
 }
-
 
 TimeMap.prototype.supplyAllMementosAScreenshotURI = function(callback){
   for(var m in this.mementos){
@@ -1692,8 +1765,8 @@ async function headless(uri,filepath) {
             timeout: 5000000,
         });
 
-      	//Set wait time before screenshotURI
-      	await page.waitFor(SCREENSHOT_DELTA * 1000); //convert to seconds
+        //Set wait time before screenshotURI
+        await page.waitFor(SCREENSHOT_DELTA * 1000); //convert to seconds
 
         // Take screenshots
         await page.screenshot({
