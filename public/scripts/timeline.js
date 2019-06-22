@@ -1,5 +1,3 @@
-
-
 var jsonObjRes = {};
 var histoData = {};
 var curURIUnderFocus=null;
@@ -599,16 +597,16 @@ var generateAllClicked = false;
   window.onload = function() {
       //window.location.href = window.location.origin;
       //alert("Windows loaded back");
-      if(localStorage.getItem("getStatsClicked") == "true"){
+      if(localStorage.getItem("getHistogramPageClicked") == "true"){
 
-          localStorage.setItem("getStatsClicked","false");
+          localStorage.setItem("getHistogramPageClicked","false");
           var curInputObj = JSON.parse(localStorage.getItem("curInputObj"));
           $('.argumentsForm #uriIP').val(curInputObj["uri"]);
           $('.argumentsForm #urirIP').val(curInputObj["urir"]);
           $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
           $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
           $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true).trigger("click");
-          getStats(); // this makes the call for getting the initial stats.
+          getHistogramPage(); // this makes the call for getting the initial stats.
       }else{
         //alert("doesn't have the local storage set, using the Query parameters");
         //GET Request-> "http://localhost:3000/GetResponse/?URI-R=http://4genderjustice.org/&ci=1068&primesource=archiveit&hdt=4"
@@ -631,10 +629,25 @@ var generateAllClicked = false;
             $('.argumentsForm .primesrcsection input[type=radio][value='+ curDeepLinkStateArr[1] +']').prop("checked",true).trigger("click");
             if(curDeepLinkStateArr[4] == "summary"){
               getSummary();
-            }else if(curDeepLinkStateArr[4] == "stats"){
-                getTheNewStats();
-            }else{
-              getStats();
+	    }else if(curDeepLinkStateArr[4] == "stats"){
+		getStats();
+	    }else if(curDeepLinkStateArr[4].length > 9){
+		    
+		var from = curDeepLinkStateArr[4].substring(7,17);
+		var to = curDeepLinkStateArr[4].substring(17,27);
+		    
+		if(isValidDate(from) && isValidDate(to)){
+			var fromDate = formatDateRange(from);
+			var toDate = formatDateRange(to);
+			var theDateRange = "Requested Date Range: " + fromDate + " - " + toDate;
+			$(".statsWrapper .Memento_Date_Range").html(theDateRange);
+			getDateRangeSummary(fromDate, toDate);
+	        }
+	        else{
+			document.getElementById('date_error').style.display = "block";
+		    }
+	    }else{
+              getHistogramPage();
             }
           }else{
               return false;
@@ -780,32 +793,17 @@ function setProgressBar(value){
   $(".progress-bar-space .progress-bar-striped").css("width",value+"%");
 }
 
-
-
-function getStats(){
+function getHistogramPage(){
     var toDisplay= "Internet Archive";
     if($("input[name='primesource']:checked").val() == "archiveit" ){
         toDisplay= "Archive-It";
     }
     getHistoData(toDisplay);
-
-
-    $(".getTheNewStats").click(function(event){
-        getTheNewStats();
-    });
-
-    $("#generateAllThumbnails").click(function(event){
-        generateAllClicked = true;
-        getSummary();
-    });
-
-
-    //date range click event
-    $("#submitRange").click(function(event){
-        getSummary();
+    $(".getStats").click(function(event){
+        getStats();
     });
 }
-
+    
 function getHistoData(toDisplay){
   var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
@@ -833,16 +831,12 @@ function getHistoData(toDisplay){
       $.ajax({
         type: "GET",
         url: address, // uncomment this for deployment
-        beforeSend: function(xhr) {
-            xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
-        },
         dataType: "text",
         timeout: 0,
         success: function( data, textStatus, jqXHR) {
             $("#busy-loader").hide();
             $('#serverStreamingModal').modal('hide');
           try{
-
               data = $.trim(data).split("...");
               if(data.length > 1){
                   if(data [1] == ""){
@@ -856,20 +850,26 @@ function getHistoData(toDisplay){
               }
 
               histoData= $.parseJSON(data);
+	      console.log(histoData);
               if(histoData.length > 12){
-                $("#generateAllThumbnails").hide();
+                  document.getElementById('generateAllThumbnails').style.display = "none";
               }
+              document.getElementById("histoWrapper").style.display = "block";
+	      var endPoint = histoData.length - 1;
 
+	      var fromYear = histoData[0].event_display_date.substring(0,4);
+	      var fromMonth = histoData[0].event_display_date.substring(5,7);
+	      var fromDate = histoData[0].event_display_date.substring(8,10);
+
+	      var toYear = histoData[endPoint].event_display_date.substring(0,4);
+	      var toMonth = histoData[endPoint].event_display_date.substring(5,7);
+	      var toDate = histoData[endPoint].event_display_date.substring(8,10);
+
+	      var fromDateStr= fromYear+"-"+fromMonth +"-"+fromDate;
+	      var toDateStr= toYear+"-"+toMonth +"-"+toDate;
+	      var dateRangeStr= fromDateStr + " - " + toDateStr;
+	      $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
               getHistogram(toDisplay, histoData);
-              $(".histoWrapper").show();
-              
-              var fromDate= new Date(histoData[0].event_display_date);
-              var fromDateStr= fromDate.getFullYear()+"-"+fromDate.getMonth() +"-"+fromDate.getDate();
-              var toDate = new Date(histoData[histoData.length-1].event_display_date);
-              var toDateStr= toDate.getFullYear()+"-"+toDate.getMonth() +"-"+toDate.getDate();
-              var dateRangeStr= fromDateStr + " - " + toDateStr;
-          $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
-
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
@@ -887,11 +887,9 @@ function getHistoData(toDisplay){
       });
     }
 }
-
-
-
-function getTheNewStats(){
-    $(".histoWrapper").hide();
+   
+function getStats(){
+  document.getElementById("histoWrapper").style.display = "none";
   var collectionIdentifer = $('.argumentsForm #collectionNo').val();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
@@ -909,7 +907,7 @@ function getTheNewStats(){
       $("#busy-loader").show();
       $('#serverStreamingModal .logsContent').empty();
        $('#logtab .logsContent').empty();
-       var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
+	var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
        history.pushState({},"Stats State",path);
       $('#serverStreamingModal').modal('show');
         $.ajax({
@@ -940,8 +938,6 @@ function getTheNewStats(){
                     if($("input[name='primesource']:checked").val() == "archiveit" ){
                       toDisplay= "Archive-It";
                     }
-                    
-
                     var fromDate= new Date(jsonObjRes[0].fromdate);
                     var fromDateStr= fromDate.getFullYear()+"-"+fromDate.getMonth() +"-"+fromDate.getDate();
                     var toDate = new Date(jsonObjRes[0].todate);
@@ -949,13 +945,9 @@ function getTheNewStats(){
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
                     $(".paraOnlyOnStatsResults").show();
-                    $(".time_container").show();
-                    
-                    //Get the data into an array for the histogram
-                    //From and to dates are passed for the domain
-                    //getHistoData(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate(), toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
                     
                     $(".statsWrapper .collection_stats").html(memStatStr);
+
 
                     //  $(".statsWrapper .collection_stats").attr("title","Date Range: "+dateRangeStr)
                     if(  $(".statsWrapper button[type='button']").eq(1).length != 0){
@@ -975,7 +967,7 @@ function getTheNewStats(){
                 }catch(err){
                     alert($.trim(data));
                     $('#serverStreamingModal .logsContent').empty();
-                    $('#serverStreamingModal').modal('hide');
+                      $('#serverStreamingModal').modal('hide');
                     $(".statsWrapper").hide();
                     $(".tabContentWrapper").hide();
                 }
@@ -990,22 +982,19 @@ function getTheNewStats(){
         });
       }
 }
- 
-
 
 function getSummary(){
     
-  //Remove histogram
-  document.getElementById("histogram").style.display = "none";
-  $(".histoWrapper").hide();
-
+  // Remove histogram
+  document.getElementById("histoWrapper").style.display = "none";
+    
   var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
   if(collectionIdentifer == ""){
       collectionIdentifer = "all";
   }
   //var hammingDistance = $('.argumentsForm #hammingDistance').val();
   var hammingDistance = $(".statsWrapper .on").val();
-
+    
   if (generateAllClicked == true) {
     hammingDistance = "0";
   }
@@ -1116,18 +1105,137 @@ function getSummary(){
         }
       });
     }
-
-    //resetting this back to false so that the user can view unique thumbnails
+    //resetting this in order to have an option of unique thumbnails
     generateAllThumbnails = false;
 }
 
+function getDateRangeSummary(from, to){
+	
+  // Remove histogram
+  document.getElementById("histoWrapper").style.display = "none";
+    
+  var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
+  if(collectionIdentifer == ""){
+      collectionIdentifer = "all";
+  }
+  //var hammingDistance = $('.argumentsForm #hammingDistance').val();
+  var hammingDistance = $(".statsWrapper .on").val();
 
+  if(hammingDistance == "" || hammingDistance===undefined){
+    hammingDistance = $('.argumentsForm #hammingDistance').val();
+  }
+
+  var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
+  if($("body").find("form")[0].checkValidity()){
+        $(".time_container").hide();
+        $(".Explain_Threshold").hide();
+       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+from+to+"/" +$('.argumentsForm #urirIP').val().trim();
+       console.log("Made it here!");
+
+       var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
+       changeToSummaryState(summaryStatePath);
+
+       startEventNotification();
+       var ENDPOINT = "/alsummarizedtimemap";
+       var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+from+to"/"+$('.argumentsForm #urirIP').val()
+       $("#busy-loader").show();
+       $('#serverStreamingModal .logsContent').empty();
+       $('#serverStreamingModal').modal('show');
+      $.ajax({
+        type: "GET",
+        url: address, // uncomment this for deployment
+        beforeSend: function(xhr) {
+          xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+        },
+        dataType: "text",
+        timeout: 0,
+        success: function( data, textStatus, jqXHR) {
+            $("#busy-loader").hide();
+            $('#serverStreamingModal').modal('hide');
+          try{
+              data = $.trim(data).split("...");
+              if(data.length > 1){
+                  if(data [1] == ""){
+                      data = data [0];
+                  }else{
+                      data = data [1];
+                  }
+              }
+              else{
+                  data = data [0];
+              }
+
+              jsonObjRes= $.parseJSON(data);
+              // following code segment makes the screenshot URI got with event_html | event_html_similarto properties to a html fragment
+              jsonObjRes[0].event_html= "<img src='"+jsonObjRes[0].event_html+"' width='300px' />";
+              var noOfUniqueMementos = 1;
+              for(var i=1;i< jsonObjRes.length;i++){
+                  jsonObjRes[i].event_html= "<img src='"+jsonObjRes[i].event_html+"' width='300px' />";
+                  jsonObjRes[i].event_html_similarto= "<img src='"+jsonObjRes[i].event_html_similarto+"' width='300px' />";
+              }
+
+
+              var dateRangeStr= jsonObjRes[0].event_display_date.split(",")[0] + " - " + jsonObjRes[jsonObjRes.length-1].event_display_date.split(",")[0];
+              var toDisplay= "Internet Archive";
+              if($("input[name='primesource']:checked").val() == "archiveit" ){
+                toDisplay= "Archive-It";
+              }
+
+              $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes.length +" mementos | "+dateRangeStr);
+              $(".paraOnlyOnStatsResults").hide();
+              $(".statsWrapper").show();
+
+              window.timeline = new Timeline(jsonObjRes);
+              // place where the notch width is being reduced t0 2px.
+              $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
+              // Color is changed in the Array at 284 line as that is the right place
+              // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
+              new Zoom("in");
+              new Zoom("out");
+              var chooseNext = new Chooser("next");
+              var choosePrev = new Chooser("prev");
+              var chooseUniqueNext = new Chooser("uniquenext");
+              var chooseUniquePrev = new Chooser("uniqueprev");
+              chooseNext.click();
+              $(document).bind('keydown', function(e) {
+                  if (e.keyCode === 39) {
+                      chooseNext.click();
+                  } else if (e.keyCode === 37) {
+                      choosePrev.click();
+                  } else {
+                      return;
+                  }
+              });
+              console.log(jsonObjRes);
+              drawImageGrid(jsonObjRes); // calling Image Grid Function here
+              drawImageSlider(jsonObjRes);
+              getImageArray(); //calling GIF function
+              $(".modal-backdrop").remove();
+              $('#serverStreamingModal').modal('hide');
+	      //localStorage.setItem("submitRangeClicked", "false");
+          }
+          catch(err){
+            alert("Some problem fetching the response, Please refresh and try again.");
+            $("#busy-loader").hide();
+            $('#serverStreamingModal').modal('hide');
+            $(".tabContentWrapper").hide();
+          }
+        },
+        error: function( data, textStatus, jqXHR) {
+          var errMsg = "Some problem fetching the response, Please refresh and try again.";
+          $("#busy-loader").hide();
+          $('#serverStreamingModal').modal('hide');
+          alert(errMsg);
+        }
+      });
+    }
+}
 
 $(function(){
   $(".cancelProcess").click(function(event){
 
     //console.log("Cancel clicked");
-    localStorage.removeItem("getStatsClicked");
+    localStorage.removeItem("getHistogramPageClicked");
     localStorage.removeItem("curInputObj");
     //window.location.reload();
     window.location = "/";
@@ -1158,9 +1266,9 @@ $(function(){
             hammingDistance = 4;
         }
 
-        var role = "histogram" 
+        var role = "histogram"
         if($(this).parents("body").find("form")[0].checkValidity()){
-            localStorage.setItem("getStatsClicked", "true");
+            localStorage.setItem("getHistogramPageClicked", "true");
             var curInputJsobObj = {};
             curInputJsobObj["uri"]= $("#uriIP").val().trim();
             curInputJsobObj["urir"]= $("#urirIP").val().trim();
@@ -1194,11 +1302,32 @@ $(function(){
     $(".getSummary").click(function(event){
       getSummary();
     });
+	
+    $("#submitRange").click(function(event){
+	//localStorage.setItem("submitRangeClicked,"true");
+	var from = document.getElementById("fromInput").value;
+	var to = document.getElementById("toInput").value;
 
+	from.toString();
+	to.toString();
+	    
+     	if(isValidDate(from) && isValidDate(to)){
+		var fromDate = formatDateRange(from);
+		var toDate = formatDateRange(to);
+		var theDateRange = "Requested Date Range: " + fromDate + " - " + toDate;
+		$(".statsWrapper .Memento_Date_Range").html(theDateRange);
+		getDateRangeSummary(fromDate, toDate);
+	}
+	else{
+		document.getElementById('date_error').style.display = "block";
+	}
+    });
+    
     $("#generateAllThumbnails").click(function(event){
         generateAllClicked = true;
         getSummary();
     });
+
 
     $(document).on("click","button[name=thresholdDistance]",function(){
       $('button[name=thresholdDistance].on').removeClass('on')
@@ -1266,7 +1395,7 @@ function updateDeepLinkStateArr() {
     var pathname = window.location.pathname;
     var deepLinkStr = pathname.slice(1);
     var deepLinkParts = deepLinkStr.split("/");
-    if(deepLinkParts[0] == "alsummarizedview" && (deepLinkParts[1].toLowerCase()=="archiveit" || deepLinkParts[1].toLowerCase()=="internetarchive"  )  && (deepLinkParts[4]=="stats" || deepLinkParts[4]=="summary" || deepLinkParts[4] == "histogram")){
+    if(deepLinkParts[0] == "alsummarizedview" && (deepLinkParts[1].toLowerCase()=="archiveit" || deepLinkParts[1].toLowerCase()=="internetarchive"  )  && (deepLinkParts[4]=="stats" || deepLinkParts[4]=="summary")){
       curDeepLinkStateArr[0] = deepLinkParts[0];
       curDeepLinkStateArr[1] = deepLinkParts[1];
       curDeepLinkStateArr[4]= deepLinkParts[4];
@@ -1292,6 +1421,69 @@ function updateDeepLinkStateArr() {
     }
 
 }
+
+function formatDateRange(dateInput){	
+	var Month = dateInput.substring(5,7);
+	var Date = dateInput.substring(8,10);
+	var Year = dateInput.substring(0,4);
+	
+	var fullDate = Year + "-" + Month + "-" + Date;
+	return fullDate;
+}
+
+// Validates that the input string is a valid date formatted as "mm/dd/yyyy"
+function isValidDate(dateString)
+{
+    // First check for the pattern
+    if(!/^\d{4}\/\d{2}\/\d{2}$/.test(dateString))
+        return false;
+
+    // Parse the date parts to integers
+    var parts = dateString.split("/");
+    var day = parseInt(parts[2], 10);
+    var month = parseInt(parts[1], 10);
+    var year = parseInt(parts[0], 10);
+
+    // Check the ranges of month and year
+    if(year < 1000 || year > 3000 || month == 0 || month > 12)
+        return false;
+
+    var monthLength = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
+
+    // Adjust for leap years
+    if(year % 400 == 0 || (year % 100 != 0 && year % 4 == 0))
+        monthLength[1] = 29;
+
+    // Find index of last memento
+    var endPoint = histoData.length - 1;
+	
+    // Get date of first memento
+    var fromYear = histoData[0].event_display_date.substring(0,4);
+    var fromMonth = histoData[0].event_display_date.substring(5,7);
+    fromMonth = fromMonth - 1;
+    var fromDay = histoData[0].event_display_date.substring(8,10);
+	
+    // Get date of last memento
+    var toYear = histoData[endPoint].event_display_date.substring(0,4);
+    var toMonth = histoData[endPoint].event_display_date.substring(5,7);
+    toMonth = toMonth - 1;
+    var toDay = histoData[endPoint].event_display_date.substring(8,10);
+	
+    month = month - 1;
+    
+    // Create date objects
+    var from = new Date(fromYear, fromMonth, fromDay);
+    var to = new Date(toYear, toMonth, toDay);
+    var compareDate = new Date(year, month, day);
+    
+    // Check if input within possible range of mementos
+    if(compareDate < from || compareDate > to){
+	    console.log("out of range");
+	    return false;
+    }
+    // Check the range of the day
+    return day > 0 && day <= monthLength[month];
+};
 
 window.addEventListener('popstate', function(e) {
     location.reload();
