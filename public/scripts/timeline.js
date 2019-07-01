@@ -629,24 +629,28 @@ var generateAllClicked = false;
             $('.argumentsForm .primesrcsection input[type=radio][value='+ curDeepLinkStateArr[1] +']').prop("checked",true).trigger("click");
             if(curDeepLinkStateArr[4] == "summary"){
               getSummary();
-	    }else if(curDeepLinkStateArr[4] == "stats"){
-		getStats();
-	    }else if(curDeepLinkStateArr[4].length > 9){
-		    
-		var from = curDeepLinkStateArr[4].substring(7,17);
-		var to = curDeepLinkStateArr[4].substring(17,27);
-		    
-		if(isValidDate(from) && isValidDate(to)){
-			var fromDate = formatDateRange(from);
-			var toDate = formatDateRange(to);
-			var theDateRange = "Requested Date Range: " + fromDate + " - " + toDate;
-			$(".statsWrapper .Memento_Date_Range").html(theDateRange);
-			getDateRangeSummary(fromDate, toDate);
-	        }
-	        else{
-			document.getElementById('date_error').style.display = "block";
-		    }
-	    }else{
+	        }else if(curDeepLinkStateArr[4] == "stats"){
+		      getStats();
+	        }else if(curDeepLinkStateArr.length > 6){
+		      console.log(curDeepLinkStateArr);
+		      var from = curDeepLinkStateArr[6].substring(0,4)+"/"+curDeepLinkStateArr[6].substring(4,6)+"/"+curDeepLinkStateArr[6].substring(6,8);
+		      var to = curDeepLinkStateArr[7].substring(0,4)+"/"+curDeepLinkStateArr[7].substring(4,6)+"/"+curDeepLinkStateArr[7].substring(6,8);
+		      
+
+            
+		      if(isValidDate(from) && isValidDate(to)){
+			    var fromDate = formatDateRange(from);
+			    var toDate = formatDateRange(to);
+			    var theDateRange = "Requested Date Range: " + fromDate + " - " + toDate;
+			    $(".statsWrapper .Memento_Date_Range").html(theDateRange);
+                
+			    getDateRangeSummary(fromDate, toDate);
+	          }
+	          else{
+			    document.getElementById('date_error').style.display = "block";
+		      }
+
+	        }else{
               getHistogramPage();
             }
           }else{
@@ -820,7 +824,7 @@ function getHistoData(toDisplay){
   if($("body").find("form")[0].checkValidity()){
         $(".time_container").hide();
         $(".Explain_Threshold").hide();
-       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
+       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0" +"/" +$('.argumentsForm #urirIP').val().trim();
 
        startEventNotification();
        var ENDPOINT = "/alsummarizedtimemap";
@@ -903,7 +907,7 @@ function getStats(){
   if($("body").find("form")[0].checkValidity()){
       startEventNotification();
       var ENDPOINT = "/alsummarizedtimemap";
-      var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
+      var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0"+"/"+$('.argumentsForm #urirIP').val();
       $("#busy-loader").show();
       $('#serverStreamingModal .logsContent').empty();
        $('#logtab .logsContent').empty();
@@ -1007,9 +1011,11 @@ function getSummary(){
   if($("body").find("form")[0].checkValidity()){
         $(".time_container").hide();
         $(".Explain_Threshold").hide();
-       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/" +$('.argumentsForm #urirIP').val().trim();
+       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0"+"/" +$('.argumentsForm #urirIP').val().trim();
 
-       var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
+       var summaryPath = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role +"/"+ $('.argumentsForm #urirIP').val().trim();
+
+       var summaryStatePath = "/alsummarizedview" +summaryPath;
        changeToSummaryState(summaryStatePath);
 
        startEventNotification();
@@ -1125,14 +1131,18 @@ function getDateRangeSummary(from, to){
     hammingDistance = $('.argumentsForm #hammingDistance').val();
   }
 
+  var fromFormatted = from.substring(0,4)+from.substring(5,7)+from.substring(8,10);
+  var toFormatted = to.substring(0,4)+to.substring(5,7)+to.substring(8,10);
+
   var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
   if($("body").find("form")[0].checkValidity()){
         $(".time_container").hide();
         $(".Explain_Threshold").hide();
-       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+from+to+"/" +$('.argumentsForm #urirIP').val().trim();
+       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+from+"/"+to+"/" +$('.argumentsForm #urirIP').val().trim();
        console.log("Made it here!");
 
-       var summaryStatePath = "/alsummarizedview" +pathForAjaxCall;
+       var summaryPath = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+fromFormatted+"/"+toFormatted+"/" +$('.argumentsForm #urirIP').val().trim();
+       var summaryStatePath = "/alsummarizedview" +summaryPath;
        changeToSummaryState(summaryStatePath);
 
        startEventNotification();
@@ -1412,7 +1422,16 @@ function updateDeepLinkStateArr() {
       else{
         curDeepLinkStateArr[2] = deepLinkParts[2];
         curDeepLinkStateArr[3]= deepLinkParts[3];
-        curDeepLinkStateArr[5] = deepLinkStr.split("/"+deepLinkParts[4]+"/")[1];
+        if(curDeepLinkStateArr[4] == "summary" && !(isNaN(Number(deepLinkParts[5]))) && !(isNaN(Number(deepLinkParts[6]))))
+        {
+            curDeepLinkStateArr[6] = deepLinkParts[5];
+            curDeepLinkStateArr[7] = deepLinkParts[6];
+            curDeepLinkStateArr[5] = deepLinkStr.split("/"+curDeepLinkStateArr[7]+"/")[1];
+
+        }
+        else    
+            curDeepLinkStateArr[5] = deepLinkStr.split("/"+deepLinkParts[4]+"/")[1];
+
         return true;
       }
     }else{

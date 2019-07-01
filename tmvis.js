@@ -219,7 +219,7 @@ function main () {
   // this is the actually place that hit the main server logic
   //app.get('/alsummarizedtimemap/:primesource/:ci/:urir', endpoint.respondToClient)
 
-  app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/:role/*', endpoint.respondToClient)
+  app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/:role/:from/:to/*', endpoint.respondToClient)
 
 
   app.listen(port, '0.0.0.0', (err) => {
@@ -351,6 +351,7 @@ function PublicEndpoint () {
       // for the intermediate step of involving user to decide the value of k
       query['role']= request.params.role;
       console.log(query['role']);
+      /*
       if(query['role'].length > 9) // if date range was passed with role
       {
         query['from'] = query['role'].substring(7,17); // extract from date
@@ -361,6 +362,15 @@ function PublicEndpoint () {
       {
         query['from'] = 0 // extract from date
         query['to'] = 0
+      }*/
+      if(request.params.from != '0')
+      {
+        query['from'] = request.params.from;
+        query['to'] = request.params.to;
+      }
+      else{
+        query['from'] = 0;
+        query['to'] = 0;
       }
       
       query['ssd']=request.params.ssd;
@@ -522,7 +532,21 @@ function PublicEndpoint () {
               constructSSE('cached simhashes exist, proceeding with cache...',request.headers["x-my-curuniqueusersessionid"])
               constructSSE("percentagedone-15",request.headers["x-my-curuniqueusersessionid"]);
 
-              processWithFileContents(query['urir'], data, response,request.headers["x-my-curuniqueusersessionid"])
+              if(response.thumbnails['from'] != 0)
+              {
+                getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
+              }
+              else if(dateRange == true)
+              {
+                if(t.role == "stats")
+                {
+                  dateRange = false;
+                  cacheFile.deleteCacheFile();
+                }
+                getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
+              }else{
+                processWithFileContents(query['urir'], data, response,request.headers["x-my-curuniqueusersessionid"])
+              }
             }
 
         },
@@ -587,13 +611,21 @@ function processWithFileContents (uri, fileContents, response,curCookieClientId)
   * or date range was previously requested then
   * run the TimeMapGodFunction
   */
+  /*
   if(response.thumbnails['from'] != 0)
   {
     getTimemapGodFunctionForAlSummarization(uri, response,curCookieClientId);
   }
   else if(t.mementos.simhash === 'undefined' || dateRange == true)
   {
-    dateRange = false;
+    if(t.role == "stats")
+    {
+      dateRange = false;
+      cacheFile.deleteCacheFile();
+    }
+    getTimemapGodFunctionForAlSummarization(uri, response,curCookieClientId);
+  }*/
+  if(t.mementos.simhash === 'undefined' ){
     getTimemapGodFunctionForAlSummarization(uri, response,curCookieClientId);
   }
   else
@@ -978,7 +1010,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
         t.calculateSimhashes(curCookieClientId,callback);
     },
     function (callback) {
-      constructSSE("percentagedone-75",curCookieClientId);
+      constructSSE("percentagedone-45",curCookieClientId);
       if (t.role == "histogram" || t.hammingdistancethreshold == '0') {
         callback('');
       }
@@ -1015,6 +1047,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
         }
     },
     function (callback) {
+      constructSSE("percentagedone-90",curCookieClientId);
       if(t.role == "histogram"){t.getDatesForHistogram(callback,response,curCookieClientId);}
       else if(t.hammingdistancethreshold == '0'){t.supplyAllMementosAScreenshotURI(callback);}
       else{
