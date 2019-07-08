@@ -1,5 +1,6 @@
 var jsonObjRes = {};
 var histoData = {};
+var mementosToRemove = [];
 var curURIUnderFocus=null;
 var curDeepLinkStateArr=[];
 var curUniqueUserSessionID = null;
@@ -1341,6 +1342,66 @@ $(function(){
         getSummary();
     });
 
+    $(document).ready(function () {
+        $(document).on("click",".close_button", function(){
+            if($(this).hasClass('off'))
+            {
+                $(this).addClass('on');
+                $(this).removeClass('off');
+                this.parentElement.style.opacity = '.3';
+                mementosToRemove.push($(this).parent().find("img").attr("src"));
+            }
+            else
+            {
+                $(this).addClass('off');
+                $(this).removeClass('on');
+                this.parentElement.style.opacity = '1';
+                var found_it = mementosToRemove.indexOf($(this).parent().find("img").attr("src"));
+                mementosToRemove.splice(found_it,1);
+            }
+            console.log("Here's the list!");
+            console.log(mementosToRemove);
+        });
+    });
+
+    $("#updateMementos").click(function(event){
+        console.log("I was clicked!");
+        //upon button click images marked for deletion must be removed
+        //from array passed to functions
+        if(mementosToRemove.length == imagesData_IG.length)
+        {
+            document.getElementById("updateMementosError").innerHTML = "Cannot delete all mementos.";
+        }
+        else if(mementosToRemove.length > 0)
+        {
+            document.getElementById("updateMementosError").innerHTML = "";
+            document.getElementById("revertMementos").style.display = "block";
+            $("#gifApp").empty();
+            for(var i = 0; i < mementosToRemove.length; i++)
+            {
+                for(var j = 0; j < jsonObjRes.length; j++)
+                {
+                    if($(jsonObjRes[j].event_html).attr("src") == mementosToRemove[i])
+                    {
+                        jsonObjRes.splice(j, 1);
+                        break;
+                    }
+                }
+            }
+            drawImageSlider(jsonObjRes);
+            drawImageGrid(jsonObjRes);
+            getImageArray();
+            mementosToRemove = [];
+        }
+        else
+        {
+            document.getElementById("updateMementosError").innerHTML = "Please select mementos for removal.";
+        }
+    });
+
+    $("#revertMementos").click(function(event){
+        location.reload();
+    });
 
     $(document).on("click","button[name=thresholdDistance]",function(){
       $('button[name=thresholdDistance].on').removeClass('on')

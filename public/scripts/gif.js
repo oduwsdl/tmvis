@@ -2,8 +2,7 @@ var imageLinks = [];
 var stampedImages = [];
 
 function getImageArray(){
-
-	
+	console.log("Here's a gif!");
 	$("#gif #gifContent #gifApp").empty();
 	for(var i = 0; i<imagesData_IG.length; i++)
 	{

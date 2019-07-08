@@ -27,6 +27,7 @@
     	<script src="/scripts/waitforimages.js"></script>
     	<script src="/scripts/gifshot.min.js"></script>
     	<script src="/scripts/gif.js"></script>
+    	<script src="/scripts/memento_toggle.js"></script>
 			<script src="/scripts/formatting.js?version=1005"></script>
 
 			<!-- Priorirty is to stabilise the current single step build -->
@@ -103,7 +104,7 @@
 
 					</div>
 				</form>
-
+				
 				<!--HISTOGRAM-->
 				<div class="histoWrapper row" id="histoWrapper" style="display:none;">
 					<div class="col-lg-12">
@@ -140,12 +141,11 @@
 					</div>
 				</div>
 
-
 				<!--STATS-->
 				<div class="statsWrapper row" style="display:none;">
 					<div class="col-lg-12">
 						<p class="Mementos_Considered"></p>
-						<div id="histogram"></div>
+						<p class="Memento_Date_Range"></p>
 						<p class="paraOnlyOnStatsResults algodesctag" style="display:none;"> Our algorithm will generate thumbnails of the most unique mementos. The options shown below are based on the amount of difference between the mementos.</p>
 
 						<div class="paraOnlyOnStatsResults row" style="display:none;">
@@ -157,7 +157,6 @@
 							</div>
 							<div class="col-lg-8">
 								<h3 class="collection_stats_container"><span class="collection_stats"></span> &nbsp; <button class="btn btn-primary getSummary" title="Displays visualizations after screenshots are captured"> Generate Thumbnails </button>
-									<button class="btn btn-primary" id="generateAllThumbnails" style="display:none;">Generate All Thumbnails</button>
 </h3>
 								<div class="time_container">
 									<p>(estimated <span class="approxTimeShowingPTag"> </span> to generate)</p>
@@ -178,9 +177,12 @@
 			<div class="row tabContentWrapper" style="display:none; z-index: 100; margin-bottom:1%;">
 				<ul class="nav nav-tabs">
 					<li class="active"><a data-toggle="tab" href="#imageGrid">Grid</a></li>
-				  <li><a data-toggle="tab" href="#imageSlider">Slider</a></li>
+				    <li><a data-toggle="tab" href="#imageSlider">Slider</a></li>
 					<li ><a data-toggle="tab" href="#timeLine">TimeLine</a></li>
 					<li ><a data-toggle="tab" href="#gif">GIF</a></li>
+					<li><button type="button" id="updateMementos">Update</button></li>
+					<li><button type="button" id="revertMementos" style="display:none;">Revert</button></li>
+					<li><p id='updateMementosError'></p></li>
 					<!-- <li ><a data-toggle="tab" href="#logtab">Log</a></li> -->
 				</ul>
 
@@ -271,7 +273,6 @@
 							<script id="series_legend_tmpl" type="text/jst">
 									<!-- <div class="series_legend_item" data-series="<%= name %>"><span class="series_legend_swatch" style="background-color:<%= color %>">&nbsp;</span> <span class="series_legend_text"><%= name %></span></div> -->
 								<div class="series_legend_item"><span class="series_legend_swatch" style="background-color:<%= color %>">&nbsp;</span> <span class="series_legend_text"><%= name %></span></div>
-
 							</script>
 							<script id="card_tmpl" type="text/jst">
 									<div class="timeline_card_container">
@@ -284,36 +285,27 @@
 														<%= event_html %>
 													</div>
 												<% } %> -->
-
-
 												<% if (event_series=='Thumbnails'){%>
 				                                    <% if (!_.isEmpty(event_html)){ %>
 				                                        <div class="item_user_html">
 																									<h2> Unique Memento</h2>
 				                                            <%= event_html %>
-
 				                                        </div>
 				                                        <% } %>
 				                                <% } %>
-
 				                                <% if (event_series=='Non-Thumbnail Mementos'){%>
 				                                    <% if (!_.isEmpty(event_html_similarto)){ %>
 				                                        <div class="item_user_html similarToPictureEle">
 				                                        	<h2> Similar To </h2>
 				                                            <%= event_html_similarto %>
-
 				                                        </div>
 				                                        <% } %>
 				                                <% } %>
-
-
-
 												<%= event_description %>
 											</div>
 											<% if (!_.isEmpty(event_link)){ %>
 												<div class="read_btn"><a target="_blank" href="<%= event_link %>">Open Archived Page</a></div>
 												<% } %>
-
 													<div class="item_year">
 														<span class="series_legend_text">Datetime: </span> <%= event_display_date %>
 													</div>
@@ -391,4 +383,3 @@
 	</div>
 	</div>
 </html>
-

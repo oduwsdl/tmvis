@@ -20,6 +20,7 @@ function getHistogram(mementoDisplay, dateArray){
 	});
 	
 	var endPoint = data.length - 1;
+
 	var fromYear = data[0].event_display_date.substring(0,4);
 	var fromMonth = data[0].event_display_date.substring(5,7);
 	var fromDate = data[0].event_display_date.substring(8,10);
@@ -27,10 +28,6 @@ function getHistogram(mementoDisplay, dateArray){
 	var toYear = data[endPoint].event_display_date.substring(0,4);
 	var toMonth = data[endPoint].event_display_date.substring(5,7);
 	var toDate = data[endPoint].event_display_date.substring(8,10);
-        /*var fromDateStr= fromYear+"-"+fromMonth +"-"+fromDate;
-        var toDateStr= toYear+"-"+toMonth +"-"+toDate;
-        var dateRangeStr= fromDateStr + " - " + toDateStr;
-        $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ mementoDisplay +": "+ dateArray.length +" mementos | "+dateRangeStr);*/
 	
 	// set the ranges
 	var x = d3.scaleTime()

@@ -515,9 +515,8 @@ function PublicEndpoint () {
       constructSSE('Checking if a cache file exists for ' + query['urir'] + '...',request.headers["x-my-curuniqueusersessionid"])
       constructSSE("percentagedone-10",request.headers["x-my-curuniqueusersessionid"]);
 
-
-    //  ConsoleLogIfRequired('cacheFile: '+JSON.stringify(cacheFile))
-      cacheFile.readFileContents(
+    	//  ConsoleLogIfRequired('cacheFile: '+JSON.stringify(cacheFile))
+      	cacheFile.readFileContents(
         function success (data) {
           // A cache file has been previously generated using the alSummarization strategy
 
@@ -606,25 +605,6 @@ function processWithFileContents (uri, fileContents, response,curCookieClientId)
   /* ByMahee -- unnessessary for the current need
   t.printMementoInformation(response, null, false) */
 
-  /**
-  * If a date range is passed, generate all is requested,
-  * or date range was previously requested then
-  * run the TimeMapGodFunction
-  */
-  /*
-  if(response.thumbnails['from'] != 0)
-  {
-    getTimemapGodFunctionForAlSummarization(uri, response,curCookieClientId);
-  }
-  else if(t.mementos.simhash === 'undefined' || dateRange == true)
-  {
-    if(t.role == "stats")
-    {
-      dateRange = false;
-      cacheFile.deleteCacheFile();
-    }
-    getTimemapGodFunctionForAlSummarization(uri, response,curCookieClientId);
-  }*/
   if(t.mementos.simhash === 'undefined' ){
     getTimemapGodFunctionForAlSummarization(uri, response,curCookieClientId);
   }
@@ -951,7 +931,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
                ConsoleLogIfRequired("---------------------------------------------------")
             }
 
-            if(response.thumbnails['from'] != 0) // if from date was given
+            if(response.thumbnails['from'] != 0) // if from date was given, filter mementos
             {
               t.mementos = t.filterMementosForDateRange(response);
             }
@@ -1010,7 +990,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
         t.calculateSimhashes(curCookieClientId,callback);
     },
     function (callback) {
-      constructSSE("percentagedone-45",curCookieClientId);
+      constructSSE("percentagedone-75",curCookieClientId);
       if (t.role == "histogram" || t.hammingdistancethreshold == '0') {
         callback('');
       }
@@ -1047,7 +1027,6 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
         }
     },
     function (callback) {
-      constructSSE("percentagedone-90",curCookieClientId);
       if(t.role == "histogram"){t.getDatesForHistogram(callback,response,curCookieClientId);}
       else if(t.hammingdistancethreshold == '0'){t.supplyAllMementosAScreenshotURI(callback);}
       else{
