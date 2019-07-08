@@ -628,30 +628,23 @@ var generateAllClicked = false;
             $('.argumentsForm #hammingDistance').val(hammingDistance);
             $('.argumentsForm #hammingdistanceValue').html(hammingDistance);
             $('.argumentsForm .primesrcsection input[type=radio][value='+ curDeepLinkStateArr[1] +']').prop("checked",true).trigger("click");
-            if(curDeepLinkStateArr[4] == "summary"){
-              getSummary();
-	        }else if(curDeepLinkStateArr[4] == "stats"){
+            if(curDeepLinkStateArr[4] == "stats"){
 		      getStats();
 	        }else if(curDeepLinkStateArr.length > 6){
 		      console.log(curDeepLinkStateArr);
 		      var from = curDeepLinkStateArr[6].substring(0,4)+"/"+curDeepLinkStateArr[6].substring(4,6)+"/"+curDeepLinkStateArr[6].substring(6,8);
 		      var to = curDeepLinkStateArr[7].substring(0,4)+"/"+curDeepLinkStateArr[7].substring(4,6)+"/"+curDeepLinkStateArr[7].substring(6,8);
 		      
-
-            
-		      if(isValidDate(from) && isValidDate(to)){
-			    var fromDate = formatDateRange(from);
-			    var toDate = formatDateRange(to);
-			    var theDateRange = "Requested Date Range: " + fromDate + " - " + toDate;
-			    $(".statsWrapper .Memento_Date_Range").html(theDateRange);
+			  var fromDate = formatDateRange(from);
+			  var toDate = formatDateRange(to);
+			  var theDateRange = "Requested Date Range: " + fromDate + " - " + toDate;
+			  $(".statsWrapper .Memento_Date_Range").html(theDateRange);
                 
-			    getDateRangeSummary(fromDate, toDate);
-	          }
-	          else{
-			    document.getElementById('date_error').style.display = "block";
-		      }
+			  getDateRangeSummary(fromDate, toDate);
 
-	        }else{
+	        }else if(curDeepLinkStateArr[4] == "summary"){
+                getSummary();
+            }else{
               getHistogramPage();
             }
           }else{
@@ -1469,7 +1462,7 @@ function updateDeepLinkStateArr() {
     var pathname = window.location.pathname;
     var deepLinkStr = pathname.slice(1);
     var deepLinkParts = deepLinkStr.split("/");
-    if(deepLinkParts[0] == "alsummarizedview" && (deepLinkParts[1].toLowerCase()=="archiveit" || deepLinkParts[1].toLowerCase()=="internetarchive"  )  && (deepLinkParts[4]=="stats" || deepLinkParts[4]=="summary")){
+    if(deepLinkParts[0] == "alsummarizedview" && (deepLinkParts[1].toLowerCase()=="archiveit" || deepLinkParts[1].toLowerCase()=="internetarchive"  )  && (deepLinkParts[4]=="stats" || deepLinkParts[4]=="summary" || deepLinkParts[4]=="histogram")){
       curDeepLinkStateArr[0] = deepLinkParts[0];
       curDeepLinkStateArr[1] = deepLinkParts[1];
       curDeepLinkStateArr[4]= deepLinkParts[4];

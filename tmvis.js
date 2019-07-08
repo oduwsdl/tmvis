@@ -936,6 +936,12 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
               t.mementos = t.filterMementosForDateRange(response);
             }
 
+            if (t.mementos.length == 0) {
+              ConsoleLogIfRequired('There were no mementos in this date range:(')
+              response.write('There were no mementos in this date range')
+              response.end()
+                return
+            }
             ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.')
             constructSSE('Timemap fetched has a total of '+t.mementos.length + ' mementos.',curCookieClientId)
             constructSSE("percentagedone-20",curCookieClientId);
@@ -1254,7 +1260,10 @@ TimeMap.prototype.filterMementosForDateRange = function(response)
   {
     tempMementoArr.push(tempStackOfMementos.pop())
   }
-  tempMementoArr[0]["rel"] = "first memento";
+
+  if(tempMementoArr.length > 0){
+    tempMementoArr[0]["rel"] = "first memento";
+  }
 
   return tempMementoArr;
 }
