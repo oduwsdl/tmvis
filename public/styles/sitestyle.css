@@ -385,24 +385,12 @@ body{
 	position: relative;
 }
 
-.button_container .close_button {
-
-}
-
-.normalImage{
-	opacity: 1;
-}
-
-.fadedImage{
-	opacity: .2;
-}
-
 .button_container .on{
 	opacity: 1;
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	transform: translate(477%, -528%);
+	transform: translate(460%, -512%);
 	font-size: 16px;
 	padding: 1px 8px 1.7px 8px;
 	border: none;
@@ -422,7 +410,7 @@ body{
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	transform: translate(477%, -528%);
+	transform: translate(460%, -512%);
 	font-size: 16px;
 	padding: 1px 8px 1.7px 8px;
 	border: none;
@@ -436,43 +424,54 @@ body{
   background-color: #878787;
 }
 
-#updateMementos{
-    border: none;
-    color: #337ab7;
-    padding: 10px 18px;
+#updateMementos{ 
+    border: outset;
+    border-width: 2.5px;
+    border-color: #4690d0;
+    color: #ffffff;
+    padding: 6px 12px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-    border-radius: 3.5px 3.5px 0px 0px;
-    background-image: linear-gradient(#dddddd, #dddddd);
+    border-radius: 3.5px;
+    background-color:#337ab7;
 }
 
 #updateMementos:hover{
-    background-image: linear-gradient( #286090, #286090);
-    color: white;
+    background-color: #286090;
+}
+
+#updateLI{
+	margin-top: -8px;
+	margin-left: 5%;
 }
 
 #updateMementosError{
 	color: #d50000;
-	margin: 10px 5px 0px 20px;
+	margin: 0px 5px 0px 60px;
 	width: 300px;
 }
 
 #revertMementos{
-	margin-left: 2px;
-    border: none;
-    color: #337ab7;
-    padding: 10px 18px;
+    border: outset;
+    border-width: 2.5px;
+    border-color: #4690d0;
+    color: #ffffff;
+    padding: 6px 12px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-    border-radius: 3.5px 3.5px 0px 0px;
-    background-image: linear-gradient(#dddddd, #dddddd);
+    border-radius: 3.5px;
+    background-color:#337ab7;
 }
 
 #revertMementos:hover{
-    background-image: linear-gradient( #286090, #286090);
-    color: white;
+    background-color: #286090;
+}
+
+#revertLI{
+	margin-top: -8px;
+	margin-left: 3%; 
 }
