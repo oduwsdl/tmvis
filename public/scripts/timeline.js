@@ -755,7 +755,7 @@ function startEventNotification(){
              $('#serverStreamingModal .logsContent').empty();
 
              // Temparory disabled for this step: for avoiding the refresh issue... automatically refreshing the page when the results are available
-              // window.location.reload();
+               //window.location.reload();
 
             setProgressBar(2);
              $('#serverStreamingModal').modal('hide');
@@ -768,7 +768,7 @@ function startEventNotification(){
                $('#serverStreamingModal .logsContent').empty();
                 setProgressBar(2);
                 // for avoiding the refresh issue... automatically refreshing the page when the results are available
-                window.location.reload();
+                //window.location.reload();
                $('#serverStreamingModal').modal('hide');
                if(notificationSrc != null){
                  notificationSrc.close();
@@ -879,10 +879,15 @@ function getHistoData(toDisplay){
             $(".tabContentWrapper").hide();
           }
         },
-        error: function( data, textStatus, jqXHR) {
+        error: function( data, textStatus, jqXHR, err) {
           var errMsg = "Some problem fetching the response, Please refresh and try again.";
           $("#busy-loader").hide();
           $('#serverStreamingModal').modal('hide');
+          console.log("readyState: " + jqXHR.readyState);
+          console.log("responseText: "+ jqXHR.responseText);
+          console.log("status: " + jqXHR.status);
+          console.log("text status: " + textStatus);
+          console.log("error: " + err);
           alert(errMsg);
         }
       });
@@ -911,11 +916,11 @@ function getStats(){
 	var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
        history.pushState({},"Stats State",path);
       $('#serverStreamingModal').modal('show');
-        $.ajax({
+      $.ajax({
             type: "GET",
             url: address, // uncomment this for deployment
             beforeSend: function(xhr) {
-              xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+                xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
             },
             dataType: "text",
             timeout: 90000000,
@@ -973,12 +978,22 @@ function getStats(){
                     $(".tabContentWrapper").hide();
                 }
             },
-            error: function( data, textStatus, jqXHR) {
+            error: function( data, textStatus, jqXHR,err) {
               // $("#busy-loader").hide();
               // $('#serverStreamingModal .logsContent').empty();
-              //   $('#serverStreamingModal').modal('hide');
-              // var errMsg = "Some problem fetching the response, Please refresh and try again.";
-              // alert(errMsg);
+              //   $('#serverStreamingModal').mo dal('hide');
+               var errMsg = "Some problem fetching the response, Please refresh and try again.";   
+              console.log("readyState: " + jqXHR.readyState);
+              console.log("responseText: "+ jqXHR.responseText);
+              console.log("status: " + jqXHR.status);
+              console.log("text status: " + textStatus);
+              console.log("error: " + err);
+              if(textStatus == 'error')
+              {
+                window.location.reload();
+              }else{
+                alert(errMsg);
+              }
             }
         });
       }
@@ -1100,11 +1115,22 @@ function getSummary(){
             $(".tabContentWrapper").hide();
           }
         },
-        error: function( data, textStatus, jqXHR) {
+        error: function( data, textStatus, jqXHR, err) {
           var errMsg = "Some problem fetching the response, Please refresh and try again.";
           $("#busy-loader").hide();
           $('#serverStreamingModal').modal('hide');
-          alert(errMsg);
+          console.log("readyState: " + jqXHR.readyState);
+          console.log("responseText: "+ jqXHR.responseText);
+          console.log("status: " + jqXHR.status);
+          console.log("text status: " + textStatus);
+          console.log("error: " + err);
+          
+          if(textStatus == 'error')
+          {
+            window.location.reload();
+          }else{
+            alert(errMsg);
+          }
         }
       });
     }
@@ -1232,7 +1258,17 @@ function getDateRangeSummary(from, to){
           var errMsg = "Some problem fetching the response, Please refresh and try again.";
           $("#busy-loader").hide();
           $('#serverStreamingModal').modal('hide');
-          alert(errMsg);
+          console.log("readyState: " + jqXHR.readyState);
+          console.log("responseText: "+ jqXHR.responseText);
+          console.log("status: " + jqXHR.status);
+          console.log("text status: " + textStatus);
+          console.log("error: " + err);
+          if(textStatus == 'error')
+          {
+            window.location.reload();
+          }else{
+            alert(errMsg);
+          }
         }
       });
     }
