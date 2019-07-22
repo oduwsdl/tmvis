@@ -55,7 +55,6 @@
 	});
 
 	function drawImageSlider(data){
-		console.log("I'm running!");
 		imagesData = [];
 		indexImage = 0;
 		$.each(data, function (index, obj) {
