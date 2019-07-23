@@ -1,5 +1,5 @@
 ARG     NODE_TAG=11.11
-FROM    node:11.11.0
+FROM    node:$NODE_TAG
 
 LABEL   app.name="TMVis" \
         app.description="An archival thumbnail visualization server" \
