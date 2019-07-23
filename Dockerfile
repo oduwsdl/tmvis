@@ -1,4 +1,4 @@
-ARG     NODE_TAG=latest
+ARG     NODE_TAG=11.11
 FROM    node:$NODE_TAG
 
 LABEL   app.name="TMVis" \
