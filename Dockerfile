@@ -1,4 +1,4 @@
-#ARG     NODE_TAG=latest
+ARG     NODE_TAG=11.11
 FROM    node:11.11.0
 
 LABEL   app.name="TMVis" \
