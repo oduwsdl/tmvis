@@ -1,5 +1,5 @@
-ARG     NODE_TAG=latest
-FROM    node:$NODE_TAG
+#ARG     NODE_TAG=latest
+FROM    node:11.11.0
 
 LABEL   app.name="TMVis" \
         app.description="An archival thumbnail visualization server" \
