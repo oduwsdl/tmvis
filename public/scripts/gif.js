@@ -2,9 +2,9 @@ var imageLinks = [];
 var stampedImages = [];
 
 function getImageArray(){
-
-	
 	$("#gif #gifContent #gifApp").empty();
+	imageLinks = [];
+	stampedImages = [];
 	for(var i = 0; i<imagesData_IG.length; i++)
 	{
 		imageLinks[i] = $(imagesData_IG[i].event_html).attr('src');

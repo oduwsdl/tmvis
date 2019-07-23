@@ -1,4 +1,3 @@
-
 //Sliders
 .slidecontainer {
     width: 100%; /* Width of the outside container */
@@ -113,6 +112,12 @@ display:inline;
   }
   .Mementos_Considered{
       font-weight: bold;
+      display: inline-block;
+  }
+  .Memento_Date_Range{
+      font-weight: bold;
+      display: inline-block;
+      margin-left: 25.5%;
   }
   .paraOnlyOnStatsResults{
 
@@ -123,6 +128,11 @@ display:inline;
   }
 
   .statsWrapper p{
+    font-family: inherit !important;
+
+  }
+
+  .histoWrapper p{
     font-family: inherit !important;
 
   }
@@ -327,8 +337,6 @@ body{
   padding: 2%;
 }
 
-//GIF tab
-
 #gifButton{
 	margin: 10px 0 10px;
 }
@@ -352,4 +360,118 @@ body{
 
 .inputControl-addon{
 	margin-right: 30px;
+}
+
+.histogramOptions{
+	text-align: center;
+	margin-top: 25px;
+}
+
+.dateTitle{
+	display: inline-block;
+	margin: 10px 10px 0px 20px;
+	font-weight: bold;
+}
+
+#dateBox{
+	margin-top: 25px;
+}
+
+#date_error{
+	color: red;
+}
+
+.button_container {
+	position: relative;
+}
+
+.button_container .on{
+	opacity: 1;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(460%, -512%);
+	font-size: 16px;
+	padding: 1px 8px 1.7px 8px;
+	border: none;
+	cursor: pointer;
+	border-radius: 30px;
+	background-color: #555;
+	color: #555;
+}
+
+.button_container .on:hover {
+  background-color: #000000;
+  color: #000000;
+}
+
+.button_container .off{
+	opacity: 1;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(460%, -512%);
+	font-size: 16px;
+	padding: 1px 8px 1.7px 8px;
+	border: none;
+	cursor: pointer;
+	border-radius: 30px;
+	background-color: #c7c7c7;
+	color: white;
+}
+
+.button_container .off:hover {
+  background-color: #878787;
+}
+
+#updateMementos{ 
+    border: outset;
+    border-width: 2.5px;
+    border-color: #4690d0;
+    color: #ffffff;
+    padding: 6px 12px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 3.5px;
+    background-color:#337ab7;
+}
+
+#updateMementos:hover{
+    background-color: #286090;
+}
+
+#updateLI{
+	margin-top: -8px;
+	margin-left: 5%;
+}
+
+#updateMementosError{
+	color: #d50000;
+	margin: 0px 5px 0px 60px;
+	width: 300px;
+}
+
+#revertMementos{
+    border: outset;
+    border-width: 2.5px;
+    border-color: #4690d0;
+    color: #ffffff;
+    padding: 6px 12px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 3.5px;
+    background-color:#337ab7;
+}
+
+#revertMementos:hover{
+    background-color: #286090;
+}
+
+#revertLI{
+	margin-top: -8px;
+	margin-left: 3%; 
 }
