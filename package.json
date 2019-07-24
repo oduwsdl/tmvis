@@ -29,6 +29,7 @@
     "stackjs": "^0.1.0",
     "validator": "*",
     "webshot": "*",
-    "write-json-file": "^2.3.0"
+    "write-json-file": "^2.3.0",
+    "primordial": "*"
   }
 }
