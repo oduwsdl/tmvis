@@ -870,7 +870,7 @@ function getHistoData(toDisplay){
 	      var toDateStr= toYear+"-"+toMonth +"-"+toDate;
 	      var dateRangeStr= fromDateStr + " - " + toDateStr;
 	      $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
-          getHistogram(toDisplay, histoData);
+              getHistogram(toDisplay, histoData);
           $(".modal-backdrop").remove();
           $('#serverStreamingModal').modal('hide');
           }
