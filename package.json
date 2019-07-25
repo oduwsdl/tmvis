@@ -23,13 +23,13 @@
     "morgan": "^1.9.0",
     "node-phantom": "*",
     "nodemon": "^1.14.12",
-    "rimraf": "*",
+    "primordial": "*",
     "puppeteer": "*",
+    "rimraf": "*",
     "simhash": "*",
     "stackjs": "^0.1.0",
     "validator": "*",
     "webshot": "*",
-    "write-json-file": "^2.3.0",
-    "primordial": "*"
+    "write-json-file": "^2.3.0"
   }
 }
