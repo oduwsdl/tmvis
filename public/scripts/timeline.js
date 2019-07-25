@@ -872,7 +872,7 @@ function getHistoData(toDisplay){
 	      $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
               getHistogram(toDisplay, histoData);
               $(".modal-backdrop").remove();
-          $('#serverStreamingModal').modal('hide');
+              $('#serverStreamingModal').modal('hide');
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
