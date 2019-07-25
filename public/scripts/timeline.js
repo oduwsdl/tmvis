@@ -871,6 +871,8 @@ function getHistoData(toDisplay){
 	      var dateRangeStr= fromDateStr + " - " + toDateStr;
 	      $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
               getHistogram(toDisplay, histoData);
+              $(".modal-backdrop").remove();
+              $('#serverStreamingModal').modal('hide');
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
@@ -1388,13 +1390,11 @@ $(function(){
                 var found_it = mementosToRemove.indexOf($(this).parent().find("img").attr("src"));
                 mementosToRemove.splice(found_it,1);
             }
-            console.log("Here's the list!");
             console.log(mementosToRemove);
         });
     });
 
     $("#updateMementos").click(function(event){
-        console.log("I was clicked!");
         //upon button click images marked for deletion must be removed
         //from array passed to functions
         if(mementosToRemove.length == imagesData_IG.length)
