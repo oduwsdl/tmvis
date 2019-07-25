@@ -1388,13 +1388,11 @@ $(function(){
                 var found_it = mementosToRemove.indexOf($(this).parent().find("img").attr("src"));
                 mementosToRemove.splice(found_it,1);
             }
-            console.log("Here's the list!");
             console.log(mementosToRemove);
         });
     });
 
     $("#updateMementos").click(function(event){
-        console.log("I was clicked!");
         //upon button click images marked for deletion must be removed
         //from array passed to functions
         if(mementosToRemove.length == imagesData_IG.length)
