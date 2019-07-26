@@ -1395,6 +1395,9 @@ $(function(){
     });
 
     $("#updateMementos").click(function(event){
+
+        let chosenMementos = JSON.parse(JSON.stringify(jsonObjRes));
+
         //upon button click images marked for deletion must be removed
         //from array passed to functions
         if(mementosToRemove.length == imagesData_IG.length)
@@ -1408,17 +1411,17 @@ $(function(){
             $("#gifApp").empty();
             for(var i = 0; i < mementosToRemove.length; i++)
             {
-                for(var j = 0; j < jsonObjRes.length; j++)
+                for(var j = 0; j < chosenMementos.length; j++)
                 {
-                    if($(jsonObjRes[j].event_html).attr("src") == mementosToRemove[i])
+                    if($(chosenMementos[j].event_html).attr("src") == mementosToRemove[i])
                     {
-                        jsonObjRes.splice(j, 1);
+                        chosenMementos.splice(j, 1);
                         break;
                     }
                 }
             }
-            drawImageSlider(jsonObjRes);
-            drawImageGrid(jsonObjRes);
+            drawImageSlider(chosenMementos);
+            drawImageGrid(chosenMementos);
             getImageArray();
             mementosToRemove = [];
         }
@@ -1429,7 +1432,10 @@ $(function(){
     });
 
     $("#revertMementos").click(function(event){
-        location.reload();
+        drawImageSlider(jsonObjRes);
+        drawImageGrid(jsonObjRes);
+        getImageArray();
+        document.getElementById("revertMementos").style.display = "none";
     });
 
     $(document).on("click","button[name=thresholdDistance]",function(){
