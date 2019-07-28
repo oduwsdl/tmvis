@@ -953,6 +953,7 @@ function getStats(){
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
                     $(".paraOnlyOnStatsResults").show();
+                    $(".time_container").show();
                     
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
@@ -1107,6 +1108,7 @@ function getSummary(){
               drawImageGrid(jsonObjRes); // calling Image Grid Function here
               drawImageSlider(jsonObjRes);
               getImageArray(); //calling GIF function
+              generateMementoURIList(jsonObjRes);
               $(".modal-backdrop").remove();
               $('#serverStreamingModal').modal('hide');
           }
@@ -1245,6 +1247,7 @@ function getDateRangeSummary(from, to){
               drawImageGrid(jsonObjRes); // calling Image Grid Function here
               drawImageSlider(jsonObjRes);
               getImageArray(); //calling GIF function
+              generateMementoURIList(jsonObjRes);
               $(".modal-backdrop").remove();
               $('#serverStreamingModal').modal('hide');
 	      //localStorage.setItem("submitRangeClicked", "false");
@@ -1423,6 +1426,7 @@ $(function(){
             drawImageSlider(chosenMementos);
             drawImageGrid(chosenMementos);
             getImageArray();
+            generateMementoURIList(chosenMementos);
             mementosToRemove = [];
         }
         else
@@ -1435,6 +1439,7 @@ $(function(){
         drawImageSlider(jsonObjRes);
         drawImageGrid(jsonObjRes);
         getImageArray();
+        generateMementoURIList(jsonObjRes);
         document.getElementById("revertMementos").style.display = "none";
     });
 
@@ -1602,6 +1607,22 @@ function isValidDate(dateString)
     // Check the range of the day
     return day > 0 && day <= monthLength[month];
 };
+
+function generateMementoURIList(object)
+{
+    var URIM = [];
+
+    $.each(object,function(index,obj){
+        if($(obj.event_html).attr("src").indexOf("notcaptured") < 0){
+            URIM[index] = obj.event_link;
+        }
+    });
+    var download = document.getElementById("downloadMementoURI");
+    download.href = "";
+    var data = URIM.toString();
+    data = data.replace(/,/g,"\n");
+    download.setAttribute('href', 'data:text/plaincharset=utf-8,' + encodeURIComponent(data));
+}
 
 window.addEventListener('popstate', function(e) {
     location.reload();
