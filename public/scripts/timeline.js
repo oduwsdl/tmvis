@@ -1618,9 +1618,7 @@ function generateMementoURIList(object)
         }
     });
     var download = document.getElementById("downloadMementoURI");
-    download.href = "";
-    var data = URIM.join('\n');
-    download.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
+    download.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(URIM.join('\n')));
 }
 
 window.addEventListener('popstate', function(e) {
