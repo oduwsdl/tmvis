@@ -1621,7 +1621,7 @@ function generateMementoURIList(object)
     download.href = "";
     var data = URIM.toString();
     data = data.replace(/,/g,"\n");
-    download.setAttribute('href', 'data:text/plaincharset=utf-8,' + encodeURIComponent(data));
+    download.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
 }
 
 window.addEventListener('popstate', function(e) {
