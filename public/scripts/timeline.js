@@ -1614,7 +1614,7 @@ function generateMementoURIList(object)
 
     $.each(object,function(index,obj){
         if($(obj.event_html).attr("src").indexOf("notcaptured") < 0){
-            URIM[index] = obj.event_link;
+            URIM.push(obj.event_link);
         }
     });
     var download = document.getElementById("downloadMementoURI");
