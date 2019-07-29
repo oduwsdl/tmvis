@@ -1619,7 +1619,7 @@ function generateMementoURIList(object)
     });
     var download = document.getElementById("downloadMementoURI");
     download.href = "";
-    var data = URIM.toString();
+    var data = URIM.join('\n');
     data = data.replace(/,/g,"\n");
     download.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
 }
