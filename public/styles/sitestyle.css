@@ -390,9 +390,9 @@ body{
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	transform: translate(460%, -512%);
-	font-size: 16px;
-	padding: 1px 8px 1.7px 8px;
+	transform: translate(565%, -632%);
+	font-size: 13px;
+	padding: 1px 6.5px 1.7px 7px;
 	border: none;
 	cursor: pointer;
 	border-radius: 30px;
@@ -406,13 +406,13 @@ body{
 }
 
 .button_container .off{
-	opacity: 1;
+	opacity: .8;
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	transform: translate(460%, -512%);
-	font-size: 16px;
-	padding: 1px 8px 1.7px 8px;
+	transform: translate(565%, -632%);
+	font-size: 13px;
+	padding: 1px 6.5px 1.7px 7px;
 	border: none;
 	cursor: pointer;
 	border-radius: 30px;
