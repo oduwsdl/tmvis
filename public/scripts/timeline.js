@@ -953,6 +953,7 @@ function getStats(){
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
                     $(".paraOnlyOnStatsResults").show();
+                    $(".time_container").show();
                     
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
@@ -1107,6 +1108,7 @@ function getSummary(){
               drawImageGrid(jsonObjRes); // calling Image Grid Function here
               drawImageSlider(jsonObjRes);
               getImageArray(); //calling GIF function
+              generateMementoURIList(jsonObjRes);
               $(".modal-backdrop").remove();
               $('#serverStreamingModal').modal('hide');
           }
@@ -1245,6 +1247,7 @@ function getDateRangeSummary(from, to){
               drawImageGrid(jsonObjRes); // calling Image Grid Function here
               drawImageSlider(jsonObjRes);
               getImageArray(); //calling GIF function
+              generateMementoURIList(jsonObjRes);
               $(".modal-backdrop").remove();
               $('#serverStreamingModal').modal('hide');
 	      //localStorage.setItem("submitRangeClicked", "false");
@@ -1395,6 +1398,9 @@ $(function(){
     });
 
     $("#updateMementos").click(function(event){
+
+        let chosenMementos = JSON.parse(JSON.stringify(jsonObjRes));
+
         //upon button click images marked for deletion must be removed
         //from array passed to functions
         if(mementosToRemove.length == imagesData_IG.length)
@@ -1408,18 +1414,19 @@ $(function(){
             $("#gifApp").empty();
             for(var i = 0; i < mementosToRemove.length; i++)
             {
-                for(var j = 0; j < jsonObjRes.length; j++)
+                for(var j = 0; j < chosenMementos.length; j++)
                 {
-                    if($(jsonObjRes[j].event_html).attr("src") == mementosToRemove[i])
+                    if($(chosenMementos[j].event_html).attr("src") == mementosToRemove[i])
                     {
-                        jsonObjRes.splice(j, 1);
+                        chosenMementos.splice(j, 1);
                         break;
                     }
                 }
             }
-            drawImageSlider(jsonObjRes);
-            drawImageGrid(jsonObjRes);
+            drawImageSlider(chosenMementos);
+            drawImageGrid(chosenMementos);
             getImageArray();
+            generateMementoURIList(chosenMementos);
             mementosToRemove = [];
         }
         else
@@ -1429,7 +1436,11 @@ $(function(){
     });
 
     $("#revertMementos").click(function(event){
-        location.reload();
+        drawImageSlider(jsonObjRes);
+        drawImageGrid(jsonObjRes);
+        getImageArray();
+        generateMementoURIList(jsonObjRes);
+        document.getElementById("revertMementos").style.display = "none";
     });
 
     $(document).on("click","button[name=thresholdDistance]",function(){
@@ -1596,6 +1607,19 @@ function isValidDate(dateString)
     // Check the range of the day
     return day > 0 && day <= monthLength[month];
 };
+
+function generateMementoURIList(object)
+{
+    var URIM = [];
+
+    $.each(object,function(index,obj){
+        if($(obj.event_html).attr("src").indexOf("notcaptured") < 0){
+            URIM.push(obj.event_link);
+        }
+    });
+    var download = document.getElementById("downloadMementoURI");
+    download.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(URIM.join('\n')));
+}
 
 window.addEventListener('popstate', function(e) {
     location.reload();
