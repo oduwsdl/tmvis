@@ -1362,7 +1362,7 @@ $(function(){
         var from = document.getElementById("fromInput").value;
         var to = document.getElementById("toInput").value;
 
-        if(from != fromBox && to != toBox) // If user entered dates
+        if(from != fromBox || to != toBox) // If user entered dates
         {
             if(isValidDate(from) && isValidDate(to))
             {
@@ -1422,7 +1422,6 @@ $(function(){
         else if(mementosToRemove.length > 0)
         {
             document.getElementById("updateMementosError").innerHTML = "";
-            document.getElementById("revertMementos").style.display = "block";
             $("#gifApp").empty();
             for(var i = 0; i < mementosToRemove.length; i++)
             {
@@ -1452,7 +1451,6 @@ $(function(){
         drawImageGrid(jsonObjRes);
         getImageArray();
         generateMementoURIList(jsonObjRes);
-        document.getElementById("revertMementos").style.display = "none";
     });
 
     $(document).on("click","button[name=thresholdDistance]",function(){
