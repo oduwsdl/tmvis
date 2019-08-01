@@ -869,10 +869,15 @@ function getHistoData(toDisplay){
 	      var fromDateStr= fromYear+"-"+fromMonth +"-"+fromDate;
 	      var toDateStr= toYear+"-"+toMonth +"-"+toDate;
 	      var dateRangeStr= fromDateStr + " - " + toDateStr;
-	      $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
+	       $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
               getHistogram(toDisplay, histoData);
               $(".modal-backdrop").remove();
               $('#serverStreamingModal').modal('hide');
+               // For date range input box
+              var defaultFrom = fromYear+"/"+fromMonth +"/"+fromDate;
+              var defaultTo = toYear+"/"+toMonth +"/"+toDate;
+              document.getElementById("fromInput").defaultValue = defaultFrom;
+              document.getElementById("toInput").defaultValue = defaultTo;
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
@@ -1166,7 +1171,6 @@ function getDateRangeSummary(from, to){
         $(".time_container").hide();
         $(".Explain_Threshold").hide();
        var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+from+"/"+to+"/" +$('.argumentsForm #urirIP').val().trim();
-       console.log("Made it here!");
 
        var summaryPath = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+fromFormatted+"/"+toFormatted+"/" +$('.argumentsForm #urirIP').val().trim();
        var summaryStatePath = "/alsummarizedview" +summaryPath;
@@ -1352,23 +1356,31 @@ $(function(){
     });
 	
     $("#submitRange").click(function(event){
-	//localStorage.setItem("submitRangeClicked,"true");
-	var from = document.getElementById("fromInput").value;
-	var to = document.getElementById("toInput").value;
+    	//localStorage.setItem("submitRangeClicked,"true");
+    	var fromBox = document.getElementById("fromInput").defaultValue;
+    	var toBox = document.getElementById("toInput").defaultValue;
+        var from = document.getElementById("fromInput").value;
+        var to = document.getElementById("toInput").value;
 
-	from.toString();
-	to.toString();
-	    
-     	if(isValidDate(from) && isValidDate(to)){
-		var fromDate = formatDateRange(from);
-		var toDate = formatDateRange(to);
-		var theDateRange = "Requested Date Range: " + fromDate + " - " + toDate;
-		$(".statsWrapper .Memento_Date_Range").html(theDateRange);
-		getDateRangeSummary(fromDate, toDate);
-	}
-	else{
-		document.getElementById('date_error').style.display = "block";
-	}
+        if(from != fromBox && to != toBox) // If user entered dates
+        {
+            if(isValidDate(from) && isValidDate(to))
+            {
+                var fromDate = formatDateRange(from);
+                var toDate = formatDateRange(to);
+                var theDateRange = "Requested Date Range: " + fromDate + " - " + toDate;
+                $(".statsWrapper .Memento_Date_Range").html(theDateRange);
+                getDateRangeSummary(fromDate, toDate);
+            }
+            else
+            {
+                document.getElementById('date_error').style.display = "block";
+            }
+        }
+        else
+        {
+            getStats(); // Dates were set to full default range
+        }
     });
     
     $("#generateAllThumbnails").click(function(event){
