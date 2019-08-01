@@ -1408,7 +1408,7 @@ $(function(){
 
     $("#updateMementos").click(function(event){
 
-        let chosenMementos = JSON.parse(JSON.stringify(jsonObjRes));
+        var chosenMementos = JSON.parse(JSON.stringify(jsonObjRes));
 
         //upon button click images marked for deletion must be removed
         //from array passed to functions
