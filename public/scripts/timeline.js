@@ -797,9 +797,6 @@ function getHistogramPage(){
         toDisplay= "Archive-It";
     }
     getHistoData(toDisplay);
-    $(".getStats").click(function(event){
-        getStats();
-    });
 }
     
 function getHistoData(toDisplay){
