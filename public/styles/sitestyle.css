@@ -149,6 +149,9 @@ display:inline;
   .getSummary{
     vertical-align: top !important;
   }
+  .getDateRangeSummary{
+    vertical-align: top !important;
+  }
 	#footer{
 		text-align:center;
 		font-family: 'Oswald', sans-serif !important;

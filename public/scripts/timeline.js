@@ -640,7 +640,7 @@ var generateAllClicked = false;
 			  var theDateRange = "Requested Date Range: " + fromDate + " - " + toDate;
 			  $(".statsWrapper .Memento_Date_Range").html(theDateRange);
                 
-			  getDateRangeSummary(fromDate, toDate);
+			  getDateRangeStats(fromDate, toDate);
 
 	        }else if(curDeepLinkStateArr[4] == "summary"){
                 getSummary();
@@ -970,6 +970,113 @@ function getStats(){
                     $(".statsWrapper").show();
                     $(".getSummary").show();
 
+                    //$(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
+                    $(".modal-backdrop").remove();
+                    $('#serverStreamingModal').modal('hide');
+
+                }catch(err){
+                    alert($.trim(data));
+                    $('#serverStreamingModal .logsContent').empty();
+                      $('#serverStreamingModal').modal('hide');
+                    $(".statsWrapper").hide();
+                    $(".tabContentWrapper").hide();
+                }
+            },
+            error: function( data, textStatus, jqXHR,err) {
+              // $("#busy-loader").hide();
+              // $('#serverStreamingModal .logsContent').empty();
+              //   $('#serverStreamingModal').mo dal('hide');
+               var errMsg = "Some problem fetching the response, Please refresh and try again.";   
+              console.log("readyState: " + jqXHR.readyState);
+              console.log("responseText: "+ jqXHR.responseText);
+              console.log("status: " + jqXHR.status);
+              console.log("text status: " + textStatus);
+              console.log("error: " + err);
+              if(textStatus == 'error')
+              {
+                window.location.reload();
+              }else{
+                alert(errMsg);
+              }
+            }
+        });
+      }
+}
+
+function getDateRangeStats(from, to){
+  document.getElementById("histoWrapper").style.display = "none";
+  var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+  if(collectionIdentifer == ""){
+      collectionIdentifer = "all";
+  }
+  var hammingDistance = $('.argumentsForm #hammingDistance').val();
+  if(hammingDistance == ""){
+      hammingDistance = 4;
+  }
+
+  var fromFormatted = from.substring(0,4)+from.substring(5,7)+from.substring(8,10);
+  var toFormatted = to.substring(0,4)+to.substring(5,7)+to.substring(8,10);
+
+  var role = "stats";
+  if($("body").find("form")[0].checkValidity()){
+      startEventNotification();
+      var ENDPOINT = "/alsummarizedtimemap";
+      var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+from+"/"+to+"/"+$('.argumentsForm #urirIP').val();
+      $("#busy-loader").show();
+      $('#serverStreamingModal .logsContent').empty();
+       $('#logtab .logsContent').empty();
+    var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+fromFormatted+"/"+toFormatted+"/"+$('.argumentsForm #urirIP').val();
+       history.pushState({},"Stats State",path);
+      $('#serverStreamingModal').modal('show');
+      $.ajax({
+            type: "GET",
+            url: address, // uncomment this for deployment
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+            },
+            dataType: "text",
+            timeout: 90000000,
+            success: function( data, textStatus, jqXHR) {
+                $("#busy-loader").hide();
+                $('#serverStreamingModal .logsContent').empty();
+                $('#serverStreamingModal').modal('hide');
+                try{
+                    jsonObjRes= $.parseJSON(data);
+                    var htmlStr="&nbsp;";
+                    var curUniqThumbCount = 0;
+                    jsonObjRes.forEach(function(item,index,arry){
+                      if(curUniqThumbCount != item['unique']){
+                        htmlStr+= "<button type='button' class='btn btn-secondary' name='thresholdDistance' title='No Of unique thumbnails:"+item['unique'] +"' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</button>";
+                      }
+                        curUniqThumbCount = item['unique'];
+                    });
+
+                    var memStatStr = htmlStr;
+                    var toDisplay= "Internet Archive";
+                    if($("input[name='primesource']:checked").val() == "archiveit" ){
+                      toDisplay= "Archive-It";
+                    }
+                    var fromDate= new Date(jsonObjRes[0].fromdate);
+                    var fromDateStr= fromDate.getFullYear()+"-"+fromDate.getMonth() +"-"+fromDate.getDate();
+                    var toDate = new Date(jsonObjRes[0].todate);
+                    var toDateStr= toDate.getFullYear()+"-"+toDate.getMonth() +"-"+toDate.getDate();
+                    var dateRangeStr= fromDateStr + " - " + toDateStr;
+                    $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
+                    $(".paraOnlyOnStatsResults").show();
+                    $(".time_container").show();
+                    
+                    $(".statsWrapper .collection_stats").html(memStatStr);
+
+
+                    //  $(".statsWrapper .collection_stats").attr("title","Date Range: "+dateRangeStr)
+                    if(  $(".statsWrapper button[type='button']").eq(1).length != 0){
+                      $(".statsWrapper button[type='button']").eq(1).trigger("click");
+                    }else{
+                      $(".statsWrapper button[type='button']").eq(0).trigger("click");
+                    }
+
+                    $(".statsWrapper").show();
+                    $(".getSummary").show();
 
                     //$(".approxTimeShowingPTag").show(800).delay(5000).fadeOut();
                     $(".modal-backdrop").remove();
@@ -1144,7 +1251,7 @@ function getSummary(){
     generateAllThumbnails = false;
 }
 
-function getDateRangeSummary(from, to){
+function getDateRangeSummary(from,to){
 	
   // Remove histogram
   document.getElementById("histoWrapper").style.display = "none";
@@ -1349,7 +1456,22 @@ $(function(){
 
     // work around for the timeline setting stuff
     $(".getSummary").click(function(event){
-      getSummary();
+        // Check for input dates
+        var theDates = $(".statsWrapper .Memento_Date_Range").html();
+
+        if(theDates.length > 20) // If a date range was passed
+        {
+            var theDates = $(".statsWrapper .Memento_Date_Range").html();
+
+            var from = theDates.substring(22,32);
+            var to = theDates.substring(35,45);
+
+            getDateRangeSummary(from, to); // Summary for a certain range
+        }
+        else
+        {
+            getSummary(); // Otherwise, get the full time map
+        }
     });
 	
     $("#submitRange").click(function(event){
@@ -1367,7 +1489,7 @@ $(function(){
                 var toDate = formatDateRange(to);
                 var theDateRange = "Requested Date Range: " + fromDate + " - " + toDate;
                 $(".statsWrapper .Memento_Date_Range").html(theDateRange);
-                getDateRangeSummary(fromDate, toDate);
+                getDateRangeStats(fromDate, toDate);
             }
             else
             {
