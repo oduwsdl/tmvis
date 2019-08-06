@@ -635,9 +635,7 @@ var generateAllClicked = false;
 		      var from = curDeepLinkStateArr[6].substring(0,4)+"/"+curDeepLinkStateArr[6].substring(4,6)+"/"+curDeepLinkStateArr[6].substring(6,8);
 		      var to = curDeepLinkStateArr[7].substring(0,4)+"/"+curDeepLinkStateArr[7].substring(4,6)+"/"+curDeepLinkStateArr[7].substring(6,8);
 		      
-			  var fromDate = formatDateRange(from);
-			  var toDate = formatDateRange(to);
-			  var theDateRange = "Requested Date Range: " + fromDate + " - " + toDate;
+			  var theDateRange = "Requested Date Range: " + from + " - " + to;
 			  $(".statsWrapper .Memento_Date_Range").html(theDateRange);
                 
 			  getDateRangeStats(fromDate, toDate);
@@ -871,10 +869,9 @@ function getHistoData(toDisplay){
               $(".modal-backdrop").remove();
               $('#serverStreamingModal').modal('hide');
                // For date range input box
-              var defaultFrom = fromYear+"/"+fromMonth +"/"+fromDate;
-              var defaultTo = toYear+"/"+toMonth +"/"+toDate;
-              document.getElementById("fromInput").defaultValue = defaultFrom;
-              document.getElementById("toInput").defaultValue = defaultTo;
+
+              document.getElementById("fromInput").defaultValue = fromDateStr;
+              document.getElementById("toInput").defaultValue = toDateStr;
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
@@ -1475,9 +1472,9 @@ $(function(){
     });
 	
     $("#submitRange").click(function(event){
-    	//localStorage.setItem("submitRangeClicked,"true");
-    	var fromBox = document.getElementById("fromInput").defaultValue;
-    	var toBox = document.getElementById("toInput").defaultValue;
+        //localStorage.setItem("submitRangeClicked,"true");
+        var fromBox = document.getElementById("fromInput").defaultValue;
+        var toBox = document.getElementById("toInput").defaultValue;
         var from = document.getElementById("fromInput").value;
         var to = document.getElementById("toInput").value;
 
@@ -1485,11 +1482,9 @@ $(function(){
         {
             if(isValidDate(from) && isValidDate(to))
             {
-                var fromDate = formatDateRange(from);
-                var toDate = formatDateRange(to);
-                var theDateRange = "Requested Date Range: " + fromDate + " - " + toDate;
+                var theDateRange = "Requested Date Range: " + from + " - " + to;
                 $(".statsWrapper .Memento_Date_Range").html(theDateRange);
-                getDateRangeStats(fromDate, toDate);
+                getDateRangeStats(from, to);
             }
             else
             {
@@ -1674,24 +1669,15 @@ function updateDeepLinkStateArr() {
 
 }
 
-function formatDateRange(dateInput){	
-	var Month = dateInput.substring(5,7);
-	var Date = dateInput.substring(8,10);
-	var Year = dateInput.substring(0,4);
-	
-	var fullDate = Year + "-" + Month + "-" + Date;
-	return fullDate;
-}
-
 // Validates that the input string is a valid date formatted as "mm/dd/yyyy"
 function isValidDate(dateString)
 {
     // First check for the pattern
-    if(!/^\d{4}\/\d{2}\/\d{2}$/.test(dateString))
+    if(!/^\d{4}\-\d{2}\-\d{2}$/.test(dateString))
         return false;
 
     // Parse the date parts to integers
-    var parts = dateString.split("/");
+    var parts = dateString.split("-");
     var day = parseInt(parts[2], 10);
     var month = parseInt(parts[1], 10);
     var year = parseInt(parts[0], 10);
@@ -1708,19 +1694,19 @@ function isValidDate(dateString)
 
     // Find index of last memento
     var endPoint = histoData.length - 1;
-	
+    
     // Get date of first memento
     var fromYear = histoData[0].event_display_date.substring(0,4);
     var fromMonth = histoData[0].event_display_date.substring(5,7);
     fromMonth = fromMonth - 1;
     var fromDay = histoData[0].event_display_date.substring(8,10);
-	
+    
     // Get date of last memento
     var toYear = histoData[endPoint].event_display_date.substring(0,4);
     var toMonth = histoData[endPoint].event_display_date.substring(5,7);
     toMonth = toMonth - 1;
     var toDay = histoData[endPoint].event_display_date.substring(8,10);
-	
+    
     month = month - 1;
     
     // Create date objects
@@ -1730,8 +1716,8 @@ function isValidDate(dateString)
     
     // Check if input within possible range of mementos
     if(compareDate < from || compareDate > to){
-	    console.log("out of range");
-	    return false;
+        console.log("out of range");
+        return false;
     }
     // Check the range of the day
     return day > 0 && day <= monthLength[month];
