@@ -87,8 +87,6 @@ var streamedHashMapObj = new HashMap()
 var responseDup = null;
 var Stack = require('stackjs');
 
-var dateRange = false;
-
 //return
 /* *******************************
    TODO: reorder functions (main first) to be more maintainable 20141205
@@ -515,8 +513,8 @@ function PublicEndpoint () {
       constructSSE('Checking if a cache file exists for ' + query['urir'] + '...',request.headers["x-my-curuniqueusersessionid"])
       constructSSE("percentagedone-10",request.headers["x-my-curuniqueusersessionid"]);
 
-    	//  ConsoleLogIfRequired('cacheFile: '+JSON.stringify(cacheFile))
-      	cacheFile.readFileContents(
+      //  ConsoleLogIfRequired('cacheFile: '+JSON.stringify(cacheFile))
+        cacheFile.readFileContents(
         function success (data) {
           // A cache file has been previously generated using the alSummarization strategy
 
@@ -531,20 +529,16 @@ function PublicEndpoint () {
               constructSSE('cached simhashes exist, proceeding with cache...',request.headers["x-my-curuniqueusersessionid"])
               constructSSE("percentagedone-15",request.headers["x-my-curuniqueusersessionid"]);
 
-              if(response.thumbnails['from'] != 0)
+              if(response.thumbnails['from'] == 0 && t.role == "histogram")
               {
-                getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
-              }
-              else if(dateRange == true)
-              {
-                if(t.role == "stats")
-                {
-                  dateRange = false;
-                  cacheFile.deleteCacheFile();
-                }
+                cacheFile.deleteCacheFile();
                 getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
               }else{
                 processWithFileContents(query['urir'], data, response,request.headers["x-my-curuniqueusersessionid"])
+                if(response.thumbnails['from'] != 0 && t.role == "summary")
+                {
+                  cacheFile.deleteCacheFile();
+                }
               }
             }
 
@@ -610,7 +604,6 @@ function processWithFileContents (uri, fileContents, response,curCookieClientId)
   }
   else
   {
-    dateRange = false;
     ConsoleLogIfRequired("Existing file contents are as follows:")
     ConsoleLogIfRequired("**************************************************************************************************");
     console.log(JSON.stringify(t));
@@ -996,7 +989,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
         t.calculateSimhashes(curCookieClientId,callback);
     },
     function (callback) {
-      constructSSE("percentagedone-75",curCookieClientId);
+      constructSSE("percentagedone-30",curCookieClientId);
       if (t.role == "histogram" || t.hammingdistancethreshold == '0') {
         callback('');
       }
@@ -1237,7 +1230,6 @@ TimeMap.prototype.getDatesForHistogram = function (callback,response,curCookieCl
 */
 TimeMap.prototype.filterMementosForDateRange = function(response)
 {
-  dateRange = true;
   var theFromDate = new Date(response.thumbnails['from']);
   var theToDate = new Date(response.thumbnails['to']);
 
