@@ -795,6 +795,7 @@ function getHistogramPage(){
         toDisplay= "Archive-It";
     }
     getHistoData(toDisplay);
+    $(".modal-backdrop").remove();
 }
     
 function getHistoData(toDisplay){
