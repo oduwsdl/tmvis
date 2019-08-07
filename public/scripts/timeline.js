@@ -628,20 +628,26 @@ var generateAllClicked = false;
             $('.argumentsForm #hammingDistance').val(hammingDistance);
             $('.argumentsForm #hammingdistanceValue').html(hammingDistance);
             $('.argumentsForm .primesrcsection input[type=radio][value='+ curDeepLinkStateArr[1] +']').prop("checked",true).trigger("click");
-            if(curDeepLinkStateArr[4] == "stats"){
-		      getStats();
-	        }else if(curDeepLinkStateArr.length > 6){
+            if(curDeepLinkStateArr.length > 6){
 		      console.log(curDeepLinkStateArr);
 		      var from = curDeepLinkStateArr[6].substring(0,4)+"/"+curDeepLinkStateArr[6].substring(4,6)+"/"+curDeepLinkStateArr[6].substring(6,8);
 		      var to = curDeepLinkStateArr[7].substring(0,4)+"/"+curDeepLinkStateArr[7].substring(4,6)+"/"+curDeepLinkStateArr[7].substring(6,8);
 		      
-			  var theDateRange = "Requested Date Range: " + from + " - " + to;
+			  var fromDate = formatDateRange(from);
+			  var toDate = formatDateRange(to);
+			  var theDateRange = "Requested Date Range: " + fromDate + " - " + toDate;
 			  $(".statsWrapper .Memento_Date_Range").html(theDateRange);
-                
-			  getDateRangeStats(fromDate, toDate);
+              
+              if(curDeepLinkStateArr[4] == "stats"){
+			    getDateRangeStats(fromDate, toDate);
+              } else {
+                getDateRangeSummary(fromDate, toDate);
+              }
 
 	        }else if(curDeepLinkStateArr[4] == "summary"){
                 getSummary();
+            }else if(curDeepLinkStateArr[4] == "stats"){
+                getStats();
             }else{
               getHistogramPage();
             }
@@ -1651,7 +1657,7 @@ function updateDeepLinkStateArr() {
       else{
         curDeepLinkStateArr[2] = deepLinkParts[2];
         curDeepLinkStateArr[3]= deepLinkParts[3];
-        if(curDeepLinkStateArr[4] == "summary" && !(isNaN(Number(deepLinkParts[5]))) && !(isNaN(Number(deepLinkParts[6]))))
+        if((curDeepLinkStateArr[4] == "summary" || curDeepLinkStateArr[4] == "stats") && !(isNaN(Number(deepLinkParts[5]))) && !(isNaN(Number(deepLinkParts[6]))))
         {
             curDeepLinkStateArr[6] = deepLinkParts[5];
             curDeepLinkStateArr[7] = deepLinkParts[6];
