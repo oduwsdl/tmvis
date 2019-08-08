@@ -630,18 +630,16 @@ var generateAllClicked = false;
             $('.argumentsForm .primesrcsection input[type=radio][value='+ curDeepLinkStateArr[1] +']').prop("checked",true).trigger("click");
             if(curDeepLinkStateArr.length > 6){
 		      console.log(curDeepLinkStateArr);
-		      var from = curDeepLinkStateArr[6].substring(0,4)+"/"+curDeepLinkStateArr[6].substring(4,6)+"/"+curDeepLinkStateArr[6].substring(6,8);
-		      var to = curDeepLinkStateArr[7].substring(0,4)+"/"+curDeepLinkStateArr[7].substring(4,6)+"/"+curDeepLinkStateArr[7].substring(6,8);
+		      var from = curDeepLinkStateArr[6].substring(0,4)+"-"+curDeepLinkStateArr[6].substring(4,6)+"-"+curDeepLinkStateArr[6].substring(6,8);
+		      var to = curDeepLinkStateArr[7].substring(0,4)+"-"+curDeepLinkStateArr[7].substring(4,6)+"-"+curDeepLinkStateArr[7].substring(6,8);
 		      
-			  var fromDate = formatDateRange(from);
-			  var toDate = formatDateRange(to);
-			  var theDateRange = "Requested Date Range: " + fromDate + " - " + toDate;
+			  var theDateRange = "Requested Date Range: " + from + " - " + to;
 			  $(".statsWrapper .Memento_Date_Range").html(theDateRange);
               
               if(curDeepLinkStateArr[4] == "stats"){
-			    getDateRangeStats(fromDate, toDate);
+			    getDateRangeStats(from, to);
               } else {
-                getDateRangeSummary(fromDate, toDate);
+                getDateRangeSummary(from, to);
               }
 
 	        }else if(curDeepLinkStateArr[4] == "summary"){
