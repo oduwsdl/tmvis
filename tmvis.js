@@ -1218,8 +1218,8 @@ TimeMap.prototype.getDatesForHistogram = function (callback,response,curCookieCl
   ConsoleLogIfRequired(mementoJObjArr)
   ConsoleLogIfRequired("-------------------------------------------------------------------------")
 
-  var cacheFile = new SimhashCacheFile(this.primesource+"_"+this.collectionidentifier+"_"+this.originalURI,isDebugMode)
-  cacheFile.writeThumbSumJSONOPContentToFile(mementoJObjArr);
+  //var cacheFile = new SimhashCacheFile(this.primesource+"_"+this.collectionidentifier+"_"+this.originalURI,isDebugMode)
+  //cacheFile.writeThumbSumJSONOPContentToFile(mementoJObjArr);
   response.write(JSON.stringify(mementoJObjArr));
   response.end();
   callback('');
