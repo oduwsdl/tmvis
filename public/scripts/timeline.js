@@ -955,7 +955,7 @@ function getStats(){
                     var toDate = new Date(jsonObjRes[0].todate);
                     var toDateStr= toDate.getFullYear()+"-"+toDate.getMonth() +"-"+toDate.getDate();
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
-                    $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
+                    $(".statsWrapper .Mementos_Considered").html($(".histoWrapper .Mementos_Considered").html());
                     $(".paraOnlyOnStatsResults").show();
                     $(".time_container").show();
                     
@@ -1058,10 +1058,23 @@ function getDateRangeStats(from, to){
                     if($("input[name='primesource']:checked").val() == "archiveit" ){
                       toDisplay= "Archive-It";
                     }
+
                     var fromDate= new Date(jsonObjRes[0].fromdate);
-                    var fromDateStr= fromDate.getFullYear()+"-"+fromDate.getMonth() +"-"+fromDate.getDate();
+
+                    // Format from month
+                    var theFromMonth = fromDate.getMonth() + 1;
+                    if(theFromMonth <= 9)
+                        theFromMonth = "0" + theFromMonth;
+                    var fromDateStr= fromDate.getFullYear()+"-"+ theFromMonth +"-"+fromDate.getDate();
+
                     var toDate = new Date(jsonObjRes[0].todate);
-                    var toDateStr= toDate.getFullYear()+"-"+toDate.getMonth() +"-"+toDate.getDate();
+
+                    // Format to month
+                    var theToMonth = toDate.getMonth() + 1;
+                    if(theToMonth <= 9)
+                        theToMonth = "0" + toDate.getMonth();
+                    var toDateStr= toDate.getFullYear()+"-"+ theToMonth +"-"+toDate.getDate();
+
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
                     $(".paraOnlyOnStatsResults").show();
