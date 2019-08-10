@@ -889,11 +889,11 @@ function getHistoData(toDisplay){
           var errMsg = "Some problem fetching the response, Please refresh and try again.";
           $("#busy-loader").hide();
           $('#serverStreamingModal').modal('hide');
-          console.log("readyState: " + jqXHR.readyState);
+          /*console.log("readyState: " + jqXHR.readyState);
           console.log("responseText: "+ jqXHR.responseText);
           console.log("status: " + jqXHR.status);
           console.log("text status: " + textStatus);
-          console.log("error: " + err);
+          console.log("error: " + err);*/
           alert(errMsg);
         }
       });
@@ -1009,11 +1009,11 @@ function getStats(){
               // $('#serverStreamingModal .logsContent').empty();
               //   $('#serverStreamingModal').mo dal('hide');
                var errMsg = "Some problem fetching the response, Please refresh and try again.";   
-              console.log("readyState: " + jqXHR.readyState);
+              /*console.log("readyState: " + jqXHR.readyState);
               console.log("responseText: "+ jqXHR.responseText);
               console.log("status: " + jqXHR.status);
               console.log("text status: " + textStatus);
-              console.log("error: " + err);
+              console.log("error: " + err);*/
               if(textStatus == 'error')
               {
                 window.location.reload();
@@ -1137,11 +1137,11 @@ function getDateRangeStats(from, to){
               // $('#serverStreamingModal .logsContent').empty();
               //   $('#serverStreamingModal').mo dal('hide');
                var errMsg = "Some problem fetching the response, Please refresh and try again.";   
-              console.log("readyState: " + jqXHR.readyState);
+              /*console.log("readyState: " + jqXHR.readyState);
               console.log("responseText: "+ jqXHR.responseText);
               console.log("status: " + jqXHR.status);
               console.log("text status: " + textStatus);
-              console.log("error: " + err);
+              console.log("error: " + err);*/
               if(textStatus == 'error')
               {
                 window.location.reload();
@@ -1274,11 +1274,11 @@ function getSummary(){
           var errMsg = "Some problem fetching the response, Please refresh and try again.";
           $("#busy-loader").hide();
           $('#serverStreamingModal').modal('hide');
-          console.log("readyState: " + jqXHR.readyState);
+          /*console.log("readyState: " + jqXHR.readyState);
           console.log("responseText: "+ jqXHR.responseText);
           console.log("status: " + jqXHR.status);
           console.log("text status: " + textStatus);
-          console.log("error: " + err);
+          console.log("error: " + err);*/
           
           if(textStatus == 'error')
           {
@@ -1413,11 +1413,11 @@ function getDateRangeSummary(from,to){
           var errMsg = "Some problem fetching the response, Please refresh and try again.";
           $("#busy-loader").hide();
           $('#serverStreamingModal').modal('hide');
-          console.log("readyState: " + jqXHR.readyState);
+          /*console.log("readyState: " + jqXHR.readyState);
           console.log("responseText: "+ jqXHR.responseText);
           console.log("status: " + jqXHR.status);
           console.log("text status: " + textStatus);
-          console.log("error: " + err);
+          console.log("error: " + err);*/
           if(textStatus == 'error')
           {
             window.location.reload();
