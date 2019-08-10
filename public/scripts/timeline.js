@@ -873,8 +873,8 @@ function getHistoData(toDisplay){
               getHistogram(toDisplay, histoData);
               $(".modal-backdrop").remove();
               $('#serverStreamingModal').modal('hide');
-               // For date range input box
 
+               // For date range input box
               document.getElementById("fromInput").defaultValue = fromDateStr;
               document.getElementById("toInput").defaultValue = toDateStr;
           }
@@ -950,12 +950,32 @@ function getStats(){
                     if($("input[name='primesource']:checked").val() == "archiveit" ){
                       toDisplay= "Archive-It";
                     }
+
                     var fromDate= new Date(jsonObjRes[0].fromdate);
-                    var fromDateStr= fromDate.getFullYear()+"-"+fromDate.getMonth() +"-"+fromDate.getDate();
+                    // Format from date
+                    var theFromMonth = fromDate.getMonth() + 1;
+                    if(theFromMonth <= 9)
+                        theFromMonth = "0" + theFromMonth;
+                    var theFromDay = fromDate.getDate();
+                    if(theFromDay <= 9)
+                        theFromDay = "0" + theFromDay;
+
+
+                    var fromDateStr = fromDate.getFullYear() +"-"+ theFromMonth +"-"+ theFromDay;
+
                     var toDate = new Date(jsonObjRes[0].todate);
-                    var toDateStr= toDate.getFullYear()+"-"+toDate.getMonth() +"-"+toDate.getDate();
+                    // Format to date
+                    var theToMonth = toDate.getMonth() + 1;
+                    if(theToMonth <= 9)
+                        theToMonth = "0" + theToMonth;
+                     var theToDay = toDate.getDate();
+                    if(theToDay <= 9)
+                        theToDay = "0" + theToDay;
+
+                    var toDateStr = toDate.getFullYear() +"-"+ theToMonth +"-"+ theToDay;
+
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
-                    $(".statsWrapper .Mementos_Considered").html($(".histoWrapper .Mementos_Considered").html());
+                    $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
                     $(".paraOnlyOnStatsResults").show();
                     $(".time_container").show();
                     
@@ -1059,21 +1079,28 @@ function getDateRangeStats(from, to){
                       toDisplay= "Archive-It";
                     }
 
-                    var fromDate= new Date(jsonObjRes[0].fromdate);
-
-                    // Format from month
+                     var fromDate= new Date(jsonObjRes[0].fromdate);
+                    // Format from date
                     var theFromMonth = fromDate.getMonth() + 1;
                     if(theFromMonth <= 9)
                         theFromMonth = "0" + theFromMonth;
-                    var fromDateStr= fromDate.getFullYear()+"-"+ theFromMonth +"-"+fromDate.getDate();
+                    var theFromDay = fromDate.getDate();
+                    if(theFromDay <= 9)
+                        theFromDay = "0" + theFromDay;
+
+
+                    var fromDateStr = fromDate.getFullYear() +"-"+ theFromMonth +"-"+ theFromDay;
 
                     var toDate = new Date(jsonObjRes[0].todate);
-
-                    // Format to month
+                    // Format to date
                     var theToMonth = toDate.getMonth() + 1;
                     if(theToMonth <= 9)
-                        theToMonth = "0" + toDate.getMonth();
-                    var toDateStr= toDate.getFullYear()+"-"+ theToMonth +"-"+toDate.getDate();
+                        theToMonth = "0" + theToMonth;
+                     var theToDay = toDate.getDate();
+                    if(theToDay <= 9)
+                        theToDay = "0" + theToDay;
+
+                    var toDateStr = toDate.getFullYear() +"-"+ theToMonth +"-"+ theToDay;
 
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
