@@ -149,6 +149,9 @@ display:inline;
   .getSummary{
     vertical-align: top !important;
   }
+  .getDateRangeSummary{
+    vertical-align: top !important;
+  }
 	#footer{
 		text-align:center;
 		font-family: 'Oswald', sans-serif !important;
@@ -426,7 +429,7 @@ body{
 
 #updateMementos{ 
     border-style: outset;
-    border-width: 2.5px 1px 2.5px 2.5px;
+    border-width: 2.5px 2.5px 2.5px 2.5px;
     border-color: #4690d0;
     color: #ffffff;
     padding: 6px 12px;
@@ -434,7 +437,7 @@ body{
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-    border-radius: 4px 0px 0px 4px;
+    border-radius: 4px 4px 4px 4px;
     background-color:#337ab7;
 }
 
@@ -444,7 +447,7 @@ body{
 
 #updateLI{
 	margin-top: -8px;
-	margin-left: 5%;
+	margin-left: 7%;
 }
 
 #updateMementosError{
@@ -477,8 +480,8 @@ body{
 }
 
 #downloadMementoURI{
-	border-style: outset;
-    border-width: 2.5px 2.5px 2.5px 0.5px;
+    border-style: outset;
+    border-width: 2.5px 2.5px 2.5px 2.5px;
     border-color: #4690d0;
     color: #ffffff;
     padding: 6px 12px;
@@ -486,7 +489,7 @@ body{
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-    border-radius: 0px 4px 4px 0px;
+    border-radius: 4px 4px 4px 4px;
     background-color:#337ab7;
 }
 
@@ -496,5 +499,5 @@ body{
 
 #downloadLI{
 	margin-top: -8px;
-	margin-left: 0%;
+	margin-left: 3%;
 }

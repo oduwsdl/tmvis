@@ -50,7 +50,7 @@
 				<form action="#" class="argumentsForm">
 
 					<div class="row URIWrapper" >
-						<label for="uriIP">Enter URI-R <span class='uriexample'>(ex: http://4genderjustice.org)</span> or  URI-M <span class='uriexample'>(ex: http://wayback.archive-it.org/1068/20150701215641/http://4genderjustice.org/)</span> or URI-TM <span class='uriexample'>(ex: http://web.archive.org/web/timemap/link/http://4genderjustice.org)</span></label>
+						<label for="uriIP">Enter URI-R <span class='uriexample'>(ex: http://4genderjustice.org)</span> or  URI-M <span class='uriexample'>(ex: http://wayback.archive-it.org/1068/20150701215641/http://4genderjustice.org/)</span> <!--or URI-TM <span class='uriexample'>(ex: http://web.archive.org/web/timemap/link/http://4genderjustice.org)</span--></label>
 							<div class="input-group">
 
 								<input class="form-control" name="URI" id="uriIP" required placeholder="http://4genderjustice.org/">
@@ -110,30 +110,11 @@
 						<p class="Mementos_Considered"></p>
 						<div id="histogram"></div>
 						<div class="histogramOptions row">
-							<button class="btn btn-primary getStats" title="Displays visualizations after screenshots are captured"> Calculate Unique </button>
 							<button class="btn btn-primary" id="generateAllThumbnails"> Generate All Thumbnails </button>
-							<button type="button" class="btn btn-primary" name="option" id="dateRange">Date Range</button>
-
-							<script type="text/javascript">
-								//shows the date range options when date range is toggled on
-								$(document).on("click","button[name=option]",function(){
-								if ($(this).attr("id") == "dateRange") {
-									$(this).addClass("on");
-									document.getElementById('dateRange').id = 'dateRangeShow'
-									$("#dateBox").show();
-								}
-								else{
-									$('button[name=option].on').removeClass('on')
-									document.getElementById('dateRangeShow').id = 'dateRange'
-									$("#dateBox").hide();
-								}
-							});
-							</script>
-
-							<div id="dateBox" style="display:none;">
+							<div id="dateBox">
 									<p class="dateTitle">From: </p><input type="text" placeholder="yyyy/mm/dd" id="fromInput">
 									<p class="dateTitle">To: </p><input type="text" placeholder="yyyy/mm/dd" id="toInput">
-									<button type="button" class="btn btn-primary" name="option" id="submitRange">Submit</button>
+									<button type="button" class="btn btn-primary" name="option" id="submitRange"> Calculate Unique </button>
 							</div>
 							<p id="date_error" style="display:none;"> ERROR: Please enter in yyyy/mm/dd format.<br>Make sure the dates are in the proper order.</p>
 						</div>
@@ -180,10 +161,10 @@
 					<li ><a data-toggle="tab" href="#timeLine">TimeLine</a></li>
 					<li ><a data-toggle="tab" href="#gif">GIF</a></li>
 					<li id="updateLI"><button type="button" id="updateMementos" title="Update the displayed mementos.">Update</button></li>
+					<li id="revertLI"><button type="button" id="revertMementos" title="Revert to orignal displayed mementos.">Revert</button></li>
 					<li id="downloadLI">
-						<a download="URI-M.txt" id="downloadMementoURI" title="Download a list of memento URI-Ms.">Download</a>
+						<a download="URI-M.txt" id="downloadMementoURI" title="Download a list of memento URI-Ms.">Download URI-M List</a>
 					</li>
-					<li id="revertLI"><button type="button" id="revertMementos" style="display:none;">Revert</button></li>
 					<li><p id='updateMementosError'></p></li>
 					<!-- <li ><a data-toggle="tab" href="#logtab">Log</a></li> -->
 				</ul>
