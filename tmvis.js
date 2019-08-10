@@ -834,6 +834,11 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
   else if(response.thumbnails['primesource']=="internetarchive"){
       timemapHost = 'web.archive.org'
       timemapPath = '/web/timemap/link/' + uri
+      var uriHolder = uri.split("/")
+      if(uriHolder[3] == "web" && uriHolder[4] == "timemap" && uriHolder[5] == "link")
+      {
+        timemapPath = uri;
+      }
   }else { // must contain the Host and Path for Memento Aggregator
     ConsoleLogIfRequired("Haven't given the Memgators Host and Path yet")
     return
