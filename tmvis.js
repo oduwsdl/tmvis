@@ -834,8 +834,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
   else if(response.thumbnails['primesource']=="internetarchive"){
       timemapHost = 'web.archive.org'
       timemapPath = '/web/timemap/link/' + uri
-      var uriHolder = uri.split("/")
-      if(uriHolder[3] == "web" && uriHolder[4] == "timemap" && uriHolder[5] == "link")
+      if(uri.search('/web/timemap/link/') > 0)
       {
         timemapPath = uri;
       }
