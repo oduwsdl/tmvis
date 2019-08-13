@@ -766,7 +766,7 @@ function startEventNotification(){
                notificationSrc.close();
              }
            }
-           else if(streamedObj.data === "statssent"){
+           else if(streamedObj.data === "statssent" || streamedObj.data === "histoDataSent"){
                $('#serverStreamingModal .logsContent').empty();
                 setProgressBar(2);
                 // for avoiding the refresh issue... automatically refreshing the page when the results are available
