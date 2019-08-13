@@ -678,7 +678,7 @@ function uriAnalysisForAttributes(uri){
       }else if(prePartToURIR.indexOf("archive.org") > -1){
         primesource = "internetarchive";
       }else{
-        alert("not a valid input for URI, pass a valid URI-R || URI-M || URI-TM");
+        alert("not a valid input for URI, pass a valid URI-R || URI-M || URI-T");
         return false;
       }
       $('.argumentsForm #urirIP').val(urir);
