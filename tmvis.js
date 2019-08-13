@@ -1224,6 +1224,7 @@ TimeMap.prototype.getDatesForHistogram = function (callback,response,curCookieCl
 
   //var cacheFile = new SimhashCacheFile(this.primesource+"_"+this.collectionidentifier+"_"+this.originalURI,isDebugMode)
   //cacheFile.writeThumbSumJSONOPContentToFile(mementoJObjArr);
+  constructSSE("histoDataSent",curCookieClientId);
   response.write(JSON.stringify(mementoJObjArr));
   response.end();
   callback('');
