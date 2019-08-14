@@ -766,7 +766,7 @@ function startEventNotification(){
                notificationSrc.close();
              }
            }
-           else if(streamedObj.data === "statssent" || streamedObj.data === "histoDataSent"){
+           else if(streamedObj.data === "statssent"){
                $('#serverStreamingModal .logsContent').empty();
                 setProgressBar(2);
                 // for avoiding the refresh issue... automatically refreshing the page when the results are available
@@ -776,6 +776,9 @@ function startEventNotification(){
                  notificationSrc.close();
                }
              }
+           else if(streamedObj.data === "histoDataSent"){
+               $('#serverStreamingModal').modal('hide');
+           }
            else{
              $("#serverStreamingModal .logsContent").prepend(curLog);
               $('#logtab .logsContent').prepend(curLog);
@@ -1449,8 +1452,8 @@ $(function(){
 
      // following is commented to first stabilise the single step process
     $(".getJSONFromServer").click(function(event){
-
-
+        document.getElementById("inputURI_error").style.display = "none";
+        document.getElementById("uriIP").style.boxShadow = "";
         event.preventDefault();
         uriAnalysisForAttributes($("#uriIP").val().trim());
         $(".tabContentWrapper").hide();
@@ -1491,7 +1494,10 @@ $(function(){
             window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
         }else{
           if( $("#uriIP").val().trim()==""){
-            alert("Please enter an URI-R, required field.");
+            // Display message, highlight input box in red
+            document.getElementById("inputURI_error").style.display = "block";
+            document.getElementById("uriIP").style.boxShadow = "0 0 4px .5px red";
+            //alert("Please enter an URI-R, required field.");
           }
         }
       });
