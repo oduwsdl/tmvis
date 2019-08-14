@@ -766,7 +766,7 @@ function startEventNotification(){
                notificationSrc.close();
              }
            }
-           else if(streamedObj.data === "statssent" || streamedObj.data === "histoDataSent"){
+           else if(streamedObj.data === "statssent"){
                $('#serverStreamingModal .logsContent').empty();
                 setProgressBar(2);
                 // for avoiding the refresh issue... automatically refreshing the page when the results are available
@@ -776,6 +776,9 @@ function startEventNotification(){
                  notificationSrc.close();
                }
              }
+           else if(streamedObj.data === "histoDataSent"){
+               $('#serverStreamingModal').modal('hide');
+           }
            else{
              $("#serverStreamingModal .logsContent").prepend(curLog);
               $('#logtab .logsContent').prepend(curLog);
