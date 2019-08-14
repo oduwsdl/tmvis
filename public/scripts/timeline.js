@@ -1452,8 +1452,8 @@ $(function(){
 
      // following is commented to first stabilise the single step process
     $(".getJSONFromServer").click(function(event){
-
-
+        document.getElementById("inputURI_error").style.display = "none";
+        document.getElementById("uriIP").style.boxShadow = "";
         event.preventDefault();
         uriAnalysisForAttributes($("#uriIP").val().trim());
         $(".tabContentWrapper").hide();
@@ -1494,7 +1494,9 @@ $(function(){
             window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
         }else{
           if( $("#uriIP").val().trim()==""){
-            alert("Please enter an URI-R, required field.");
+            document.getElementById("inputURI_error").style.display = "block";
+            document.getElementById("uriIP").style.boxShadow = "0 0 4px .5px red";
+            //alert("Please enter an URI-R, required field.");
           }
         }
       });

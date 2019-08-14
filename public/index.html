@@ -55,6 +55,11 @@
 							<div class="input-group">
 
 								<input class="form-control" name="URI" id="uriIP" required placeholder="For example, http://4genderjustice.org/">
+
+								<div id="inputURI_error">
+									Please enter a URI-R, required field.
+								</div>
+
 								<!-- GET STATS -->
 								<span id="statsbtn" class="input-group-btn">
 										<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
@@ -69,8 +74,8 @@
 						  </div>
 					</div>
 
-
 					<div class="row orgAndCollNoWrapper form-inline" style="vertical-align:middle;" >
+
 						<!--ARCHIVE OPTIONS -->
 							<div class="pull-left primesrcsection" style="min-width:25%; margin-left:40%">
 								<label class="radio"><input type="radio" class ="form-control" checked="checked" name="primesource"  id = "internetarchive" value="internetarchive" onclick="javascript:yesnoCheck();">Internet Archive</label>&nbsp;
