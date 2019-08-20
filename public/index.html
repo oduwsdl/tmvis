@@ -51,7 +51,27 @@
 				<form action="#" class="argumentsForm">
 
 					<div class="row URIWrapper" >
-						<label for="uriIP">Enter URI-R <span class='uriexample'>(ex: http://4genderjustice.org)</span> or  URI-M <span class='uriexample'>(ex: http://wayback.archive-it.org/1068/20150701215641/http://4genderjustice.org/)</span> or URI-T <span class='uriexample'>(ex: http://web.archive.org/web/timemap/link/http://4genderjustice.org)</span></label>
+						<label for="uriIP">Enter URI-R <span class='uriexample'>(ex: http://4genderjustice.org)</span> or  URI-M <span class='uriexample'>(ex: http://wayback.archive-it.org/1068/20150701215641/http://4genderjustice.org/)</span> or URI-T <span class='uriexample'>(ex: http://web.archive.org/web/timemap/link/http://4genderjustice.org)</span>
+							<div id="helpBox">
+								<button type="button" id="helpLink" onclick="displayHelp()">Help</button>
+								<div id="helpSection" style="display:none;">
+									<p id="closeHelp" onclick="removeHelp()">x</p>
+									URI-R - <span class="uriHelp">This is the live website URI. Enter this and then select Internet Archive or, select a particular collection to pull mementos from with the Archive-It option.</span>
+									</br></br>
+									URI-M - <span class="uriHelp">This is a single memento URI. Provide this input, and the information in the URI is used to pull mementos from a specific Archive-It collection.</span>
+									</br></br>
+									URI-T - <span class="uriHelp">This is a timemap URI that specifies a particular archive to query for mementos, so Internet Archive or Archive-It don't have to be selected.</span>
+								</div>
+							</div>
+							<script type="text/javascript">
+								function displayHelp(){
+									document.getElementById("helpSection").style.display = "block";
+								}
+								function removeHelp(){
+									document.getElementById("helpSection").style.display = "none";
+								}
+							</script>
+						</label>
 							<div class="input-group">
 
 								<input class="form-control" name="URI" id="uriIP" required placeholder="For example, http://4genderjustice.org/">
