@@ -19,6 +19,7 @@
 		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 		<script src="//d3js.org/d3.v4.min.js"></script>
+		<script src="https://code.jquery.com/jquery-migrate-3.1.0.js"></script>
 
     	<script src="/scripts/imageSliderScript.js"></script>
     	<script src="/scripts/imageGridScript.js"></script>
@@ -50,10 +51,33 @@
 				<form action="#" class="argumentsForm">
 
 					<div class="row URIWrapper" >
-						<label for="uriIP">Enter URI-R <span class='uriexample'>(ex: http://4genderjustice.org)</span> or  URI-M <span class='uriexample'>(ex: http://wayback.archive-it.org/1068/20150701215641/http://4genderjustice.org/)</span> or URI-TM <span class='uriexample'>(ex: http://web.archive.org/web/timemap/link/http://4genderjustice.org)</span></label>
+						<label for="uriIP">Enter URI-R <span class='uriexample'>(ex: http://4genderjustice.org)</span> or  URI-M <span class='uriexample'>(ex: http://wayback.archive-it.org/1068/20150701215641/http://4genderjustice.org/)</span> or URI-T <span class='uriexample'>(ex: http://web.archive.org/web/timemap/link/http://4genderjustice.org)</span>
+							<div id="helpBox">
+								<button type="button" id="helpLink" onclick="displayHelp()">Help</button>
+								<div id="helpSection" style="display:none;">
+									<button type="button" id="closeHelp" onclick="removeHelp()">x</button>
+									URI-R - <span class="uriHelp">This is the URI of the live webpage. After entering the URI-R, you may choose to analyze mementos from the Internet Archive or a specific collection in Archive-It.</span>
+									</br></br>
+									URI-M - <span class="uriHelp">This is the URI of a memento, a webpage archived at a specific datetime. The URI-M contains the name of the archive or Archive-It collection, so there is no need to choose between Internet Archive or Archive-It. Our service will analyze all of the mementos of that URI-R in the specified archive or Archive-It collection.</span>
+									</br></br>
+									URI-T - <span class="uriHelp">This is the URI of a timemap, the list of all mementos for a URI-R in an archive. The URI-T contains the name of the archive or Archive-It collection, so as with the URI-M, so there is no need to choose between Internet Archive or Archive-It. Our service will analyze all of the mementos listed in the URI-T.</span>
+								</div>
+							</div>
+							<script type="text/javascript">
+								function displayHelp(){
+									document.getElementById("helpSection").style.display = "block";
+								}
+								function removeHelp(){
+									document.getElementById("helpSection").style.display = "none";
+								}
+							</script>
+						</label>
 							<div class="input-group">
 
-								<input class="form-control" name="URI" id="uriIP" required placeholder="http://4genderjustice.org/">
+								<input class="form-control" name="URI" id="uriIP" required placeholder="For example, http://4genderjustice.org/">
+
+								<div id="inputURI_error">Required field! Enter a URI-R, URI-M, or URI-T</div>
+
 								<!-- GET STATS -->
 								<span id="statsbtn" class="input-group-btn">
 										<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
@@ -64,12 +88,12 @@
 							</div>
 							<div class="form-group hidden">
 						    <label for="urirIP">Enter URI-R:</label>
-						    <input class="form-control" name="URI-R" id="urirIP" required placeholder="http://4genderjustice.org/">
+						    <input class="form-control" name="URI-R" id="urirIP" required placeholder="For example, http://4genderjustice.org/">
 						  </div>
 					</div>
 
-
 					<div class="row orgAndCollNoWrapper form-inline" style="vertical-align:middle;" >
+
 						<!--ARCHIVE OPTIONS -->
 							<div class="pull-left primesrcsection" style="min-width:25%; margin-left:40%">
 								<label class="radio"><input type="radio" class ="form-control" checked="checked" name="primesource"  id = "internetarchive" value="internetarchive" onclick="javascript:yesnoCheck();">Internet Archive</label>&nbsp;
@@ -109,6 +133,7 @@
 					<div class="col-lg-12">
 						<p class="Mementos_Considered"></p>
 						<div id="histogram"></div>
+						<div id="memento_limit" style="display: none;"> For timemaps with more than 5000 mementos, only the latest 5000 are analyzed. </div>
 						<div class="histogramOptions row">
 							<button class="btn btn-primary" id="generateAllThumbnails"> Generate All Thumbnails </button>
 							<div id="dateBox">

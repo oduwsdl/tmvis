@@ -678,7 +678,7 @@ function uriAnalysisForAttributes(uri){
       }else if(prePartToURIR.indexOf("archive.org") > -1){
         primesource = "internetarchive";
       }else{
-        alert("not a valid input for URI, pass a valid URI-R || URI-M || URI-TM");
+        alert("not a valid input for URI, pass a valid URI-R || URI-M || URI-T");
         return false;
       }
       $('.argumentsForm #urirIP').val(urir);
@@ -766,7 +766,7 @@ function startEventNotification(){
                notificationSrc.close();
              }
            }
-           else if(streamedObj.data === "statssent" || streamedObj.data === "histoDataSent"){
+           else if(streamedObj.data === "statssent"){
                $('#serverStreamingModal .logsContent').empty();
                 setProgressBar(2);
                 // for avoiding the refresh issue... automatically refreshing the page when the results are available
@@ -776,6 +776,9 @@ function startEventNotification(){
                  notificationSrc.close();
                }
              }
+           else if(streamedObj.data === "histoDataSent"){
+               $('#serverStreamingModal').modal('hide');
+           }
            else{
              $("#serverStreamingModal .logsContent").prepend(curLog);
               $('#logtab .logsContent').prepend(curLog);
@@ -851,9 +854,12 @@ function getHistoData(toDisplay){
               }
 
               histoData= $.parseJSON(data);
-	      console.log(histoData);
               if(histoData.length > 12){
                   document.getElementById('generateAllThumbnails').style.display = "none";
+              }
+              if(histoData.length == 5000)
+              {
+                document.getElementById("memento_limit").style.display = "block";
               }
               document.getElementById("histoWrapper").style.display = "block";
 	      var endPoint = histoData.length - 1;
@@ -918,9 +924,9 @@ function getStats(){
       var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0"+"/"+$('.argumentsForm #urirIP').val();
       $("#busy-loader").show();
       $('#serverStreamingModal .logsContent').empty();
-       $('#logtab .logsContent').empty();
-	var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
-       history.pushState({},"Stats State",path);
+      $('#logtab .logsContent').empty();
+	  var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
+      history.pushState({},"Stats State",path);
       $('#serverStreamingModal').modal('show');
       $.ajax({
             type: "GET",
@@ -1328,11 +1334,11 @@ function getDateRangeSummary(from,to){
        $("#busy-loader").show();
        $('#serverStreamingModal .logsContent').empty();
        $('#serverStreamingModal').modal('show');
-      $.ajax({
+       $.ajax({
         type: "GET",
         url: address, // uncomment this for deployment
         beforeSend: function(xhr) {
-          xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+            xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
         },
         dataType: "text",
         timeout: 0,
@@ -1430,15 +1436,13 @@ function getDateRangeSummary(from,to){
 }
 
 $(function(){
-  $(".cancelProcess").click(function(event){
-
-    //console.log("Cancel clicked");
-    localStorage.removeItem("getHistogramPageClicked");
-    localStorage.removeItem("curInputObj");
-    //window.location.reload();
-    window.location = "/";
-    
-  });
+    $(".cancelProcess").click(function(event){
+        console.log("Cancel clicked");
+        localStorage.removeItem("getHistogramPageClicked");
+        localStorage.removeItem("curInputObj");
+        //window.location.reload();
+        window.location = "/";
+    });
 
     // Analyses the input pattern and finds all the parameters
     $(document).on('focusout','#uriIP',function(){
@@ -1449,8 +1453,8 @@ $(function(){
 
      // following is commented to first stabilise the single step process
     $(".getJSONFromServer").click(function(event){
-
-
+        document.getElementById("inputURI_error").style.display = "none";
+        document.getElementById("uriIP").style.boxShadow = "";
         event.preventDefault();
         uriAnalysisForAttributes($("#uriIP").val().trim());
         $(".tabContentWrapper").hide();
@@ -1491,7 +1495,10 @@ $(function(){
             window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
         }else{
           if( $("#uriIP").val().trim()==""){
-            alert("Please enter an URI-R, required field.");
+            // Display message, highlight input box in red
+            document.getElementById("inputURI_error").style.display = "block";
+            document.getElementById("uriIP").style.boxShadow = "0 0 4px .5px red";
+            //alert("Please enter an URI-R, required field.");
           }
         }
       });
