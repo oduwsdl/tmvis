@@ -55,12 +55,12 @@
 							<div id="helpBox">
 								<button type="button" id="helpLink" onclick="displayHelp()">Help</button>
 								<div id="helpSection" style="display:none;">
-									<p id="closeHelp" onclick="removeHelp()">x</p>
-									URI-R - <span class="uriHelp">This is the live website URI. Enter this and then select Internet Archive or, select a particular collection to pull mementos from with the Archive-It option.</span>
+									<button type="button" id="closeHelp" onclick="removeHelp()">x</button>
+									URI-R - <span class="uriHelp">This is the URI of the live webpage. After entering the URI-R, you may choose to analyze mementos from the Internet Archive or a specific collection in Archive-It.</span>
 									</br></br>
-									URI-M - <span class="uriHelp">This is a single memento URI. Provide this input, and the information in the URI is used to pull mementos from a specific Archive-It collection.</span>
+									URI-M - <span class="uriHelp">This is the URI of a memento, a webpage archived at a specific datetime. The URI-M contains the name of the archive or Archive-It collection, so there is no need to choose between Internet Archive or Archive-It. Our service will analyze all of the mementos of that URI-R in the specified archive or Archive-It collection.</span>
 									</br></br>
-									URI-T - <span class="uriHelp">This is a timemap URI that specifies a particular archive to query for mementos, so Internet Archive or Archive-It don't have to be selected.</span>
+									URI-T - <span class="uriHelp">This is the URI of a timemap, the list of all mementos for a URI-R in an archive. The URI-T contains the name of the archive or Archive-It collection, so as with the URI-M, so there is no need to choose between Internet Archive or Archive-It. Our service will analyze all of the mementos listed in the URI-T.</span>
 								</div>
 							</div>
 							<script type="text/javascript">
@@ -133,6 +133,7 @@
 					<div class="col-lg-12">
 						<p class="Mementos_Considered"></p>
 						<div id="histogram"></div>
+						<div id="memento_limit" style="display: none;"> For timemaps with more than 5000 mementos, only the latest 5000 are analyzed. </div>
 						<div class="histogramOptions row">
 							<button class="btn btn-primary" id="generateAllThumbnails"> Generate All Thumbnails </button>
 							<div id="dateBox">

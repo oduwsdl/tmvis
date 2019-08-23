@@ -854,9 +854,12 @@ function getHistoData(toDisplay){
               }
 
               histoData= $.parseJSON(data);
-	      console.log(histoData);
               if(histoData.length > 12){
                   document.getElementById('generateAllThumbnails').style.display = "none";
+              }
+              if(histoData.length == 5000)
+              {
+                document.getElementById("memento_limit").style.display = "block";
               }
               document.getElementById("histoWrapper").style.display = "block";
 	      var endPoint = histoData.length - 1;
@@ -921,9 +924,9 @@ function getStats(){
       var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0"+"/"+$('.argumentsForm #urirIP').val();
       $("#busy-loader").show();
       $('#serverStreamingModal .logsContent').empty();
-       $('#logtab .logsContent').empty();
-	var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
-       history.pushState({},"Stats State",path);
+      $('#logtab .logsContent').empty();
+	  var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
+      history.pushState({},"Stats State",path);
       $('#serverStreamingModal').modal('show');
       $.ajax({
             type: "GET",
@@ -1331,11 +1334,11 @@ function getDateRangeSummary(from,to){
        $("#busy-loader").show();
        $('#serverStreamingModal .logsContent').empty();
        $('#serverStreamingModal').modal('show');
-      $.ajax({
+       $.ajax({
         type: "GET",
         url: address, // uncomment this for deployment
         beforeSend: function(xhr) {
-          xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+            xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
         },
         dataType: "text",
         timeout: 0,
@@ -1433,15 +1436,13 @@ function getDateRangeSummary(from,to){
 }
 
 $(function(){
-  $(".cancelProcess").click(function(event){
-
-    //console.log("Cancel clicked");
-    localStorage.removeItem("getHistogramPageClicked");
-    localStorage.removeItem("curInputObj");
-    //window.location.reload();
-    window.location = "/";
-    
-  });
+    $(".cancelProcess").click(function(event){
+        console.log("Cancel clicked");
+        localStorage.removeItem("getHistogramPageClicked");
+        localStorage.removeItem("curInputObj");
+        //window.location.reload();
+        window.location = "/";
+    });
 
     // Analyses the input pattern and finds all the parameters
     $(document).on('focusout','#uriIP',function(){
