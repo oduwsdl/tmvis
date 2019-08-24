@@ -753,8 +753,9 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,callback) 
 
           var sh = simhash((buffer2).split('')).join('')
          ConsoleLogIfRequired("ByMahee -- computed simhash for "+mOptions.host+mOptions.path+" -> "+ sh)
-         constructSSE('computed simhash for '+mOptions.host+mOptions.path +' -> '+ sh,curCookieClientId)
+         //constructSSE('computed simhash for '+mOptions.host+mOptions.path +' -> '+ sh,curCookieClientId)
           var retStr = getHexString(sh)
+         constructSSE('computed simhash for '+mOptions.host+mOptions.path +' -> '+ retStr,curCookieClientId)
           //|| (retStr == null)
         //  if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302 || retStr == null || (retStr.match(/0/g) || []).length === 32) {
 
@@ -827,17 +828,19 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 
   var timemapHost = 'wayback.archive-it.org'
   var timemapPath = '/'+response.thumbnails['collectionidentifier']+'/timemap/link/' + uri
-  if(response.thumbnails['primesource']=="archiveit"){
+  if(uri.indexOf('web.archive.org/web/timemap/link/') > -1){
+    timemapHost = 'web.archive.org'
+    timemapPath = uri;
+  }else if(uri.indexOf('wayback.archive-it.org') > -1 && uri.indexOf('/timemap/link/') > -1){
+    timemapHost = 'wayback.archive-it.org'
+    timemapPath = uri.split("wayback.archive-it.org")[1];
+  }else if(response.thumbnails['primesource']=="archiveit"){
      timemapHost = 'wayback.archive-it.org'
      timemapPath = '/'+response.thumbnails['collectionidentifier']+'/timemap/link/' + uri
   }
   else if(response.thumbnails['primesource']=="internetarchive"){
       timemapHost = 'web.archive.org'
       timemapPath = '/web/timemap/link/' + uri
-      if(uri.indexOf('/web/timemap/link/') > 0)
-      {
-        timemapPath = uri;
-      }
   }else { // must contain the Host and Path for Memento Aggregator
     ConsoleLogIfRequired("Haven't given the Memgators Host and Path yet")
     return
