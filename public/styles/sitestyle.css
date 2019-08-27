@@ -510,3 +510,58 @@ body{
 	padding: 6px 10px 6px 10px;
 	border-radius: 0px 0px 4px 4px;
 }
+
+#helpBox{
+	display: inline-block;
+	position: relative;
+	margin-left: 10px;
+}
+
+#helpLink{
+	color: #337ab7;
+	text-decoration: underline;
+	border: none;
+	background-color: whitesmoke;
+}
+
+#helpLink:hover{
+	color: #00549c;
+}
+
+#helpSection{
+	width: 550px;
+	display: block;
+	z-index: 10;
+	position: absolute;
+	background-color: whitesmoke;
+	padding: 7px;
+	box-shadow: 6px 6px 6px #dedede;
+	border: groove;
+	border-color: #efefef;
+	border-radius: 3px;
+	transform: translate(-20%, 4%);
+}
+
+#closeHelp{
+	position: absolute;
+	margin-left: 94.75%;
+	margin-top: -1.45%;
+	border: none;
+	background-color: #bdbdbd;
+	padding: 0px 7px 2px 7px;
+}
+
+#closeHelp:hover{
+	color: #ffffff;
+	background-color: #8a8a8a;
+}
+
+.uriHelp{
+	font-weight: normal;
+}
+
+#memento_limit{
+	position: absolute;
+	margin-left: 10.5%;
+	font-size: 13px;
+}
