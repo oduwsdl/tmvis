@@ -1506,11 +1506,11 @@ $(function(){
     $(".toggleHelp").click(function(event){
         if(document.getElementById("helpSection").style.display == "block")
         {
-            document.getElementById("helpSection").style.display = "none"
+            document.getElementById("helpSection").style.display = "none";
         }
         else
         {
-            document.getElementById("helpSection").style.display = "block"
+            document.getElementById("helpSection").style.display = "block";
         }
     });
 
