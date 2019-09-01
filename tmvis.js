@@ -528,7 +528,7 @@ function PublicEndpoint () {
               constructSSE('cached simhashes exist, proceeding with cache...',request.headers["x-my-curuniqueusersessionid"]);
               constructSSE("percentagedone-15",request.headers["x-my-curuniqueusersessionid"]);
 
-              if(response.thumbnails['from'] == 0 && t.role == "histogram")
+              if(response.thumbnails['from'] != 0 && t.role == "stats")
               {
                 cacheFile.deleteCacheFile();
                 getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
