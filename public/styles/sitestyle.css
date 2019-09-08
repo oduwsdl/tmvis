@@ -377,7 +377,7 @@ body{
 }
 
 #dateBox{
-	margin-top: 25px;
+	margin-top: 5px;
 }
 
 #date_error{
@@ -561,7 +561,12 @@ body{
 }
 
 #memento_limit{
-	position: absolute;
-	margin-left: 10.5%;
+	margin-left: 11%;
 	font-size: 13px;
+}
+
+#selected_dates{
+	margin: 0 auto;
+	margin-top: 27px;
+	text-align: center;
 }

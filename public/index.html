@@ -125,10 +125,13 @@
 					<div class="col-lg-12">
 						<p class="Mementos_Considered"></p>
 						<div id="histogram"></div>
+						<button id="brush_clear">Clear Selection</button>
 						<div id="memento_limit" style="display: none;"> For timemaps with more than 5000 mementos, only the latest 5000 are analyzed. </div>
+						<!--div id="selected_dates"></div-->
 						<div class="histogramOptions row">
 							<button class="btn btn-primary" id="generateAllThumbnails"> Generate All Thumbnails </button>
 							<div id="dateBox">
+									<p class="dateTitle" id="selected_mementos"></p>
 									<p class="dateTitle">From: </p><input type="text" placeholder="yyyy/mm/dd" id="fromInput">
 									<p class="dateTitle">To: </p><input type="text" placeholder="yyyy/mm/dd" id="toInput">
 									<button type="button" class="btn btn-primary" name="option" id="submitRange"> Calculate Unique </button>

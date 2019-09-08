@@ -829,7 +829,7 @@ function getHistoData(toDisplay){
        $("#busy-loader").show();
        $('#serverStreamingModal .logsContent').empty();
        $('#serverStreamingModal').modal('show');
-      $.ajax({
+       $.ajax({
         type: "GET",
         url: address, // uncomment this for deployment
         beforeSend: function(xhr) {
@@ -862,27 +862,28 @@ function getHistoData(toDisplay){
                 document.getElementById("memento_limit").style.display = "block";
               }
               document.getElementById("histoWrapper").style.display = "block";
-	      var endPoint = histoData.length - 1;
+	          var endPoint = histoData.length - 1;
 
-	      var fromYear = histoData[0].event_display_date.substring(0,4);
-	      var fromMonth = histoData[0].event_display_date.substring(5,7);
-	      var fromDate = histoData[0].event_display_date.substring(8,10);
+	          var fromYear = histoData[0].event_display_date.substring(0,4);
+	          var fromMonth = histoData[0].event_display_date.substring(5,7);
+	          var fromDate = histoData[0].event_display_date.substring(8,10);
 
-	      var toYear = histoData[endPoint].event_display_date.substring(0,4);
-	      var toMonth = histoData[endPoint].event_display_date.substring(5,7);
-	      var toDate = histoData[endPoint].event_display_date.substring(8,10);
+	          var toYear = histoData[endPoint].event_display_date.substring(0,4);
+	          var toMonth = histoData[endPoint].event_display_date.substring(5,7);
+	          var toDate = histoData[endPoint].event_display_date.substring(8,10);
 
-	      var fromDateStr= fromYear+"-"+fromMonth +"-"+fromDate;
-	      var toDateStr= toYear+"-"+toMonth +"-"+toDate;
-	      var dateRangeStr= fromDateStr + " - " + toDateStr;
-	       $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
-              getHistogram(toDisplay, histoData);
+	          var fromDateStr= fromYear+"-"+fromMonth +"-"+fromDate;
+	          var toDateStr= toYear+"-"+toMonth +"-"+toDate;
+	          var dateRangeStr= fromDateStr + " - " + toDateStr;
+	          $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
+              getHistogram(histoData);
               $(".modal-backdrop").remove();
               $('#serverStreamingModal').modal('hide');
 
-               // For date range input box
+              // For date range input box
               document.getElementById("fromInput").defaultValue = fromDateStr;
               document.getElementById("toInput").defaultValue = toDateStr;
+              document.getElementById("selected_mementos").innerHTML = "Mementos selected: " + histoData.length;
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
