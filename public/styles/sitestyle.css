@@ -519,9 +519,11 @@ body{
 
 #helpLink{
 	color: #337ab7;
-	text-decoration: underline;
 	border: none;
 	background-color: whitesmoke;
+	font-weight: 750;
+	font-size: 19px;
+	margin-top: 6px;
 }
 
 #helpLink:hover{

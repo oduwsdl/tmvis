@@ -118,26 +118,33 @@ function getHistogram(dateArray){
 
 		var total_selected = 0;
 
-		var d0 = d3.event.selection;
+		var d0 = d3.event.selection.map(x.invert),
+		    d1 = d0.map(d3.timeDay.round);
+
+		// If empty when rounded use floor & ceil
+		if (d1[0] >= d1[1]) {
+		    d1[0] = d3.timeDay.floor(d0[0]);
+		    d1[1] = d3.timeDay.offset(d1[0]);
+		}
 
 		// Get adjusted from date after brush snap
 		var newFrom = new Date(d1[0].getFullYear(), d1[0].getMonth(), 1, 0,0,0);
-		d0[0] = newFrom;
+		d1[0] = newFrom;
 
 		// Get adjusted to date after brush snap
 		var toDays = new Date(d1[1].getFullYear(), (d1[1].getMonth() + 1), 0).getDate();
 		var newTo = new Date(d1[1].getFullYear(), d1[1].getMonth(), toDays, 11,59,59);
-		d0[1] = newTo;
+		d1[1] = newTo;
 
-		d3.select(this).transition().call(d3.event.target.move, d0.map(x));
+		d3.select(this).transition().call(d3.event.target.move, d1.map(x));
 
-		var total_selected = selectedBars(d0[0], d0[1], total_selected);
+		var total_selected = selectedBars(d1[0], d1[1], total_selected);
 
 		d3.select("#selected_mementos").text("Mementos selected: " + total_selected);
 
 		// Update input values
-		document.getElementById("fromInput").value = formatDate(d0[0]);
-		document.getElementById("toInput").value = formatDate(d0[1]);
+		document.getElementById("fromInput").value = formatDate(d1[0]);
+		document.getElementById("toInput").value = formatDate(d1[1]);
 
 		total_selected = 0;
 	}
