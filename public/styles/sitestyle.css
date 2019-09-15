@@ -467,7 +467,7 @@ body{
     display: inline-block;
     font-size: 16px;
     border-radius: 4px;
-    background-color:#337ab7;
+    background-color: #337ab7;
 }
 
 #revertMementos:hover{
@@ -565,8 +565,17 @@ body{
 	font-size: 13px;
 }
 
-#selected_dates{
-	margin: 0 auto;
-	margin-top: 27px;
-	text-align: center;
+#brush_clear{
+	position: relative;
+	display: block;
+	transform: translate(870%, -45%);
+	padding: 4px;
+	border-radius: 3px;
+	font-size: 13px;
+	color: white;
+	background-color: #ccc;
+}
+
+.brush_clear:hover{
+	background-color: #286090;
 }
