@@ -985,6 +985,7 @@ function getStats(){
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
                     $(".paraOnlyOnStatsResults").show();
                     $(".time_container").show();
+                    $(".Explain_Threshold").show();
                     
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
@@ -1113,6 +1114,7 @@ function getDateRangeStats(from, to){
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
                     $(".paraOnlyOnStatsResults").show();
                     $(".time_container").show();
+                    $(".Explain_Threshold").show();
                     
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
