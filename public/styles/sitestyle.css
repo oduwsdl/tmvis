@@ -523,7 +523,12 @@ body{
 	background-color: whitesmoke;
 	font-weight: 750;
 	font-size: 19px;
-	margin-top: 6px;
+}
+
+#helpImage{
+	height: 16px;
+	width: 16px;
+	opacity: .8;
 }
 
 #helpLink:hover{
