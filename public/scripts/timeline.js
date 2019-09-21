@@ -350,7 +350,7 @@ var generateAllClicked = false;
         },
 
         showNotches : function(e){
-            e.preventDefault();
+            //e.preventDefault();
             this.el.removeClass("series_legend_item_inactive");
             _.each(this.cards, function(card){
                 card.showNotch();
