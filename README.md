@@ -16,8 +16,8 @@ To query the server instance generated using your browser visit `http://localhos
 
 ### Example URIs
 
-* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/stats/http://4genderjustice.org/`
-* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/summary/http://4genderjustice.org/`
+* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/stats/0/0/http://4genderjustice.org/`
+* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/summary/0/0/http://4genderjustice.org/`
 
 
 ## Running as a Docker Container (Non development mode: Recommended for naive users)
@@ -96,7 +96,7 @@ Running this service provides a user with the array of JSON object as the respon
 
 ## Request format (Role -> stats)
 ```
-curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/stats/http://4genderjustice.org/
+curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/stats/0/0/http://4genderjustice.org/
 
 Mapping of attributes of URI to the values are as follows:
   primesource -> archiveIt
@@ -117,7 +117,7 @@ Mapping of attributes of URI to the values are as follows:
 
 ## Request format (Role -> summary)
 ```
-curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/summary/http://4genderjustice.org/
+curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/summary/0/0/http://4genderjustice.org/
 
 Mapping of attributes of URI to the values are as follows:
   primesource -> archiveIt

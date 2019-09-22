@@ -350,7 +350,7 @@ var generateAllClicked = false;
         },
 
         showNotches : function(e){
-            e.preventDefault();
+            //e.preventDefault();
             this.el.removeClass("series_legend_item_inactive");
             _.each(this.cards, function(card){
                 card.showNotch();
@@ -1477,6 +1477,18 @@ $(function(){
             var curInputJsobObj = {};
             curInputJsobObj["uri"]= $("#uriIP").val().trim();
             curInputJsobObj["urir"]= $("#urirIP").val().trim();
+            if(curInputJsobObj["urir"].indexOf(", ")>-1)
+            {
+                var urirTemp = curInputJsobObj["urir"].split(", ");
+                curInputJsobObj["urir"] = "";
+                for (var i = 0; i < urirTemp.length; i++) {
+                    curInputJsobObj["urir"] += urirTemp[i];
+                    if(i != urirTemp.length-1)
+                    {
+                        curInputJsobObj["urir"] += ",";
+                    }
+                }
+            }
             curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
             if(curInputJsobObj["primesource"]=="internetarchive"){
               curInputJsobObj["collectionIdentifer"]= "all";
