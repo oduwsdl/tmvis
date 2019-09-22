@@ -1,8 +1,8 @@
 function getHistogram(dateArray){
 	// set the dimensions and margins of the graph
 	var margin = {top: 10, right: 30, bottom: 30, left: 110},
-	    width = 1000 - margin.left - margin.right,
-	    height = 90 - margin.top - margin.bottom;
+	    width = 1050 - margin.left - margin.right,
+	    height = 100 - margin.top - margin.bottom;
 
 	// parse the date / time
 	var parseDate = d3.timeParse("%Y-%m-%d");
