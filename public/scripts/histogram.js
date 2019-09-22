@@ -19,11 +19,11 @@ function getHistogram(dateArray){
 	    d.date = parseDate(d.event_display_date);
 	});
 
+	// Get from and to dates
 	var fromDateString = data[0].event_display_date.substring(0,10);
-
 	var toDateString = data[data.length - 1].event_display_date.substring(0,10);
 
-	// get the domain
+	// Convert to date objects to get the domain
 	var from = new Date(fromDateString);
 	var to = new Date(toDateString);
 	
@@ -84,11 +84,8 @@ function getHistogram(dateArray){
 	    .attr("class", "brush")
 	    .call(gBrush);
 
-	var fromInput = d3.select("#fromInput");
-	var toInput = d3.select("#toInput");
-
-	fromInput.on("blur", updateBrush);
-	toInput.on("blur", updateBrush);
+	d3.select("#fromInput").on("blur", updateBrush);
+	d3.select("#toInput").on("blur", updateBrush);
 
 	function brushed() {
 	  	if (!d3.event.sourceEvent) return; // Transition after input
@@ -184,6 +181,7 @@ function getHistogram(dateArray){
 			document.getElementById('date_error').style.display = "block";
 	}
 
+	// Highlight selected bars and tally mementos
 	function selectedBars(from, to, total){
 		d3.selectAll("rect.bar").style("fill", function(d, i) {
 			if (d.x0 >= from && d.x0 <= to)
@@ -192,14 +190,13 @@ function getHistogram(dateArray){
 				return "orange";
 			}
 			else
-			{
 				return "steelblue";
-			}
 		});
 
 		return total;
 	}
 
+	// Add leading zeros
 	function formatDate(date)
 	{
 		var month = date.getMonth() + 1;
