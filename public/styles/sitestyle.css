@@ -522,7 +522,11 @@ body{
 	border: none;
 	background-color: whitesmoke;
 	font-weight: 750;
-	font-size: 19px;
+	font-size: 21px;
+}
+
+#helpLink p{
+	margin-top: 3px;
 }
 
 #helpImage{
