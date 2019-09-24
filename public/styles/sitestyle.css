@@ -377,7 +377,7 @@ body{
 }
 
 #dateBox{
-	margin-top: 25px;
+	margin-top: 5px;
 }
 
 #date_error{
@@ -467,7 +467,7 @@ body{
     display: inline-block;
     font-size: 16px;
     border-radius: 4px;
-    background-color:#337ab7;
+    background-color: #337ab7;
 }
 
 #revertMementos:hover{
@@ -519,9 +519,20 @@ body{
 
 #helpLink{
 	color: #337ab7;
-	text-decoration: underline;
 	border: none;
 	background-color: whitesmoke;
+	font-weight: 750;
+	font-size: 21px;
+}
+
+#helpLink p{
+	margin-top: 3px;
+}
+
+#helpImage{
+	height: 16px;
+	width: 16px;
+	opacity: .8;
 }
 
 #helpLink:hover{
@@ -561,7 +572,21 @@ body{
 }
 
 #memento_limit{
-	position: absolute;
-	margin-left: 10.5%;
+	margin-left: 11%;
 	font-size: 13px;
+}
+
+#brush_clear{
+	position: relative;
+	display: block;
+	transform: translate(870%, -45%);
+	padding: 4px;
+	border-radius: 3px;
+	font-size: 13px;
+	color: white;
+	background-color: #ccc;
+}
+
+.brush_clear:hover{
+	background-color: #286090;
 }

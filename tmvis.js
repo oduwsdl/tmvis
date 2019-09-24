@@ -87,6 +87,8 @@ var streamedHashMapObj = new HashMap();
 var responseDup = null;
 var Stack = require('stackjs');
 
+var URIs = [];
+var dateRange = false;
 //return
 /* *******************************
    TODO: reorder functions (main first) to be more maintainable 20141205
@@ -444,23 +446,31 @@ function PublicEndpoint () {
     var strategy = "alSummarization";
     headers['X-Summarization-Strategy'] = strategy;
 
+    URIs = query['urir'].split(",");
 
-    if (!query['urir'].match(/^[a-zA-Z]+:\/\//)) {
-      query['urir'] = 'http://' + query['urir'];
-    }// Prepend scheme if missing
+    if(URIs.length == 0)
+        URIs = [uri];
+
+    for (var i = 0; i < URIs.length; i++) {
+        if (!URIs[i].match(/^[a-zA-Z]+:\/\//)) {
+          URIs[i] = 'http://' + URIs[i];
+        }// Prepend scheme if missing
+    }
 
     headers['Content-Type'] = 'application/json';//'text/html'
     response.writeHead(200, headers);
 ;
     ConsoleLogIfRequired('New client request urir: ' + query['urir'] + '\r\n> Primesource: ' + query.primesource + '\r\n> Strategy: ' + strategy);
 
-    if (!validator.isURL(query['urir'])) { // Return "invalid URL"
-      console.log(query['urir']);
-      consoleLogJSONError('Invalid URI');
-      //response.writeHead(200, headers);
-      response.write('Invalid urir \r\n');
-      response.end();
-      return;
+    for (var i = 0; i < URIs.length; i++) {
+        if (!validator.isURL(URIs[i])) { // Return "invalid URL"
+          console.log(query['urir']);
+          consoleLogJSONError('Invalid URI');
+          //response.writeHead(200, headers);
+          response.write('Invalid urir \r\n');
+          response.end();
+          return;
+        }
     }
 
     function consoleLogJSONError (str) {
@@ -528,15 +538,20 @@ function PublicEndpoint () {
               constructSSE('cached simhashes exist, proceeding with cache...',request.headers["x-my-curuniqueusersessionid"]);
               constructSSE("percentagedone-15",request.headers["x-my-curuniqueusersessionid"]);
 
-              if(response.thumbnails['from'] == 0 && t.role == "histogram")
+              if(response.thumbnails['from'] != 0 && t.role == "stats")
               {
                 cacheFile.deleteCacheFile();
                 getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
+              }else if(dateRange && t.role == "histogram"){
+                cacheFile.deleteCacheFile();
+                dateRange = false;
+                 getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
               }else{
                 processWithFileContents(query['urir'], data, response,request.headers["x-my-curuniqueusersessionid"]);
                 if(response.thumbnails['from'] != 0 && t.role == "summary")
                 {
                   cacheFile.deleteCacheFile();
+                  dateRange = false;
                 }
               }
             }
@@ -809,6 +824,41 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,callback) 
     req.end();
 }
 
+//Determines if the uri type is URI-R, URI-M, URI-TM in order set appropriate host and path
+function determineURIType (uri, response)
+{
+  var returnValue = {};
+
+  if(uri.indexOf('web.archive.org/web/timemap/link/') > -1){
+      returnValue.host = 'web.archive.org';
+      returnValue.path = uri;
+    }else if(uri.indexOf('wayback.archive-it.org') > -1 && uri.indexOf('/timemap/link/') > -1){
+      returnValue.host = 'wayback.archive-it.org';
+      returnValue.path = uri.split("wayback.archive-it.org")[1];
+    }else if(response.thumbnails['primesource']=="archiveit"){
+       returnValue.host = 'wayback.archive-it.org';
+       returnValue.path = '/'+response.thumbnails['collectionidentifier']+'/timemap/link/' + uri;
+    }
+    else if(response.thumbnails['primesource']=="internetarchive"){
+        returnValue.host = 'web.archive.org';
+        returnValue.path = '/web/timemap/link/' + uri;
+    }else { // must contain the Host and Path for Memento Aggregator
+      ConsoleLogIfRequired("Haven't given the Memgators Host and Path yet");
+      returnValue.host = "";
+      returnValue.path = "";
+      return;
+    }
+
+    return returnValue; 
+}
+
+function dateSort(a,b)
+{
+	var dateA = new Date(a["datetime"].split(",")[1]);
+	var dateB = new Date(b["datetime"].split(",")[1]);
+	return dateA - dateB;
+}
+
 /**
 * Given a URI, return a TimeMap from the Memento Aggregator
 * TODO: God function that does WAY more than simply getting a timemap
@@ -827,158 +877,161 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 
   var timemapHost = 'wayback.archive-it.org';
   var timemapPath = '/'+response.thumbnails['collectionidentifier']+'/timemap/link/' + uri;
-  if(uri.indexOf('web.archive.org/web/timemap/link/') > -1){
-    timemapHost = 'web.archive.org';
-    timemapPath = uri;
-  }else if(uri.indexOf('wayback.archive-it.org') > -1 && uri.indexOf('/timemap/link/') > -1){
-    timemapHost = 'wayback.archive-it.org';
-    timemapPath = uri.split("wayback.archive-it.org")[1];
-  }else if(response.thumbnails['primesource']=="archiveit"){
-     timemapHost = 'wayback.archive-it.org';
-     timemapPath = '/'+response.thumbnails['collectionidentifier']+'/timemap/link/' + uri;
-  }
-  else if(response.thumbnails['primesource']=="internetarchive"){
-      timemapHost = 'web.archive.org';
-      timemapPath = '/web/timemap/link/' + uri;
-  }else { // must contain the Host and Path for Memento Aggregator
-    ConsoleLogIfRequired("Haven't given the Memgators Host and Path yet");
-    return;
-  }
+
+  var URIs = [];
+  URIs = uri.split(",");
+
+  if(URIs.length == 0)
+    URIs = [uri];
 
 
-  var options = {
-    'host': timemapHost,
-    'path': timemapPath,
-    'port': 80,
-    'method': 'GET'
-  }
-
-  ConsoleLogIfRequired('Path: ' + options.host + options.path)
   var buffer = ''; // An out-of-scope string to save the Timemap string, TODO: better documentation
   var t;
   var retStr = '';
   var metadata = '';
+  var timeMapLoaded = 0;
 
   ConsoleLogIfRequired('Starting many asynchronous operationsX...');
   async.series([
     // TODO: define how this is different from the getTimemap() parent function (i.e., some name clarification is needed)
     // TODO: abstract this method to its callback form. Currently, this is reaching and populating the timemap out of scope and can't be simply isolated (I tried)
     function fetchTimemap (callback) {
-      constructSSE('Http Request made to fetch the timemap...',curCookieClientId);
 
-      var req = http.request(options, function (res) {
-         ConsoleLogIfRequired("--ByMahee-- Inside the http request call back success, request is made on the following obect:")
-        constructSSE('streamingStarted',curCookieClientId)
+      	for(var i in URIs)
+        {
 
-        constructSSE('Fetching the Timemap and writing the data response into buffer..',curCookieClientId)
-        // ConsoleLogIfRequired(options);
-        // ConsoleLogIfRequired("----------------");
-        res.setEncoding('utf8')
+        	var returnVal = determineURIType(URIs[i], response);
+          	timemapHost = returnVal.host;
+          	timemapPath = returnVal.path;
 
-        res.on('data', function (data) {
-          buffer += data.toString()
-        });
+          	var options = {
+            	'host': timemapHost,
+            	'path': timemapPath,
+            	'port': 80,
+            	'method': 'GET'
+          	}
+          	constructSSE('Http Request made to fetch the timemap...',curCookieClientId);
+        
+          	var req = http.request(options, function (res) {
+	          	ConsoleLogIfRequired("--ByMahee-- Inside the http request call back success, request is made on the following obect:")
+	          	constructSSE('streamingStarted',curCookieClientId)
+	        
+	          	constructSSE('Fetching the Timemap and writing the data response into buffer..',curCookieClientId)
+	          	// ConsoleLogIfRequired(options);
+	          	// ConsoleLogIfRequired("----------------");
+	          	res.setEncoding('utf8')
+	        
+	          	res.on('data', function (data) {
+	            	buffer += data.toString()
+	          	});
+	        
+	          	res.on('end', function (d) {
+	        
+		            //  ConsoleLogIfRequired("Data Response from fetchTimeMap:" + buffer)
+		            if(timeMapLoaded == URIs.length-1)
+		            {
+		              	if (buffer.length > 100) {  // Magic number = arbitrary, has be quantified for correctness
+		                           
+			                //ConsoleLogIfRequired('Timemap acquired for ' + uri + ' from ' + timemapHost + timemapPath);
+			                // ConsoleLogIfRequired("-----------ByMahee--------");
+			                // ConsoleLogIfRequired(buffer);
+			                // ConsoleLogIfRequired("-----------ByMahee--------");
+			                           
+			                t = new TimeMap(buffer);
+			                t.originalURI = uri ;// Need this for a filename for caching
+			                t.primesource = response.thumbnails['primesource'];
+			                t.collectionidentifier = response.thumbnails['collectionidentifier'];
+			                t.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
+			                t.role = response.thumbnails['role'];
+			                           
+			                t.createMementos(); // the place where all the mementos are generated
+			                ConsoleLogIfRequired("-- ByMahee -- Mementos are created by this point, following is the whole timeMap Object");
+			                //ConsoleLogIfRequired(t);
+			                ConsoleLogIfRequired("---------------------------------------------------");
+			                           
+			                if (t.mementos.length === 0) {
+			                  ConsoleLogIfRequired('There were no mementos for ' + uri + ' :(');
+			                  response.write('There were no mementos for ' + uri + ' :(');
+			                  response.end();
+			                  return;
+		                	}
+		                           
+		                	var originalMemetosLengthFromTM = t.mementos.length;
+		                    // code segment to consider only last 5000 mementos for the huge TimeMaps
+		                	if(t.mementos.length > 5000){
+			                  	var tempMemetoArr=[];
+			                  	var tempStackOfMementos = new Stack();
+			                  	var numOfMementosToConsider = 5000; // only latest 1000 mementos are considered
+			                  	for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--){
+			                    	tempStackOfMementos.push(t.mementos[i]);
+			                  	}
+			                  	for(var i=0;i< numOfMementosToConsider; i++){
+			                    	tempMemetoArr.push(tempStackOfMementos.pop());
+			                  	}
+			                  	constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']',curCookieClientId);
+			                  	ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']');
+			                  	tempMemetoArr[0]["rel"] = "first memento";
+			                  	t.mementos = tempMemetoArr;
+			                  	ConsoleLogIfRequired("-----------Mementos under consideration, Length -> "+t.mementos.length +"  -------");
+			                  	ConsoleLogIfRequired(JSON.stringify(t.mementos));
+			                  	ConsoleLogIfRequired("---------------------------------------------------");
+		                	}
+		                    if(URIs.length > 1)
+		                    	t.mementos.sort(dateSort);
 
-        res.on('end', function (d) {
-
-        //  ConsoleLogIfRequired("Data Response from fetchTimeMap:" + buffer)
-
-          if (buffer.length > 100) {  // Magic number = arbitrary, has be quantified for correctness
-
-            //ConsoleLogIfRequired('Timemap acquired for ' + uri + ' from ' + timemapHost + timemapPath);
-            // ConsoleLogIfRequired("-----------ByMahee--------");
-            // ConsoleLogIfRequired(buffer);
-            // ConsoleLogIfRequired("-----------ByMahee--------");
-
-            t = new TimeMap(buffer);
-            t.originalURI = uri ;// Need this for a filename for caching
-            t.primesource = response.thumbnails['primesource'];
-            t.collectionidentifier = response.thumbnails['collectionidentifier'];
-            t.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
-            t.role = response.thumbnails['role'];
-
-            t.createMementos(); // the place where all the mementos are generated
-            ConsoleLogIfRequired("-- ByMahee -- Mementos are created by this point, following is the whole timeMap Object");
-            //ConsoleLogIfRequired(t);
-            ConsoleLogIfRequired("---------------------------------------------------");
-
-            if (t.mementos.length === 0) {
-              ConsoleLogIfRequired('There were no mementos for ' + uri + ' :(');
-              response.write('There were no mementos for ' + uri + ' :(');
-              response.end();
-                return;
-            }
-
-           var originalMemetosLengthFromTM = t.mementos.length;
-            // code segment to consider only last 5000 mementos for the huge TimeMaps
-           if(t.mementos.length > 5000){
-               var tempMemetoArr=[];
-               var tempStackOfMementos = new Stack();
-               var numOfMementosToConsider = 5000; // only latest 1000 mementos are considered
-               for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--){
-                   tempStackOfMementos.push(t.mementos[i]);
-               }
-               for(var i=0;i< numOfMementosToConsider; i++){
-                   tempMemetoArr.push(tempStackOfMementos.pop());
-               }
-               constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']',curCookieClientId);
-               ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']');
-               tempMemetoArr[0]["rel"] = "first memento";
-               t.mementos = tempMemetoArr;
-               ConsoleLogIfRequired("-----------Mementos under consideration, Length -> "+t.mementos.length +"  -------");
-               ConsoleLogIfRequired(JSON.stringify(t.mementos));
-               ConsoleLogIfRequired("---------------------------------------------------");
-            }
-
-            if(response.thumbnails['from'] != 0) // if from date was given, filter mementos
-            {
-              t.mementos = t.filterMementosForDateRange(response);
-            }
-
-            if (t.mementos.length == 0) {
-              ConsoleLogIfRequired('There were no mementos in this date range:(');
-              response.write('There were no mementos in this date range');
-              response.end();
-                return;
-            }
-            ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.');
-            constructSSE('Timemap fetched has a total of '+t.mementos.length + ' mementos.',curCookieClientId);
-            constructSSE("percentagedone-20",curCookieClientId);
-            callback('');
-          }else{
-            ConsoleLogIfRequired('The page you requested has not been archived.');
-            constructSSE('The page requested has not been archived.',curCookieClientId);
-            constructSSE("percentagedone-100",curCookieClientId);
-             //process.exit(-1)
-             response.write('The page you requested has not been archived.',);
-             response.end();
-             return;
-          }
-        });
-      });
-
-      req.on('error', function (e) { // Houston...
-        ConsoleLogIfRequired('problem with request: ' + e.message);
-        ConsoleLogIfRequired(e);
-        if (e.message === 'connect ETIMEDOUT') { // Error experienced when IA went down on 20141211
-          ConsoleLogIfRequired('Hmm, the connection timed out. Internet Archive might be down.');
-          constructSSE('the connection timed out, prime source of archive might be down.',curCookieClientId);
-
-          response.write('Hmm, the connection timed out. Internet Archive might be down.');
-          response.end();
-            return;
-        }
-      })
-
-      req.on('socket', function (socket) { // Slow connection is slow
-        /*socket.setTimeout(3000)
-        socket.on('timeout', function () {
-          ConsoleLogIfRequired("The server took too long to respond and we're only getting older so we aborted.")
-          req.abort()
-        }) */
-      })
-
-      req.end();
+			                if(response.thumbnails['from'] != 0) // if from date was given, filter mementos
+			                {
+			                    t.mementos = t.filterMementosForDateRange(response);
+			                }
+		                           
+			                if (t.mementos.length == 0) {
+			                    ConsoleLogIfRequired('There were no mementos in this date range:(');
+			                    response.write('There were no mementos in this date range');
+			                    response.end();
+			                    return;
+			                }
+		                    ConsoleLogIfRequired('Fetching HTML for ' + t.mementos.length + ' mementos.');
+		                    constructSSE('Timemap fetched has a total of '+t.mementos.length + ' mementos.',curCookieClientId);
+		                    constructSSE("percentagedone-20",curCookieClientId);
+		                    callback('');
+		                }else{
+		                    ConsoleLogIfRequired('The page you requested has not been archived.');
+		                    constructSSE('The page requested has not been archived.',curCookieClientId);
+		                    constructSSE("percentagedone-100",curCookieClientId);
+		                    //process.exit(-1)
+		                    response.write('The page you requested has not been archived.',);
+		                    response.end();
+		                    return;
+		                }
+		            } else {
+		                timeMapLoaded++;
+		        	}
+	        	});
+            });
+        
+            req.on('error', function (e) { // Houston...
+                ConsoleLogIfRequired('problem with request: ' + e.message);
+                ConsoleLogIfRequired(e);
+                if (e.message === 'connect ETIMEDOUT') { // Error experienced when IA went down on 20141211
+                	ConsoleLogIfRequired('Hmm, the connection timed out. Internet Archive might be down.');
+                    constructSSE('the connection timed out, prime source of archive might be down.',curCookieClientId);
+        
+                    response.write('Hmm, the connection timed out. Internet Archive might be down.');
+                    response.end();
+                    return;
+                }
+            })
+        
+            req.on('socket', function (socket) { // Slow connection is slow
+                /*socket.setTimeout(3000)
+                socket.on('timeout', function () {
+                	ConsoleLogIfRequired("The server took too long to respond and we're only getting older so we aborted.")
+                	req.abort()
+                }) */
+            })
+        
+            req.end();
+      	}
     },
 
     //ByMahee -- commented out some of the methods called to build step by step
@@ -1237,6 +1290,7 @@ TimeMap.prototype.getDatesForHistogram = function (callback,response,curCookieCl
 */
 TimeMap.prototype.filterMementosForDateRange = function(response)
 {
+  dateRange = true;
   var theFromDate = new Date(response.thumbnails['from']);
   var theToDate = new Date(response.thumbnails['to']);
 
@@ -1753,6 +1807,7 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieC
 async function headless(uri,filepath) {
     const browser = await puppeteer.launch({
         ignoreHTTPSErrors: true,
+        executablePath: 'google-chrome',
           args: ['--no-sandbox']
         // headless: false,
     });
