@@ -388,14 +388,32 @@ body{
 	position: relative;
 }
 
+.refresh_button{
+	float: right;
+	transform: translate(-140%, -955%);
+	font-size: 15px;
+	padding: .2px 4.5px .8px 4.5px;
+	border: none;
+	cursor: pointer;
+	border-radius: 30px;
+	background-color: #c7c7c7;
+	color: white;
+	opacity: .8;
+}
+
+.refresh_button:hover {
+	background-color: #555;
+}
+
 .button_container .on{
-	opacity: 1;
+	opacity: .8;
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	transform: translate(565%, -632%);
-	font-size: 13px;
-	padding: 1px 6.5px 1.7px 7px;
+	transform: translate(580%, -580%);
+	font-size: 16px;
+	font-weight: bolder;
+	padding: 0px 6px .8px 6.9px;
 	border: none;
 	cursor: pointer;
 	border-radius: 30px;
@@ -413,9 +431,10 @@ body{
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	transform: translate(565%, -632%);
-	font-size: 13px;
-	padding: 1px 6.5px 1.7px 7px;
+	transform: translate(580%, -580%);
+	font-size: 16px;
+	font-weight: bolder;
+	padding: 0px 6px .8px 6.9px;
 	border: none;
 	cursor: pointer;
 	border-radius: 30px;
@@ -424,7 +443,7 @@ body{
 }
 
 .button_container .off:hover {
-  background-color: #878787;
+  background-color: #555;
 }
 
 #updateMementos{ 

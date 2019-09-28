@@ -1600,6 +1600,22 @@ $(function(){
             console.log(mementosToRemove);
         });
     });
+    $(document).ready(function () {
+        $(document).on("click",".refresh_button", function(){
+            if(!($(this).find("i").hasClass('fa-spin')))
+            {
+                $(this).find("i").addClass('fa-spin');
+                /*$(this).removeClass('off');
+                this.parentElement.style.opacity = '.3';
+                mementosToRemove.push($(this).parent().find("img").attr("src"));*/
+            }
+            else
+            {
+                $(this).find("i").removeClass('fa-spin');
+            }
+            console.log(mementosToRemove);
+        });
+    });
 
     $("#updateMementos").click(function(event){
 
