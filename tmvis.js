@@ -89,6 +89,7 @@ var Stack = require('stackjs');
 
 var URIs = [];
 var dateRange = false;
+var fullTimemap = new TimeMap(); 
 //return
 /* *******************************
    TODO: reorder functions (main first) to be more maintainable 20141205
@@ -538,22 +539,7 @@ function PublicEndpoint () {
               constructSSE('cached simhashes exist, proceeding with cache...',request.headers["x-my-curuniqueusersessionid"]);
               constructSSE("percentagedone-15",request.headers["x-my-curuniqueusersessionid"]);
 
-              if(response.thumbnails['from'] != 0 && t.role == "stats")
-              {
-                cacheFile.deleteCacheFile();
-                getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
-              }else if(dateRange && t.role == "histogram"){
-                cacheFile.deleteCacheFile();
-                dateRange = false;
-                 getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
-              }else{
-                processWithFileContents(query['urir'], data, response,request.headers["x-my-curuniqueusersessionid"]);
-                if(response.thumbnails['from'] != 0 && t.role == "summary")
-                {
-                  cacheFile.deleteCacheFile();
-                  dateRange = false;
-                }
-              }
+              processWithFileContents(query['urir'], data, response,request.headers["x-my-curuniqueusersessionid"]);
             }
 
         },
@@ -570,9 +556,30 @@ function PublicEndpoint () {
   }
 }
 
-
-
-
+function writeFullTimemapToCache(curCookieClientId){
+  async.series([
+    function(callback){
+      fullTimemap.calculateSimhashes(curCookieClientId,callback);
+    },
+    function(callback){
+      fullTimemap.saveSimhashesToCache(callback);
+    },
+    function(callback){
+      fullTimemap.writeJSONToCache(callback);
+    }
+  ],
+    function (err, result) {
+      if (err) {
+        console.log('ERROR!');
+        console.log(err);
+      } else {
+        dateRange = false;
+        console.log('There were no errors executing the callback chain');
+        ConsoleLogIfRequired(fullTimemap);
+      }
+    }
+  );
+}
 
 /**
 * Delete all derived data including caching and screenshot - namely for testing
@@ -613,7 +620,12 @@ function processWithFileContents (uri, fileContents, response,curCookieClientId)
   /* ByMahee -- unnessessary for the current need
   t.printMementoInformation(response, null, false) */
 
-  if(t.mementos.simhash === 'undefined' ){
+  if(!dateRange && response.thumbnails['from'] != 0)
+  {
+    t.mementos = t.filterMementosForDateRange(response);
+  }
+
+  if((dateRange && (t.role == "histogram" || t.role == "stats")) || t.mementos.simhash === 'undefined'){
     getTimemapGodFunctionForAlSummarization(uri, response,curCookieClientId);
   }
   else
@@ -981,6 +993,15 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 
 			                if(response.thumbnails['from'] != 0) // if from date was given, filter mementos
 			                {
+                          fullTimemap = new TimeMap(buffer);
+                          fullTimemap.originalURI = uri ;
+                          fullTimemap.primesource = response.thumbnails['primesource'];
+                          fullTimemap.collectionidentifier = response.thumbnails['collectionidentifier'];
+                          fullTimemap.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
+                          fullTimemap.role = response.thumbnails['role'];   
+                          fullTimemap.createMementos();
+                          dateRange = true;
+
 			                    t.mementos = t.filterMementosForDateRange(response);
 			                }
 		                           
@@ -1094,8 +1115,10 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
     function (callback) {
         if(isToComputeBoth){
           if ( t.role == "histogram") {callback('');}
-          else
+          else {
+            if(dateRange){writeFullTimemapToCache(curCookieClientId);}
             t.createScreenshotsForMementos(curCookieClientId,response,callback);
+          }
         }
         else if (callback) {
           callback('');
@@ -1290,7 +1313,6 @@ TimeMap.prototype.getDatesForHistogram = function (callback,response,curCookieCl
 */
 TimeMap.prototype.filterMementosForDateRange = function(response)
 {
-  dateRange = true;
   var theFromDate = new Date(response.thumbnails['from']);
   var theToDate = new Date(response.thumbnails['to']);
 
