@@ -1,6 +1,7 @@
 var jsonObjRes = {};
 var histoData = {};
 var mementosToRemove = [];
+var displayedMementos = [];
 var curURIUnderFocus=null;
 var curDeepLinkStateArr=[];
 var curUniqueUserSessionID = null;
@@ -629,20 +630,20 @@ var generateAllClicked = false;
             $('.argumentsForm #hammingdistanceValue').html(hammingDistance);
             $('.argumentsForm .primesrcsection input[type=radio][value='+ curDeepLinkStateArr[1] +']').prop("checked",true).trigger("click");
             if(curDeepLinkStateArr.length > 6){
-		      console.log(curDeepLinkStateArr);
-		      var from = curDeepLinkStateArr[6].substring(0,4)+"-"+curDeepLinkStateArr[6].substring(4,6)+"-"+curDeepLinkStateArr[6].substring(6,8);
-		      var to = curDeepLinkStateArr[7].substring(0,4)+"-"+curDeepLinkStateArr[7].substring(4,6)+"-"+curDeepLinkStateArr[7].substring(6,8);
-		      
-			  var theDateRange = "Requested Date Range: " + from + " - " + to;
-			  $(".statsWrapper .Memento_Date_Range").html(theDateRange);
+              console.log(curDeepLinkStateArr);
+              var from = curDeepLinkStateArr[6].substring(0,4)+"-"+curDeepLinkStateArr[6].substring(4,6)+"-"+curDeepLinkStateArr[6].substring(6,8);
+              var to = curDeepLinkStateArr[7].substring(0,4)+"-"+curDeepLinkStateArr[7].substring(4,6)+"-"+curDeepLinkStateArr[7].substring(6,8);
+              
+              var theDateRange = "Requested Date Range: " + from + " - " + to;
+              $(".statsWrapper .Memento_Date_Range").html(theDateRange);
               
               if(curDeepLinkStateArr[4] == "stats"){
-			    getDateRangeStats(from, to);
+                getDateRangeStats(from, to);
               } else {
                 getDateRangeSummary(from, to);
               }
 
-	        }else if(curDeepLinkStateArr[4] == "summary"){
+            }else if(curDeepLinkStateArr[4] == "summary"){
                 getSummary();
             }else if(curDeepLinkStateArr[4] == "stats"){
                 getStats();
@@ -862,20 +863,20 @@ function getHistoData(toDisplay){
                 document.getElementById("memento_limit").style.display = "block";
               }
               document.getElementById("histoWrapper").style.display = "block";
-	          var endPoint = histoData.length - 1;
+              var endPoint = histoData.length - 1;
 
-	          var fromYear = histoData[0].event_display_date.substring(0,4);
-	          var fromMonth = histoData[0].event_display_date.substring(5,7);
-	          var fromDate = histoData[0].event_display_date.substring(8,10);
+              var fromYear = histoData[0].event_display_date.substring(0,4);
+              var fromMonth = histoData[0].event_display_date.substring(5,7);
+              var fromDate = histoData[0].event_display_date.substring(8,10);
 
-	          var toYear = histoData[endPoint].event_display_date.substring(0,4);
-	          var toMonth = histoData[endPoint].event_display_date.substring(5,7);
-	          var toDate = histoData[endPoint].event_display_date.substring(8,10);
+              var toYear = histoData[endPoint].event_display_date.substring(0,4);
+              var toMonth = histoData[endPoint].event_display_date.substring(5,7);
+              var toDate = histoData[endPoint].event_display_date.substring(8,10);
 
-	          var fromDateStr= fromYear+"-"+fromMonth +"-"+fromDate;
-	          var toDateStr= toYear+"-"+toMonth +"-"+toDate;
-	          var dateRangeStr= fromDateStr + " - " + toDateStr;
-	          $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
+              var fromDateStr= fromYear+"-"+fromMonth +"-"+fromDate;
+              var toDateStr= toYear+"-"+toMonth +"-"+toDate;
+              var dateRangeStr= fromDateStr + " - " + toDateStr;
+              $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
               getHistogram(histoData);
               $(".modal-backdrop").remove();
               $('#serverStreamingModal').modal('hide');
@@ -926,7 +927,7 @@ function getStats(){
       $("#busy-loader").show();
       $('#serverStreamingModal .logsContent').empty();
       $('#logtab .logsContent').empty();
-	  var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
+      var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
       history.pushState({},"Stats State",path);
       $('#serverStreamingModal').modal('show');
       $.ajax({
@@ -1265,6 +1266,7 @@ function getSummary(){
                   }
               });
               console.log(jsonObjRes);
+              displayedMementos = JSON.parse(JSON.stringify(jsonObjRes)); // create deep copy of mementos
               drawImageGrid(jsonObjRes); // calling Image Grid Function here
               drawImageSlider(jsonObjRes);
               getImageArray(); //calling GIF function
@@ -1303,7 +1305,7 @@ function getSummary(){
 }
 
 function getDateRangeSummary(from,to){
-	
+    
   // Remove histogram
   document.getElementById("histoWrapper").style.display = "none";
     
@@ -1403,13 +1405,14 @@ function getDateRangeSummary(from,to){
                   }
               });
               console.log(jsonObjRes);
+              displayedMementos = JSON.parse(JSON.stringify(jsonObjRes)); // create deep copy of mementos
               drawImageGrid(jsonObjRes); // calling Image Grid Function here
               drawImageSlider(jsonObjRes);
               getImageArray(); //calling GIF function
               generateMementoURIList(jsonObjRes);
               $(".modal-backdrop").remove();
               $('#serverStreamingModal').modal('hide');
-	      //localStorage.setItem("submitRangeClicked", "false");
+          //localStorage.setItem("submitRangeClicked", "false");
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
@@ -1548,7 +1551,7 @@ $(function(){
             getSummary(); // Otherwise, get the full time map
         }
     });
-	
+    
     $("#submitRange").click(function(event){
         //localStorage.setItem("submitRangeClicked,"true");
         var fromBox = document.getElementById("fromInput").defaultValue;
@@ -1597,29 +1600,33 @@ $(function(){
                 var found_it = mementosToRemove.indexOf($(this).parent().find("img").attr("src"));
                 mementosToRemove.splice(found_it,1);
             }
-            console.log(mementosToRemove);
         });
     });
+
     $(document).ready(function () {
         $(document).on("click",".refresh_button", function(){
             if(!($(this).find("i").hasClass('fa-spin')))
             {
                 $(this).find("i").addClass('fa-spin');
-                /*$(this).removeClass('off');
-                this.parentElement.style.opacity = '.3';
-                mementosToRemove.push($(this).parent().find("img").attr("src"));*/
+                //Refresh function to be created
+                var button = $(this).find("i");
+                var refreshLink = $(this).parent().find("a").attr("href");
+                var refreshImg = $(this).parent().find("img").attr("src");
+                console.log(refreshLink);
+                console.log(refreshImg);
+                refreshMemento(refreshLink, refreshImg, button);
             }
             else
             {
                 $(this).find("i").removeClass('fa-spin');
             }
-            console.log(mementosToRemove);
         });
     });
 
     $("#updateMementos").click(function(event){
 
-        var chosenMementos = JSON.parse(JSON.stringify(jsonObjRes));
+        // choose mementos form list of those currently displayed
+        var chosenMementos = JSON.parse(JSON.stringify(displayedMementos));
 
         //upon button click images marked for deletion must be removed
         //from array passed to functions
@@ -1642,6 +1649,10 @@ $(function(){
                     }
                 }
             }
+
+            // update list of displayed mementos with chosen mementos
+            displayedMementos = JSON.parse(JSON.stringify(chosenMementos));
+
             drawImageSlider(chosenMementos);
             drawImageGrid(chosenMementos);
             getImageArray();
@@ -1659,6 +1670,9 @@ $(function(){
         drawImageGrid(jsonObjRes);
         getImageArray();
         generateMementoURIList(jsonObjRes);
+
+        // reset list of displayed mementos
+        displayedMementos = JSON.parse(JSON.stringify(jsonObjRes));
     });
 
     $(document).on("click","button[name=thresholdDistance]",function(){
@@ -1761,6 +1775,44 @@ function updateDeepLinkStateArr() {
       return false;
     }
 
+}
+
+function refreshMemento(link, img, button)
+{
+
+    var path = "/refreshscreenshot?link="+link+"&img="+img;   
+    $.ajax({
+        type: "GET",
+        url: path, // uncomment this for deployment
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+        },
+        dataType: "text",
+        timeout: 90000,
+        success: function(data, textStatus, jqXHR) {
+            try
+            {
+                drawImageSlider(displayedMementos);
+                drawImageGrid(displayedMementos);
+                getImageArray();
+                generateMementoURIList(displayedMementos);
+                button.removeClass('fa-spin');
+            }
+            catch(err){
+
+            }
+        },
+        error: function( data, textStatus, jqXHR, err) {
+            var errMsg = "Some problem fetching the response, Please refresh and try again.";
+            $("#busy-loader").hide();
+            $('#serverStreamingModal').modal('hide');
+            /*console.log("readyState: " + jqXHR.readyState);
+            console.log("responseText: "+ jqXHR.responseText);
+            console.log("status: " + jqXHR.status);
+            console.log("text status: " + textStatus);
+            console.log("error: " + err);*/
+        }
+    });
 }
 
 // Validates that the input string is a valid date formatted as "mm/dd/yyyy"

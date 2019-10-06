@@ -370,6 +370,12 @@ body{
 	margin-top: 25px;
 }
 
+#zoom_histogram{
+	width: 700px;
+	display: inline-block;
+	margin: -27px 0px 0px 20px;
+}
+
 .dateTitle{
 	display: inline-block;
 	margin: 10px 10px 0px 20px;
@@ -593,12 +599,15 @@ body{
 #memento_limit{
 	margin-left: 11%;
 	font-size: 13px;
+	display: inline-block;
+	position: relative;
+	transform: translate(-10px, -30px);
 }
 
 #brush_clear{
 	position: relative;
-	display: block;
-	transform: translate(870%, -45%);
+	display: inline-block;
+	transform: translate(880%, -40%);
 	padding: 4px;
 	border-radius: 3px;
 	font-size: 13px;
