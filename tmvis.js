@@ -187,6 +187,11 @@ function main () {
           response.end();
     });
 
+  //For individual memento refresh
+   app.get('/refreshscreenshot', (request, response) => {
+          refreshMemento(request, response);
+    });
+
     //that a work around to clear the streaming realted cache
      app.get('/clearstreamhash', (request, response) => {
             var headers = {}
@@ -230,6 +235,55 @@ function main () {
   });
 
 
+}
+
+//retake screenshot
+function refreshMemento(request, response) {
+  var headers = {}
+  // IE8 does not allow domains to be specified, just the *
+  // headers['Access-Control-Allow-Origin'] = req.headers.origin
+  headers['Access-Control-Allow-Origin'] = '*';
+  headers['Access-Control-Allow-Methods'] = 'GET';
+  headers['Access-Control-Allow-Credentials'] = false;
+  headers['Access-Control-Max-Age'] = '86400';  // 24 hours
+  headers['Access-Control-Allow-Headers'] = 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Accept-Datetime';
+  headers['Content-Type'] = 'text/html'; // text/html
+
+  var curCookieClientId = request.headers["x-my-curuniqueusersessionid"];
+  var mementoURI = request.query.link;
+  var file = request.query.img;
+  file = file.split("static/")[1];
+
+  var memento = {screenshotURI: file, uri: mementoURI};
+
+  console.log("File: "+file);
+  console.log("URI: "+mementoURI);
+
+  try{
+    fs.unlink(screenshotsLocation+file,function(){});
+    var tempTimemap = new TimeMap();
+
+    async.series([
+      function(callback){
+        tempTimemap.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,true,callback);
+      },
+      function(callback){
+        response.writeHead(200, headers);
+        response.end();
+        callback();
+      }
+    ], 
+      function(err){
+        if(err){
+          console.log("Error: "+err);
+          response.writeHead(405,headers);
+          response.end();
+        }
+      }
+    );
+  } catch(e){
+    response.writeHead(405,headers);
+  }
 }
 
 
@@ -1690,7 +1744,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
     1,function( memento,callback){
       ConsoleLogIfRequired('************curCookieClientId just before calling  createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'************');
-      self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback);
+      self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,false,callback);
       //self.createScreenshotForMementoWithPhantom(curCookieClientId,memento,callback)
       completedScreenshotCaptures++;
       var value = ((completedScreenshotCaptures/noOfThumbnailsSelectedToBeCaptured)*80)+5;
@@ -1749,7 +1803,7 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (curCookieCl
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
     1,
     function( memento,callback){
-      self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,callback);
+      self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,false,callback);
       //self.createScreenshotForMementoWithPhantom(curCookieClientId,memento,callback)
     },
 
@@ -1768,7 +1822,7 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (curCookieCl
 
 
 // createScreenshotForMemento through puppeteer
-TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieClientId,memento,callback) {
+TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieClientId,memento,refreshMemento,callback) {
   var uri = memento.uri
   ConsoleLogIfRequired('********** curCookieClientId in createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'***************');
 
@@ -1805,7 +1859,7 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieC
   constructSSE('Starting screenshot generation process for -> ' + uri,curCookieClientId);
   constructSSE('...',curCookieClientId);
 
-  headless(uri, screenshotsLocation + filename).then(v => {
+  headless(uri, screenshotsLocation + filename, refreshMemento).then(v => {
       // Once all the async parts finish this prints.
       console.log("Finished Headless");
       constructSSE('Done capturing the screenshot.',curCookieClientId)
@@ -1822,11 +1876,11 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieC
         });
 
       ConsoleLogIfRequired('t=' + (new Date()).getTime() + ' ' + 'Screenshot created for ' + uri);
-      callback();
+      if(callback){callback();}
   });
 }
 
-async function headless(uri,filepath) {
+async function headless(uri,filepath,refreshMemento) {
     const browser = await puppeteer.launch({
         ignoreHTTPSErrors: true,
         executablePath: 'google-chrome',
@@ -1841,6 +1895,13 @@ async function headless(uri,filepath) {
         },
         userAgent: "memento-damage research ODU <@WebSciDL>",
     });
+
+    var wait;
+    if(refreshMemento){
+      wait = 'networkidle0'
+    } else {
+      wait = 'domcontentloaded'
+    }
 
     try {
         // track failed responses ~ Security blocks, etc.
@@ -1858,7 +1919,7 @@ async function headless(uri,filepath) {
 
         // timeout at 5 minutes (5 * 60 * 1000ms), wait until all dom content is loaded
         await page.goto(uri, {
-            waitUntil: 'domcontentloaded',
+            waitUntil: wait,
             timeout: 5000000,
         });
 
