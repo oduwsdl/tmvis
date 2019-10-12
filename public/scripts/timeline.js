@@ -1865,6 +1865,7 @@ function isValidDate(dateString)
         console.log("out of range");
         return false;
     }
+    
     // Check the range of the day
     return day > 0 && day <= monthLength[month];
 };
