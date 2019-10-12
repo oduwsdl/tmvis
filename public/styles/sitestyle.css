@@ -371,9 +371,9 @@ body{
 }
 
 #zoom_histogram{
-	width: 700px;
 	display: inline-block;
-	margin: -27px 0px 0px 20px;
+	width: 700px;
+	margin: 0px 0px 0px 0px;
 }
 
 .dateTitle{
@@ -607,7 +607,7 @@ body{
 #brush_clear{
 	position: relative;
 	display: inline-block;
-	transform: translate(880%, -40%);
+	transform: translate(160%, -125%);
 	padding: 4px;
 	border-radius: 3px;
 	font-size: 13px;
