@@ -20,8 +20,8 @@ function getHistogram(dateArray){
 	    d.date = parseDate(d.event_display_date);
 	});
 
+	// grab to and from dates
 	var fromDateString = data[0].event_display_date.substring(0,10);
-
 	var toDateString = data[data.length - 1].event_display_date.substring(0,10);
 
 	// get the domain
@@ -29,11 +29,15 @@ function getHistogram(dateArray){
 	var to = new Date(toDateString);
 	
 	// set the ranges
+
+	// for main histogram
 	var x = d3.scaleTime()
 		  .domain([from, to])
 		  .rangeRound([0, width]);
 	var y = d3.scaleLinear()
 		  .range([height, 0]);
+
+	// for zoomable histogram
 	var y2 = d3.scaleLinear()
 		  .range([height2, 0]);
 	var x2 = d3.scaleTime()
@@ -46,6 +50,7 @@ function getHistogram(dateArray){
 	    .domain(x.domain())
 	    .thresholds(x.ticks(d3.timeMonth));
 
+	// For main histogram
 	// append the svg object to the body of the page
 	// append a 'group' element to 'svg'
 	// moves the 'group' element to the top left margin
@@ -55,11 +60,7 @@ function getHistogram(dateArray){
 	    .append("g")
 	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-	// create tooltip
-	var div = d3.select("body").append("div") 
-	    .attr("class", "tooltip")       
-	    .style("opacity", 0);
-
+	// For zoomable histogram 
 	// append the svg object to the body of the page
 	// append a 'group' element to 'svg'
 	// moves the 'group' element to the top left margin
@@ -68,6 +69,11 @@ function getHistogram(dateArray){
 	    .attr("height", height2 + margin.top + margin.bottom)
 	    .append("g")
 	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	// create tooltip
+	var div = d3.select("body").append("div") 
+	    .attr("class", "tooltip")       
+	    .style("opacity", 0);
 
 	// group the data for the bars
 	var bins = histogram(data);
@@ -131,16 +137,14 @@ function getHistogram(dateArray){
 				.style("opacity", 0); 
 	    });
 
-	var t;
-
 	// Append the brush
 	svg.append("g")
 	    .attr("class", "brush")
 	    .call(gBrush);
 
+	// Grab input boxes
 	var fromInput = d3.select("#fromInput");
 	var toInput = d3.select("#toInput");
-
 	fromInput.on("blur", updateBrush);
 	toInput.on("blur", updateBrush);
 
@@ -203,6 +207,7 @@ function getHistogram(dateArray){
 		document.getElementById("fromInput").value = formatDate(d1[0]);
 		document.getElementById("toInput").value = formatDate(d1[1]);
 
+		// Append tooltips on mouseover
 		zoomsvg.selectAll("rect")
 		 	.on("mouseover", function(d) {    
 		    	div .transition()    
@@ -249,6 +254,22 @@ function getHistogram(dateArray){
 			var total_selected = selectedBars(fromDate, toDate, total_selected);
 
 			d3.select("#selected_mementos").text("Mementos selected: " + total_selected);
+
+			// Append tooltips on mouseover
+			zoomsvg.selectAll("rect")
+			 	.on("mouseover", function(d) {    
+			    	div .transition()    
+						.duration(200)    
+						.style("opacity", .8);    
+			    	div .html("Number of Mementos: " + d.length + "<br/>" + d.x0.toString().substring(4,7) + " " + d.x0.toString().substring(11,15))  
+						.style("left", (d3.event.pageX) + "px")   
+						.style("top", (d3.event.pageY - 28) + "px");  
+			    })          
+		      	.on("mouseout", function(d) {   
+			    	div .transition()    
+						.duration(500)    
+						.style("opacity", 0);
+		       	});
 
 			total_selected = 0;
 		}
@@ -367,8 +388,6 @@ function getHistogram(dateArray){
 
 		var bars = zoomsvg.selectAll("rect")
 			.data(updatedata, function(d) { return d;});
-
-		console.log(bars);
 
 		bars.exit().remove();
 
