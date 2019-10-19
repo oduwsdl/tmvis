@@ -30,7 +30,7 @@
 * Maheedhar Gunnam <mgunn001@odu.edu>
 */
 
-var http = require('http');
+var http = require('follow-redirects/http');
 var express = require('express');
 var url = require('url');
 //var connect = require('connect');

@@ -13,6 +13,7 @@
     "cookie-parser": "^1.4.3",
     "es6-promise": "*",
     "express": "*",
+    "follow-redirects": "^1.9.0",
     "fs-extra": "*",
     "hashmap": "^2.3.0",
     "image-watermark": "0.0.7",
