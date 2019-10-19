@@ -20,8 +20,8 @@ function getHistogram(dateArray){
 	    d.date = parseDate(d.event_display_date);
 	});
 
+	// grab to and from dates
 	var fromDateString = data[0].event_display_date.substring(0,10);
-
 	var toDateString = data[data.length - 1].event_display_date.substring(0,10);
 
 	// get the domain
@@ -29,11 +29,15 @@ function getHistogram(dateArray){
 	var to = new Date(toDateString);
 	
 	// set the ranges
+
+	// for main histogram
 	var x = d3.scaleTime()
 		  .domain([from, to])
 		  .rangeRound([0, width]);
 	var y = d3.scaleLinear()
 		  .range([height, 0]);
+
+	// for zoomable histogram
 	var y2 = d3.scaleLinear()
 		  .range([height2, 0]);
 	var x2 = d3.scaleTime()
@@ -46,6 +50,7 @@ function getHistogram(dateArray){
 	    .domain(x.domain())
 	    .thresholds(x.ticks(d3.timeMonth));
 
+	// For main histogram
 	// append the svg object to the body of the page
 	// append a 'group' element to 'svg'
 	// moves the 'group' element to the top left margin
@@ -55,6 +60,7 @@ function getHistogram(dateArray){
 	    .append("g")
 	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+	// For zoomable histogram 
 	// append the svg object to the body of the page
 	// append a 'group' element to 'svg'
 	// moves the 'group' element to the top left margin
@@ -63,6 +69,11 @@ function getHistogram(dateArray){
 	    .attr("height", height2 + margin.top + margin.bottom)
 	    .append("g")
 	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	// create tooltip
+	var div = d3.select("body").append("div") 
+	    .attr("class", "tooltip")       
+	    .style("opacity", 0);
 
 	// group the data for the bars
 	var bins = histogram(data);
@@ -111,106 +122,31 @@ function getHistogram(dateArray){
 			return "translate(" + x2(d.x0) + "," + y2(d.length) + ")"; 
 		})
 	    .attr("width", function(d) { return x2(d.x1) - x2(d.x0) -1 ; })
-	    .attr("height", function(d) { return height2 - y2(d.length); });
-
-	var t;
+	    .attr("height", function(d) { return height2 - y2(d.length); })
+	    .on("mouseover", function(d) {    
+		    div	.transition()    
+				.duration(200)    
+				.style("opacity", .8);    
+		    div .html("Number of Mementos: " + d.length + "<br/>" + d.x0.toString().substring(4,7) + " " + d.x0.toString().substring(11,15))  
+				.style("left", (d3.event.pageX) + "px")   
+				.style("top", (d3.event.pageY - 28) + "px");  
+		})          
+	    .on("mouseout", function(d) {   
+		    div .transition()    
+				.duration(500)    
+				.style("opacity", 0); 
+	    });
 
 	// Append the brush
 	svg.append("g")
 	    .attr("class", "brush")
 	    .call(gBrush);
 
-	const tooltip = svg.append("g")
-		.attr("width", 6)
-	    .attr("height", 5)
-    	.attr("class", "tooltip")
-    	.style("z-index", 1000)
-    	.style("display", "block");
-
-  	tooltip.append("rect")
-	    .attr("width", 5)
-	    .attr("height", 4)
-	    .attr("fill", "red")
-	    .style("display", "block")
-	    .style("opacity", 1);
-
-  	tooltip.append("text")
-	    .attr('class', 'id_feature')
-	    .attr("x", 25)
-	    .attr("dy", "1.2em")
-	    .style("text-anchor", "middle")
-	    .attr("font-size", "14px");
-
-  	tooltip.append("text")
-	    .attr('class', 'value_feature')
-	    .attr("x", 25)
-	    .attr("dy", "2.4em")
-	    .style("text-anchor", "middle")
-	    .attr("font-size", "14px")
-	    .attr("font-weight", "bold");
-
-	update();
-
+	// Grab input boxes
 	var fromInput = d3.select("#fromInput");
 	var toInput = d3.select("#toInput");
-
 	fromInput.on("blur", updateBrush);
 	toInput.on("blur", updateBrush);
-
-	function update() {
-		d3.selectAll(".bar")
-		    .on("mouseover", () => {
-		    	console.log("Detected");
-		    	clearTimeout(t);
-		    	svg.select('.tooltip').style('display', 'block');
-		    })
-		    .on("mouseout", () => {
-		    	clearTimeout(t);
-		    	t = setTimeout(() => { svg.select('.tooltip').style('display', 'none'); }, 250);
-		    })
-		    .on("mousemove", function(d) {
-		    	clearTimeout(t);
-		    	const tooltip = svg.select('.tooltip').style('display', 'block');
-		    	tooltip
-			        .select("text.id_feature")
-			        .text(d.length);
-			    	tooltip.select('text.value_feature')
-			        	.text(d.length);
-			    	tooltip
-			        	.attr('transform', `translate(${[d3.mouse(this)[0] - 5, d3.mouse(this)[1] - 25]})`);
-		    });
-
-		svg.select('.brush')
-		    .on('mousemove mousedown', function () {
-		    	dispatchClickToBar(d3.event.pageX, d3.event.pageY, d3.event.clientX, d3.event.clientY, 'mousemove');
-		    })
-		    .on('mouseout', function () {
-		    	clearTimeout(t);
-		    	t = setTimeout(() => { svg.select('.tooltip').style('display', 'none'); }, 250);
-		    })
-
-	}
-
-	function dispatchClickToBar(pageX, pageY, clientX, clientY, type) {
-		const elems = document.elementsFromPoint(pageX, pageY);
-		const elem = elems.find(e => e.className.baseVal === 'bar');
-		if (elem) {
-	    	const new_click_event = new MouseEvent(type, {
-	    		pageX: pageX,
-	    		pageY: pageY,
-	    		clientX: clientX,
-	    		clientY: clientY,
-	    		bubbles: true,
-	    		cancelable: true,
-	    		view: window
-	    });
-	    elem.dispatchEvent(new_click_event);
-	  	} 
-	  	else {
-	  		clearTimeout(t);
-	    	t = setTimeout(() => { svg.select('.tooltip').style('display', 'none'); }, 5);
-	  	}
-	}
 
 	function brushed() {
 		document.getElementById('date_error').style.display = "none";
@@ -271,6 +207,22 @@ function getHistogram(dateArray){
 		document.getElementById("fromInput").value = formatDate(d1[0]);
 		document.getElementById("toInput").value = formatDate(d1[1]);
 
+		// Append tooltips on mouseover
+		zoomsvg.selectAll("rect")
+		 	.on("mouseover", function(d) {    
+		    	div .transition()    
+					.duration(200)    
+					.style("opacity", .8);    
+		    	div .html("Number of Mementos: " + d.length + "<br/>" + d.x0.toString().substring(4,7) + " " + d.x0.toString().substring(11,15))  
+					.style("left", (d3.event.pageX) + "px")   
+					.style("top", (d3.event.pageY - 28) + "px");  
+		    })          
+	      	.on("mouseout", function(d) {   
+		    	div .transition()    
+					.duration(500)    
+					.style("opacity", 0);
+	       	});
+
 		total_selected = 0;
 	}
 
@@ -292,7 +244,7 @@ function getHistogram(dateArray){
 			var total_selected = 0;
 
 			// Adjust dates to snap to bars
-			varfromDate = new Date(fromDate.getFullYear(), fromDate.getMonth(), 1, 0,0,0);
+			var fromDate = new Date(fromDate.getFullYear(), fromDate.getMonth(), 1, 0,0,0);
 			var toDays = new Date(toDate.getFullYear(), (toDate.getMonth() + 1), 0).getDate();
 			toDate = new Date(toDate.getFullYear(), toDate.getMonth(), toDays, 11,59,59);
 
@@ -302,6 +254,22 @@ function getHistogram(dateArray){
 			var total_selected = selectedBars(fromDate, toDate, total_selected);
 
 			d3.select("#selected_mementos").text("Mementos selected: " + total_selected);
+
+			// Append tooltips on mouseover
+			zoomsvg.selectAll("rect")
+			 	.on("mouseover", function(d) {    
+			    	div .transition()    
+						.duration(200)    
+						.style("opacity", .8);    
+			    	div .html("Number of Mementos: " + d.length + "<br/>" + d.x0.toString().substring(4,7) + " " + d.x0.toString().substring(11,15))  
+						.style("left", (d3.event.pageX) + "px")   
+						.style("top", (d3.event.pageY - 28) + "px");  
+			    })          
+		      	.on("mouseout", function(d) {   
+			    	div .transition()    
+						.duration(500)    
+						.style("opacity", 0);
+		       	});
 
 			total_selected = 0;
 		}
@@ -367,10 +335,8 @@ function getHistogram(dateArray){
 	    
 	    // Create date objects
 	    var compFrom = new Date(from.getFullYear(), from.getMonth(), 1);
-	    console.log(compFrom);
 	    var toDays = new Date(to.getFullYear(), (to.getMonth() + 1), 0).getDate();
 	    var compTo = new Date(to.getFullYear(), to.getMonth(), toDays);
-	    console.log(compTo);
 	    var compareDate = new Date(year, month, day);
 	    
 	    // Check if input within possible range of mementos
@@ -423,10 +389,7 @@ function getHistogram(dateArray){
 		var bars = zoomsvg.selectAll("rect")
 			.data(updatedata, function(d) { return d;});
 
-		bars.exit()
-			.transition(700)
-			.style("fill-opacity", 1e-6)
-      		.remove();
+		bars.exit().remove();
 
       	bars.attr("class", "bar2")
       		.transition(700)

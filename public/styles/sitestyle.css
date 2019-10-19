@@ -601,7 +601,7 @@ body{
 	font-size: 13px;
 	display: inline-block;
 	position: relative;
-	transform: translate(-10px, -30px);
+	transform: translate(-10px, -5px);
 }
 
 #brush_clear{
