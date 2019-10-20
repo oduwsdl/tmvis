@@ -12,12 +12,19 @@ Archives"](http://www.cs.odu.edu/~mln/pubs/ecir-2014/ecir-2014.pdf) for the Web 
 
 To execute the code, run `node tmvis.js`.
 
-To query the server instance generated using your browser visit `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/[stats | summary]/http://4genderjustice.org/`, which has the attributes path as `primesource/ci/role/URI-R` substitute the URI-R to request a different site's summarization. The additional parameters of role is used to specify the values 'stats' or 'summary', stats: for getting the no of unique mementos and summary: to get the the unique mementos along with the screenshots captured,`ci` is used to specify the collection identifier if not specified the argument 'all' is used, `primesource` gets the value of 'archiveIt' or 'internetarchive' as to let the service know which is the primary source.
+To query the server instance generated using your browser visit `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/[histogram | stats | summary]/[from]/[to]/http://4genderjustice.org/`, which has the attributes path as `primesource/ci/role/from/to/URI-R` substitute the URI-R to request a different site's summarization. The additional parameters of `from` and `to` is used to specify the date range of the timemap to be loaded (`/0/0/` for full timemap or `/YYYY-MM-DD/YYYY-MM-DD` format for a specific date range), `role` is used to specify the values 'histogram', 'stats' or 'summary', histogram: to get dates and times of a timemap in the specified date range, stats: for getting the no of unique mementos, and summary: to get the the unique mementos along with the screenshots captured,`ci` is used to specify the collection identifier if not specified the argument 'all' is used, `primesource` gets the value of 'archiveIt' or 'internetarchive' as to let the service know which is the primary source.
 
 ### Example URIs
 
+#### Full timemaps
+* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/histogram/0/0/http://4genderjustice.org/`
 * `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/stats/0/0/http://4genderjustice.org/`
 * `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/summary/0/0/http://4genderjustice.org/`
+
+#### Date range (Format: YYYY-MM-DD)
+* `http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/histogram/2016-08-01/2017-07-23/http://4genderjustice.org/`
+* `http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/stats/2016-08-01/2017-07-23/http://4genderjustice.org/`
+* `http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/summary/2016-08-01/2017-07-23/http://4genderjustice.org/`
 
 
 ## Running as a Docker Container (Non development mode: Recommended for naive users)
@@ -93,6 +100,44 @@ Though GPL Licensing was used for base (https://github.com/machawk1/ArchiveThumb
 
 Running this service provides a user with the array of JSON object as the response (webservice model), which then has to be visualized with the UI tool deployed at http://tmvis.cs.odu.edu/ for which the code is available at https://github.com/oduwsdl/tmvis/ under the public folder.
 
+## Request format (Role -> histogram)
+```
+curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/histogram/0/0/http://4genderjustice.org/
+
+Mapping of attributes of URI to the values are as follows:
+  primesource -> archiveIt
+  hammingdistance -> 4
+  role -> histogram
+  from date -> 0
+  to date -> 0
+  collection Identifier -> 1068
+  URI-R under request -> http://4genderjustice.org/
+```
+
+## Response format
+```
+[
+  {
+    "event_display_date":"2015-07-01, 21:56:41"
+  },
+  {
+    "event_display_date":"2015-07-01, 22:32:40"
+  },
+  {
+    "event_display_date":"2015-10-01, 21:17:52"
+  },
+  ....
+  {
+    "event_display_date":"2019-06-19, 14:49:52"
+  },
+  {
+    "event_display_date":"2019-07-23, 18:40:14"
+  },
+  {
+    "event_display_date":"2019-07-24, 02:42:08"
+  }
+]
+```
 
 ## Request format (Role -> stats)
 ```
@@ -102,17 +147,33 @@ Mapping of attributes of URI to the values are as follows:
   primesource -> archiveIt
   hammingdistance -> 4
   role -> stats
+  from date -> 0
+  to date -> 0
   collection Identifier -> 1068
   URI-R under request -> http://4genderjustice.org/
 ```
 
 ## Response format
 ```
-{
-  "totalmementos": 21,
-  "unique": 2,
-  "timetowait": 0
-}
+[
+  {
+    "threshold":2,
+    "totalmementos":42,
+    "unique":9,
+    "timetowait":5,
+    "fromdate":"Wed, 01 Jul 2015 21:56:41 GMT",
+    "todate":"Wed, 24 Jul 2019 02:42:08 GMT"
+  },
+  ....
+  {
+    "threshold":12,
+    "totalmementos":42,
+    "unique":2,
+    "timetowait":2,
+    "fromdate":"Wed, 01 Jul 2015 21:56:41 GMT",
+    "todate":"Wed, 24 Jul 2019 02:42:08 GMT"
+  }
+]
 ```
 
 ## Request format (Role -> summary)
@@ -123,6 +184,8 @@ Mapping of attributes of URI to the values are as follows:
   primesource -> archiveIt
   hammingdistance -> 4
   role -> summary
+  from date -> 0
+  to date -> 0
   collection Identifier -> 1068
   URI-R under request -> http://4genderjustice.org/
 ```
@@ -149,5 +212,121 @@ Mapping of attributes of URI to the values are as follows:
     "event_description": "",
     "event_link": "http://wayback.archive-it.org/1068/20150701223240/http://4genderjustice.org/"
   },....
+]
+```
+
+## Request format (Role -> histogram) (Date range)
+```
+curl -il http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/histogram/2016-08-01/2017-07-23/http://4genderjustice.org/
+
+Mapping of attributes of URI to the values are as follows:
+  primesource -> internetarchive
+  hammingdistance -> 4
+  role -> histogram
+  from date -> 2016-08-01
+  to date -> 2017-07-23
+  collection Identifier -> all
+  URI-R under request -> http://4genderjustice.org/
+```
+
+## Response format
+```
+[
+  {
+    "event_display_date":"2016-08-02, 16:39:55"
+  },
+  {
+    "event_display_date":"2016-08-08, 16:01:06"
+  },
+  {
+    "event_display_date":"2016-08-08, 16:17:51"
+  },
+  ....
+  {
+    "event_display_date":"2017-07-19, 06:47:29"
+  },
+  {
+    "event_display_date":"2017-07-21, 12:59:30"
+  },
+  {
+    "event_display_date":"2017-07-22, 06:49:56"
+  }
+]
+```
+
+## Request format (Role -> stats) (Date range)
+```
+curl -il http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/stats/2016-08-01/2017-07-23/http://4genderjustice.org/
+
+Mapping of attributes of URI to the values are as follows:
+  primesource -> internetarchive
+  hammingdistance -> 4
+  role -> stats
+  from date -> 2016-08-01
+  to date -> 2017-07-23
+  collection Identifier -> all
+  URI-R under request -> http://4genderjustice.org/
+```
+
+## Response format
+```
+[
+  {
+    "threshold":2,
+    "totalmementos":91,
+    "unique":6,
+    "timetowait":4,
+    "fromdate":"Tue, 02 Aug 2016 16:39:55 GMT",
+    "todate":"Sat, 22 Jul 2017 06:49:56 GMT"
+  },
+  ....
+  {
+    "threshold":7,
+    "totalmementos":91,
+    "unique":1,
+    "timetowait":1,
+    "fromdate":"Tue, 02 Aug 2016 16:39:55 GMT",
+    "todate":"Sat, 22 Jul 2017 06:49:56 GMT"
+  }
+]
+```
+
+## Request format (Role -> summary) (Date range)
+```
+curl -il http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/summary/2016-08-01/2017-07-23/http://4genderjustice.org/
+
+Mapping of attributes of URI to the values are as follows:
+  primesource -> internetarchive
+  hammingdistance -> 4
+  role -> summary
+  from date -> 2016-08-01
+  to date -> 2017-07-23
+  collection Identifier -> all
+  URI-R under request -> http://4genderjustice.org/
+```
+
+## Response format
+```
+[
+  {
+    "timestamp":1470155995,
+    "event_series":"Thumbnails",
+    "event_html":"http://localhost:3000/static/timemapSum_httpwebarchiveorgweb20160802163955http4genderjusticeorg.png",
+    "event_date":"Aug. 02, 2016",
+    "event_display_date":"2016-08-02, 16:39:55",
+    "event_description":"",
+    "event_link":"http://web.archive.org/web/20160802163955/http://4genderjustice.org/"
+  },
+  ....
+  {
+    "timestamp":1500706196,
+    "event_series":"Non-Thumbnail Mementos",
+    "event_html":"notcaptured",
+    "event_html_similarto":"http://localhost:3000/static/timemapSum_httpwebarchiveorgweb20170714114554http4genderjusticeorg.png",
+    "event_date":"Jul. 22, 2017",
+    "event_display_date":"2017-07-22, 06:49:56",
+    "event_description":"",
+    "event_link":"http://web.archive.org/web/20170722064956/http://4genderjustice.org/"
+  }
 ]
 ```
