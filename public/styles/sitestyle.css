@@ -388,6 +388,7 @@ body{
 
 #date_error{
 	color: red;
+	margin-top: 20px;
 }
 
 .button_container {
