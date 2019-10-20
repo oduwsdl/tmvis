@@ -1316,24 +1316,33 @@ $(function(){
         var from = document.getElementById("fromInput").value;
         var to = document.getElementById("toInput").value;
 
-        if(from != fromBox || to != toBox) // If user entered dates
+        if(isValidDate(from) && isValidDate(to))
         {
-            if(isValidDate(from) && isValidDate(to))
+            // Create date objects for comparison
+            fromBox = new Date(fromBox);
+            toBox = new Date(toBox);
+            var fromDate = new Date(from);
+            var toDate = new Date(to);
+            if(fromDate < toDate) // Check that dates are in the proper order
             {
-                var theDateRange = "Requested Date Range: " + from + " - " + to;
-                $(".statsWrapper .Memento_Date_Range").html(theDateRange);
-                console.log("Fetching date range stats...");
-                getStats(from, to);
+                if(fromDate > fromBox && toDate < toBox)
+                {
+                    var theDateRange = "Requested Date Range: " + from + " - " + to;
+                    $(".statsWrapper .Memento_Date_Range").html(theDateRange);
+                    console.log("Fetching date range stats...");
+                    getStats(from, to);
+                }
+                else
+                    getStats(0,0); // Dates were set to full default range
             }
             else
             {
+                document.getElementById('date_error').innerHTML = "Please enter a from date that is less than the to date";
                 document.getElementById('date_error').style.display = "block";
             }
         }
         else
-        {
-            getStats(0,0); // Dates were set to full default range
-        }
+            document.getElementById('date_error').style.display = "block";
     });
     
     $("#generateAllThumbnails").click(function(event){
@@ -1578,7 +1587,10 @@ function isValidDate(dateString)
 {
     // First check for the pattern
     if(!/^\d{4}\-\d{2}\-\d{2}$/.test(dateString))
+    {
+        document.getElementById("date_error").innerHTML = "Please enter dates in YYYY-MM-DD format";
         return false;
+    }
 
     // Parse the date parts to integers
     var parts = dateString.split("-");
@@ -1588,7 +1600,10 @@ function isValidDate(dateString)
 
     // Check the ranges of month and year
     if(year < 1000 || year > 3000 || month == 0 || month > 12)
+    {
+        document.getElementById("date_error").innerHTML = "Dates are out of range.";
         return false;
+    }
 
     var monthLength = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
 
@@ -1599,33 +1614,44 @@ function isValidDate(dateString)
     // Find index of last memento
     var endPoint = histoData.length - 1;
     
-    // Get date of first memento
-    var fromYear = histoData[0].event_display_date.substring(0,4);
-    var fromMonth = histoData[0].event_display_date.substring(5,7);
-    fromMonth = fromMonth - 1;
-    var fromDay = histoData[0].event_display_date.substring(8,10);
-    
-    // Get date of last memento
-    var toYear = histoData[endPoint].event_display_date.substring(0,4);
-    var toMonth = histoData[endPoint].event_display_date.substring(5,7);
-    toMonth = toMonth - 1;
-    var toDay = histoData[endPoint].event_display_date.substring(8,10);
-    
+    // Create date objects
+    var from = new Date(histoData[0].event_display_date.substring(0,10));
+    var to = new Date(histoData[endPoint].event_display_date.substring(0,10));
+
+    // Adjust dates to histogram domain
+    from = new Date(from.getFullYear(), from.getMonth(), 1);
+    toDays = new Date(to.getFullYear(), to.getMonth()+1, 0).getDate();
+    to = new Date(to.getFullYear(), to.getMonth(), toDays);
+
+    // Adjust month for date string
+    var fromMonth = from.getMonth()+1;
+    var toMonth = to.getMonth()+1;
+
+    var fromDateStr = formatDate(from);
+    var toDateStr = formatDate(to);
+
+    var compareDate = new Date(year, month-1, day);
+
+    console.log(from);
+    console.log(to);
+    console.log(compareDate);
+
     month = month - 1;
     
-    // Create date objects
-    var from = new Date(fromYear, fromMonth, fromDay);
-    var to = new Date(toYear, toMonth, toDay);
-    var compareDate = new Date(year, month, day);
-    
     // Check if input within possible range of mementos
-    if(compareDate < from || compareDate > to){
-        console.log("out of range");
+    if(compareDate < from || compareDate > to)
+    {
+        document.getElementById("date_error").innerHTML = "Please enter dates between " + fromDateStr + " and " + toDateStr;
         return false;
     }
     
     // Check the range of the day
-    return day > 0 && day <= monthLength[month];
+    if(day > 0 && day <= monthLength[month])
+        return true;
+    else
+    {
+        document.getElementById("date_error").innerHTML = "Invalid date, please enter in YYYY-MM-DD format";
+    }
 };
 
 function generateMementoURIList(object)
@@ -1644,3 +1670,15 @@ function generateMementoURIList(object)
 window.addEventListener('popstate', function(e) {
     location.reload();
 });
+
+function formatDate(date)
+{
+    var month = date.getMonth() + 1;
+    if(month <= 9)
+        month = "0" + month;
+    var day = date.getDate();
+    if(day <= 9)
+        day = "0" + day;
+
+    return date.getFullYear() + "-" + month + "-" + day;
+}

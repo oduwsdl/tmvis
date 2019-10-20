@@ -27,6 +27,11 @@ function getHistogram(dateArray){
 	// get the domain
 	var from = new Date(fromDateString);
 	var to = new Date(toDateString);
+
+	// create brush snapped versoin of domain
+	var fromDateSnapped = new Date(from.getFullYear(), from.getMonth(), 1);
+	var toDays = new Date(to.getFullYear(), (to.getMonth() + 1), 0).getDate();
+	var toDateSnapped = new Date(to.getFullYear(), to.getMonth(), toDays); 
 	
 	// set the ranges
 
@@ -164,9 +169,18 @@ function getHistogram(dateArray){
 
 		d3.select("#selected_mementos").text("Mementos selected: " + total_selected);
 
-		// Update input values
-		document.getElementById("fromInput").value = formatDate(d0[0]);
-		document.getElementById("toInput").value = formatDate(d0[1]);
+		// Prevent range from going past possible domain
+		if(d0[0] < from)
+			var fromBoxDate = formatDate(fromDateSnapped);
+		else
+			var fromBoxDate = formatDate(d0[0]);
+		if(d0[1] > to)
+			var toBoxDate = formatDate(toDateSnapped);
+		else
+			var toBoxDate = formatDate(d0[1]);
+
+		document.getElementById("fromInput").value = fromBoxDate;
+		document.getElementById("toInput").value = toBoxDate;
 
 		total_selected = 0;
 	}
@@ -203,9 +217,18 @@ function getHistogram(dateArray){
 
 		d3.select("#selected_mementos").text("Mementos selected: " + total_selected);
 
-		// Update input values
-		document.getElementById("fromInput").value = formatDate(d1[0]);
-		document.getElementById("toInput").value = formatDate(d1[1]);
+		// Prevent range from going past possible domain
+		if(d1[0] < from)
+			var fromBoxDate = formatDate(fromDateSnapped);
+		else
+			var fromBoxDate = formatDate(d1[0]);
+		if(d1[1] > to)
+			var toBoxDate = formatDate(toDateSnapped);
+		else
+			var toBoxDate = formatDate(d1[1]);
+
+		document.getElementById("fromInput").value = fromBoxDate;
+		document.getElementById("toInput").value = toBoxDate;
 
 		// Append tooltips on mouseover
 		zoomsvg.selectAll("rect")
@@ -241,37 +264,45 @@ function getHistogram(dateArray){
 			fromDate = new Date(fromDate);
 			toDate = new Date (toDate);
 
-			var total_selected = 0;
+			if(fromDate < toDate)
+			{
+				var total_selected = 0;
 
-			// Adjust dates to snap to bars
-			var fromDate = new Date(fromDate.getFullYear(), fromDate.getMonth(), 1, 0,0,0);
-			var toDays = new Date(toDate.getFullYear(), (toDate.getMonth() + 1), 0).getDate();
-			toDate = new Date(toDate.getFullYear(), toDate.getMonth(), toDays, 11,59,59);
+				// Adjust dates to snap to bars
+				var fromDate = new Date(fromDate.getFullYear(), fromDate.getMonth(), 1, 0,0,0);
+				var toDays = new Date(toDate.getFullYear(), (toDate.getMonth() + 1), 0).getDate();
+				toDate = new Date(toDate.getFullYear(), toDate.getMonth(), toDays, 11,59,59);
 
-			// Update brush postion with adjusted user input
-			gBrush.move(d3.select("g.brush").transition().delay(100).duration(100), [fromDate, toDate].map(x));
+				// Update brush postion with adjusted user input
+				gBrush.move(d3.select("g.brush").transition().delay(100).duration(100), [fromDate, toDate].map(x));
 
-			var total_selected = selectedBars(fromDate, toDate, total_selected);
+				var total_selected = selectedBars(fromDate, toDate, total_selected);
 
-			d3.select("#selected_mementos").text("Mementos selected: " + total_selected);
+				d3.select("#selected_mementos").text("Mementos selected: " + total_selected);
 
-			// Append tooltips on mouseover
-			zoomsvg.selectAll("rect")
-			 	.on("mouseover", function(d) {    
-			    	div .transition()    
-						.duration(200)    
-						.style("opacity", .8);    
-			    	div .html("Number of Mementos: " + d.length + "<br/>" + d.x0.toString().substring(4,7) + " " + d.x0.toString().substring(11,15))  
-						.style("left", (d3.event.pageX) + "px")   
-						.style("top", (d3.event.pageY - 28) + "px");  
-			    })          
-		      	.on("mouseout", function(d) {   
-			    	div .transition()    
-						.duration(500)    
-						.style("opacity", 0);
-		       	});
+				// Append tooltips on mouseover
+				zoomsvg.selectAll("rect")
+				 	.on("mouseover", function(d) {    
+				    	div .transition()    
+							.duration(200)    
+							.style("opacity", .8);    
+				    	div .html("Number of Mementos: " + d.length + "<br/>" + d.x0.toString().substring(4,7) + " " + d.x0.toString().substring(11,15))  
+							.style("left", (d3.event.pageX) + "px")   
+							.style("top", (d3.event.pageY - 28) + "px");  
+				    })          
+			      	.on("mouseout", function(d) {   
+				    	div .transition()    
+							.duration(500)    
+							.style("opacity", 0);
+			       	});
 
-			total_selected = 0;
+				total_selected = 0;
+			}
+			else
+			{
+				document.getElementById('date_error').innerHTML = "Please enter a from date that is less than the to date";
+                document.getElementById('date_error').style.display = "block";
+			}
 		}
 		else
 			document.getElementById('date_error').style.display = "block";
@@ -313,7 +344,10 @@ function getHistogram(dateArray){
 	{
 	    // First check for the pattern
 	    if(!/^\d{4}\-\d{2}\-\d{2}$/.test(dateString))
+	    {
+	        document.getElementById("date_error").innerHTML = "Please enter dates in YYYY-MM-DD format";
 	        return false;
+	    }
 
 	    // Parse the date parts to integers
 	    var parts = dateString.split("-");
@@ -323,7 +357,10 @@ function getHistogram(dateArray){
 
 	    // Check the ranges of month and year
 	    if(year < 1000 || year > 3000 || month == 0 || month > 12)
+	    {
+	        document.getElementById("date_error").innerHTML = "Dates are out of range.";
 	        return false;
+	    }
 
 	    var monthLength = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
 
@@ -331,19 +368,43 @@ function getHistogram(dateArray){
 	    if(year % 400 == 0 || (year % 100 != 0 && year % 4 == 0))
 	        monthLength[1] = 29;
 
-	    month = month - 1;
+	    // Find index of last memento
+	    var endPoint = data.length - 1;
 	    
 	    // Create date objects
-	    var compFrom = new Date(from.getFullYear(), from.getMonth(), 1);
-	    var toDays = new Date(to.getFullYear(), (to.getMonth() + 1), 0).getDate();
-	    var compTo = new Date(to.getFullYear(), to.getMonth(), toDays);
-	    var compareDate = new Date(year, month, day);
+	    var from = new Date(data[0].event_display_date.substring(0,10));
+	    var to = new Date(data[endPoint].event_display_date.substring(0,10));
+
+	    // Adjust dates to histogram domain
+	    from = new Date(from.getFullYear(), from.getMonth(), 1);
+	    toDays = new Date(to.getFullYear(), to.getMonth()+1, 0).getDate();
+	    to = new Date(to.getFullYear(), to.getMonth(), toDays);
+
+	    // Adjust month for date string
+	    var fromMonth = from.getMonth()+1;
+	    var toMonth = to.getMonth()+1;
+
+	    var fromDateStr = formatDate(from);
+	    var toDateStr = formatDate(to);
+
+	    var compareDate = new Date(year, month-1, day);
+
+	    month = month - 1;
 	    
 	    // Check if input within possible range of mementos
-	    if(compareDate < compFrom || compareDate > compTo) { return false; }
-
+	    if(compareDate < from || compareDate > to)
+	    {
+	        document.getElementById("date_error").innerHTML = "Please enter dates between " + fromDateStr + " and " + toDateStr;
+	        return false;
+	    }
+	    
 	    // Check the range of the day
-	    return day > 0 && day <= monthLength[month];
+	    if(day > 0 && day <= monthLength[month])
+	        return true;
+	    else
+	    {
+	        document.getElementById("date_error").innerHTML = "Invalid date, please enter in YYYY-MM-DD format";
+	    }
 	};
 
 	$("#brush_clear").click(function(event){
