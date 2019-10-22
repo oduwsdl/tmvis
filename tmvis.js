@@ -52,8 +52,8 @@ var path = require('path');
 var validator = require('validator');
 //var underscore = require('underscore');
 
-var webshot = require('webshot'); // PhantomJS wrapper
-
+//var webshot = require('webshot'); // PhantomJS wrapper
+var webshot = null;
 var argv = require('minimist')(process.argv.slice(2));
 
 var mementoFramework = require('./lib/mementoFramework.js');
