@@ -1116,7 +1116,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 
     // -- ByMahee -- Uncomment one by one for CLI_JSON
     function (callback) {
-      if (t.role == "histogram" || t.hammingdistancethreshold == '0') {
+      if (t.role == "histogram" || (t.hammingdistancethreshold == '0' && t.role == "summary")) {
         callback('');
       }
       else
@@ -1124,7 +1124,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
     },
     function (callback) {
       constructSSE("percentagedone-30",curCookieClientId);
-      if (t.role == "histogram" || t.hammingdistancethreshold == '0') {
+      if (t.role == "histogram" || (t.hammingdistancethreshold == '0' && t.role == "summary")) {
         callback('');
       }
       else
@@ -1135,7 +1135,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
         if(isToComputeBoth){
           if(t.role == "stats"){
             t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback);
-          }else if(t.role == "histogram" || t.hammingdistancethreshold == '0'){
+          }else if(t.role == "histogram" || (t.hammingdistancethreshold == '0' && t.role == "summary")){
             callback('');
           }else{
             t.calculateHammingDistancesWithOnlineFilteringForSummary(curCookieClientId,callback);
@@ -1149,7 +1149,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
         if(isToComputeBoth){
           if(t.role == "stats"){
             t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);
-          }else if(t.role == "histogram" || t.hammingdistancethreshold == '0'){
+          }else if(t.role == "histogram" || (t.hammingdistancethreshold == '0' && t.role == "summary")){
             callback('');
           }else{
             t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary(callback);
@@ -1161,7 +1161,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
     },
     function (callback) {
       if(t.role == "histogram"){t.getDatesForHistogram(callback,response,curCookieClientId);}
-      else if(t.hammingdistancethreshold == '0'){t.supplyAllMementosAScreenshotURI(callback);}
+      else if(t.hammingdistancethreshold == '0' && t.role == "summary"){t.supplyAllMementosAScreenshotURI(callback);}
       else{
         t.writeJSONToCache(callback);
       }
