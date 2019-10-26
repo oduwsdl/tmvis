@@ -972,27 +972,10 @@ function getStats(from, to){
                     }
 
                     var fromDate= new Date(jsonObjRes[0].fromdate);
-                    // Format from date
-                    var theFromMonth = fromDate.getMonth() + 1;
-                    if(theFromMonth <= 9)
-                        theFromMonth = "0" + theFromMonth;
-                    var theFromDay = fromDate.getDate();
-                    if(theFromDay <= 9)
-                        theFromDay = "0" + theFromDay;
-
-
-                    var fromDateStr = fromDate.getFullYear() +"-"+ theFromMonth +"-"+ theFromDay;
+                    var fromDateStr = formatDate(fromDate);
 
                     var toDate = new Date(jsonObjRes[0].todate);
-                    // Format to date
-                    var theToMonth = toDate.getMonth() + 1;
-                    if(theToMonth <= 9)
-                        theToMonth = "0" + theToMonth;
-                     var theToDay = toDate.getDate();
-                    if(theToDay <= 9)
-                        theToDay = "0" + theToDay;
-
-                    var toDateStr = toDate.getFullYear() +"-"+ theToMonth +"-"+ theToDay;
+                    var toDateStr = formatDate(toDate);
 
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);

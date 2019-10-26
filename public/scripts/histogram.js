@@ -47,7 +47,7 @@ function getHistogram(dateArray){
 		  .range([height2, 0]);
 	var x2 = d3.scaleTime()
 		  .domain([from, to])
-		  .rangeRound([0, width-200]);
+		  .rangeRound([0, width-120]);
 
 	// set the parameters for the histogram
 	var histogram = d3.histogram()
@@ -58,22 +58,18 @@ function getHistogram(dateArray){
 	// For main histogram
 	// append the svg object to the body of the page
 	// append a 'group' element to 'svg'
-	// moves the 'group' element to the top left margin
 	var svg = d3.select("#histogram").append("svg")
 	    .attr("width", width + margin.left + margin.right)
 	    .attr("height", height + margin.top + margin.bottom)
-	    .append("g")
-	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	    .append("g");
 
 	// For zoomable histogram 
 	// append the svg object to the body of the page
 	// append a 'group' element to 'svg'
-	// moves the 'group' element to the top left margin
 	var zoomsvg = d3.select("#zoom_histogram").append("svg")
-	    .attr("width", width + margin.left + margin.right - 200)
+	    .attr("width", width + margin.left + margin.right - 120)
 	    .attr("height", height2 + margin.top + margin.bottom)
-	    .append("g")
-	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	    .append("g");
 
 	// create tooltip
 	var div = d3.select("body").append("div") 
@@ -148,10 +144,10 @@ function getHistogram(dateArray){
 	    .call(gBrush);
 
 	// Grab input boxes
-	var fromInput = d3.select("#fromInput");
+	/*var fromInput = d3.select("#fromInput");
 	var toInput = d3.select("#toInput");
 	fromInput.on("blur", updateBrush);
-	toInput.on("blur", updateBrush);
+	toInput.on("blur", updateBrush);*/
 
 	function brushed() {
 		document.getElementById('date_error').style.display = "none";
@@ -297,6 +293,7 @@ function getHistogram(dateArray){
 			       	});
 
 				total_selected = 0;
+				document.getElementById("brush_clear").style.background = "#337ab7";
 			}
 			else
 			{
@@ -427,6 +424,10 @@ function getHistogram(dateArray){
 		d3.selectAll("rect.bar").style("fill", function(d, i) {
 			return "steelblue";
 		});
+	});
+
+	$("#updateDateRange").click(function(event){
+		updateBrush();
 	});
 
 	function zoomHistogram(zoomsvg, updatedata, from, to){

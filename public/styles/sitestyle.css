@@ -365,6 +365,11 @@ body{
 	margin-right: 30px;
 }
 
+#histogram_container{
+	width: 880px;
+	margin: 20px auto 0px auto;
+}
+
 .histogramOptions{
 	text-align: center;
 	margin-top: 25px;
@@ -373,7 +378,6 @@ body{
 #zoom_histogram{
 	display: inline-block;
 	width: 700px;
-	margin: 0px 0px 0px 0px;
 }
 
 .dateTitle{
@@ -389,6 +393,14 @@ body{
 #date_error{
 	color: red;
 	margin-top: 20px;
+}
+
+#submitRange{
+	margin: 30px auto 10px auto;
+}
+
+#generateAllThumbnails{
+	margin: 30px auto 10px auto;
 }
 
 .button_container {
@@ -608,10 +620,10 @@ body{
 #brush_clear{
 	position: relative;
 	display: inline-block;
-	transform: translate(160%, -125%);
+	transform: translate(75%, -180%);
 	padding: 4px;
 	border-radius: 3px;
-	font-size: 13px;
+	font-size: 12px;
 	color: white;
 	background-color: #ccc;
 }

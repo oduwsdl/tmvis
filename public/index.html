@@ -76,7 +76,7 @@
 										<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
 								    <!-- <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
 									-->
-										<button class="btn btn-primary getJSONFromServer form-control" title="Get number of unique mementos"> Calculate # of Thumbnails </button>
+										<button class="btn btn-primary getJSONFromServer form-control" title="Get number of unique mementos"> View Timemap </button>
 								</span>
 							</div>
 							<div class="form-group hidden">
@@ -128,13 +128,14 @@
 							<div id="memento_limit" style="display: none;"> For timemaps with more than 5000 mementos, only the latest 5000 are analyzed. </div>
 						</div>
 						<div class="histogramOptions row">
-							<button class="btn btn-primary" id="generateAllThumbnails"> Generate All Thumbnails </button>
 							<div id="dateBox">
 									<p class="dateTitle" id="selected_mementos"></p>
 									<p class="dateTitle">From: </p><input type="text" placeholder="yyyy-mm-dd" id="fromInput">
 									<p class="dateTitle">To: </p><input type="text" placeholder="yyyy-mm-dd" id="toInput">
-									<button type="button" class="btn btn-primary" name="option" id="submitRange"> Calculate Unique </button>
+									<button class="btn btn-primary" id="updateDateRange"> Update </button>
 							</div>
+							<button class="btn btn-primary" id="generateAllThumbnails"> Generate All Thumbnails </button>
+							<button type="button" class="btn btn-primary" name="option" id="submitRange"> Calculate Unique </button>
 							<p id="date_error" style="display:none;"></p>
 						</div>
 					</div>
