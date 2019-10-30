@@ -365,9 +365,19 @@ body{
 	margin-right: 30px;
 }
 
+#histogram_container{
+	width: 880px;
+	margin: 20px auto 0px auto;
+}
+
 .histogramOptions{
 	text-align: center;
 	margin-top: 25px;
+}
+
+#zoom_histogram{
+	display: inline-block;
+	width: 700px;
 }
 
 .dateTitle{
@@ -382,20 +392,47 @@ body{
 
 #date_error{
 	color: red;
+	margin-top: 20px;
+}
+
+#submitRange{
+	margin: 30px auto 10px auto;
+}
+
+#generateAllThumbnails{
+	margin: 30px auto 10px auto;
 }
 
 .button_container {
 	position: relative;
 }
 
+.refresh_button{
+	float: right;
+	transform: translate(-140%, -955%);
+	font-size: 15px;
+	padding: .2px 4.5px .8px 4.5px;
+	border: none;
+	cursor: pointer;
+	border-radius: 30px;
+	background-color: #c7c7c7;
+	color: white;
+	opacity: .8;
+}
+
+.refresh_button:hover {
+	background-color: #555;
+}
+
 .button_container .on{
-	opacity: 1;
+	opacity: .8;
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	transform: translate(565%, -632%);
-	font-size: 13px;
-	padding: 1px 6.5px 1.7px 7px;
+	transform: translate(580%, -580%);
+	font-size: 16px;
+	font-weight: bolder;
+	padding: 0px 6px .8px 6.9px;
 	border: none;
 	cursor: pointer;
 	border-radius: 30px;
@@ -413,9 +450,10 @@ body{
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	transform: translate(565%, -632%);
-	font-size: 13px;
-	padding: 1px 6.5px 1.7px 7px;
+	transform: translate(580%, -580%);
+	font-size: 16px;
+	font-weight: bolder;
+	padding: 0px 6px .8px 6.9px;
 	border: none;
 	cursor: pointer;
 	border-radius: 30px;
@@ -424,7 +462,7 @@ body{
 }
 
 .button_container .off:hover {
-  background-color: #878787;
+  background-color: #555;
 }
 
 #updateMementos{ 
@@ -574,15 +612,18 @@ body{
 #memento_limit{
 	margin-left: 11%;
 	font-size: 13px;
+	display: inline-block;
+	position: relative;
+	transform: translate(-10px, -5px);
 }
 
 #brush_clear{
 	position: relative;
-	display: block;
-	transform: translate(870%, -45%);
+	display: inline-block;
+	transform: translate(75%, -180%);
 	padding: 4px;
 	border-radius: 3px;
-	font-size: 13px;
+	font-size: 12px;
 	color: white;
 	background-color: #ccc;
 }

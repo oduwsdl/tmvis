@@ -1,6 +1,15 @@
 rect.bar { fill: steelblue; }
 
-rect.bar:hover { fill: orange; }
+rect.bar2 { 
+    fill: steelblue; 
+    z-index: 100;
+}
+rect.exit { 
+    opacity: .5;
+    z-index: 1;
+}
+
+rect.bar2:hover { fill: orange; }
 
 div.tooltip { 
     color: white;

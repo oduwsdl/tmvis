@@ -17,6 +17,7 @@
 		<!--script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script-->
 		<link href='http://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
 		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 		<script src="//d3js.org/d3.v4.min.js"></script>
 		<script src="https://code.jquery.com/jquery-migrate-3.1.0.js"></script>
@@ -75,7 +76,7 @@
 										<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
 								    <!-- <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
 									-->
-										<button class="btn btn-primary getJSONFromServer form-control" title="Get number of unique mementos"> Calculate # of Thumbnails </button>
+										<button class="btn btn-primary getJSONFromServer form-control" title="Get number of unique mementos"> View TimeMap </button>
 								</span>
 							</div>
 							<div class="form-group hidden">
@@ -113,10 +114,6 @@
 										<p>Delay taking screenshot of webpage once it's loaded.</p>
 								</div>
 						</div>
-
-
-
-
 					</div>
 				</form>
 				
@@ -124,18 +121,22 @@
 				<div class="histoWrapper row" id="histoWrapper" style="display:none;">
 					<div class="col-lg-12">
 						<p class="Mementos_Considered"></p>
-						<div id="histogram"></div>
-						<button class="btn" id="brush_clear">Clear Selection</button>
-						<div id="memento_limit" style="display: none;"> For timemaps with more than 5000 mementos, only the latest 5000 are analyzed. </div>
+						<div id="histogram_container">
+							<div id="histogram"></div>
+							<div style="visibility: hidden;" id="zoom_histogram"></div>
+							<button class="btn" id="brush_clear">Clear Selection</button>
+							<div id="memento_limit" style="display: none;"> For timemaps with more than 5000 mementos, only the latest 5000 are analyzed. </div>
+						</div>
 						<div class="histogramOptions row">
-							<button class="btn btn-primary" id="generateAllThumbnails"> Generate All Thumbnails </button>
 							<div id="dateBox">
 									<p class="dateTitle" id="selected_mementos"></p>
-									<p class="dateTitle">From: </p><input type="text" placeholder="yyyy/mm/dd" id="fromInput">
-									<p class="dateTitle">To: </p><input type="text" placeholder="yyyy/mm/dd" id="toInput">
-									<button type="button" class="btn btn-primary" name="option" id="submitRange"> Calculate Unique </button>
+									<p class="dateTitle">From: </p><input type="text" placeholder="yyyy-mm-dd" id="fromInput">
+									<p class="dateTitle">To: </p><input type="text" placeholder="yyyy-mm-dd" id="toInput">
+									<button class="btn btn-primary" id="updateDateRange"> Update </button>
 							</div>
-							<p id="date_error" style="display:none;"> ERROR: Please enter in yyyy/mm/dd format.<br>Make sure the dates are in the proper order.</p>
+							<button class="btn btn-primary" id="generateAllThumbnails"> Generate All Thumbnails </button>
+							<button type="button" class="btn btn-primary" name="option" id="submitRange"> Calculate Unique </button>
+							<p id="date_error" style="display:none;"></p>
 						</div>
 					</div>
 				</div>

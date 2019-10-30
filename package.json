@@ -13,6 +13,7 @@
     "cookie-parser": "^1.4.3",
     "es6-promise": "*",
     "express": "*",
+    "follow-redirects": "^1.9.0",
     "fs-extra": "*",
     "hashmap": "^2.3.0",
     "image-watermark": "0.0.7",
@@ -21,7 +22,6 @@
     "minimist": "*",
     "mkdir-recursive": "*",
     "morgan": "^1.9.0",
-    "node-phantom": "*",
     "nodemon": "^1.14.12",
     "primordial": "*",
     "puppeteer": "*",
@@ -29,7 +29,6 @@
     "simhash": "*",
     "stackjs": "^0.1.0",
     "validator": "*",
-    "webshot": "*",
     "write-json-file": "^2.3.0"
   }
 }
