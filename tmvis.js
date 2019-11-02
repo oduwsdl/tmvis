@@ -1042,7 +1042,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 			                  	ConsoleLogIfRequired(JSON.stringify(t.mementos));
 			                  	ConsoleLogIfRequired("---------------------------------------------------");
 		                	}
-		                    if(URIs.length > 1)
+		                    if(URIs.length > 1 && t.role == "histogram")
 		                    	t.mementos.sort(dateSort);
 
 			                if(response.thumbnails['from'] != 0) // if from date was given, filter mementos
