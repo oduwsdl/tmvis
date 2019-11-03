@@ -6,6 +6,7 @@ var curURIUnderFocus=null;
 var curDeepLinkStateArr=[];
 var curUniqueUserSessionID = null;
 var generateAllClicked = false;
+var inputDates = "";
 (function(window, document, undefined){
 
 
@@ -799,6 +800,7 @@ function setProgressBar(value){
 
 function getHistogramPage(){
     var toDisplay= "Internet Archive";
+    inputDates = "";
     if($("input[name='primesource']:checked").val() == "archiveit" ){
         toDisplay= "Archive-It";
     }
@@ -931,6 +933,7 @@ function getStats(from, to){
       }
       else
       {
+        inputDates = from + "," + to;
         var fromFormatted = from.substring(0,4)+from.substring(5,7)+from.substring(8,10);
         var toFormatted = to.substring(0,4)+to.substring(5,7)+to.substring(8,10);
         var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+from+"/"+to+"/"+$('.argumentsForm #urirIP').val();
@@ -977,7 +980,7 @@ function getStats(from, to){
                     var toDate = new Date(jsonObjRes[0].todate);
                     var toDateStr = formatDate(toDate);
 
-                    var dateRangeStr= fromDateStr + " - " + toDateStr;
+                    var dateRangeStr= fromDateStr + "," + toDateStr;
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
                     $(".paraOnlyOnStatsResults").show();
                     $(".time_container").show();
@@ -1148,8 +1151,6 @@ function getSummary(from, to){
               drawImageSlider(jsonObjRes);
               getImageArray(); //calling GIF function
               generateMementoURIList(jsonObjRes);
-              $(".modal-backdrop").remove();
-              $('#serverStreamingModal').modal('hide');
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
@@ -1179,6 +1180,7 @@ function getSummary(from, to){
     }
     //resetting this in order to have an option of unique thumbnails
     generateAllThumbnails = false;
+    inputDates = "";
 }
 
 $(function(){
@@ -1274,17 +1276,13 @@ $(function(){
 
     // work around for the timeline setting stuff
     $(".getSummary").click(function(event){
-        // Check for input dates
-        var theDates = $(".statsWrapper .Memento_Date_Range").html();
 
-        if(theDates.length > 20) // If a date range was passed
+        if(inputDates.length > 1) // If a date range was passed
         {
-            var theDates = $(".statsWrapper .Memento_Date_Range").html();
 
-            var from = theDates.substring(22,32);
-            var to = theDates.substring(35,45);
+            var dates = inputDates.split(",");
 
-            getSummary(from, to); // Summary for a certain range
+            getSummary(dates[0], dates[1]); // Summary for a certain range
         }
         else
         {
@@ -1614,10 +1612,6 @@ function isValidDate(dateString)
     var toDateStr = formatDate(to);
 
     var compareDate = new Date(year, month-1, day);
-
-    console.log(from);
-    console.log(to);
-    console.log(compareDate);
 
     month = month - 1;
     
