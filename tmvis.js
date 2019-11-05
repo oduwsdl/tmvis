@@ -1840,10 +1840,7 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieC
   try {
     fs.openSync(
       path.join(__dirname + '/'+screenshotsLocation + memento.screenshotURI),
-      'r', function (e, r) {
-        ConsoleLogIfRequired(e);
-        ConsoleLogIfRequired(r);
-      });
+      'r');
 
     constructSSE(memento.screenshotURI + ' already exists...',curCookieClientId);
     ConsoleLogIfRequired(memento.screenshotURI + ' already exists...continuing',curCookieClientId);
