@@ -980,7 +980,7 @@ function getStats(from, to){
                     var toDate = new Date(jsonObjRes[0].todate);
                     var toDateStr = formatDate(toDate);
 
-                    var dateRangeStr= fromDateStr + "," + toDateStr;
+                    var dateRangeStr= fromDateStr + " - " + toDateStr;
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
                     $(".paraOnlyOnStatsResults").show();
                     $(".time_container").show();
@@ -1306,7 +1306,7 @@ $(function(){
             var toDate = new Date(to);
             if(fromDate < toDate) // Check that dates are in the proper order
             {
-                if(fromDate > fromBox && toDate < toBox)
+                if(fromDate != fromBox || toDate != toBox)
                 {
                     var theDateRange = "Requested Date Range: " + from + " - " + to;
                     $(".statsWrapper .Memento_Date_Range").html(theDateRange);
