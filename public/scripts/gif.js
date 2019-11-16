@@ -93,8 +93,8 @@ function watermarkImage(elemImage, text, counter) {
 function createGif(image, interval)
 {
 	gifshot.createGIF({
-   	gifWidth: 400,
-	gifHeight: 300,
+   	gifWidth: 1024,
+	gifHeight: 768,
 	interval: interval,
 	numFrames: 10,
 	images: image,
@@ -112,6 +112,8 @@ function createGif(image, interval)
 		var image = obj.image, animatedImage = document.createElement('img');
 		animatedImage.src = image;
 		animatedImage.style.border = "1px solid black";
+		animatedImage.style.width = "400px";
+		animatedImage.style.height = "300px";
 		document.getElementById("gifApp").appendChild(animatedImage);
 		
 		document.getElementById("gifDownload").href = image;
