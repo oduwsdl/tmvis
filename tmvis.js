@@ -1553,9 +1553,13 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSum
   var self = this;
   var uniqueIndexList = [];
   var hammingDistanceThreshold = self.hammingdistancethreshold;
+
+  // if negative hamming distance was passed, first, center, and last mementos from the unique list will be used
   if(hammingDistanceThreshold < 0){
+    // set hamming distance back to positive to use
     hammingDistanceThreshold = hammingDistanceThreshold * -1;
   }
+
   this.mementos.forEach(function (memento,m) {
     var uri = memento.uri;
 
@@ -1582,6 +1586,7 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSum
       //var filename = 'timemapSum_' + SCREENSHOT_DELTA + '_'+ memento.hammingBasisURI.replace("id_/http","/http").replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png'  // Sanitize URI->filename // replaced by above segment
       memento.hammingBasisScreenshotURI = filename;
     } else {
+        // if hamming distance is negative, store index of unique memento
         if(self.hammingdistancethreshold < 0){
           uniqueIndexList.push(m);
         }
@@ -1593,25 +1598,22 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSum
     }
   })
 
+  // if hamming distance is negative, grab first, center, and last mementos from the list of unique
   if(self.hammingdistancethreshold < 0){
+
+      // get the center of the list
       var center = Math.floor(uniqueIndexList.length/2);
-      var i = 0;
-      var odd = false;
-      if(uniqueIndexList.length % 2 != 0){
-        odd = true;
-      }
+      var i = 0, odd = false;
+
+      if(uniqueIndexList.length % 2 != 0) { odd = true; } // check if list length is odd or even
 
       while(i < uniqueIndexList.length)
       {
         var filename = null;
         filename = 'timemapSum_'+ this.mementos[uniqueIndexList[i]].uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png' ; // Sanitize URI->filename
         this.mementos[uniqueIndexList[i]].screenshotURI = filename;
-        if(odd && i > 0){
-          i += (center);
-        }
-        else{
-          i += center-1;
-        }
+
+        i += (odd && i > 0) ? center : center-1; // increment depending on list length being odd or even
       }
   }
 
@@ -2074,7 +2076,10 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFilteringForSummary = funct
   var dummySimhash = "00000000000000000000000000000000";
   //ConsoleLogIfRequired('Calculate hamming distance of ' + this.mementos.length + ' mementos')
   var thisHammingDistanceThreshold = this.hammingdistancethreshold;
+
+  // if hamming distance was negative, take only the first, center, and last unnique
   if(thisHammingDistanceThreshold < 0){
+    // set hamming distance back to positive to be used
     thisHammingDistanceThreshold = thisHammingDistanceThreshold * -1;
   }
 
@@ -2107,12 +2112,15 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFilteringForSummary = funct
       ConsoleLogIfRequired('m==0, continuing');
     }
   }
+
+  // if hamming distance was negative, only 3 unique mementos
   if(this.hammingdistancethreshold < 0){
     var noOfUniqueMementos = 3;
   }
   else{
     var noOfUniqueMementos = copyOfMementos.length;
   }
+
   var totalMementos = this.mementos.length;
   constructSSE('Completed filtering...',curCookieClientId);
   constructSSE('Out of the total <h3>'+totalMementos+'</h3> existing mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique...',curCookieClientId);
@@ -2206,9 +2214,16 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
       lastNoOfUniqueMementos = noOfUniqueMementos;
   }
 
-  if(lastNoOfUniqueMementos > 9){ // if last set of unique mementos is too large
-      noOfUniqueMementos = 3;
+  // if last set of unique mementos is too large
+  if(lastNoOfUniqueMementos > 9){
+
+      noOfUniqueMementos = 3; // give the user an option of only 3 unique
+
+      // take last calculated hamming distance and multiply by -1
+      // negative hamming distance means take first, center, and last unique mementos
+      // this gives the user the option of only laoding 3 unique mementos
       hdtRangeVar = lastHdtRangeVar * -1;
+
       if( !this.menentoDetForMultipleKValues.has(hdtRangeVar)){
           this.menentoDetForMultipleKValues.set(hdtRangeVar,curMementoDetArray);
       }
@@ -2219,7 +2234,6 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
           curStatObj["totalmementos"] = totalMementos;
           curStatObj["unique"] = noOfUniqueMementos;
           this.statsHashMapObj.set(hdtRangeVar,curStatObj);
-
       }
   }
 

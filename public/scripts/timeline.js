@@ -1306,7 +1306,7 @@ $(function(){
             var toDate = new Date(to);
             if(fromDate < toDate) // Check that dates are in the proper order
             {
-                if(fromDate != fromBox || toDate != toBox)
+                if(fromDate > fromBox || toDate < toBox)
                 {
                     var theDateRange = "Requested Date Range: " + from + " - " + to;
                     $(".statsWrapper .Memento_Date_Range").html(theDateRange);
