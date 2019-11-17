@@ -327,8 +327,10 @@ body{
 	height: 200px !important;
 }
 
-#serverStreamingModal .modal-body {
+#serverStreamingModal .logsContent {
 	max-height: 800px !important;
+	display: flex;
+	flex-direction: column-reverse;
     overflow-y: scroll;
 		overflow-x: hidden;
 }

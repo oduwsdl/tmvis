@@ -616,9 +616,13 @@ function writeFullTimemapToCache(curCookieClientId){
       fullTimemap.calculateSimhashes(curCookieClientId,false,callback);
     },
     function(callback){
+      var cacheFile = new SimhashCacheFile(fullTimemap.primesource+"_"+fullTimemap.collectionidentifier+"_"+fullTimemap.originalURI,isDebugMode);
+      cacheFile.deleteCacheFile();
       fullTimemap.saveSimhashesToCache(callback);
     },
     function(callback){
+      var cacheFile = new SimhashCacheFile(fullTimemap.primesource+"_"+fullTimemap.collectionidentifier+"_"+fullTimemap.originalURI+".json",isDebugMode);
+      cacheFile.deleteCacheFile();
       fullTimemap.writeJSONToCache(callback);
     }
   ],
@@ -1789,8 +1793,6 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
   }
   var completedScreenshotCaptures = 0;
   var preVal =0;
-  var temp = self.mementos.filter(criteria);
-  console.log(temp);
   async.eachLimit(
     shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
     1,function( memento,callback){
