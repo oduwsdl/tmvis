@@ -1741,14 +1741,18 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
     self.statsHashMapObj.forEach(function(statsObj, hammingDistance) {
       console.log("------------------ selected for screenshots------------");
       console.log(JSON.stringify(self.menentoDetForMultipleKValues.get(hammingDistance).filter(criteria)));
+      // if negative hamming distance was passed, get first, center, and last mementos from the list
       if(hammingDistance < 0){
 
+        // make hamming distance positive to use
         hammingDistance = hammingDistance * -1;
 
+        // get original list of mementos
         var toBeCaptured = self.menentoDetForMultipleKValues.get(hammingDistance).filter(criteria);
-        var center = Math.floor(toBeCaptured.length/2);
+        var center = Math.floor(toBeCaptured.length/2); // find center
         var capturedThree = [];
 
+        // push first, center, and last mementos
         capturedThree.push(toBeCaptured[0]);
         capturedThree.push(toBeCaptured[center]);
         capturedThree.push(toBeCaptured[(toBeCaptured.length) - 1]);
