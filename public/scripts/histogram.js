@@ -144,10 +144,10 @@ function getHistogram(dateArray){
 	    .call(gBrush);
 
 	// Grab input boxes
-	/*var fromInput = d3.select("#fromInput");
+	var fromInput = d3.select("#fromInput");
 	var toInput = d3.select("#toInput");
 	fromInput.on("blur", updateBrush);
-	toInput.on("blur", updateBrush);*/
+	toInput.on("blur", updateBrush);
 
 	function brushed() {
 		document.getElementById('date_error').style.display = "none";
