@@ -1145,12 +1145,17 @@ function getSummary(from, to){
                       return;
                   }
               });
-              console.log(jsonObjRes);
+              //console.log(jsonObjRes);
               displayedMementos = JSON.parse(JSON.stringify(jsonObjRes)); // create deep copy of mementos
               drawImageGrid(jsonObjRes); // calling Image Grid Function here
               drawImageSlider(jsonObjRes);
               getImageArray(); //calling GIF function
               generateMementoURIList(jsonObjRes);
+
+              if($('.argumentsForm #urirIP').val().indexOf(",") < 0) // give URI stamp option to the user if multiple URIs
+              {
+                $("#URIWatermarkLabel").hide();
+              }
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");

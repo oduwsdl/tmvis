@@ -1,10 +1,15 @@
 var imageLinks = [];
-var stampedImages = [];
+var timeStampedImages = [];
+var URIStampedImages =[];
+var timeAndURIStampedImages = [];
 
 function getImageArray(){
 	$("#gif #gifContent #gifApp").empty();
 	imageLinks = [];
-	stampedImages = [];
+	timeStampedImages = [];
+	URIStampedImages = [];
+	timeAndURIStampedImages = [];
+
 	for(var i = 0; i<imagesData_IG.length; i++)
 	{
 		imageLinks[i] = $(imagesData_IG[i].event_html).attr('src');
@@ -12,7 +17,9 @@ function getImageArray(){
 	}
 	var interval = document.getElementById("interval").value;
 
-	watermark();
+	timeStampWatermark();
+	URIStampWatermark();
+	timeAndURIStampWatermark();
 	createGif(imageLinks, interval);
 
 	document.getElementById("gifButton").addEventListener("click", updateGif);
@@ -21,29 +28,75 @@ function getImageArray(){
 function updateGif(){
 	$("#gifApp").empty();
 	var interval = document.getElementById("interval").value;
+	var timeWatermarkOption = document.getElementById("timeWatermarkOption");
+	var URIWatermarkOption = document.getElementById("URIWatermarkOption");
 
-	if(document.getElementById("watermarkOption").checked == true)
-	{
-		createGif(stampedImages,interval);
-	}
-	else{
+	if(timeWatermarkOption.checked == true && URIWatermarkOption.checked == true) {
+		createGif(timeAndURIStampedImages,interval);
+	} else if(timeWatermarkOption.checked == true) {
+		createGif(timeStampedImages,interval);
+	} else if(URIWatermarkOption.checked == true) {
+		createGif(URIStampedImages,interval);
+	} else{
 		createGif(imageLinks, interval);
 	}
 }
 	
-function watermark(){	
+function timeStampWatermark(){	
 	for(var i = 0; i<imagesData_IG.length; i++)
 	{
 		
 		var stamp = imagesData_IG[i].event_display_date;
 		var img= new Image();
 		img.src = imageLinks[i];
-		watermarkImage(img,stamp,i);
+		watermarkImage(img,stamp,i,timeAndURIStampedImages);
 	}
 }
 
 
-function watermarkImage(elemImage, text, counter) {
+function URIStampWatermark(){	
+	var URI = $("#uriIP").val();
+	URI = URI.split(',');
+
+	for(var i = 0; i<imagesData_IG.length; i++)
+	{
+		
+		for(var j = 0; j<URI.length; j++)
+		{
+			if(imagesData_IG[i].event_link.indexOf(URI[j]) > 0)
+			{
+				var stamp = URI[j];
+				stamp.replace(/\s/g,"");
+				var img = new Image();
+				img.src = imageLinks[i];
+				watermarkImage(img,stamp,i,URIStampedImages);
+			}
+		}
+	}
+}
+
+function timeAndURIStampWatermark(){	
+	var URI = $("#uriIP").val();
+	URI = URI.split(',');
+
+	for(var i = 0; i<imagesData_IG.length; i++)
+	{
+		
+		for(var j = 0; j<URI.length; j++)
+		{
+			if(imagesData_IG[i].event_link.indexOf(URI[j]) > 0)
+			{
+				var stamp = URI[j];
+				stamp.replace(/\s/g,"");
+				stamp += "\n" + imagesData_IG[i].event_display_date;
+				var img = new Image();
+				img.src = imageLinks[i];
+				watermarkImage(img,stamp,i,URIStampedImages);
+			}
+		}
+	}
+}
+function watermarkImage(elemImage, text, counter,array) {
 	var testImage = new Image();
 	testImage.onload = function() {
 		var h = testImage.height, w = testImage.width, img = new Image();
@@ -57,7 +110,7 @@ function watermarkImage(elemImage, text, counter) {
 					      
 			try {
 					elemImage.src = canvas.toDataURL('image/png');
-					stampedImages[counter] = elemImage.src;
+					array[counter] = elemImage.src;
 					//console.log(elemImage.src);
 			}
 			catch (e) {
