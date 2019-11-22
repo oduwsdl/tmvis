@@ -49,7 +49,7 @@ function timeStampWatermark(){
 		var stamp = imagesData_IG[i].event_display_date;
 		var img= new Image();
 		img.src = imageLinks[i];
-		watermarkImage(img,stamp,i,timeAndURIStampedImages);
+		watermarkImage(img,stamp,i,timeStampedImages);
 	}
 }
 
@@ -91,7 +91,7 @@ function timeAndURIStampWatermark(){
 				stamp += "\n" + imagesData_IG[i].event_display_date;
 				var img = new Image();
 				img.src = imageLinks[i];
-				watermarkImage(img,stamp,i,URIStampedImages);
+				watermarkImage(img,stamp,i,timeAndURIStampedImages);
 			}
 		}
 	}
