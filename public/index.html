@@ -25,7 +25,7 @@
     	<script src="/scripts/imageSliderScript.js"></script>
     	<script src="/scripts/imageGridScript.js"></script>
     	<script src="/scripts/timeline.js?version=1005"></script>
-		<script src="/scripts/histogram.js"></script>
+	<script src="/scripts/histogram.js"></script>
     	<script src="/scripts/waitforimages.js"></script>
     	<script src="/scripts/gifshot.min.js"></script>
     	<script src="/scripts/gif.js"></script>
@@ -205,9 +205,14 @@
 								<input type="number" name="in" min=".1" step=".1" value="1" id="interval">
 								<div class="inputControl-addon">sec</div>	
 
-								<label id= "watermarkLabel">
-									<input type="checkbox" id="watermarkOption">
+								<label id= "timeWatermarkLabel">
+									<input type="checkbox" id="timeWatermarkOption">
 									Add Timestamp
+								</label>
+
+								<label id= "URIWatermarkLabel" style= "margin-left: 10px;">
+									<input type="checkbox" id="URIWatermarkOption">
+									Add URI
 								</label>
 
 								<br><button class="btn btn-primary" id="gifButton">Update GIF</button>

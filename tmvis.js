@@ -2129,7 +2129,8 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFilteringForSummary = funct
 
   var totalMementos = this.mementos.length;
   constructSSE('Completed filtering...',curCookieClientId);
-  constructSSE('Out of the total <h3>'+totalMementos+'</h3> existing mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique...',curCookieClientId);
+  //constructSSE('Out of the total <h3>'+totalMementos+'</h3> existing mementos, <h3>'+noOfUniqueMementos +'</h3> mementos are considered to be unique...',curCookieClientId);
+  constructSSE('mementos are considered to be unique...<h3>'+noOfUniqueMementos +'</h3> existing mementos,<h3>'+totalMementos+'</h3> Out of the total' ,curCookieClientId);
   //ConsoleLogIfRequired((this.mementos.length - copyOfMementos.length) + ' mementos trimmed due to insufficient hamming, ' + this.mementos.length + ' remain.')
   //this.mementos = copyOfMementos; // currentchange 04 june 18
   copyOfMementos = null;
