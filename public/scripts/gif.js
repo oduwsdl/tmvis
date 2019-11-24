@@ -55,21 +55,14 @@ function watermark(){
 		watermarkImage(img,timeStamp,i,timeStampedImages);
 
 		var link = imagesData_IG[i].event_link;
-		var linkMatch = link.match(regexForPort);
-		if(linkMatch != null && link.indexOf(":80") > 0)
-		{
-			link = link.replace(":80","");
-		}
+		link = link.replace(":80","");
 		
 		for(var j = 0; j<URI.length; j++)
 		{
-			var uriMatch = URI[j].match(regexForHTTPS);
 			var uri = URI[j];
+			uri = uri.replace(regexForHTTPS,"");
+			uri = uri.replace(/\/$/, "");
 
-			if(uriMatch != null)
-			{
-				uri = uri.replace(regexForHTTPS,"");
-			}
 			if(link.indexOf(uri) > 0)
 			{
 				var URIStamp = uri;
