@@ -17,9 +17,7 @@ function getImageArray(){
 	}
 	var interval = document.getElementById("interval").value;
 
-	timeStampWatermark();
-	URIStampWatermark();
-	timeAndURIStampWatermark();
+	watermark();
 	createGif(imageLinks, interval);
 
 	document.getElementById("gifButton").addEventListener("click", updateGif);
@@ -41,61 +39,51 @@ function updateGif(){
 		createGif(imageLinks, interval);
 	}
 }
-	
-function timeStampWatermark(){	
+
+
+function watermark(){	
+	var URI = $("#uriIP").val();
+	URI = URI.split(',');
+	var regexForPort = /(\/http:\/\/.*):(\80*)/g;
+	var regexForHTTPS = /(https?:\/\/)/gi;
 	for(var i = 0; i<imagesData_IG.length; i++)
 	{
-		
-		var stamp = imagesData_IG[i].event_display_date;
-		var img= new Image();
+		var img = new Image();
 		img.src = imageLinks[i];
-		watermarkImage(img,stamp,i,timeStampedImages);
-	}
-}
 
+		var timeStamp = imagesData_IG[i].event_display_date;
+		watermarkImage(img,timeStamp,i,timeStampedImages);
 
-function URIStampWatermark(){	
-	var URI = $("#uriIP").val();
-	URI = URI.split(',');
-
-	for(var i = 0; i<imagesData_IG.length; i++)
-	{
+		var link = imagesData_IG[i].event_link;
+		var linkMatch = link.match(regexForPort);
+		if(linkMatch != null && link.indexOf(":80") > 0)
+		{
+			link = link.replace(":80","");
+		}
 		
 		for(var j = 0; j<URI.length; j++)
 		{
-			if(imagesData_IG[i].event_link.indexOf(URI[j]) > 0)
+			var uriMatch = URI[j].match(regexForHTTPS);
+			var uri = URI[j];
+
+			if(uriMatch != null)
 			{
-				var stamp = URI[j];
-				stamp.replace(/\s/g,"");
-				var img = new Image();
-				img.src = imageLinks[i];
-				watermarkImage(img,stamp,i,URIStampedImages);
+				uri = uri.replace(regexForHTTPS,"");
+			}
+			if(link.indexOf(uri) > 0)
+			{
+				var URIStamp = uri;
+				URIStamp.replace(/\s/g,"");
+				watermarkImage(img,URIStamp,i,URIStampedImages);
+
+				var timeAndURIStamp =  URIStamp + "\n" + imagesData_IG[i].event_display_date;
+				watermarkImage(img,timeAndURIStamp,i,timeAndURIStampedImages);
 			}
 		}
 	}
 }
 
-function timeAndURIStampWatermark(){	
-	var URI = $("#uriIP").val();
-	URI = URI.split(',');
 
-	for(var i = 0; i<imagesData_IG.length; i++)
-	{
-		
-		for(var j = 0; j<URI.length; j++)
-		{
-			if(imagesData_IG[i].event_link.indexOf(URI[j]) > 0)
-			{
-				var stamp = URI[j];
-				stamp.replace(/\s/g,"");
-				stamp += "\n" + imagesData_IG[i].event_display_date;
-				var img = new Image();
-				img.src = imageLinks[i];
-				watermarkImage(img,stamp,i,timeAndURIStampedImages);
-			}
-		}
-	}
-}
 function watermarkImage(elemImage, text, counter,array) {
 	var testImage = new Image();
 	testImage.onload = function() {
