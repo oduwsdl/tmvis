@@ -1,6 +1,15 @@
 var imagesData_IG = [];
 
 function drawImageGrid(data){
+	var URI = $("#uriIP").val();
+	var multURI = false;
+	if(URI.indexOf(',') > 0){
+		URI = URI.split(',');
+		multURI = true;
+	}
+
+	var regexForPort = /(\/http:\/\/.*):(\80*)/g;
+	var regexForHTTPS = /(https?:\/\/)/gi;
 
 	imagesData_IG = [];
 	$("#imageGrid .grid-container ul").empty();
@@ -13,7 +22,29 @@ function drawImageGrid(data){
 	$(".collection_stats").html(memStatStr);
 	console.log(memStatStr);
 	$.each(imagesData_IG, function(i){
-		$("#imageGrid ul").append("<li class='button_container normalImage'><a class='row' target='_blank' href='" + imagesData_IG[i].event_link + "'><img  style='width:285px;height:185px;' class='gridimage' src='" + $(imagesData_IG[i].event_html).attr('src')+"'></img></a><button name='chooseMementos' class='refresh_button'><i class='fa fa-refresh'></i></button><button name='chooseMementos' class='close_button off'>x</button><span class='row gridimagedatetime'><b>Datetime: </b>" + (imagesData_IG[i].event_display_date).split(",")[0] + ", " + (imagesData_IG[i].event_display_date).split(",")[1] + "</span></li>");
+
+		if(multURI)
+		{
+			var link = imagesData_IG[i].event_link;
+			link = link.replace(":80","");
+
+			for(var j = 0; j < URI.length; ++j)
+			{
+				var uri = URI[j];
+
+				uri = uri.replace(regexForHTTPS,"");
+				uri = uri.replace(/\/$/, "");
+
+				if(link.indexOf(uri) > 0){
+					var stamp = uri;
+					stamp.replace(/\s/g,"");
+					$("#imageGrid ul").append("<li class='button_container normalImage'><a class='row' target='_blank' href='" + imagesData_IG[i].event_link + "'><img  style='width:285px;height:185px;' class='gridimage' src='" + $(imagesData_IG[i].event_html).attr('src')+"'></img></a><button name='chooseMementos' class='refresh_button'><i class='fa fa-refresh'></i></button><button name='chooseMementos' class='close_button off'>x</button><span class='row gridimagedatetime'><b>Datetime: </b>" + (imagesData_IG[i].event_display_date).split(",")[0] + ", " + (imagesData_IG[i].event_display_date).split(",")[1] + "</br><b>URI: </b>" + stamp + "</span></li>");
+				}
+			}
+		}
+		else{
+			$("#imageGrid ul").append("<li class='button_container normalImage'><a class='row' target='_blank' href='" + imagesData_IG[i].event_link + "'><img  style='width:285px;height:185px;' class='gridimage' src='" + $(imagesData_IG[i].event_html).attr('src')+"'></img></a><button name='chooseMementos' class='refresh_button'><i class='fa fa-refresh'></i></button><button name='chooseMementos' class='close_button off'>x</button><span class='row gridimagedatetime'><b>Datetime: </b>" + (imagesData_IG[i].event_display_date).split(",")[0] + ", " + (imagesData_IG[i].event_display_date).split(",")[1] + "</span></li>");
+		}
 		//console.log("<li><a target='_blank' href='" + imagesData_IG[i].event_link + "'><img style='height:150px;' src='" + $(imagesData_IG[i].event_html).attr('src')+"'></img></a><b>Datetime: </b>" + (imagesData_IG[i].event_display_date).split(",")[0] + ", " + (imagesData_IG[i].event_display_date).split(",")[1] + "</li>");
 	});
 }

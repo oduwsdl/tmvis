@@ -129,7 +129,7 @@
 						</div>
 						<div class="histogramOptions row">
 							<div id="dateBox">
-									<p class="dateTitle" id="selected_mementos"></p>
+									<p class="dateTitle">Mementos Selected: <b id="selected_mementos"></b></p>
 									<p class="dateTitle">From: </p><input type="text" placeholder="yyyy-mm-dd" id="fromInput">
 									<p class="dateTitle">To: </p><input type="text" placeholder="yyyy-mm-dd" id="toInput">
 									<button class="btn btn-primary" id="updateDateRange"> Update </button>
@@ -205,9 +205,14 @@
 								<input type="number" name="in" min=".1" step=".1" value="1" id="interval">
 								<div class="inputControl-addon">sec</div>	
 
-								<label id= "watermarkLabel">
-									<input type="checkbox" id="watermarkOption">
+								<label id= "timeWatermarkLabel">
+									<input type="checkbox" id="timeWatermarkOption">
 									Add Timestamp
+								</label>
+
+								<label id= "URIWatermarkLabel" style= "margin-left: 10px;">
+									<input type="checkbox" id="URIWatermarkOption">
+									Add URI
 								</label>
 
 								<br><button class="btn btn-primary" id="gifButton">Update GIF</button>

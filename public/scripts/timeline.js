@@ -886,7 +886,7 @@ function getHistoData(toDisplay){
               // For date range input box
               document.getElementById("fromInput").defaultValue = fromDateStr;
               document.getElementById("toInput").defaultValue = toDateStr;
-              document.getElementById("selected_mementos").innerHTML = "Mementos selected: " + histoData.length;
+              document.getElementById("selected_mementos").innerHTML = histoData.length;
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
@@ -1145,12 +1145,17 @@ function getSummary(from, to){
                       return;
                   }
               });
-              console.log(jsonObjRes);
+              //console.log(jsonObjRes);
               displayedMementos = JSON.parse(JSON.stringify(jsonObjRes)); // create deep copy of mementos
               drawImageGrid(jsonObjRes); // calling Image Grid Function here
               drawImageSlider(jsonObjRes);
               getImageArray(); //calling GIF function
               generateMementoURIList(jsonObjRes);
+
+              if($('.argumentsForm #urirIP').val().indexOf(",") < 0) // give URI stamp option to the user if multiple URIs
+              {
+                $("#URIWatermarkLabel").hide();
+              }
           }
           catch(err){
             alert("Some problem fetching the response, Please refresh and try again.");
@@ -1292,38 +1297,49 @@ $(function(){
     
     $("#submitRange").click(function(event){
         //localStorage.setItem("submitRangeClicked,"true");
+
+        var selectedMementos = parseInt(document.getElementById("selected_mementos").innerHTML);
+
         var fromBox = document.getElementById("fromInput").defaultValue;
         var toBox = document.getElementById("toInput").defaultValue;
         var from = document.getElementById("fromInput").value;
         var to = document.getElementById("toInput").value;
 
-        if(isValidDate(from) && isValidDate(to))
+        if(selectedMementos > 0)
         {
-            // Create date objects for comparison
-            fromBox = new Date(fromBox);
-            toBox = new Date(toBox);
-            var fromDate = new Date(from);
-            var toDate = new Date(to);
-            if(fromDate < toDate) // Check that dates are in the proper order
+            if(isValidDate(from) && isValidDate(to))
             {
-                if(fromDate > fromBox || toDate < toBox)
+                // Create date objects for comparison
+                fromBox = new Date(fromBox);
+                toBox = new Date(toBox);
+                var fromDate = new Date(from);
+                var toDate = new Date(to);
+                if(fromDate < toDate) // Check that dates are in the proper order
                 {
-                    var theDateRange = "Requested Date Range: " + from + " - " + to;
-                    $(".statsWrapper .Memento_Date_Range").html(theDateRange);
-                    console.log("Fetching date range stats...");
-                    getStats(from, to);
+                    if(fromDate > fromBox || toDate < toBox)
+                    {
+                        var theDateRange = "Requested Date Range: " + from + " - " + to;
+                        $(".statsWrapper .Memento_Date_Range").html(theDateRange);
+                        console.log("Fetching date range stats...");
+                        getStats(from, to);
+                    }
+                    else
+                        getStats(0,0); // Dates were set to full default range
                 }
                 else
-                    getStats(0,0); // Dates were set to full default range
+                {
+                    document.getElementById('date_error').innerHTML = "Please enter a from date that is less than the to date";
+                    document.getElementById('date_error').style.display = "block";
+                }
             }
             else
-            {
-                document.getElementById('date_error').innerHTML = "Please enter a from date that is less than the to date";
                 document.getElementById('date_error').style.display = "block";
-            }
         }
         else
+        {
+            document.getElementById('date_error').innerHTML = "Please select at least one memento";
             document.getElementById('date_error').style.display = "block";
+        }
     });
     
     $("#generateAllThumbnails").click(function(event){

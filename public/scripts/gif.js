@@ -1,10 +1,15 @@
 var imageLinks = [];
-var stampedImages = [];
+var timeStampedImages = [];
+var URIStampedImages =[];
+var timeAndURIStampedImages = [];
 
 function getImageArray(){
 	$("#gif #gifContent #gifApp").empty();
 	imageLinks = [];
-	stampedImages = [];
+	timeStampedImages = [];
+	URIStampedImages = [];
+	timeAndURIStampedImages = [];
+
 	for(var i = 0; i<imagesData_IG.length; i++)
 	{
 		imageLinks[i] = $(imagesData_IG[i].event_html).attr('src');
@@ -21,29 +26,58 @@ function getImageArray(){
 function updateGif(){
 	$("#gifApp").empty();
 	var interval = document.getElementById("interval").value;
+	var timeWatermarkOption = document.getElementById("timeWatermarkOption");
+	var URIWatermarkOption = document.getElementById("URIWatermarkOption");
 
-	if(document.getElementById("watermarkOption").checked == true)
-	{
-		createGif(stampedImages,interval);
-	}
-	else{
+	if(timeWatermarkOption.checked == true && URIWatermarkOption.checked == true) {
+		createGif(timeAndURIStampedImages,interval);
+	} else if(timeWatermarkOption.checked == true) {
+		createGif(timeStampedImages,interval);
+	} else if(URIWatermarkOption.checked == true) {
+		createGif(URIStampedImages,interval);
+	} else{
 		createGif(imageLinks, interval);
 	}
 }
-	
+
+
 function watermark(){	
+	var URI = $("#uriIP").val();
+	URI = URI.split(',');
+	var regexForPort = /(\/http:\/\/.*):(\80*)/g;
+	var regexForHTTPS = /(https?:\/\/)/gi;
 	for(var i = 0; i<imagesData_IG.length; i++)
 	{
-		
-		var stamp = imagesData_IG[i].event_display_date;
-		var img= new Image();
+		var img = new Image();
 		img.src = imageLinks[i];
-		watermarkImage(img,stamp,i);
+
+		var timeStamp = imagesData_IG[i].event_display_date;
+		watermarkImage(img,timeStamp,i,timeStampedImages);
+
+		var link = imagesData_IG[i].event_link;
+		link = link.replace(":80","");
+		
+		for(var j = 0; j<URI.length; j++)
+		{
+			var uri = URI[j];
+			uri = uri.replace(regexForHTTPS,"");
+			uri = uri.replace(/\/$/, "");
+
+			if(link.indexOf(uri) > 0)
+			{
+				var URIStamp = uri;
+				URIStamp.replace(/\s/g,"");
+				watermarkImage(img,URIStamp,i,URIStampedImages);
+
+				var timeAndURIStamp =  URIStamp + "\n" + imagesData_IG[i].event_display_date;
+				watermarkImage(img,timeAndURIStamp,i,timeAndURIStampedImages);
+			}
+		}
 	}
 }
 
 
-function watermarkImage(elemImage, text, counter) {
+function watermarkImage(elemImage, text, counter,array) {
 	var testImage = new Image();
 	testImage.onload = function() {
 		var h = testImage.height, w = testImage.width, img = new Image();
@@ -57,7 +91,7 @@ function watermarkImage(elemImage, text, counter) {
 					      
 			try {
 					elemImage.src = canvas.toDataURL('image/png');
-					stampedImages[counter] = elemImage.src;
+					array[counter] = elemImage.src;
 					//console.log(elemImage.src);
 			}
 			catch (e) {
