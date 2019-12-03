@@ -163,7 +163,7 @@ function getHistogram(dateArray){
 
 		var total_selected = selectedBars(d0[0], d0[1], total_selected);
 
-		d3.select("#selected_mementos").text("Mementos selected: " + total_selected);
+		d3.select("#selected_mementos").text(total_selected);
 
 		// Prevent range from going past possible domain
 		if(d0[0] < from)
@@ -211,7 +211,7 @@ function getHistogram(dateArray){
 
 		var total_selected = selectedBars(d1[0], d1[1], total_selected);
 
-		d3.select("#selected_mementos").text("Mementos selected: " + total_selected);
+		d3.select("#selected_mementos").text(total_selected);
 
 		// Prevent range from going past possible domain
 		if(d1[0] < from)
@@ -274,7 +274,7 @@ function getHistogram(dateArray){
 
 				var total_selected = selectedBars(fromDate, toDate, total_selected);
 
-				d3.select("#selected_mementos").text("Mementos selected: " + total_selected);
+				d3.select("#selected_mementos").text(total_selected);
 
 				// Append tooltips on mouseover
 				zoomsvg.selectAll("rect")
