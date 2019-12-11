@@ -588,6 +588,9 @@ function PublicEndpoint () {
             if(isToOverrideCachedSimHash){
               ConsoleLogIfRequired("Responded to compute latest simhahes, Proceeding...");
               getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
+            }else if(t.role == "histogram"){
+              ConsoleLogIfRequired("Responded to grab latest set of mementos");
+              getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
             }else{
               ConsoleLogIfRequired("Responded to continue with the exisitng cached simhashes file. Proceeding..");
               constructSSE('cached simhashes exist, proceeding with cache...',request.headers["x-my-curuniqueusersessionid"]);
