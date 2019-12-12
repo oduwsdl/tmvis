@@ -416,7 +416,7 @@ function getHistogram(dateArray){
         document.getElementById("brush_clear").style.background = "#ccc";
 
 		// Reset selected mementos
-        d3.select("#selected_mementos").text("Mementos selected: " + data.length);
+        d3.select("#selected_mementos").text(data.length);
 		// Remove brush
 		d3.select("g.brush").call(gBrush.move, null);
 
