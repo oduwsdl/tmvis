@@ -1808,7 +1808,7 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
 
 TimeMap.prototype.supplyAllMementosAScreenshotURI = function(callback){
   for(var m in this.mementos){
-    var filename = 'timemapSum_' + '_'+ this.mementos[m].uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png';
+    var filename = 'timemapSum_' + this.mementos[m].uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png';
     this.mementos[m].screenshotURI = filename;
   }
 
