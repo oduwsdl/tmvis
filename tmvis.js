@@ -67,7 +67,7 @@ var rimraf = require('rimraf');
 const puppeteer = require('puppeteer');
 var HashMap = require('hashmap');
 var cookieParser = require("cookie-parser");
-
+var normalizeUrl = require("normalize-url");
 
 var zlib = require('zlib');
 var app = express();
@@ -575,7 +575,7 @@ function PublicEndpoint () {
 
     // TODO: optimize this out of the conditional so the functions needed for each strategy are self-contained (and possibly OOP-ified)
     if (strategy === 'alSummarization') {
-      var cacheFile = new SimhashCacheFile( query.primesource+"_"+query.ci+"_"+query['urir'],isDebugMode);
+      var cacheFile = new SimhashCacheFile( query.primesource+"_"+query.ci+"_"+urlCanonicalize(query['urir']),isDebugMode);
       cacheFile.path += '.json';
       ConsoleLogIfRequired('Checking if a cache file exists for ' + query['urir'] + '...');
       constructSSE('Checking if a cache file exists for ' + query['urir'] + '...',request.headers["x-my-curuniqueusersessionid"]);
@@ -677,7 +677,7 @@ function cleanSystemData (cb) {
 function processWithFileContents (uri, fileContents, response,curCookieClientId) {
   var t = createMementosFromJSONFile(fileContents);
   t.curClientId = curCookieClientId;
-  t.originalURI = response.thumbnails['urir'];
+  t.originalURI = urlCanonicalize(response.thumbnails['urir']);
   t.primesource = response.thumbnails['primesource'];
   t.collectionidentifier = response.thumbnails['collectionidentifier'];
   t.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
@@ -991,6 +991,30 @@ TimeMap.prototype.deleteCachedMementos = function(cachedMementos, callback)
     if(callback){callback('')}
 }
 
+//normalize url for cache naming
+function urlCanonicalize(url)
+{
+    var options = {stripProtocol: true,
+                stripWWW: true,
+                sortQueryParameters: true,
+                removeTrailingSlash: true,
+                stripHash: true};
+
+    var canonicalizedURL = "";
+    if(URIs.length == 1)
+    {
+        canonicalizedURL = normalizeUrl(url,options);
+    }else{
+        var sortedURIs = URIs.sort();
+        for(var i in sortedURIs)
+        {
+            canonicalizedURL += normalizeUrl(sortedURIs[i],options);
+        }
+    }
+
+    return canonicalizedURL;
+}
+
 //Determines if the uri type is URI-R, URI-M, URI-TM in order set appropriate host and path
 function determineURIType (uri, response)
 {
@@ -1091,7 +1115,7 @@ TimeMap.prototype.fetchTimemap = function(uri, response, curCookieClientId, call
                   // ConsoleLogIfRequired("-----------ByMahee--------");
                              
                   t.str = buffer;
-                  t.originalURI = uri ;// Need this for a filename for caching
+                  t.originalURI = urlCanonicalize(uri);// Need this for a filename for caching
                   t.primesource = response.thumbnails['primesource'];
                   t.collectionidentifier = response.thumbnails['collectionidentifier'];
                   t.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
@@ -1135,7 +1159,7 @@ TimeMap.prototype.fetchTimemap = function(uri, response, curCookieClientId, call
                   if(response.thumbnails['from'] != 0) // if from date was given, filter mementos
                   {
                       fullTimemap = new TimeMap(buffer);
-                      fullTimemap.originalURI = uri ;
+                      fullTimemap.originalURI = urlCanonicalize(uri);
                       fullTimemap.primesource = response.thumbnails['primesource'];
                       fullTimemap.collectionidentifier = response.thumbnails['collectionidentifier'];
                       fullTimemap.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
