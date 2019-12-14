@@ -506,7 +506,7 @@ function PublicEndpoint () {
     URIs = query['urir'].split(",");
 
     if(URIs.length == 0)
-        URIs = [uri];
+        URIs = [query.urir];
 
     for (var i = 0; i < URIs.length; i++) {
         if (!URIs[i].match(/^[a-zA-Z]+:\/\//)) {
