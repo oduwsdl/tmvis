@@ -89,7 +89,7 @@ var Stack = require('stackjs');
 
 var URIs = [];
 var dateRange = false;
-var fullTimemap = new TimeMap(); 
+//var fullTimemap = new TimeMap(); 
 //return
 /* *******************************
    TODO: reorder functions (main first) to be more maintainable 20141205
@@ -692,7 +692,14 @@ function processWithFileContents (uri, fileContents, response,curCookieClientId)
 
   if(t.mementos.length != response.thumbnails['numMementos'])
   {
-    updateCache(t, uri,response, curCookieClientId);
+    var fullCachedTimemap = createMementosFromJSONFile(fileContents);
+    fullCachedTimemap.curClientId = curCookieClientId;
+    fullCachedTimemap.originalURI = urlCanonicalize(response.thumbnails['urir']);
+    fullCachedTimemap.primesource = response.thumbnails['primesource'];
+    fullCachedTimemap.collectionidentifier = response.thumbnails['collectionidentifier'];
+    fullCachedTimemap.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
+    fullCachedTimemap.role = response.thumbnails['role'];
+    updateCache(fullCachedTimemap, t, uri,response, curCookieClientId);
   } else {
     if(t.mementos.simhash === 'undefined'){
       getTimemapGodFunctionForAlSummarization(uri, response,curCookieClientId);
@@ -906,12 +913,19 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,notDateRan
     req.end();
 }
 
-function updateCache(t, uri,response, curCookieClientId)
+function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId)
 {
+    ConsoleLogIfRequired("Inside updateCache()");
     var updatedTimemap = new TimeMap();
     async.series([
         function(callback){
             updatedTimemap.fetchTimemap(uri, response, curCookieClientId, callback);
+        },
+        function(callback){
+            if(response.thumbnails["from"] != 0){
+                updatedTimemap.mementos = updatedTimemap.filterMementosForDateRange(response);
+            }
+            callback('');     
         },
         function(callback){
             //remove cached mementos
@@ -922,13 +936,17 @@ function updateCache(t, uri,response, curCookieClientId)
         },
         function(callback){
             //merge new mementos new and sort
+            fullCachedTimemap.mementos = fullCachedTimemap.mementos.concat(updatedTimemap.mementos);
+            fullCachedTimemap.mementos.sort(dateSort);
+            fullCachedTimemap.mementos = getUnique(fullCachedTimemap.mementos,"uri");
+
             t.mementos = t.mementos.concat(updatedTimemap.mementos);
             t.mementos.sort(dateSort);
+            t.mementos = getUnique(t.mementos,"uri");
             callback('');
-
         },
         function(callback){
-            t.saveSimhashesToCache(callback);
+            fullCachedTimemap.saveSimhashesToCache(callback);
         },
         function (callback) {
             if(t.role == "stats"){
@@ -945,7 +963,7 @@ function updateCache(t, uri,response, curCookieClientId)
             }
         },
         function(callback) {
-            t.writeJSONToCache(callback);
+            fullCachedTimemap.writeJSONToCache(callback);
         },
         function (callback) {
             t.createScreenshotsForMementos(curCookieClientId,response,callback);
@@ -989,6 +1007,21 @@ TimeMap.prototype.deleteCachedMementos = function(cachedMementos, callback)
         }
     }
     if(callback){callback('')}
+}
+
+//remove duplicates from an array
+function getUnique(arr, comp) {
+
+  const unique = arr
+       .map(e => e[comp])
+
+     // store the keys of the unique objects
+    .map((e, i, final) => final.indexOf(e) === i && i)
+
+    // eliminate the dead keys & store unique objects
+    .filter(e => arr[e]).map(e => arr[e]);
+
+   return unique;
 }
 
 //normalize url for cache naming
@@ -1156,7 +1189,7 @@ TimeMap.prototype.fetchTimemap = function(uri, response, curCookieClientId, call
                     if(URIs.length > 1 && t.role == "histogram")
                       t.mementos.sort(dateSort);
 
-                  if(response.thumbnails['from'] != 0) // if from date was given, filter mementos
+                  /*if(response.thumbnails['from'] != 0) // if from date was given, filter mementos
                   {
                       fullTimemap = new TimeMap(buffer);
                       fullTimemap.originalURI = urlCanonicalize(uri);
@@ -1167,7 +1200,7 @@ TimeMap.prototype.fetchTimemap = function(uri, response, curCookieClientId, call
                       fullTimemap.createMementos();
 
                       t.mementos = t.filterMementosForDateRange(response);
-                  }
+                  }*/
                            
                   if (t.mementos.length == 0) {
                       ConsoleLogIfRequired('There were no mementos in this date range:(');
@@ -1242,6 +1275,12 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
     function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP */
 
     // -- ByMahee -- Uncomment one by one for CLI_JSON
+    function(callback) {
+        if(response.thumbnails['from'] != 0){
+            t.mementos = t.filterMementosForDateRange(response);
+        }
+        callback('');
+    },
     function (callback) {
       if (t.role == "histogram" || (t.hammingdistancethreshold == '0' && t.role == "summary")) {
         callback('');
