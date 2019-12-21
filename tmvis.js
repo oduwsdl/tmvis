@@ -1494,34 +1494,16 @@ TimeMap.prototype.getDatesForHistogram = function (callback,response,curCookieCl
 */
 TimeMap.prototype.filterMementosForDateRange = function(response)
 {
+  ConsoleLogIfRequired("Inside filterMementosForDateRange()");
   var theFromDate = new Date(response.thumbnails['from']);
   var theToDate = new Date(response.thumbnails['to']);
 
-  var resizedMementosLength = this.mementos.length;
-  var tempMementoArr = [];
-  var tempStackOfMementos = new Stack();
-  var mementoCount = 0;
-
-  // Only consider mementos in the given date range
-  for(var i = resizedMementosLength - 1; i > 0; i--)
-  {
-    var tryDate = new Date(this.mementos[i].datetime);
-    if(tryDate > theFromDate && tryDate < theToDate)
-    {
-      tempStackOfMementos.push(this.mementos[i]);
-      mementoCount++;
-    }
-  }
-  for(var i = 0;i < mementoCount; i++)
-  {
-    tempMementoArr.push(tempStackOfMementos.pop());
-  }
-
-  if(tempMementoArr.length > 0){
-    tempMementoArr[0]["rel"] = "first memento";
-  }
-
-  return tempMementoArr;
+  var filtered = this.mementos.filter(function (curMemento){
+    var tryDate = new Date(curMemento.datetime);
+    return tryDate >= theFromDate && tryDate <= theToDate;
+  });
+  ConsoleLogIfRequired("Filtered memento array size: "+filtered.length);
+  return filtered;
 }
 
 /**
