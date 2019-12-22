@@ -67,7 +67,7 @@ var rimraf = require('rimraf');
 const puppeteer = require('puppeteer');
 var HashMap = require('hashmap');
 var cookieParser = require("cookie-parser");
-
+var normalizeUrl = require("normalize-url");
 
 var zlib = require('zlib');
 var app = express();
@@ -89,7 +89,7 @@ var Stack = require('stackjs');
 
 var URIs = [];
 var dateRange = false;
-var fullTimemap = new TimeMap(); 
+//var fullTimemap = new TimeMap(); 
 //return
 /* *******************************
    TODO: reorder functions (main first) to be more maintainable 20141205
@@ -506,7 +506,7 @@ function PublicEndpoint () {
     URIs = query['urir'].split(",");
 
     if(URIs.length == 0)
-        URIs = [uri];
+        URIs = [query.urir];
 
     for (var i = 0; i < URIs.length; i++) {
         if (!URIs[i].match(/^[a-zA-Z]+:\/\//)) {
@@ -575,7 +575,7 @@ function PublicEndpoint () {
 
     // TODO: optimize this out of the conditional so the functions needed for each strategy are self-contained (and possibly OOP-ified)
     if (strategy === 'alSummarization') {
-      var cacheFile = new SimhashCacheFile( query.primesource+"_"+query.ci+"_"+query['urir'],isDebugMode);
+      var cacheFile = new SimhashCacheFile( query.primesource+"_"+query.ci+"_"+urlCanonicalize(query['urir']),isDebugMode);
       cacheFile.path += '.json';
       ConsoleLogIfRequired('Checking if a cache file exists for ' + query['urir'] + '...');
       constructSSE('Checking if a cache file exists for ' + query['urir'] + '...',request.headers["x-my-curuniqueusersessionid"]);
@@ -677,7 +677,7 @@ function cleanSystemData (cb) {
 function processWithFileContents (uri, fileContents, response,curCookieClientId) {
   var t = createMementosFromJSONFile(fileContents);
   t.curClientId = curCookieClientId;
-  t.originalURI = response.thumbnails['urir'];
+  t.originalURI = urlCanonicalize(response.thumbnails['urir']);
   t.primesource = response.thumbnails['primesource'];
   t.collectionidentifier = response.thumbnails['collectionidentifier'];
   t.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
@@ -692,7 +692,14 @@ function processWithFileContents (uri, fileContents, response,curCookieClientId)
 
   if(t.mementos.length != response.thumbnails['numMementos'])
   {
-    updateCache(t, uri,response, curCookieClientId);
+    var fullCachedTimemap = createMementosFromJSONFile(fileContents);
+    fullCachedTimemap.curClientId = curCookieClientId;
+    fullCachedTimemap.originalURI = urlCanonicalize(response.thumbnails['urir']);
+    fullCachedTimemap.primesource = response.thumbnails['primesource'];
+    fullCachedTimemap.collectionidentifier = response.thumbnails['collectionidentifier'];
+    fullCachedTimemap.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
+    fullCachedTimemap.role = response.thumbnails['role'];
+    updateCache(fullCachedTimemap, t, uri,response, curCookieClientId);
   } else {
     if(t.mementos.simhash === 'undefined'){
       getTimemapGodFunctionForAlSummarization(uri, response,curCookieClientId);
@@ -906,12 +913,19 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,notDateRan
     req.end();
 }
 
-function updateCache(t, uri,response, curCookieClientId)
+function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId)
 {
+    ConsoleLogIfRequired("Inside updateCache()");
     var updatedTimemap = new TimeMap();
     async.series([
         function(callback){
             updatedTimemap.fetchTimemap(uri, response, curCookieClientId, callback);
+        },
+        function(callback){
+            if(response.thumbnails["from"] != 0){
+                updatedTimemap.mementos = updatedTimemap.filterMementosForDateRange(response);
+            }
+            callback('');     
         },
         function(callback){
             //remove cached mementos
@@ -922,13 +936,17 @@ function updateCache(t, uri,response, curCookieClientId)
         },
         function(callback){
             //merge new mementos new and sort
+            fullCachedTimemap.mementos = fullCachedTimemap.mementos.concat(updatedTimemap.mementos);
+            fullCachedTimemap.mementos.sort(dateSort);
+            fullCachedTimemap.mementos = getUnique(fullCachedTimemap.mementos,"uri");
+
             t.mementos = t.mementos.concat(updatedTimemap.mementos);
             t.mementos.sort(dateSort);
+            t.mementos = getUnique(t.mementos,"uri");
             callback('');
-
         },
         function(callback){
-            t.saveSimhashesToCache(callback);
+            fullCachedTimemap.saveSimhashesToCache(callback);
         },
         function (callback) {
             if(t.role == "stats"){
@@ -945,7 +963,7 @@ function updateCache(t, uri,response, curCookieClientId)
             }
         },
         function(callback) {
-            t.writeJSONToCache(callback);
+            fullCachedTimemap.writeJSONToCache(callback);
         },
         function (callback) {
             t.createScreenshotsForMementos(curCookieClientId,response,callback);
@@ -989,6 +1007,45 @@ TimeMap.prototype.deleteCachedMementos = function(cachedMementos, callback)
         }
     }
     if(callback){callback('')}
+}
+
+//remove duplicates from an array
+function getUnique(arr, comp) {
+
+  const unique = arr
+       .map(e => e[comp])
+
+     // store the keys of the unique objects
+    .map((e, i, final) => final.indexOf(e) === i && i)
+
+    // eliminate the dead keys & store unique objects
+    .filter(e => arr[e]).map(e => arr[e]);
+
+   return unique;
+}
+
+//normalize url for cache naming
+function urlCanonicalize(url)
+{
+    var options = {stripProtocol: true,
+                stripWWW: true,
+                sortQueryParameters: true,
+                removeTrailingSlash: true,
+                stripHash: true};
+
+    var canonicalizedURL = "";
+    if(URIs.length == 1)
+    {
+        canonicalizedURL = normalizeUrl(url,options);
+    }else{
+        var sortedURIs = URIs.sort();
+        for(var i in sortedURIs)
+        {
+            canonicalizedURL += normalizeUrl(sortedURIs[i],options);
+        }
+    }
+
+    return canonicalizedURL;
 }
 
 //Determines if the uri type is URI-R, URI-M, URI-TM in order set appropriate host and path
@@ -1091,7 +1148,7 @@ TimeMap.prototype.fetchTimemap = function(uri, response, curCookieClientId, call
                   // ConsoleLogIfRequired("-----------ByMahee--------");
                              
                   t.str = buffer;
-                  t.originalURI = uri ;// Need this for a filename for caching
+                  t.originalURI = urlCanonicalize(uri);// Need this for a filename for caching
                   t.primesource = response.thumbnails['primesource'];
                   t.collectionidentifier = response.thumbnails['collectionidentifier'];
                   t.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
@@ -1132,10 +1189,10 @@ TimeMap.prototype.fetchTimemap = function(uri, response, curCookieClientId, call
                     if(URIs.length > 1 && t.role == "histogram")
                       t.mementos.sort(dateSort);
 
-                  if(response.thumbnails['from'] != 0) // if from date was given, filter mementos
+                  /*if(response.thumbnails['from'] != 0) // if from date was given, filter mementos
                   {
                       fullTimemap = new TimeMap(buffer);
-                      fullTimemap.originalURI = uri ;
+                      fullTimemap.originalURI = urlCanonicalize(uri);
                       fullTimemap.primesource = response.thumbnails['primesource'];
                       fullTimemap.collectionidentifier = response.thumbnails['collectionidentifier'];
                       fullTimemap.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
@@ -1143,7 +1200,7 @@ TimeMap.prototype.fetchTimemap = function(uri, response, curCookieClientId, call
                       fullTimemap.createMementos();
 
                       t.mementos = t.filterMementosForDateRange(response);
-                  }
+                  }*/
                            
                   if (t.mementos.length == 0) {
                       ConsoleLogIfRequired('There were no mementos in this date range:(');
@@ -1218,6 +1275,12 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
     function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP */
 
     // -- ByMahee -- Uncomment one by one for CLI_JSON
+    function(callback) {
+        if(response.thumbnails['from'] != 0){
+            t.mementos = t.filterMementosForDateRange(response);
+        }
+        callback('');
+    },
     function (callback) {
       if (t.role == "histogram" || (t.hammingdistancethreshold == '0' && t.role == "summary")) {
         callback('');
@@ -1470,34 +1533,16 @@ TimeMap.prototype.getDatesForHistogram = function (callback,response,curCookieCl
 */
 TimeMap.prototype.filterMementosForDateRange = function(response)
 {
+  ConsoleLogIfRequired("Inside filterMementosForDateRange()");
   var theFromDate = new Date(response.thumbnails['from']);
   var theToDate = new Date(response.thumbnails['to']);
 
-  var resizedMementosLength = this.mementos.length;
-  var tempMementoArr = [];
-  var tempStackOfMementos = new Stack();
-  var mementoCount = 0;
-
-  // Only consider mementos in the given date range
-  for(var i = resizedMementosLength - 1; i > 0; i--)
-  {
-    var tryDate = new Date(this.mementos[i].datetime);
-    if(tryDate > theFromDate && tryDate < theToDate)
-    {
-      tempStackOfMementos.push(this.mementos[i]);
-      mementoCount++;
-    }
-  }
-  for(var i = 0;i < mementoCount; i++)
-  {
-    tempMementoArr.push(tempStackOfMementos.pop());
-  }
-
-  if(tempMementoArr.length > 0){
-    tempMementoArr[0]["rel"] = "first memento";
-  }
-
-  return tempMementoArr;
+  var filtered = this.mementos.filter(function (curMemento){
+    var tryDate = new Date(curMemento.datetime);
+    return tryDate >= theFromDate && tryDate <= theToDate;
+  });
+  ConsoleLogIfRequired("Filtered memento array size: "+filtered.length);
+  return filtered;
 }
 
 /**
@@ -1784,7 +1829,7 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
 
 TimeMap.prototype.supplyAllMementosAScreenshotURI = function(callback){
   for(var m in this.mementos){
-    var filename = 'timemapSum_' + '_'+ this.mementos[m].uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png';
+    var filename = 'timemapSum_' + this.mementos[m].uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png';
     this.mementos[m].screenshotURI = filename;
   }
 
