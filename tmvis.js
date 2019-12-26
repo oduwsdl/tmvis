@@ -89,6 +89,7 @@ var Stack = require('stackjs');
 
 var URIs = [];
 var dateRange = false;
+var mementosFromMultipleURIs = [];
 //var fullTimemap = new TimeMap(); 
 //return
 /* *******************************
@@ -573,46 +574,53 @@ function PublicEndpoint () {
     t.hammingdistancethreshold = query.hdt;
     t.role = query.role;
 
-    // TODO: optimize this out of the conditional so the functions needed for each strategy are self-contained (and possibly OOP-ified)
-    if (strategy === 'alSummarization') {
-      var cacheFile = new SimhashCacheFile( query.primesource+"_"+query.ci+"_"+urlCanonicalize(query['urir']),isDebugMode);
-      cacheFile.path += '.json';
-      ConsoleLogIfRequired('Checking if a cache file exists for ' + query['urir'] + '...');
-      constructSSE('Checking if a cache file exists for ' + query['urir'] + '...',request.headers["x-my-curuniqueusersessionid"]);
-      constructSSE("percentagedone-10",request.headers["x-my-curuniqueusersessionid"]);
+    // If more than 1 URI was passed at once, check if each individual URI has been cached.
+    // If not, cache it. Then merge the timemaps of each URI for the user.
+    if(URIs.length > 1 && t.role != "histogram") {
+      processMultipleURIs(t, query, response, request.headers["x-my-curuniqueusersessionid"]);
+    }
+    else {
+      // TODO: optimize this out of the conditional so the functions needed for each strategy are self-contained (and possibly OOP-ified)
+      if (strategy === 'alSummarization') {
+        var cacheFile = new SimhashCacheFile( query.primesource+"_"+query.ci+"_"+urlCanonicalize(query['urir']),isDebugMode);
+        cacheFile.path += '.json';
+        ConsoleLogIfRequired('Checking if a cache file exists for ' + query['urir'] + '...');
+        constructSSE('Checking if a cache file exists for ' + query['urir'] + '...',request.headers["x-my-curuniqueusersessionid"]);
+        constructSSE("percentagedone-10",request.headers["x-my-curuniqueusersessionid"]);
 
-      //  ConsoleLogIfRequired('cacheFile: '+JSON.stringify(cacheFile))
-        cacheFile.readFileContents(
-        function success (data) {
-          // A cache file has been previously generated using the alSummarization strategy
+        //  ConsoleLogIfRequired('cacheFile: '+JSON.stringify(cacheFile))
+          cacheFile.readFileContents(
+          function success (data) {
+            // A cache file has been previously generated using the alSummarization strategy
 
-          // ByMahee -- ToDo: We can even add a prompt from user asking whether he would want to recompute hashes here
-          ConsoleLogIfRequired("**ByMahee** -- readFileContents : Inside Success ReadFile Content, processWithFileContents is called next ");
+            // ByMahee -- ToDo: We can even add a prompt from user asking whether he would want to recompute hashes here
+            ConsoleLogIfRequired("**ByMahee** -- readFileContents : Inside Success ReadFile Content, processWithFileContents is called next ");
 
-            if(isToOverrideCachedSimHash){
-              ConsoleLogIfRequired("Responded to compute latest simhahes, Proceeding...");
-              getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
-            }else if(t.role == "histogram"){
-              ConsoleLogIfRequired("Responded to grab latest set of mementos");
-              getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
-            }else{
-              ConsoleLogIfRequired("Responded to continue with the exisitng cached simhashes file. Proceeding..");
-              constructSSE('cached simhashes exist, proceeding with cache...',request.headers["x-my-curuniqueusersessionid"]);
-              constructSSE("percentagedone-15",request.headers["x-my-curuniqueusersessionid"]);
+              if(isToOverrideCachedSimHash){
+                ConsoleLogIfRequired("Responded to compute latest simhahes, Proceeding...");
+                getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
+              }else if(t.role == "histogram"){
+                ConsoleLogIfRequired("Responded to grab latest set of mementos");
+                getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
+              }else{
+                ConsoleLogIfRequired("Responded to continue with the exisitng cached simhashes file. Proceeding..");
+                constructSSE('cached simhashes exist, proceeding with cache...',request.headers["x-my-curuniqueusersessionid"]);
+                constructSSE("percentagedone-15",request.headers["x-my-curuniqueusersessionid"]);
 
-              processWithFileContents(query['urir'], data, response,request.headers["x-my-curuniqueusersessionid"]);
-            }
+                processWithFileContents(query['urir'], data, response,request.headers["x-my-curuniqueusersessionid"]);
+              }
 
-        },
-        function failed () {
-          //ByMahee -- calling the core function responsible for AlSummarization, if the cached file doesn't exist
-          ConsoleLogIfRequired("**ByMahee** -- readFileContents : Inside Failed ReadFile Content (meaning file doesn't exist), getTimemapGodFunctionForAlSummarization is called next ");
-          constructSSE("cached simhashes doesn't exist, proceeding to compute the simhashes...",request.headers["x-my-curuniqueusersessionid"]);
+          },
+          function failed () {
+            //ByMahee -- calling the core function responsible for AlSummarization, if the cached file doesn't exist
+            ConsoleLogIfRequired("**ByMahee** -- readFileContents : Inside Failed ReadFile Content (meaning file doesn't exist), getTimemapGodFunctionForAlSummarization is called next ");
+            constructSSE("cached simhashes doesn't exist, proceeding to compute the simhashes...",request.headers["x-my-curuniqueusersessionid"]);
 
-          getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
-        }
+            getTimemapGodFunctionForAlSummarization(query['urir'], response,request.headers["x-my-curuniqueusersessionid"]);
+          }
 
-      );
+        );
+      }
     }
   }
 }
@@ -669,6 +677,170 @@ function cleanSystemData (cb) {
   }
 }
 
+function processMultipleURIs(t, query, response, curCookieClientId) {
+  var uriList =  query['urir'].split(',');
+
+  mementosFromMultipleURIs = [];
+
+  async.series([
+      function(callback) {
+        checkIfCachedForMultipleURIs(uriList, query, response, curCookieClientId, callback);
+      },
+      function(callback) {
+        t.mementos = mementosFromMultipleURIs;
+        if(response.thumbnails['numMementos'] != t.mementos.length) {
+          for(var i in uriList) {
+            var fullCachedTimemap = JSON.parse(JSON.stringify(t.mementos)); // Create a deep copy
+            fullCachedTimemap.curClientId = curCookieClientId;
+            fullCachedTimemap.originalURI = uriList[i];
+            fullCachedTimemap.primesource = response.thumbnails['primesource'];
+            fullCachedTimemap.collectionidentifier = response.thumbnails['collectionidentifier'];
+            fullCachedTimemap.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
+            fullCachedTimemap.role = response.thumbnails['role'];
+            updateCacheForMultipleURIs(fullCachedTimemap, t, uriList[i], response, curCookieClientId);
+          }
+        }
+        callback();
+      },
+      function(callback) {
+        if(response.thumbnails['from'] != 0){
+            t.mementos = t.filterMementosForDateRange(response);
+        }
+        callback('');
+      },
+      function (callback) {
+            if(t.role == "stats"){
+              t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback);
+            }else if(t.role == "histogram"){
+              callback('');
+            }else{
+              t.calculateHammingDistancesWithOnlineFilteringForSummary(curCookieClientId,callback);
+            }
+            constructSSE("percentagedone-5",curCookieClientId);
+          },
+          function (callback) {
+            if(t.role == "stats"){
+              t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);
+            }else if(t.role == "histogram"){
+              callback('');
+            }else{
+              t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary(callback);
+
+            }
+            constructSSE("percentagedone-15",curCookieClientId);
+          },
+          function (callback) {
+            ConsoleLogIfRequired('****************curCookieClientId from processWithFileContents ->'+curCookieClientId +' *********');
+            constructSSE("percentagedone-20",curCookieClientId);
+            if (t.role == "histogram") {t.getDatesForHistogram(callback,response,curCookieClientId);}
+            else
+              t.createScreenshotsForMementos(curCookieClientId,response,callback);
+          },
+          function (callback) {
+            constructSSE('Writing the data into cache file for future use...',curCookieClientId);
+            constructSSE("percentagedone-95",curCookieClientId);
+            if (t.role == "histogram") {callback('');}
+            else
+              t.writeThumbSumJSONOPToCache(response);
+          }
+    ], function(err){ 
+      if(err)
+        console.log(err);
+    });
+}
+
+/**
+* Checks if each of the given URIs have been cached.
+* If a URI has not been cached, the timemap is fetched and cached.
+* Else, the cache file is read.
+*
+* @param uriList - The list of user input URIs
+* @param response handler to client's browser interface
+*/
+function checkIfCachedForMultipleURIs(uriList, query, response, curCookieClientId, callback) {
+    async.eachLimit(uriList, 1, function(uri, callback){
+        var cacheFile = new SimhashCacheFile(query.primesource+"_"+query.ci+"_"+uri,isDebugMode);
+        cacheFile.path += ".json";
+        if (!(fs.existsSync(cacheFile.path))) {
+          getTimemapForMultipleURIs(uri, response, curCookieClientId, callback);
+        }
+        else {
+          var data = fs.readFileSync(cacheFile.path, 'utf-8');
+          mementosFromMultipleURIs = mementosFromMultipleURIs.concat(JSON.parse(data));
+          callback();
+        }
+      },
+      function(err){
+        if(err){
+          console.log(err);
+          return;
+        }
+        if(callback) {
+          callback();
+        }
+    });
+}
+
+/**
+* Variation of getTimemapGodFunctionForAlSummarization made for multiple URI input.
+* Caches the timemap for the provided URI and appends the mementos to mementosFromMultipleURIs.
+* Else, the cache file is read.
+*
+* @param uri - The URI of the timemap to be cached
+* @param response - Handler to client's browser interface
+*/
+function getTimemapForMultipleURIs (uri, response,curCookieClientId, callback) {
+  
+  var t = new TimeMap();
+  var retStr = '';
+  var metadata = '';
+
+  ConsoleLogIfRequired('Starting many asynchronous operationsX...');
+
+  async.series([
+    function(callback){
+      t.fetchTimemap(uri, response, curCookieClientId, callback)
+    },
+    function(callback) {
+      if(response.thumbnails['from'] != 0){
+          t.mementos = t.filterMementosForDateRange(response);
+      }
+      callback('');
+    },
+    function (callback) {
+      if (t.hammingdistancethreshold == '0' && t.role == "summary") {
+        callback('');
+      }
+      else
+        t.calculateSimhashes(curCookieClientId,true,callback);
+    },
+    function (callback) {
+      constructSSE("percentagedone-30",curCookieClientId);
+      if (t.role == "histogram" || (t.hammingdistancethreshold == '0' && t.role == "summary")) {
+        callback('');
+      }
+      else
+        t.saveSimhashesToCache(callback);  
+    },
+    function (callback) {
+      if(t.hammingdistancethreshold == '0' && t.role == "summary"){t.supplyAllMementosAScreenshotURI(callback);}
+      else{
+        t.writeJSONToCache(callback);
+      }
+    }
+  ],
+  function (err, result) {
+      if (err) {
+        ConsoleLogIfRequired('ERROR!');
+        ConsoleLogIfRequired(err);
+      } else {
+        ConsoleLogIfRequired('There were no errors executing the callback chain');
+        mementosFromMultipleURIs = mementosFromMultipleURIs.concat(t.mementos);
+        callback();
+      }
+  })
+}
+
 /**
 * Display thumbnail interface based on passed in JSON
 * @param fileContents JSON string consistenting of an array of mementos
@@ -700,7 +872,8 @@ function processWithFileContents (uri, fileContents, response,curCookieClientId)
     fullCachedTimemap.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
     fullCachedTimemap.role = response.thumbnails['role'];
     updateCache(fullCachedTimemap, t, uri,response, curCookieClientId);
-  } else {
+  } 
+  else {
     if(t.mementos.simhash === 'undefined'){
       getTimemapGodFunctionForAlSummarization(uri, response,curCookieClientId);
     }
@@ -972,6 +1145,55 @@ function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId)
             t.SendThumbSumJSONCalledFromCache(response,callback);
         }
 
+    ],
+        function (err, result) {
+            if (err) {
+                ConsoleLogIfRequired('ERROR!');
+                ConsoleLogIfRequired(err);
+            } else {
+                ConsoleLogIfRequired('There were no errors executing the callback chain');
+            }
+    });
+}
+
+function updateCacheForMultipleURIs(fullCachedTimemap, t, uri,response, curCookieClientId)
+{
+    ConsoleLogIfRequired("Inside updateCache()");
+    var updatedTimemap = new TimeMap();
+    async.series([
+        function(callback){
+            updatedTimemap.fetchTimemap(uri, response, curCookieClientId, callback);
+        },
+        function(callback){
+            if(response.thumbnails["from"] != 0){
+                updatedTimemap.mementos = updatedTimemap.filterMementosForDateRange(response);
+            }
+            callback('');     
+        },
+        function(callback){
+            //remove cached mementos
+            updatedTimemap.deleteCachedMementos(t.mementos,callback);
+        },
+        function(callback){
+            updatedTimemap.calculateSimhashes(curCookieClientId, true, callback);
+        },
+        function(callback){
+            //merge new mementos new and sort
+            fullCachedTimemap.mementos = fullCachedTimemap.mementos.concat(updatedTimemap.mementos);
+            fullCachedTimemap.mementos.sort(dateSort);
+            fullCachedTimemap.mementos = getUnique(fullCachedTimemap.mementos,"uri");
+
+            t.mementos = t.mementos.concat(updatedTimemap.mementos);
+            t.mementos.sort(dateSort);
+            t.mementos = getUnique(t.mementos,"uri");
+            callback('');
+        },
+        function(callback){
+            fullCachedTimemap.saveSimhashesToCache(callback);
+        },
+        function(callback) {
+            fullCachedTimemap.writeJSONToCache(callback);
+        }
     ],
         function (err, result) {
             if (err) {
