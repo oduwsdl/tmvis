@@ -1263,6 +1263,10 @@ function urlCanonicalize(url)
         var sortedURIs = URIs.sort();
         for(var i in sortedURIs)
         {
+            if(i != 0)
+            {
+                canonicalizedURL += ","; //delimiter separating the uris
+            }
             canonicalizedURL += normalizeUrl(sortedURIs[i],options);
         }
     }
