@@ -579,6 +579,7 @@ function PublicEndpoint () {
     // If more than 1 URI was passed at once, check if each individual URI has been cached.
     // If not, cache it. Then merge the timemaps of each URI for the user.
     if(URIs.length > 1 && t.role != "histogram") {
+      mementosFromMultipleURIs = [];
       processMultipleURIs(t, query, response, request.headers["x-my-curuniqueusersessionid"]);
     }
     else {
@@ -682,33 +683,23 @@ function cleanSystemData (cb) {
 function processMultipleURIs(t, query, response, curCookieClientId) {
   var uriList =  query['urir'].split(',');
 
-  mementosFromMultipleURIs = [];
-
   async.series([
       function(callback) {
         checkIfCachedForMultipleURIs(uriList, query, response, curCookieClientId, callback);
       },
       function(callback) {
-        t.mementos = mementosFromMultipleURIs;
-        if(response.thumbnails['from'] != 0){
-            t.mementos = t.filterMementosForDateRange(response);
+        if(response.thumbnails['numMementos'] != mementosFromMultipleURIs.length) {
+          mementosFromMultipleURIs = [];
+          updateCacheForMultipleURIs(uriList, query, response, curCookieClientId, callback);
         }
-        callback('');
+        else
+          callback('');
       },
       function(callback) {
-        if(response.thumbnails['numMementos'] != t.mementos.length) {
-          for(var i in uriList) {
-            var fullCachedTimemap = createMementosFromJSONFile(JSON.stringify(t.mementos)); // Create a deep copy
-            fullCachedTimemap.curClientId = curCookieClientId;
-            fullCachedTimemap.originalURI = urlCanonicalize(uriList[i]);
-            fullCachedTimemap.primesource = response.thumbnails['primesource'];
-            fullCachedTimemap.collectionidentifier = response.thumbnails['collectionidentifier'];
-            fullCachedTimemap.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
-            fullCachedTimemap.role = response.thumbnails['role'];
-            updateCacheForMultipleURIs(fullCachedTimemap, t, uriList[i], response, curCookieClientId);
-          }
-        }
-        callback();
+        t.mementos = t.mementos.concat(mementosFromMultipleURIs);
+        if(response['from'] != 0)
+          t.filterMementosForDateRange(response)
+        callback('');
       },
       function (callback) {
             if(t.role == "stats"){
@@ -764,7 +755,7 @@ function checkIfCachedForMultipleURIs(uriList, query, response, curCookieClientI
         var cacheFile = new SimhashCacheFile(query.primesource+"_"+query.ci+"_"+urlCanonicalize(uri),isDebugMode);
         cacheFile.path += ".json";
         if (!(fs.existsSync(cacheFile.path))) {
-          getTimemapForMultipleURIs(uri, response, curCookieClientId, callback);
+          getTimemapForMultipleURIs(uri, response, curCookieClientId, callback, false);
         }
         else {
           var data = fs.readFileSync(cacheFile.path, 'utf-8');
@@ -791,17 +782,26 @@ function checkIfCachedForMultipleURIs(uriList, query, response, curCookieClientI
 * @param uri - The URI of the timemap to be cached
 * @param response - Handler to client's browser interface
 */
-function getTimemapForMultipleURIs (uri, response,curCookieClientId, callback) {
+function getTimemapForMultipleURIs (uri, response,curCookieClientId, callback, update) {
   
   var t = new TimeMap();
   var retStr = '';
   var metadata = '';
 
+  if(update) {
+    var cacheFile = new SimhashCacheFile(query.primesource+"_"+query.ci+"_"+urlCanonicalize(uri),isDebugMode);
+    cacheFile.path += ".json";
+    var data = JSON.parse(fs.readFileSync(cacheFile.path, 'utf-8'));
+  }
+
   ConsoleLogIfRequired('Starting many asynchronous operationsX...');
 
   async.series([
-    function(callback){
+    function(callback) {
       t.fetchTimemap(uri, response, curCookieClientId, callback);
+    },
+    function(callback) {
+      t.deleteCachedMementos(data, callback);
     },
     function(callback) {
       if(response.thumbnails['from'] != 0){
@@ -822,7 +822,7 @@ function getTimemapForMultipleURIs (uri, response,curCookieClientId, callback) {
         callback('');
       }
       else
-        t.saveSimhashesToCache(callback);  
+        t.saveSimhashesToCache(callback); 
     },
     function (callback) {
       if(t.hammingdistancethreshold == '0' && t.role == "summary"){t.supplyAllMementosAScreenshotURI(callback);}
@@ -1088,7 +1088,7 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,notDateRan
     req.end();
 }
 
-function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId)
+function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId, multipleURIs)
 {
     ConsoleLogIfRequired("Inside updateCache()");
     var updatedTimemap = new TimeMap();
@@ -1104,7 +1104,10 @@ function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId)
         },
         function(callback){
             //remove cached mementos
-            updatedTimemap.deleteCachedMementos(t.mementos,callback);
+            if(multipleURIs)
+              updatedTimemap.deleteCachedMementos(mementosFromMultipleURIs,callback);
+            else
+              updatedTimemap.deleteCachedMementos(t.mementos,callback);
         },
         function(callback){
             updatedTimemap.calculateSimhashes(curCookieClientId, true, callback);
@@ -1118,32 +1121,52 @@ function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId)
             t.mementos = t.mementos.concat(updatedTimemap.mementos);
             t.mementos.sort(dateSort);
             t.mementos = getUnique(t.mementos,"uri");
+
+            if(multipleURIs) 
+              mementosFromMultipleURIs = mementosFromMultipleURIs.concat(t.mementos);
+
             callback('');
         },
         function(callback){
             fullCachedTimemap.saveSimhashesToCache(callback);
         },
         function (callback) {
-            if(t.role == "stats"){
-                t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback);
-            }else{
-                t.calculateHammingDistancesWithOnlineFilteringForSummary(curCookieClientId,callback);
+            if(!multipleURIs) {
+              if(t.role == "stats"){
+                  t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback);
+              }else{
+                  t.calculateHammingDistancesWithOnlineFilteringForSummary(curCookieClientId,callback);
+              }
+            }
+            else {
+              callback('');
             }
         },
         function (callback) {
-            if(t.role == "stats"){
-                t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);
-            }else{
-                t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary(callback);
+            if(!multipleURIs) {
+              if(t.role == "stats"){
+                  t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);
+              }else{
+                  t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary(callback);
+              }
+            }
+            else {
+              callback('');
             }
         },
         function(callback) {
             fullCachedTimemap.writeJSONToCache(callback);
         },
         function (callback) {
+          if(multipleURIs)
+            callback();
+          else
             t.createScreenshotsForMementos(curCookieClientId,response,callback);
         },
         function (callback) {
+          if(multipleURIs)
+            callback();
+          else
             t.SendThumbSumJSONCalledFromCache(response,callback);
         }
 
@@ -1158,53 +1181,39 @@ function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId)
     });
 }
 
-function updateCacheForMultipleURIs(fullCachedTimemap, t, uri,response, curCookieClientId)
+function updateCacheForMultipleURIs(uriList, query, response, curCookieClientId, callback)
 {
-    ConsoleLogIfRequired("Inside updateCache()");
-    var updatedTimemap = new TimeMap();
-    async.series([
-        function(callback){
-            updatedTimemap.fetchTimemap(uri, response, curCookieClientId, callback);
-        },
-        function(callback){
-            if(response.thumbnails["from"] != 0){
-                updatedTimemap.mementos = updatedTimemap.filterMementosForDateRange(response);
-            }
-            callback('');     
-        },
-        function(callback){
-            //remove cached mementos
-            updatedTimemap.deleteCachedMementos(t.mementos,callback);
-        },
-        function(callback){
-            updatedTimemap.calculateSimhashes(curCookieClientId, true, callback);
-        },
-        function(callback){
-            //merge new mementos new and sort
-            fullCachedTimemap.mementos = fullCachedTimemap.mementos.concat(updatedTimemap.mementos);
-            fullCachedTimemap.mementos.sort(dateSort);
-            fullCachedTimemap.mementos = getUnique(fullCachedTimemap.mementos,"uri");
+      async.eachLimit(uriList, 1, function(uri, callback){
+        /*var cacheFile = new SimhashCacheFile(query.primesource+"_"+query.ci+"_"+urlCanonicalize(uri),isDebugMode);
+        cacheFile.path += ".json";
+        var data = fs.readFileSync(cacheFile.path, 'utf-8');
+        var fullCachedTimemap = createMementosFromJSONFile(data);
+        fullCachedTimemap.curClientId = curCookieClientId;
+        fullCachedTimemap.originalURI = urlCanonicalize(response.thumbnails['urir']);
+        fullCachedTimemap.primesource = response.thumbnails['primesource'];
+        fullCachedTimemap.collectionidentifier = response.thumbnails['collectionidentifier'];
+        fullCachedTimemap.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
+        fullCachedTimemap.role = response.thumbnails['role'];
 
-            t.mementos = t.mementos.concat(updatedTimemap.mementos);
-            t.mementos.sort(dateSort);
-            t.mementos = getUnique(t.mementos,"uri");
+        var t = new TimeMap();
 
-            callback('');
-        },
-        function(callback){
-            fullCachedTimemap.saveSimhashesToCache(callback);
-        },
-        function(callback) {
-            fullCachedTimemap.writeJSONToCache(callback);
+        t.originalURI = uri;
+        t.primesource = query.primesource;
+        t.collectionidentifier = query.ci;
+        t.hammingdistancethreshold = query.hdt;
+        t.role = query.role;
+
+        updateCache(fullCachedTimemap, t, uri,response, curCookieClientId, true);*/
+        getTimemapForMultipleURIs(uri, response, curCookieClientId, callback);
+      },
+      function(err){
+        if(err){
+          console.log(err);
+          return;
         }
-    ],
-        function (err, result) {
-            if (err) {
-                ConsoleLogIfRequired('ERROR!');
-                ConsoleLogIfRequired(err);
-            } else {
-                ConsoleLogIfRequired('There were no errors executing the callback chain');
-            }
+        if(callback) {
+          callback();
+        }
     });
 }
 
