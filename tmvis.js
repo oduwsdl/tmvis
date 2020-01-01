@@ -688,7 +688,7 @@ function processMultipleURIs(t, query, response, curCookieClientId) {
         checkIfCachedForMultipleURIs(uriList, query, response, curCookieClientId, callback);
       },
       function(callback) {
-        if(response.thumbnails['numMementos'] != mementosFromMultipleURIs.length) {
+        if(response.thumbnails['numMementos'] > mementosFromMultipleURIs.length) {
           mementosFromMultipleURIs = [];
           updateCacheForMultipleURIs(uriList, query, response, curCookieClientId, callback);
         }
@@ -697,8 +697,9 @@ function processMultipleURIs(t, query, response, curCookieClientId) {
       },
       function(callback) {
         t.mementos = t.mementos.concat(mementosFromMultipleURIs);
-        if(response['from'] != 0)
-          t.filterMementosForDateRange(response)
+        if(response.thumbnails['from'] != 0){
+            t.mementos = t.filterMementosForDateRange(response);
+        }
         callback('');
       },
       function (callback) {
