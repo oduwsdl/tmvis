@@ -680,6 +680,12 @@ function cleanSystemData (cb) {
   }
 }
 
+/**
+* When the user enters multiple URIs, each individual URI is checked to see if cached.
+* After caching the appropriate URIs the timemaps are then combined and processed.
+*
+* @param t - The passed timemap object
+*/
 function processMultipleURIs(t, query, response, curCookieClientId) {
   var uriList =  query['urir'].split(',');
 
@@ -688,6 +694,7 @@ function processMultipleURIs(t, query, response, curCookieClientId) {
         checkIfCachedForMultipleURIs(uriList, query, response, curCookieClientId, callback);
       },
       function(callback) {
+        // Check if all requested mementos were cached. If not, update the files.
         if(response.thumbnails['numMementos'] > mementosFromMultipleURIs.length) {
           mementosFromMultipleURIs = [];
           updateCacheForMultipleURIs(uriList, query, response, curCookieClientId, callback);
@@ -776,12 +783,13 @@ function checkIfCachedForMultipleURIs(uriList, query, response, curCookieClientI
 }
 
 /**
-* Variation of getTimemapGodFunctionForAlSummarization made for multiple URI input.
 * Caches the timemap for the provided URI and appends the mementos to mementosFromMultipleURIs.
 * Else, the cache file is read.
 *
 * @param uri - The URI of the timemap to be cached
 * @param response - Handler to client's browser interface
+* @param update - If true, the cache file for the URI has less mementos than requested by the user
+* and needs updated.
 */
 function getTimemapForMultipleURIs (uri, query, response, curCookieClientId, callback, update) {
 
@@ -798,7 +806,7 @@ function getTimemapForMultipleURIs (uri, query, response, curCookieClientId, cal
     else {
       var data = fs.readFileSync(cacheFile.path, 'utf-8');
       var fullCachedTimemap = createMementosFromJSONFile(data);
-      fullCachedTimemap.mementos = getUnique(mementosFromMultipleURIs, "uri");
+      //fullCachedTimemap.mementos = getUnique(mementosFromMultipleURIs, "uri");
       fullCachedTimemap.curClientId = curCookieClientId;
       fullCachedTimemap.originalURI = urlCanonicalize(response.thumbnails['urir']);
       fullCachedTimemap.primesource = response.thumbnails['primesource'];
@@ -836,12 +844,15 @@ function getTimemapForMultipleURIs (uri, query, response, curCookieClientId, cal
     function(callback) {
       if(update && t.mementos.length != 0) {
         //merge new mementos new and sort
-        fullCachedTimemap.mementos = fullCachedTimemap.mementos.concat(t.mementos);
-        fullCachedTimemap.mementos.sort(dateSort);
-        fullCachedTimemap.mementos = getUnique(fullCachedTimemap.mementos,"uri");
+        //fullCachedTimemap.mementos = fullCachedTimemap.mementos.concat(t.mementos);
+        //fullCachedTimemap.mementos.sort(dateSort);
+        //fullCachedTimemap.mementos = getUnique(fullCachedTimemap.mementos,"uri");
 
         mementosFromMultipleURIs = mementosFromMultipleURIs.concat(t.mementos);
         mementosFromMultipleURIs.sort(dateSort);
+
+        t.mementos = t.mementos.concat(fullCachedTimemap.mementos)
+        t.mementos.sort(dateSort);
 
         callback('');
       }
@@ -872,7 +883,7 @@ function getTimemapForMultipleURIs (uri, query, response, curCookieClientId, cal
         ConsoleLogIfRequired(err);
       } else {
         ConsoleLogIfRequired('There were no errors executing the callback chain');
-        if(!update)
+        if(!update && t.mementos.length != 0)
           mementosFromMultipleURIs = mementosFromMultipleURIs.concat(t.mementos);
         callback();
       }
@@ -1217,40 +1228,25 @@ function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId, mult
     });
 }
 
+/**
+* Updates the cache files for multiple URI input.
+* 
+* @param uriList - The user input URIs
+*/
 function updateCacheForMultipleURIs(uriList, query, response, curCookieClientId, callback)
 {
-      async.eachLimit(uriList, 1, function(uri, callback){
-        /*var cacheFile = new SimhashCacheFile(query.primesource+"_"+query.ci+"_"+urlCanonicalize(uri),isDebugMode);
-        cacheFile.path += ".json";
-        var data = fs.readFileSync(cacheFile.path, 'utf-8');
-        var fullCachedTimemap = createMementosFromJSONFile(data);
-        fullCachedTimemap.curClientId = curCookieClientId;
-        fullCachedTimemap.originalURI = urlCanonicalize(response.thumbnails['urir']);
-        fullCachedTimemap.primesource = response.thumbnails['primesource'];
-        fullCachedTimemap.collectionidentifier = response.thumbnails['collectionidentifier'];
-        fullCachedTimemap.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
-        fullCachedTimemap.role = response.thumbnails['role'];
-
-        var t = new TimeMap();
-
-        t.originalURI = uri;
-        t.primesource = query.primesource;
-        t.collectionidentifier = query.ci;
-        t.hammingdistancethreshold = query.hdt;
-        t.role = query.role;
-
-        updateCache(fullCachedTimemap, t, uri,response, curCookieClientId, true);*/
-        getTimemapForMultipleURIs(uri, query, response, curCookieClientId, callback, true);
-      },
-      function(err){
-        if(err){
-          console.log(err);
-          return;
-        }
-        if(callback) {
-          callback();
-        }
-    });
+    async.eachLimit(uriList, 1, function(uri, callback){
+      getTimemapForMultipleURIs(uri, query, response, curCookieClientId, callback, true);
+    },
+    function(err){
+      if(err){
+        console.log(err);
+        return;
+      }
+      if(callback) {
+        callback();
+      }
+  });
 }
 
 //Removes mementos from the implicit object if they appear in cachedMementos array
