@@ -843,13 +843,9 @@ function getTimemapForMultipleURIs (uri, query, response, curCookieClientId, cal
     },
     function(callback) {
       if(update && t.mementos.length != 0) {
-        //merge new mementos new and sort
-        //fullCachedTimemap.mementos = fullCachedTimemap.mementos.concat(t.mementos);
-        //fullCachedTimemap.mementos.sort(dateSort);
-        //fullCachedTimemap.mementos = getUnique(fullCachedTimemap.mementos,"uri");
-
         mementosFromMultipleURIs = mementosFromMultipleURIs.concat(t.mementos);
         mementosFromMultipleURIs.sort(dateSort);
+        mementosFromMultipleURIs.getUnique(mementosFromMultipleURIs, "uri");
 
         t.mementos = t.mementos.concat(fullCachedTimemap.mementos)
         t.mementos.sort(dateSort);
