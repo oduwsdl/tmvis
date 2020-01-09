@@ -1132,7 +1132,7 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,notDateRan
     req.end();
 }
 
-function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId, multipleURIs)
+function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId)
 {
     ConsoleLogIfRequired("Inside updateCache()");
     var updatedTimemap = new TimeMap();
@@ -1148,10 +1148,7 @@ function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId, mult
         },
         function(callback){
             //remove cached mementos
-            if(multipleURIs)
-              updatedTimemap.deleteCachedMementos(mementosFromMultipleURIs,callback);
-            else
-              updatedTimemap.deleteCachedMementos(t.mementos,callback);
+            updatedTimemap.deleteCachedMementos(t.mementos,callback);
         },
         function(callback){
             updatedTimemap.calculateSimhashes(curCookieClientId, true, callback);
@@ -1165,52 +1162,32 @@ function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId, mult
             t.mementos = t.mementos.concat(updatedTimemap.mementos);
             t.mementos.sort(dateSort);
             t.mementos = getUnique(t.mementos,"uri");
-
-            if(multipleURIs) 
-              mementosFromMultipleURIs = mementosFromMultipleURIs.concat(t.mementos);
-
             callback('');
         },
         function(callback){
             fullCachedTimemap.saveSimhashesToCache(callback);
         },
         function (callback) {
-            if(!multipleURIs) {
-              if(t.role == "stats"){
-                  t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback);
-              }else{
-                  t.calculateHammingDistancesWithOnlineFilteringForSummary(curCookieClientId,callback);
-              }
-            }
-            else {
-              callback('');
+            if(t.role == "stats"){
+                t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback);
+            }else{
+                t.calculateHammingDistancesWithOnlineFilteringForSummary(curCookieClientId,callback);
             }
         },
         function (callback) {
-            if(!multipleURIs) {
-              if(t.role == "stats"){
-                  t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);
-              }else{
-                  t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary(callback);
-              }
-            }
-            else {
-              callback('');
+            if(t.role == "stats"){
+                t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);
+            }else{
+                t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary(callback);
             }
         },
         function(callback) {
             fullCachedTimemap.writeJSONToCache(callback);
         },
         function (callback) {
-          if(multipleURIs)
-            callback();
-          else
             t.createScreenshotsForMementos(curCookieClientId,response,callback);
         },
         function (callback) {
-          if(multipleURIs)
-            callback();
-          else
             t.SendThumbSumJSONCalledFromCache(response,callback);
         }
 
