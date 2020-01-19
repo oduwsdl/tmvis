@@ -1,4 +1,4 @@
-function getHistogram(dateArray){
+function drawHistogram(dateArray){
 	// set the dimensions and margins of the graph
 	var margin = {top: 10, right: 30, bottom: 30, left: 110},
 	    width = 1000 - margin.left - margin.right,

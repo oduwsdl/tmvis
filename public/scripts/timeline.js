@@ -720,74 +720,71 @@ var notificationSrc= null;
 function startEventNotification(){
   notificationSrc= new EventSource('/notifications/'+getUniqueUserSessionId());
   var preVal = 2;
-       notificationSrc.onmessage = function(e) {
-           console.log(e.data);
-           var streamedObj = JSON.parse(e.data);
-           // if(streamedObj.usid != uniqueSessionId){
-           //     return false;
-           // }
-           var curLog = "<p>"+streamedObj.data+"</p>";
+        notificationSrc.onmessage = function(e) {
+            console.log(e.data);
+            var streamedObj = JSON.parse(e.data);
+            // if(streamedObj.usid != uniqueSessionId){
+            //     return false;
+            // }
+            var curLog = "<p>"+streamedObj.data+"</p>";
 
 
-           if(streamedObj.data === "streamingStarted"){
+            if(streamedObj.data === "streamingStarted") {
 
-               $('#serverStreamingModal .logsContent').empty();
-               $('#logtab .logsContent').empty();
+                $('#serverStreamingModal .logsContent').empty();
+                $('#logtab .logsContent').empty();
 
-               setProgressBar(2);
-               // un comment the following line after POC
-               if($(".tabContentWrapper").css("display") == "none"){
-                 $('#serverStreamingModal').modal('show');
-               }
+                setProgressBar(2);
+                // un comment the following line after POC
+                if($(".tabContentWrapper").css("display") == "none"){
+                $('#serverStreamingModal').modal('show');
+                }
 
-           }else if (streamedObj.data.indexOf("percentagedone-") == 0) {
-              value = parseInt(streamedObj.data.split("-")[1]);
-              if (value > preVal){
+            } else if (streamedObj.data.indexOf("percentagedone-") == 0) {
+                value = parseInt(streamedObj.data.split("-")[1]);
+                if (value > preVal){
                 preVal = value;
-              }
-              if(preVal > 100){
+                }
+                if(preVal > 100){
                 preVal = 95;
-              }
-             setProgressBar(preVal);
-               if(preVal == 100){
+                }
+                setProgressBar(preVal);
+                if(preVal == 100){
                     $('#serverStreamingModal').hide();
-               }
-           }
-           else if( streamedObj.data === "readyToDisplay"){
-           //  alert(" Ready for display");
-           //  $(".getSummary").trigger("click");
-             $('#serverStreamingModal .logsContent').empty();
+                }
+            } else if( streamedObj.data === "readyToDisplay") {
+                //  alert(" Ready for display");
+                //  $(".getSummary").trigger("click");
+                $('#serverStreamingModal .logsContent').empty();
 
-             // Temparory disabled for this step: for avoiding the refresh issue... automatically refreshing the page when the results are available
-               //window.location.reload();
+                // Temparory disabled for this step: for avoiding the refresh issue... automatically refreshing the page when the results are available
+                //window.location.reload();
 
-            setProgressBar(2);
-             $('#serverStreamingModal').modal('hide');
-             $(".tabContentWrapper").show();
-             if(notificationSrc != null){
-               notificationSrc.close();
-             }
-           }
-           else if(streamedObj.data === "statssent"){
-               $('#serverStreamingModal .logsContent').empty();
+                setProgressBar(2);
+                $('#serverStreamingModal').modal('hide');
+                $(".tabContentWrapper").show();
+                if(notificationSrc != null) {
+                    notificationSrc.close();
+                }
+            } else if(streamedObj.data === "statssent") {
+                $('#serverStreamingModal .logsContent').empty();
                 setProgressBar(2);
                 // for avoiding the refresh issue... automatically refreshing the page when the results are available
                 //window.location.reload();
-               $('#serverStreamingModal').modal('hide');
-               if(notificationSrc != null){
-                 notificationSrc.close();
-               }
-             }
-           else if(streamedObj.data === "histoDataSent"){
-               $('#serverStreamingModal').modal('hide');
-           }
-           else{
-             $("#serverStreamingModal .logsContent").prepend(curLog);
-              $('#logtab .logsContent').prepend(curLog);
-             // $('#serverStreamingModal .modal-body').animate({
-             //      scrollTop: $("#bottomModal").offset().top
-             //  }, 20);
-           }
+                $('#serverStreamingModal').modal('hide');
+                if(notificationSrc != null){
+                    notificationSrc.close();
+                }
+            } else if(streamedObj.data === "histoDataSent") {
+                $('#serverStreamingModal').modal('hide');
+            }
+            else {
+                $("#serverStreamingModal .logsContent").prepend(curLog);
+                $('#logtab .logsContent').prepend(curLog);
+                // $('#serverStreamingModal .modal-body').animate({
+                //      scrollTop: $("#bottomModal").offset().top
+                //  }, 20);
+            }
        };
 }
 
@@ -798,6 +795,10 @@ function setProgressBar(value){
   $(".progress-bar-space .progress-bar-striped").css("width",value+"%");
 }
 
+/**
+* Sets parameters for the histogram page and runs
+* the getHistoData function.
+*/
 function getHistogramPage(){
     var toDisplay= "Internet Archive";
     inputDates = "";
@@ -808,151 +809,172 @@ function getHistogramPage(){
     $(".modal-backdrop").remove();
 }
     
-function getHistoData(toDisplay){
-  var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
-  if(collectionIdentifer == ""){
+/**
+* Retrieves the timemap to draw the histogram. 
+* Displays the histogram page.
+*/
+function getHistoData(toDisplay) {
+    var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
+    if(collectionIdentifer == "") {
       collectionIdentifer = "all";
-  }
-  //var hammingDistance = $('.argumentsForm #hammingDistance').val();
-  var hammingDistance = $(".statsWrapper .on").val();
+    }
+    //var hammingDistance = $('.argumentsForm #hammingDistance').val();
+    var hammingDistance = $(".statsWrapper .on").val();
 
-  if(hammingDistance == "" || hammingDistance===undefined){
-    hammingDistance = $('.argumentsForm #hammingDistance').val();
-  }
+    if(hammingDistance == "" || hammingDistance === undefined) {
+        hammingDistance = $('.argumentsForm #hammingDistance').val();
+    }
 
-  var role = "histogram";
-  if($("body").find("form")[0].checkValidity()){
+    var role = "histogram";
+    if($("body").find("form")[0].checkValidity()) {
+        // Hide stats page elements
         $(".time_container").hide();
         $(".Explain_Threshold").hide();
-       var numOfMementos = $("#selected_mementos").text();
-       if(numOfMementos.length == 0){
+
+        var numOfMementos = $("#selected_mementos").text();
+        if(numOfMementos.length == 0) {
             numOfMementos = -1;
-       }
-       var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0" +"/" + numOfMementos + "/" +$('.argumentsForm #urirIP').val().trim();
-
-       startEventNotification();
-       var ENDPOINT = "/alsummarizedtimemap";
-       var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
-       $("#busy-loader").show();
-       $('#serverStreamingModal .logsContent').empty();
-       $('#serverStreamingModal').modal('show');
-       $.ajax({
-        type: "GET",
-        url: address, // uncomment this for deployment
-        beforeSend: function(xhr) {
-            xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
-        },
-        dataType: "text",
-        timeout: 0,
-        success: function( data, textStatus, jqXHR) {
-            $("#busy-loader").hide();
-            $('#serverStreamingModal').modal('hide');
-          try{
-              data = $.trim(data).split("...");
-              if(data.length > 1){
-                  if(data [1] == ""){
-                      data = data [0];
-                  }else{
-                      data = data [1];
-                  }
-              }
-              else{
-                  data = data [0];
-              }
-
-              histoData= $.parseJSON(data);
-              if(histoData.length > 12){
-                  document.getElementById('generateAllThumbnails').style.display = "none";
-              }
-              if(histoData.length == 5000)
-              {
-                document.getElementById("memento_limit").style.display = "block";
-              }
-              document.getElementById("histoWrapper").style.display = "block";
-              var endPoint = histoData.length - 1;
-
-              var fromYear = histoData[0].event_display_date.substring(0,4);
-              var fromMonth = histoData[0].event_display_date.substring(5,7);
-              var fromDate = histoData[0].event_display_date.substring(8,10);
-
-              var toYear = histoData[endPoint].event_display_date.substring(0,4);
-              var toMonth = histoData[endPoint].event_display_date.substring(5,7);
-              var toDate = histoData[endPoint].event_display_date.substring(8,10);
-
-              var fromDateStr= fromYear+"-"+fromMonth +"-"+fromDate;
-              var toDateStr= toYear+"-"+toMonth +"-"+toDate;
-              var dateRangeStr= fromDateStr + " - " + toDateStr;
-              $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
-              getHistogram(histoData);
-              $(".modal-backdrop").remove();
-              $('#serverStreamingModal').modal('hide');
-
-              // For date range input box
-              document.getElementById("fromInput").defaultValue = fromDateStr;
-              document.getElementById("toInput").defaultValue = toDateStr;
-              document.getElementById("selected_mementos").innerHTML = histoData.length;
-          }
-          catch(err){
-            alert("Some problem fetching the response, Please refresh and try again.");
-            $("#busy-loader").hide();
-            $('#serverStreamingModal').modal('hide');
-            $(".tabContentWrapper").hide();
-          }
-        },
-        error: function( data, textStatus, jqXHR, err) {
-          var errMsg = "Some problem fetching the response, Please refresh and try again.";
-          $("#busy-loader").hide();
-          $('#serverStreamingModal').modal('hide');
-          /*console.log("readyState: " + jqXHR.readyState);
-          console.log("responseText: "+ jqXHR.responseText);
-          console.log("status: " + jqXHR.status);
-          console.log("text status: " + textStatus);
-          console.log("error: " + err);*/
-          alert(errMsg);
         }
-      });
+        var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0" +"/" + numOfMementos + "/" +$('.argumentsForm #urirIP').val().trim();
+
+        startEventNotification();
+
+        var ENDPOINT = "/alsummarizedtimemap";
+        var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+
+        // Show the loading screen
+        $("#busy-loader").show();
+        $('#serverStreamingModal .logsContent').empty();
+        $('#serverStreamingModal').modal('show');
+
+        $.ajax({
+            type: "GET",
+            url: address, // uncomment this for deployment
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+            },
+            dataType: "text",
+            timeout: 0,
+            success: function( data, textStatus, jqXHR) {
+                $("#busy-loader").hide();
+                $('#serverStreamingModal').modal('hide');
+                try {
+                    data = $.trim(data).split("...");
+                    if(data.length > 1) {
+                        if(data [1] == "") {
+                          data = data [0];
+                        } else {
+                          data = data [1];
+                        }
+                    }
+                    else {
+                        data = data [0];
+                    }
+
+                    histoData= $.parseJSON(data); // JSON object to be passed to the histogram D3 function
+
+                    if(histoData.length > 12) { // Do not allow the user to generate a thumbnail for each memento
+                      document.getElementById('generateAllThumbnails').style.display = "none";
+                    }
+                    if(histoData.length == 5000) { // Mementos were truncated in the back-end, tell the user 
+                        document.getElementById("memento_limit").style.display = "block";
+                    }
+
+                    document.getElementById("histoWrapper").style.display = "block";
+
+                    var endPoint = histoData.length - 1;
+
+                    var fromYear = histoData[0].event_display_date.substring(0,4);
+                    var fromMonth = histoData[0].event_display_date.substring(5,7);
+                    var fromDate = histoData[0].event_display_date.substring(8,10);
+
+                    var toYear = histoData[endPoint].event_display_date.substring(0,4);
+                    var toMonth = histoData[endPoint].event_display_date.substring(5,7);
+                    var toDate = histoData[endPoint].event_display_date.substring(8,10);
+
+                    var fromDateStr= fromYear+"-"+fromMonth +"-"+fromDate;
+                    var toDateStr= toYear+"-"+toMonth +"-"+toDate;
+                    var dateRangeStr= fromDateStr + " - " + toDateStr;
+                    $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
+
+                    drawHistogram(histoData);
+
+                    // Remove loading screen
+                    $(".modal-backdrop").remove();
+                    $('#serverStreamingModal').modal('hide');
+
+                    // For date range input box
+                    document.getElementById("fromInput").defaultValue = fromDateStr;
+                    document.getElementById("toInput").defaultValue = toDateStr;
+                    document.getElementById("selected_mementos").innerHTML = histoData.length;
+                }
+                catch(err){
+                    alert("Some problem fetching the response, Please refresh and try again.");
+                    $("#busy-loader").hide();
+                    $('#serverStreamingModal').modal('hide');
+                    $(".tabContentWrapper").hide();
+                }
+            },
+            error: function( data, textStatus, jqXHR, err) {
+                var errMsg = "Some problem fetching the response, Please refresh and try again.";
+                $("#busy-loader").hide();
+                $('#serverStreamingModal').modal('hide');
+                /*console.log("readyState: " + jqXHR.readyState);
+                console.log("responseText: "+ jqXHR.responseText);
+                console.log("status: " + jqXHR.status);
+                console.log("text status: " + textStatus);
+                console.log("error: " + err);*/
+                alert(errMsg);
+            }
+        });
     }
 }
-   
-function getStats(from, to){
-  document.getElementById("histoWrapper").style.display = "none";
-  var collectionIdentifer = $('.argumentsForm #collectionNo').val();
-  if(collectionIdentifer == ""){
-      collectionIdentifer = "all";
-  }
-  var hammingDistance = $('.argumentsForm #hammingDistance').val();
-  if(hammingDistance == ""){
-      hammingDistance = 4;
-  }
 
-  var role = "stats";
-  if($("body").find("form")[0].checkValidity()){
-      startEventNotification();
-      var ENDPOINT = "/alsummarizedtimemap";
-      var numOfMementos = $("#selected_mementos").text();
-      if(numOfMementos.length == 0){
-          numOfMementos = -1;
-      }
-      if(from == 0 && to == 0) // If no dates were passed
-      {
-        var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0"+"/" + numOfMementos + "/"+$('.argumentsForm #urirIP').val();
-        var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
-      }
-      else
-      {
-        inputDates = from + "," + to;
-        var fromFormatted = from.substring(0,4)+from.substring(5,7)+from.substring(8,10);
-        var toFormatted = to.substring(0,4)+to.substring(5,7)+to.substring(8,10);
-        var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+from+"/"+to+"/"+ numOfMementos + "/"+$('.argumentsForm #urirIP').val();
-        var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+fromFormatted+"/"+toFormatted+"/"+$('.argumentsForm #urirIP').val();
-      }
+/**
+* Retrieves the data for the stats page and displays it.
+*
+* @param from - The starting date, 0 if full timemap requested.
+* @param to - The ending date, 0 if full timemap requested. 
+*/
+function getStats(from, to) {
+    document.getElementById("histoWrapper").style.display = "none";
+    var collectionIdentifer = $('.argumentsForm #collectionNo').val();
+    if(collectionIdentifer == "") {
+        collectionIdentifer = "all";
+    }
+    var hammingDistance = $('.argumentsForm #hammingDistance').val();
+    if(hammingDistance == "") {
+        hammingDistance = 4;
+    }
 
-      $("#busy-loader").show();
-      $('#serverStreamingModal .logsContent').empty();
-      $('#logtab .logsContent').empty();
-      history.pushState({},"Stats State",path);
-      $('#serverStreamingModal').modal('show');
-      $.ajax({
+    var role = "stats";
+    if($("body").find("form")[0].checkValidity()) {
+        startEventNotification();
+        var ENDPOINT = "/alsummarizedtimemap";
+        var numOfMementos = $("#selected_mementos").text();
+        if(numOfMementos.length == 0){
+            numOfMementos = -1;
+        }
+        if(from == 0 && to == 0) { // If no dates were passed
+            var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0"+"/" + numOfMementos + "/"+$('.argumentsForm #urirIP').val();
+            var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
+        }
+        else {
+            inputDates = from + "," + to;
+            var fromFormatted = from.substring(0,4)+from.substring(5,7)+from.substring(8,10);
+            var toFormatted = to.substring(0,4)+to.substring(5,7)+to.substring(8,10);
+            var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+from+"/"+to+"/"+ numOfMementos + "/"+$('.argumentsForm #urirIP').val();
+            var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+fromFormatted+"/"+toFormatted+"/"+$('.argumentsForm #urirIP').val();
+        }
+
+        // Show loading screen
+        $("#busy-loader").show();
+        $('#serverStreamingModal .logsContent').empty();
+        $('#logtab .logsContent').empty();
+        history.pushState({},"Stats State",path);
+        $('#serverStreamingModal').modal('show');
+
+        $.ajax({
             type: "GET",
             url: address, // uncomment this for deployment
             beforeSend: function(xhr) {
@@ -961,6 +983,7 @@ function getStats(from, to){
             dataType: "text",
             timeout: 90000000,
             success: function( data, textStatus, jqXHR) {
+                // Hide loading screen
                 $("#busy-loader").hide();
                 $('#serverStreamingModal .logsContent').empty();
                 $('#serverStreamingModal').modal('hide');
@@ -968,17 +991,17 @@ function getStats(from, to){
                     jsonObjRes= $.parseJSON(data);
                     var htmlStr="&nbsp;";
                     var curUniqThumbCount = 0;
-                    jsonObjRes.forEach(function(item,index,arry){
-                      if(curUniqThumbCount != item['unique']){
-                        htmlStr+= "<button type='button' class='btn btn-secondary' name='thresholdDistance' title='No Of unique thumbnails:"+item['unique'] +"' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</button>";
-                      }
+                    jsonObjRes.forEach(function(item,index,arry) {
+                        if(curUniqThumbCount != item['unique']) {
+                            htmlStr+= "<button type='button' class='btn btn-secondary' name='thresholdDistance' title='No Of unique thumbnails:"+item['unique'] +"' timetowait='"+item['timetowait']+"' value='"+ item['threshold']+"'>"+item['unique'] +"</button>";
+                        }
                         curUniqThumbCount = item['unique'];
                     });
 
                     var memStatStr = htmlStr;
                     var toDisplay= "Internet Archive";
-                    if($("input[name='primesource']:checked").val() == "archiveit" ){
-                      toDisplay= "Archive-It";
+                    if($("input[name='primesource']:checked").val() == "archiveit" ) {
+                        toDisplay= "Archive-It";
                     }
 
                     var fromDate= new Date(jsonObjRes[0].fromdate);
@@ -988,19 +1011,18 @@ function getStats(from, to){
                     var toDateStr = formatDate(toDate);
 
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
+                    // Display stats page elements
                     $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes[0]["totalmementos"] +" mementos | "+dateRangeStr);
                     $(".paraOnlyOnStatsResults").show();
                     $(".time_container").show();
                     $(".Explain_Threshold").show();
-                    
                     $(".statsWrapper .collection_stats").html(memStatStr);
 
-
                     //  $(".statsWrapper .collection_stats").attr("title","Date Range: "+dateRangeStr)
-                    if(  $(".statsWrapper button[type='button']").eq(1).length != 0){
-                      $(".statsWrapper button[type='button']").eq(1).trigger("click");
-                    }else{
-                      $(".statsWrapper button[type='button']").eq(0).trigger("click");
+                    if(  $(".statsWrapper button[type='button']").eq(1).length != 0) {
+                        $(".statsWrapper button[type='button']").eq(1).trigger("click");
+                    } else {
+                        $(".statsWrapper button[type='button']").eq(0).trigger("click");
                     }
 
                     $(".statsWrapper").show();
@@ -1010,195 +1032,196 @@ function getStats(from, to){
                     $(".modal-backdrop").remove();
                     $('#serverStreamingModal').modal('hide');
 
-                }catch(err){
+                }catch(err) {
                     alert($.trim(data));
                     $('#serverStreamingModal .logsContent').empty();
-                      $('#serverStreamingModal').modal('hide');
+                    $('#serverStreamingModal').modal('hide');
                     $(".statsWrapper").hide();
                     $(".tabContentWrapper").hide();
                 }
             },
             error: function( data, textStatus, jqXHR,err) {
-              // $("#busy-loader").hide();
-              // $('#serverStreamingModal .logsContent').empty();
-              //   $('#serverStreamingModal').mo dal('hide');
-               var errMsg = "Some problem fetching the response, Please refresh and try again.";   
-              /*console.log("readyState: " + jqXHR.readyState);
-              console.log("responseText: "+ jqXHR.responseText);
-              console.log("status: " + jqXHR.status);
-              console.log("text status: " + textStatus);
-              console.log("error: " + err);*/
-              if(textStatus == 'error')
-              {
-                window.location.reload();
-              }else{
-                alert(errMsg);
-              }
+                // $("#busy-loader").hide();
+                // $('#serverStreamingModal .logsContent').empty();
+                //   $('#serverStreamingModal').mo dal('hide');
+                var errMsg = "Some problem fetching the response, Please refresh and try again.";   
+                /*console.log("readyState: " + jqXHR.readyState);
+                console.log("responseText: "+ jqXHR.responseText);
+                console.log("status: " + jqXHR.status);
+                console.log("text status: " + textStatus);
+                console.log("error: " + err);*/
+                if(textStatus == 'error') {
+                    window.location.reload();
+                } else {
+                    alert(errMsg);
+                }
             }
         });
-      }
+    }
 }
 
-function getSummary(from, to){
+/**
+* Retrieves the data for the summary page and displays it.
+*
+* @param from - The starting date, 0 if full timemap requested.
+* @param to - The ending date, 0 if full timemap requested. 
+*/
+function getSummary(from, to) {
     
-  // Remove histogram
-  document.getElementById("histoWrapper").style.display = "none";
-    
-  var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
-  if(collectionIdentifer == ""){
-      collectionIdentifer = "all";
-  }
-  //var hammingDistance = $('.argumentsForm #hammingDistance').val();
-  var hammingDistance = $(".statsWrapper .on").val();
-    
-  if (generateAllClicked == true) {
-    hammingDistance = "0";
-  }
+    // Remove histogram
+    document.getElementById("histoWrapper").style.display = "none";
 
-  if(hammingDistance == "" || hammingDistance===undefined){
-    hammingDistance = $('.argumentsForm #hammingDistance').val();
-  }
+    var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
+    if(collectionIdentifer == "") {
+        collectionIdentifer = "all";
+    }
+    //var hammingDistance = $('.argumentsForm #hammingDistance').val();
+    var hammingDistance = $(".statsWrapper .on").val();
 
-  var role = "summary"; // basically this is set to "stats" if the First Go button is clicked, will contain "summary" as the value if Continue button is clicked
-  if($("body").find("form")[0].checkValidity()){
+    if (generateAllClicked == true) {
+        hammingDistance = "0";
+    }
+
+    if(hammingDistance == "" || hammingDistance===undefined) {
+        hammingDistance = $('.argumentsForm #hammingDistance').val();
+    }
+
+    var role = "summary"; // "histogram" if "View Timemap" is clicked, "stats" when next button is clicked, finally "summary" 3rd button is clicked
+    if($("body").find("form")[0].checkValidity()) {
         $(".time_container").hide();
         $(".Explain_Threshold").hide();
         var numOfMementos = $("#selected_mementos").text();
-        if(numOfMementos.length == 0){
+        if(numOfMementos.length == 0) {
             numOfMementos = -1;
         }
-        if(from == 0 && to == 0)
-        {
+        if(from == 0 && to == 0) {
             var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0"+"/" + numOfMementos + "/"+ $('.argumentsForm #urirIP').val().trim();
             var summaryPath = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role +"/"+ $('.argumentsForm #urirIP').val().trim();
         }
-        else
-        {
+        else {
             var fromFormatted = from.substring(0,4)+from.substring(5,7)+from.substring(8,10);
             var toFormatted = to.substring(0,4)+to.substring(5,7)+to.substring(8,10);
             var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+from+"/"+to+"/" + numOfMementos + "/"+ $('.argumentsForm #urirIP').val().trim();
             var summaryPath = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+fromFormatted+"/"+toFormatted+"/" +$('.argumentsForm #urirIP').val().trim();
         }
 
+        var summaryStatePath = "/alsummarizedview" +summaryPath;
+        changeToSummaryState(summaryStatePath);
 
-       var summaryStatePath = "/alsummarizedview" +summaryPath;
-       changeToSummaryState(summaryStatePath);
+        startEventNotification();
+        var ENDPOINT = "/alsummarizedtimemap";
+        var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
+        // Show loading screen
+        $("#busy-loader").show();
+        $('#serverStreamingModal .logsContent').empty();
+        $('#serverStreamingModal').modal('show');
 
-       startEventNotification();
-       var ENDPOINT = "/alsummarizedtimemap";
-       var address= ENDPOINT+ pathForAjaxCall;  //var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val()
-       $("#busy-loader").show();
-       $('#serverStreamingModal .logsContent').empty();
-       $('#serverStreamingModal').modal('show');
-      $.ajax({
-        type: "GET",
-        url: address, // uncomment this for deployment
-        beforeSend: function(xhr) {
-          xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
-        },
-        dataType: "text",
-        timeout: 0,
-        success: function( data, textStatus, jqXHR) {
-            $("#busy-loader").hide();
-            $('#serverStreamingModal').modal('hide');
-          try{
-              data = $.trim(data).split("...");
-              if(data.length > 1){
-                  if(data [1] == ""){
-                      data = data [0];
-                  }else{
-                      data = data [1];
-                  }
-              }
-              else{
-                  data = data [0];
-              }
+        $.ajax({
+            type: "GET",
+            url: address, // uncomment this for deployment
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("x-my-curuniqueusersessionid",  getUniqueUserSessionId());
+            },
+            dataType: "text",
+            timeout: 0,
+            success: function( data, textStatus, jqXHR) {
+                $("#busy-loader").hide();
+                $('#serverStreamingModal').modal('hide');
+                try {
+                    data = $.trim(data).split("...");
+                    if(data.length > 1){
+                        if(data [1] == "") {
+                            data = data [0];
+                        } else {
+                            data = data[1];
+                        }
+                    }
+                    else {
+                        data = data[0];
+                    }
 
-              jsonObjRes= $.parseJSON(data);
-              // following code segment makes the screenshot URI got with event_html | event_html_similarto properties to a html fragment
-              jsonObjRes[0].event_html= "<img src='"+jsonObjRes[0].event_html+"' width='300px' />";
-              var noOfUniqueMementos = 1;
-              for(var i=1;i< jsonObjRes.length;i++){
-                  jsonObjRes[i].event_html= "<img src='"+jsonObjRes[i].event_html+"' width='300px' />";
-                  jsonObjRes[i].event_html_similarto= "<img src='"+jsonObjRes[i].event_html_similarto+"' width='300px' />";
-              }
+                    jsonObjRes= $.parseJSON(data);
+                    // following code segment makes the screenshot URI got with event_html | event_html_similarto properties to a html fragment
+                    jsonObjRes[0].event_html= "<img src='"+jsonObjRes[0].event_html+"' width='300px' />";
+                    var noOfUniqueMementos = 1;
+                    for(var i=1;i< jsonObjRes.length;i++) {
+                        jsonObjRes[i].event_html= "<img src='"+jsonObjRes[i].event_html+"' width='300px' />";
+                        jsonObjRes[i].event_html_similarto= "<img src='"+jsonObjRes[i].event_html_similarto+"' width='300px' />";
+                    }
 
+                    var dateRangeStr= jsonObjRes[0].event_display_date.split(",")[0] + " - " + jsonObjRes[jsonObjRes.length-1].event_display_date.split(",")[0];
+                    var toDisplay= "Internet Archive";
+                    if($("input[name='primesource']:checked").val() == "archiveit" ) {
+                        toDisplay= "Archive-It";
+                    }
 
-              var dateRangeStr= jsonObjRes[0].event_display_date.split(",")[0] + " - " + jsonObjRes[jsonObjRes.length-1].event_display_date.split(",")[0];
-              var toDisplay= "Internet Archive";
-              if($("input[name='primesource']:checked").val() == "archiveit" ){
-                toDisplay= "Archive-It";
-              }
+                    $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes.length +" mementos | "+dateRangeStr);
+                    $(".paraOnlyOnStatsResults").hide();
+                    $(".statsWrapper").show();
 
-              $(".statsWrapper .Mementos_Considered").html("TimeMap from "+toDisplay +": "+ jsonObjRes.length +" mementos | "+dateRangeStr);
-              $(".paraOnlyOnStatsResults").hide();
-              $(".statsWrapper").show();
+                    window.timeline = new Timeline(jsonObjRes);
+                    // place where the notch width is being reduced t0 2px.
+                    $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
+                    // Color is changed in the Array at 284 line as that is the right place
+                    // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
+                    new Zoom("in");
+                    new Zoom("out");
+                    var chooseNext = new Chooser("next");
+                    var choosePrev = new Chooser("prev");
+                    var chooseUniqueNext = new Chooser("uniquenext");
+                    var chooseUniquePrev = new Chooser("uniqueprev");
+                    chooseNext.click();
+                    $(document).bind('keydown', function(e) {
+                        if (e.keyCode === 39) {
+                            chooseNext.click();
+                        } else if (e.keyCode === 37) {
+                            choosePrev.click();
+                        } else {
+                            return;
+                        }
+                    });
+                    //console.log(jsonObjRes);
+                    displayedMementos = JSON.parse(JSON.stringify(jsonObjRes)); // create deep copy of mementos
+                    drawImageGrid(jsonObjRes); // calling Image Grid Function here
+                    drawImageSlider(jsonObjRes);
+                    getImageArray(); //calling GIF function
+                    generateMementoURIList(jsonObjRes);
 
-               window.timeline = new Timeline(jsonObjRes);
-              // place where the notch width is being reduced t0 2px.
-              $("[data-notch-series='Non-Thumbnail Mementos']").width("2px");
-              // Color is changed in the Array at 284 line as that is the right place
-              // $("[data-notch-series='Non-Thumbnail Mementos']").css("background","#948989");
-              new Zoom("in");
-              new Zoom("out");
-              var chooseNext = new Chooser("next");
-              var choosePrev = new Chooser("prev");
-              var chooseUniqueNext = new Chooser("uniquenext");
-              var chooseUniquePrev = new Chooser("uniqueprev");
-              chooseNext.click();
-              $(document).bind('keydown', function(e) {
-                  if (e.keyCode === 39) {
-                      chooseNext.click();
-                  } else if (e.keyCode === 37) {
-                      choosePrev.click();
-                  } else {
-                      return;
-                  }
-              });
-              //console.log(jsonObjRes);
-              displayedMementos = JSON.parse(JSON.stringify(jsonObjRes)); // create deep copy of mementos
-              drawImageGrid(jsonObjRes); // calling Image Grid Function here
-              drawImageSlider(jsonObjRes);
-              getImageArray(); //calling GIF function
-              generateMementoURIList(jsonObjRes);
+                    if($('.argumentsForm #urirIP').val().indexOf(",") < 0) { // give URI stamp option to the user if multiple URIs
+                        $("#URIWatermarkLabel").hide();
+                    }
+                }
+                catch(err) {
+                    alert("Some problem fetching the response, Please refresh and try again.");
+                    $("#busy-loader").hide();
+                    $('#serverStreamingModal').modal('hide');
+                    $(".tabContentWrapper").hide();
+                }
+            },
+            error: function( data, textStatus, jqXHR, err) {
+                var errMsg = "Some problem fetching the response, Please refresh and try again.";
+                $("#busy-loader").hide();
+                $('#serverStreamingModal').modal('hide');
+                /*console.log("readyState: " + jqXHR.readyState);
+                console.log("responseText: "+ jqXHR.responseText);
+                console.log("status: " + jqXHR.status);
+                console.log("text status: " + textStatus);
+                console.log("error: " + err);*/
 
-              if($('.argumentsForm #urirIP').val().indexOf(",") < 0) // give URI stamp option to the user if multiple URIs
-              {
-                $("#URIWatermarkLabel").hide();
-              }
-          }
-          catch(err){
-            alert("Some problem fetching the response, Please refresh and try again.");
-            $("#busy-loader").hide();
-            $('#serverStreamingModal').modal('hide');
-            $(".tabContentWrapper").hide();
-          }
-        },
-        error: function( data, textStatus, jqXHR, err) {
-          var errMsg = "Some problem fetching the response, Please refresh and try again.";
-          $("#busy-loader").hide();
-          $('#serverStreamingModal').modal('hide');
-          /*console.log("readyState: " + jqXHR.readyState);
-          console.log("responseText: "+ jqXHR.responseText);
-          console.log("status: " + jqXHR.status);
-          console.log("text status: " + textStatus);
-          console.log("error: " + err);*/
-          
-          if(textStatus == 'error')
-          {
-            window.location.reload();
-          }else{
-            alert(errMsg);
-          }
-        }
-      });
+                if(textStatus == 'error') {
+                    window.location.reload();
+                } else {
+                    alert(errMsg);
+                }
+            }
+        });
     }
     //resetting this in order to have an option of unique thumbnails
     generateAllThumbnails = false;
     inputDates = "";
 }
 
-$(function(){
+$(function() {
     $(".cancelProcess").click(function(event){
         console.log("Cancel clicked");
         localStorage.removeItem("getHistogramPageClicked");
@@ -1208,14 +1231,14 @@ $(function(){
     });
 
     // Analyses the input pattern and finds all the parameters
-    $(document).on('focusout','#uriIP',function(){
-          var uri = $(this).val();
-          uriAnalysisForAttributes(uri);
+    $(document).on('focusout','#uriIP',function() {
+        var uri = $(this).val();
+        uriAnalysisForAttributes(uri);
     });
     //var source = new EventSource('/notifications/'+getCookie("clientId"));
 
      // following is commented to first stabilise the single step process
-    $(".getJSONFromServer").click(function(event){
+    $(".getJSONFromServer").click(function(event) { // View Timemap clicked
         document.getElementById("inputURI_error").style.display = "none";
         document.getElementById("uriIP").style.boxShadow = "";
         event.preventDefault();
@@ -1223,89 +1246,76 @@ $(function(){
         $(".tabContentWrapper").hide();
         $(".statsWrapper").hide();
         var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
-        if(collectionIdentifer == ""){
+        if(collectionIdentifer == "") {
             collectionIdentifer = "all";
         }
         var hammingDistance = $('.argumentsForm #hammingDistance').val().trim();
-        if(hammingDistance == ""){
+        if(hammingDistance == "") {
             hammingDistance = 4;
         }
 
         var role = "histogram"
-        if($(this).parents("body").find("form")[0].checkValidity()){
+        if($(this).parents("body").find("form")[0].checkValidity()) {
             localStorage.setItem("getHistogramPageClicked", "true");
             var curInputJsobObj = {};
             curInputJsobObj["uri"]= $("#uriIP").val().trim();
             curInputJsobObj["urir"]= $("#urirIP").val().trim();
-            if(curInputJsobObj["urir"].indexOf(", ")>-1)
-            {
+            if(curInputJsobObj["urir"].indexOf(", ")>-1) {
                 var urirTemp = curInputJsobObj["urir"].split(", ");
                 curInputJsobObj["urir"] = "";
                 for (var i = 0; i < urirTemp.length; i++) {
                     curInputJsobObj["urir"] += urirTemp[i];
-                    if(i != urirTemp.length-1)
-                    {
+                    if(i != urirTemp.length-1) {
                         curInputJsobObj["urir"] += ",";
                     }
                 }
             }
             curInputJsobObj["primesource"]= $('.argumentsForm input[name=primesource]:checked').val();
-            if(curInputJsobObj["primesource"]=="internetarchive"){
-              curInputJsobObj["collectionIdentifer"]= "all";
-
-            }else{
-              curInputJsobObj["collectionIdentifer"]= $('.argumentsForm #collectionNo').val().trim();
-
+            if(curInputJsobObj["primesource"]=="internetarchive") {
+                curInputJsobObj["collectionIdentifer"] = "all";
+            } else {
+                curInputJsobObj["collectionIdentifer"] = $('.argumentsForm #collectionNo').val().trim();
             }
-            if(!parseInt(curInputJsobObj["collectionIdentifer"])){
-              curInputJsobObj["collectionIdentifer"] = "all";
+            if(!parseInt(curInputJsobObj["collectionIdentifer"])) {
+                curInputJsobObj["collectionIdentifer"] = "all";
             }
-            curInputJsobObj["hammingDistance"]=   $('.argumentsForm #hammingDistance').val();
+            curInputJsobObj["hammingDistance"] = $('.argumentsForm #hammingDistance').val();
             curInputJsobObj["role"]= role;
             localStorage.setItem("curInputObj", JSON.stringify(curInputJsobObj));
             //window.location.reload();
-            if(notificationSrc != null){
-              notificationSrc.close();
+            if(notificationSrc != null) {
+                notificationSrc.close();
             }
             window.location.href = window.location.origin+generateDeepLinkState(curInputJsobObj);
-        }else{
-          if( $("#uriIP").val().trim()==""){
+        } else if($("#uriIP").val().trim()=="") {
             // Display message, highlight input box in red
             document.getElementById("inputURI_error").style.display = "block";
             document.getElementById("uriIP").style.boxShadow = "0 0 4px .5px red";
             //alert("Please enter an URI-R, required field.");
-          }
         }
       });
 
-    $(".toggleHelp").click(function(event){
-        if(document.getElementById("helpSection").style.display == "block")
-        {
+    $(".toggleHelp").click(function(event) {
+        if(document.getElementById("helpSection").style.display == "block") {
             document.getElementById("helpSection").style.display = "none";
         }
-        else
-        {
+        else {
             document.getElementById("helpSection").style.display = "block";
         }
     });
 
     // work around for the timeline setting stuff
-    $(".getSummary").click(function(event){
-
-        if(inputDates.length > 1) // If a date range was passed
-        {
-
+    $(".getSummary").click(function(event) {
+        if(inputDates.length > 1) { // If a date range was passed
             var dates = inputDates.split(",");
-
             getSummary(dates[0], dates[1]); // Summary for a certain range
         }
-        else
-        {
+        else {
             getSummary(0,0); // Otherwise, get the full time map
         }
     });
     
-    $("#submitRange").click(function(event){
+    $("#submitRange").click(function(event) {
         //localStorage.setItem("submitRangeClicked,"true");
 
         var selectedMementos = parseInt(document.getElementById("selected_mementos").innerHTML);
@@ -1315,19 +1325,15 @@ $(function(){
         var from = document.getElementById("fromInput").value;
         var to = document.getElementById("toInput").value;
 
-        if(selectedMementos > 0)
-        {
-            if(isValidDate(from) && isValidDate(to))
-            {
+        if(selectedMementos > 0) {
+            if(isValidDate(from) && isValidDate(to)) {
                 // Create date objects for comparison
                 fromBox = new Date(fromBox);
                 toBox = new Date(toBox);
                 var fromDate = new Date(from);
                 var toDate = new Date(to);
-                if(fromDate < toDate) // Check that dates are in the proper order
-                {
-                    if(fromDate > fromBox || toDate < toBox)
-                    {
+                if(fromDate < toDate) { // Check that dates are in the proper order
+                    if(fromDate > fromBox || toDate < toBox) { // Check if dates differ from full range
                         var theDateRange = "Requested Date Range: " + from + " - " + to;
                         $(".statsWrapper .Memento_Date_Range").html(theDateRange);
                         console.log("Fetching date range stats...");
@@ -1336,8 +1342,7 @@ $(function(){
                     else
                         getStats(0,0); // Dates were set to full default range
                 }
-                else
-                {
+                else {
                     document.getElementById('date_error').innerHTML = "Please enter a from date that is less than the to date";
                     document.getElementById('date_error').style.display = "block";
                 }
@@ -1345,79 +1350,69 @@ $(function(){
             else
                 document.getElementById('date_error').style.display = "block";
         }
-        else
-        {
+        else {
             document.getElementById('date_error').innerHTML = "Please select at least one memento";
             document.getElementById('date_error').style.display = "block";
         }
     });
     
-    $("#generateAllThumbnails").click(function(event){
+    $("#generateAllThumbnails").click(function(event) {
         generateAllClicked = true;
         getSummary(0,0);
     });
 
+    // Toggle 'X' buttons on image grid thumbnails
+    // If button is toggled to 'on' then save that thumbnails img src
     $(document).ready(function () {
         $(document).on("click",".close_button", function(){
-            if($(this).hasClass('off'))
-            {
+            if($(this).hasClass('off')) {
                 $(this).addClass('on');
                 $(this).removeClass('off');
                 this.parentElement.style.opacity = '.3';
                 mementosToRemove.push($(this).parent().find("img").attr("src"));
             }
-            else
-            {
+            else {
                 $(this).addClass('off');
                 $(this).removeClass('on');
                 this.parentElement.style.opacity = '1';
-                var found_it = mementosToRemove.indexOf($(this).parent().find("img").attr("src"));
-                mementosToRemove.splice(found_it,1);
+                var foundImgSrc = mementosToRemove.indexOf($(this).parent().find("img").attr("src"));
+                mementosToRemove.splice(foundImgSrc,1);
             }
         });
     });
 
     $(document).ready(function () {
-        $(document).on("click",".refresh_button", function(){
-            if(!($(this).find("i").hasClass('fa-spin')))
-            {
-                $(this).find("i").addClass('fa-spin');
-                //Refresh function to be created
+        $(document).on("click",".refresh_button", function() {
+            if(!($(this).find("i").hasClass('fa-spin'))) { //If refresh button is not spinning
+                $(this).find("i").addClass('fa-spin'); // Make refresh button spin
                 var button = $(this).find("i");
                 var refreshLink = $(this).parent().find("a").attr("href");
                 var refreshImg = $(this).parent().find("img").attr("src");
-                console.log(refreshLink);
-                console.log(refreshImg);
+
                 refreshMemento(refreshLink, refreshImg, button);
             }
-            else
-            {
+            else {
                 $(this).find("i").removeClass('fa-spin');
             }
         });
     });
 
-    $("#updateMementos").click(function(event){
+    $("#updateMementos").click(function(event) {
 
-        // choose mementos form list of those currently displayed
+        // choose mementos from list of those currently displayed
         var chosenMementos = JSON.parse(JSON.stringify(displayedMementos));
 
         //upon button click images marked for deletion must be removed
         //from array passed to functions
-        if(mementosToRemove.length == imagesData_IG.length)
-        {
+        if(mementosToRemove.length == imagesData_IG.length) {
             document.getElementById("updateMementosError").innerHTML = "Cannot delete all mementos.";
         }
-        else if(mementosToRemove.length > 0)
-        {
+        else if(mementosToRemove.length > 0) {
             document.getElementById("updateMementosError").innerHTML = "";
             $("#gifApp").empty();
-            for(var i = 0; i < mementosToRemove.length; i++)
-            {
-                for(var j = 0; j < chosenMementos.length; j++)
-                {
-                    if($(chosenMementos[j].event_html).attr("src") == mementosToRemove[i])
-                    {
+            for(var i = 0; i < mementosToRemove.length; i++) {
+                for(var j = 0; j < chosenMementos.length; j++) {
+                    if($(chosenMementos[j].event_html).attr("src") == mementosToRemove[i]) {
                         chosenMementos.splice(j, 1);
                         break;
                     }
@@ -1427,19 +1422,20 @@ $(function(){
             // update list of displayed mementos with chosen mementos
             displayedMementos = JSON.parse(JSON.stringify(chosenMementos));
 
+            // Redraw elements to reflect new list of mementos
             drawImageSlider(chosenMementos);
             drawImageGrid(chosenMementos);
             getImageArray();
             generateMementoURIList(chosenMementos);
             mementosToRemove = [];
         }
-        else
-        {
+        else {
             document.getElementById("updateMementosError").innerHTML = "Please select mementos for removal.";
         }
     });
 
-    $("#revertMementos").click(function(event){
+    // Revert back to original full list of memento thumbnails
+    $("#revertMementos").click(function(event) {
         drawImageSlider(jsonObjRes);
         drawImageGrid(jsonObjRes);
         getImageArray();
@@ -1449,23 +1445,23 @@ $(function(){
         displayedMementos = JSON.parse(JSON.stringify(jsonObjRes));
     });
 
-    $(document).on("click","button[name=thresholdDistance]",function(){
-      $('button[name=thresholdDistance].on').removeClass('on')
-      $(this).addClass("on");
-      if($(this).attr("timetowait") == 0){
-        $(".approxTimeShowingPTag").html(' <1 minute ');
-      }else{
-        $(".approxTimeShowingPTag").html('<label class="timetowait">'+$(this).attr("timetowait") +'</label> minutes ');
-      }
+    $(document).on("click","button[name=thresholdDistance]",function() {
+        $('button[name=thresholdDistance].on').removeClass('on')
+        $(this).addClass("on");
+        if($(this).attr("timetowait") == 0) {
+            $(".approxTimeShowingPTag").html(' <1 minute ');
+        } else {
+            $(".approxTimeShowingPTag").html('<label class="timetowait">'+$(this).attr("timetowait") +'</label> minutes ');
+        }
     });
 
   });
 })(window, document);
 
 function getCookie(name) {
-  var value = "; " + document.cookie;
-  var parts = value.split("; " + name + "=");
-  if (parts.length == 2) return parts.pop().split(";").shift();
+    var value = "; " + document.cookie;
+    var parts = value.split("; " + name + "=");
+    if (parts.length == 2) return parts.pop().split(";").shift();
 }
 
 function delete_cookie (name) {
@@ -1484,27 +1480,27 @@ function getParameterByName(name, url) {
 }
 
 function getUniqueUserSessionId() {
-  if(curUniqueUserSessionID == null){
-    curUniqueUserSessionID = Date.now()*Math.floor((Math.random() * 10) + 1);
-    return curUniqueUserSessionID;
-  }else{
-    return curUniqueUserSessionID;
-  }
+    if(curUniqueUserSessionID == null) {
+        curUniqueUserSessionID = Date.now()*Math.floor((Math.random() * 10) + 1);
+        return curUniqueUserSessionID;
+    } else {
+        return curUniqueUserSessionID;
+    }
 }
 
 
 
-function generateDeepLinkState(curInputJsobObj){
-  return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["urir"];
+function generateDeepLinkState(curInputJsobObj) {
+    return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["urir"];
 }
 
-function generateDeepLinkStateForSummary(curInputJsobObj){
-  return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["urir"];
+function generateDeepLinkStateForSummary(curInputJsobObj) {
+    return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["urir"];
 }
 
 function changeToSummaryState(curURLState) {
     var state = {},
-        title = "Smmary State",
+        title = "Summary State",
         path  = curURLState;
     history.pushState(state, title, path);
 }
@@ -1516,44 +1512,47 @@ function updateDeepLinkStateArr() {
     var deepLinkStr = pathname.slice(1);
     var deepLinkParts = deepLinkStr.split("/");
     if(deepLinkParts[0] == "alsummarizedview" && (deepLinkParts[1].toLowerCase()=="archiveit" || deepLinkParts[1].toLowerCase()=="internetarchive"  )  && (deepLinkParts[4]=="stats" || deepLinkParts[4]=="summary" || deepLinkParts[4]=="histogram")){
-      curDeepLinkStateArr[0] = deepLinkParts[0];
-      curDeepLinkStateArr[1] = deepLinkParts[1];
-      curDeepLinkStateArr[4]= deepLinkParts[4];
-      if(isNaN(deepLinkParts[2]) ){ //taking care of CI
-        if(deepLinkParts[2] != "all"){
-          alert("The value after 3rd backword slash(/) has to be either a numeric value or 'all', Please correct that !");
-          return false;
+        curDeepLinkStateArr[0] = deepLinkParts[0];
+        curDeepLinkStateArr[1] = deepLinkParts[1];
+        curDeepLinkStateArr[4]= deepLinkParts[4];
+        if(isNaN(deepLinkParts[2]) ) { //taking care of CI
+            if(deepLinkParts[2] != "all") {
+                alert("The value after 3rd backword slash(/) has to be either a numeric value or 'all', Please correct that !");
+                return false;
+            }
         }
-      }
-      if(isNaN(deepLinkParts[3])){ // hamming distance is not being a number
-        alert("The value after 4th backword slash(/) has to be a numeric value, Please correct that !");
-        return false;
-      }
-      else{
-        curDeepLinkStateArr[2] = deepLinkParts[2];
-        curDeepLinkStateArr[3]= deepLinkParts[3];
-        if((curDeepLinkStateArr[4] == "summary" || curDeepLinkStateArr[4] == "stats") && !(isNaN(Number(deepLinkParts[5]))) && !(isNaN(Number(deepLinkParts[6]))))
-        {
-            curDeepLinkStateArr[6] = deepLinkParts[5];
-            curDeepLinkStateArr[7] = deepLinkParts[6];
-            curDeepLinkStateArr[5] = deepLinkStr.split("/"+curDeepLinkStateArr[7]+"/")[1];
-
+        if(isNaN(deepLinkParts[3])) { // hamming distance is not being a number
+            alert("The value after 4th backword slash(/) has to be a numeric value, Please correct that !");
+            return false;
         }
-        else    
-            curDeepLinkStateArr[5] = deepLinkStr.split("/"+deepLinkParts[4]+"/")[1];
+        else {
+            curDeepLinkStateArr[2] = deepLinkParts[2];
+            curDeepLinkStateArr[3]= deepLinkParts[3];
+            if((curDeepLinkStateArr[4] == "summary" || curDeepLinkStateArr[4] == "stats") && !(isNaN(Number(deepLinkParts[5]))) && !(isNaN(Number(deepLinkParts[6])))) {
+                curDeepLinkStateArr[6] = deepLinkParts[5];
+                curDeepLinkStateArr[7] = deepLinkParts[6];
+                curDeepLinkStateArr[5] = deepLinkStr.split("/"+curDeepLinkStateArr[7]+"/")[1];
+            }
+            else    
+                curDeepLinkStateArr[5] = deepLinkStr.split("/"+deepLinkParts[4]+"/")[1];
 
-        return true;
-      }
-    }else{
+            return true;
+        }
+    } else {
       alert("Something went wrong with the request URI");
       return false;
     }
 
 }
 
-function refreshMemento(link, img, button)
-{
-
+/**
+* Requests a new screenshot for the selected thumbnail
+* 
+* @param link - Source to the memento
+* @param img - Source to the current thumbnail
+* @param button - The button that was clicked to initiate the refresh
+*/
+function refreshMemento(link, img, button) {
     var path = "/refreshscreenshot?link="+link+"&img="+img;   
     $.ajax({
         type: "GET",
@@ -1564,15 +1563,14 @@ function refreshMemento(link, img, button)
         dataType: "text",
         timeout: 90000,
         success: function(data, textStatus, jqXHR) {
-            try
-            {
+            try {
                 drawImageSlider(displayedMementos);
                 drawImageGrid(displayedMementos);
                 getImageArray();
                 generateMementoURIList(displayedMementos);
-                button.removeClass('fa-spin');
+                button.removeClass('fa-spin'); // Stop the button from spinning
             }
-            catch(err){
+            catch(err) {
 
             }
         },
@@ -1593,8 +1591,7 @@ function refreshMemento(link, img, button)
 function isValidDate(dateString)
 {
     // First check for the pattern
-    if(!/^\d{4}\-\d{2}\-\d{2}$/.test(dateString))
-    {
+    if(!/^\d{4}\-\d{2}\-\d{2}$/.test(dateString)) {
         document.getElementById("date_error").innerHTML = "Please enter dates in YYYY-MM-DD format";
         return false;
     }
@@ -1606,13 +1603,12 @@ function isValidDate(dateString)
     var year = parseInt(parts[0], 10);
 
     // Check the ranges of month and year
-    if(year < 1000 || year > 3000 || month == 0 || month > 12)
-    {
+    if(year < 1000 || year > 3000 || month == 0 || month > 12) {
         document.getElementById("date_error").innerHTML = "Dates are out of range.";
         return false;
     }
 
-    var monthLength = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
+    var monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
     // Adjust for leap years
     if(year % 400 == 0 || (year % 100 != 0 && year % 4 == 0))
@@ -1642,8 +1638,7 @@ function isValidDate(dateString)
     month = month - 1;
     
     // Check if input within possible range of mementos
-    if(compareDate < from || compareDate > to)
-    {
+    if(compareDate < from || compareDate > to) {
         document.getElementById("date_error").innerHTML = "Please enter dates between " + fromDateStr + " and " + toDateStr;
         return false;
     }
@@ -1652,17 +1647,14 @@ function isValidDate(dateString)
     if(day > 0 && day <= monthLength[month])
         return true;
     else
-    {
         document.getElementById("date_error").innerHTML = "Invalid date, please enter in YYYY-MM-DD format";
-    }
 };
 
-function generateMementoURIList(object)
-{
+function generateMementoURIList(object) {
     var URIM = [];
 
     $.each(object,function(index,obj){
-        if($(obj.event_html).attr("src").indexOf("notcaptured") < 0){
+        if($(obj.event_html).attr("src").indexOf("notcaptured") < 0) {
             URIM.push(obj.event_link);
         }
     });
@@ -1674,8 +1666,7 @@ window.addEventListener('popstate', function(e) {
     location.reload();
 });
 
-function formatDate(date)
-{
+function formatDate(date) {
     var month = date.getMonth() + 1;
     if(month <= 9)
         month = "0" + month;
