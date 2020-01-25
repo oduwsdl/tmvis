@@ -600,204 +600,216 @@ var inputDates = "";
   window.onload = function() {
       //window.location.href = window.location.origin;
       //alert("Windows loaded back");
-      if(localStorage.getItem("getHistogramPageClicked") == "true"){
-
-          localStorage.setItem("getHistogramPageClicked","false");
-          var curInputObj = JSON.parse(localStorage.getItem("curInputObj"));
-          $('.argumentsForm #uriIP').val(curInputObj["uri"]);
-          $('.argumentsForm #urirIP').val(curInputObj["urir"]);
-          $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
-          $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
-          $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true).trigger("click");
-          getHistogramPage(); // this makes the call for getting the initial stats.
-      }else{
+    if(localStorage.getItem("getHistogramPageClicked") == "true"){
+        localStorage.setItem("getHistogramPageClicked","false");
+        var curInputObj = JSON.parse(localStorage.getItem("curInputObj"));
+        $('.argumentsForm #uriIP').val(curInputObj["uri"]);
+        $('.argumentsForm #urirIP').val(curInputObj["urir"]);
+        $('.argumentsForm #collectionNo').val(curInputObj["collectionIdentifer"]);
+        $('.argumentsForm #hammingDistance').val(curInputObj["hammingDistance"] );
+        $('.argumentsForm input[value='+curInputObj["primesource"] +']').prop("checked",true).trigger("click");
+        getHistogramPage(); // this makes the call for getting the timemap to draw the histogram
+    } else {
         //alert("doesn't have the local storage set, using the Query parameters");
         //GET Request-> "http://localhost:3000/GetResponse/?URI-R=http://4genderjustice.org/&ci=1068&primesource=archiveit&hdt=4"
         var pathname = window.location.pathname;
         if(pathname == "/" || pathname == "/index.html"){
-          return true;
-        }else{
-          if(updateDeepLinkStateArr()){
+            return true;
+        } else {
+            if(updateDeepLinkStateArr()) {
+                $('.argumentsForm #uriIP').val(curDeepLinkStateArr[5]);
+                $('.argumentsForm #urirIP').val(curDeepLinkStateArr[5]);
+                $('.argumentsForm #collectionNo').val( curDeepLinkStateArr[2]);
+                var hammingDistance = curDeepLinkStateArr[3];
+                if(hammingDistance == "" || hammingDistance == undefined || hammingDistance == null) {
+                    hammingDistance = 4;
+                }
 
-            $('.argumentsForm #uriIP').val(curDeepLinkStateArr[5]);
-            $('.argumentsForm #urirIP').val(curDeepLinkStateArr[5]);
-            $('.argumentsForm #collectionNo').val( curDeepLinkStateArr[2]);
-            var hammingDistance = curDeepLinkStateArr[3];
-            if(hammingDistance == "" || hammingDistance == undefined || hammingDistance == null){
-                hammingDistance = 4;
+                $('.argumentsForm #hammingDistance').val(hammingDistance);
+                $('.argumentsForm #hammingdistanceValue').html(hammingDistance);
+                $('.argumentsForm .primesrcsection input[type=radio][value='+ curDeepLinkStateArr[1] +']').prop("checked",true).trigger("click");
+
+                if(curDeepLinkStateArr.length > 6) {
+                    console.log(curDeepLinkStateArr);
+
+                    var from = curDeepLinkStateArr[6].substring(0,4)+"-"+curDeepLinkStateArr[6].substring(4,6)+"-"+curDeepLinkStateArr[6].substring(6,8);
+                    var to = curDeepLinkStateArr[7].substring(0,4)+"-"+curDeepLinkStateArr[7].substring(4,6)+"-"+curDeepLinkStateArr[7].substring(6,8);
+                    var theDateRange = "Requested Date Range: " + from + " - " + to;
+                    $(".statsWrapper .Memento_Date_Range").html(theDateRange);
+
+                    if(curDeepLinkStateArr[4] == "stats") {
+                        getStats(from, to);
+                    } else {
+                        getSummary(from, to);
+                    }
+
+                } else if (curDeepLinkStateArr[4] == "summary") {
+                    getSummary(0,0);
+                } else if (curDeepLinkStateArr[4] == "stats") {
+                    getStats(0,0);
+                } else {
+                    getHistogramPage();
+                }
+            } else {
+                return false;
             }
+        }
+    }
+}
 
-            $('.argumentsForm #hammingDistance').val(hammingDistance);
-            $('.argumentsForm #hammingdistanceValue').html(hammingDistance);
-            $('.argumentsForm .primesrcsection input[type=radio][value='+ curDeepLinkStateArr[1] +']').prop("checked",true).trigger("click");
-            if(curDeepLinkStateArr.length > 6){
-              console.log(curDeepLinkStateArr);
-              var from = curDeepLinkStateArr[6].substring(0,4)+"-"+curDeepLinkStateArr[6].substring(4,6)+"-"+curDeepLinkStateArr[6].substring(6,8);
-              var to = curDeepLinkStateArr[7].substring(0,4)+"-"+curDeepLinkStateArr[7].substring(4,6)+"-"+curDeepLinkStateArr[7].substring(6,8);
-              
-              var theDateRange = "Requested Date Range: " + from + " - " + to;
-              $(".statsWrapper .Memento_Date_Range").html(theDateRange);
-              
-              if(curDeepLinkStateArr[4] == "stats"){
-                getStats(from, to);
-              } else {
-                getSummary(from, to);
-              }
 
-            }else if(curDeepLinkStateArr[4] == "summary"){
-                getSummary(0,0);
-            }else if(curDeepLinkStateArr[4] == "stats"){
-                getStats(0,0);
-            }else{
-              getHistogramPage();
+/**
+* Checks that the user input URI is valid.
+*
+* Criteria changes depending on if the input was a:
+* - URI-R
+* - URI-T
+* - URI-M
+*
+* @param uri -  The user input uri
+**/
+function uriAnalysisForAttributes(uri) {
+    if(uri == "") {
+        return;
+    }
+    var urir;
+    if(uri.match(/\/[0-9]{14}\//g) == null) {
+        if(uri.match(/\/\*\//g) != null) { // incase the given URI is timemap URI-TM
+            tmIndicator = uri.match(/\/\*\//g)[0];
+            urir = uri.split(tmIndicator)[1]; // uri is here now
+            var prePartToURIR = uri.split(tmIndicator)[0];
+            var hdt = 4; // set hamming distance to default
+            var primesource = "";
+            var ci = "all";
+            if(prePartToURIR.indexOf("archive-it") > -1){
+            primesource = "archiveit";
+            ci = parseInt(prePartToURIR.match(/org\/[0-9]*/g)[0].split("/")[1]); // checking for a numerical valuef or COllection Identifier
+            if(isNaN(ci)) {
+                ci = "all";
             }
-          }else{
-              return false;
-          }
+            } else if (prePartToURIR.indexOf("archive.org") > -1) {
+                primesource = "internetarchive";
+            } else {
+                alert("not a valid input for URI, pass a valid URI-R || URI-M || URI-T");
+                return false;
+            }
+            $('.argumentsForm #urirIP').val(urir);
+            $('.argumentsForm #collectionNo').val(ci);
+            $('.argumentsForm input[value='+primesource+']').prop("checked",true).trigger("click");
+        } else {
+          urir = uri; // one and the same - case where the URI-R is directly given
+          $('.argumentsForm #urirIP').val(urir);
         }
-      }
-  }
-
-function uriAnalysisForAttributes(uri){
-  if(uri == ""){
-    return;
-  }
-  var urir;
-  if(uri.match(/\/[0-9]{14}\//g) == null){
-    if(uri.match(/\/\*\//g) != null){ // incase the given URI is timemap URI-TM
-      tmIndicator = uri.match(/\/\*\//g)[0];
-      urir = uri.split(tmIndicator)[1]; // uri is here now
-      var prePartToURIR = uri.split(tmIndicator)[0];
-      var hdt = 4;
-      var primesource = "";
-      var ci = "all";
-      if(prePartToURIR.indexOf("archive-it") > -1){
-        primesource = "archiveit";
-        ci = parseInt(prePartToURIR.match(/org\/[0-9]*/g)[0].split("/")[1]); // checking for a numerical valuef or COllection Identifier
-        if(isNaN(ci)){
-            ci = "all";
+    } else { // Incase of URI-M
+        dtstr = uri.match(/\/[0-9]{14}\//g)[0];
+        urir = uri.split(dtstr)[1]; // uri is here now
+        var prePartToURIR = uri.split(dtstr)[0];
+        var hdt = 4; // set hamming distance to default
+        var primesource = "";
+        var ci = "all";
+        if(prePartToURIR.indexOf("archive-it") > -1) {
+            primesource = "archiveit";
+            ci = parseInt(prePartToURIR.match(/org\/[0-9]*/g)[0].split("/")[1]);
+            if(isNaN(ci)){
+                ci = "all";
+            }
+        } else if (prePartToURIR.indexOf("archive.org") > -1) {
+            primesource = "internetarchive";
+        } else {
+            alert("not a valid input for URI, pass a valid URI-R or URI-M");
+            return false;
         }
-      }else if(prePartToURIR.indexOf("archive.org") > -1){
-        primesource = "internetarchive";
-      }else{
-        alert("not a valid input for URI, pass a valid URI-R || URI-M || URI-T");
-        return false;
-      }
-      $('.argumentsForm #urirIP').val(urir);
-      $('.argumentsForm #collectionNo').val(ci);
-      $('.argumentsForm input[value='+primesource+']').prop("checked",true).trigger("click");
-
-    }else{
-      urir = uri; // one and the same - case where the URI-R is directly given
-      $('.argumentsForm #urirIP').val(urir);
+        $('.argumentsForm #urirIP').val(urir);
+        $('.argumentsForm #collectionNo').val(ci);
+        $('.argumentsForm input[value='+primesource+']').prop("checked",true).trigger("click");
     }
-  }else{ // Incase of URI-M
-    dtstr = uri.match(/\/[0-9]{14}\//g)[0];
-    urir = uri.split(dtstr)[1]; // uri is here now
-    var prePartToURIR = uri.split(dtstr)[0];
-    var hdt = 4;
-    var primesource = "";
-    var ci = "all";
-    if(prePartToURIR.indexOf("archive-it") > -1){
-      primesource = "archiveit";
-      ci = parseInt(prePartToURIR.match(/org\/[0-9]*/g)[0].split("/")[1]);
-      if(isNaN(ci)){
-          ci = "all";
-      }
-    }else if(prePartToURIR.indexOf("archive.org") > -1){
-      primesource = "internetarchive";
-    }else{
-      alert("not a valid input for URI, pass a valid URI-R or URI-M");
-      return false;
-    }
-    $('.argumentsForm #urirIP').val(urir);
-    $('.argumentsForm #collectionNo').val(ci);
-    $('.argumentsForm input[value='+primesource+']').prop("checked",true).trigger("click");
-  }
 }
 var notificationSrc= null;
 
-function startEventNotification(){
-  notificationSrc= new EventSource('/notifications/'+getUniqueUserSessionId());
-  var preVal = 2;
-        notificationSrc.onmessage = function(e) {
-            console.log(e.data);
-            var streamedObj = JSON.parse(e.data);
-            // if(streamedObj.usid != uniqueSessionId){
-            //     return false;
-            // }
-            var curLog = "<p>"+streamedObj.data+"</p>";
+/**
+* Begins the log of data and appends it to the loading screen.
+* Called when loading the histogram, stats, and summary pages.
+**/
+function startEventNotification() {
+    notificationSrc= new EventSource('/notifications/'+getUniqueUserSessionId());
+    var preVal = 2;
+    notificationSrc.onmessage = function(e) {
+        console.log(e.data);
+        var streamedObj = JSON.parse(e.data);
+        // if(streamedObj.usid != uniqueSessionId){
+        //     return false;
+        // }
+        var curLog = "<p>"+streamedObj.data+"</p>";
 
 
-            if(streamedObj.data === "streamingStarted") {
+        if(streamedObj.data === "streamingStarted") {
 
-                $('#serverStreamingModal .logsContent').empty();
-                $('#logtab .logsContent').empty();
+            $('#serverStreamingModal .logsContent').empty();
+            $('#logtab .logsContent').empty();
 
-                setProgressBar(2);
-                // un comment the following line after POC
-                if($(".tabContentWrapper").css("display") == "none"){
-                $('#serverStreamingModal').modal('show');
-                }
+            setProgressBar(2);
+            // un comment the following line after POC
+            if($(".tabContentWrapper").css("display") == "none"){
+            $('#serverStreamingModal').modal('show');
+            }
 
-            } else if (streamedObj.data.indexOf("percentagedone-") == 0) {
-                value = parseInt(streamedObj.data.split("-")[1]);
-                if (value > preVal){
+        } else if (streamedObj.data.indexOf("percentagedone-") == 0) {
+            value = parseInt(streamedObj.data.split("-")[1]);
+            if (value > preVal) {
                 preVal = value;
-                }
-                if(preVal > 100){
+            }
+            if(preVal > 100) {
                 preVal = 95;
-                }
-                setProgressBar(preVal);
-                if(preVal == 100){
-                    $('#serverStreamingModal').hide();
-                }
-            } else if( streamedObj.data === "readyToDisplay") {
-                //  alert(" Ready for display");
-                //  $(".getSummary").trigger("click");
-                $('#serverStreamingModal .logsContent').empty();
-
-                // Temparory disabled for this step: for avoiding the refresh issue... automatically refreshing the page when the results are available
-                //window.location.reload();
-
-                setProgressBar(2);
-                $('#serverStreamingModal').modal('hide');
-                $(".tabContentWrapper").show();
-                if(notificationSrc != null) {
-                    notificationSrc.close();
-                }
-            } else if(streamedObj.data === "statssent") {
-                $('#serverStreamingModal .logsContent').empty();
-                setProgressBar(2);
-                // for avoiding the refresh issue... automatically refreshing the page when the results are available
-                //window.location.reload();
-                $('#serverStreamingModal').modal('hide');
-                if(notificationSrc != null){
-                    notificationSrc.close();
-                }
-            } else if(streamedObj.data === "histoDataSent") {
-                $('#serverStreamingModal').modal('hide');
             }
-            else {
-                $("#serverStreamingModal .logsContent").prepend(curLog);
-                $('#logtab .logsContent').prepend(curLog);
-                // $('#serverStreamingModal .modal-body').animate({
-                //      scrollTop: $("#bottomModal").offset().top
-                //  }, 20);
+            setProgressBar(preVal);
+            if(preVal == 100) {
+                $('#serverStreamingModal').hide();
             }
-       };
+        } else if( streamedObj.data === "readyToDisplay") {
+            //  alert(" Ready for display");
+            //  $(".getSummary").trigger("click");
+            $('#serverStreamingModal .logsContent').empty();
+
+            // Temparory disabled for this step: for avoiding the refresh issue... automatically refreshing the page when the results are available
+            //window.location.reload();
+
+            setProgressBar(2);
+            $('#serverStreamingModal').modal('hide');
+            $(".tabContentWrapper").show();
+            if(notificationSrc != null) {
+                notificationSrc.close();
+            }
+        } else if(streamedObj.data === "statssent") {
+            $('#serverStreamingModal .logsContent').empty();
+            setProgressBar(2);
+            // for avoiding the refresh issue... automatically refreshing the page when the results are available
+            //window.location.reload();
+            $('#serverStreamingModal').modal('hide');
+            if(notificationSrc != null){
+                notificationSrc.close();
+            }
+        } else if(streamedObj.data === "histoDataSent") {
+            $('#serverStreamingModal').modal('hide');
+        }
+        else {
+            $("#serverStreamingModal .logsContent").prepend(curLog);
+            $('#logtab .logsContent').prepend(curLog);
+            // $('#serverStreamingModal .modal-body').animate({
+            //      scrollTop: $("#bottomModal").offset().top
+            //  }, 20);
+        }
+   };
 }
 
 
-function setProgressBar(value){
-  $(".progress-bar-space .progress-bar-striped").html(value+"%");
-  $(".progress-bar-space .progress-bar-striped").attr("aria-valuenow", value);
-  $(".progress-bar-space .progress-bar-striped").css("width",value+"%");
+function setProgressBar(value) {
+    $(".progress-bar-space .progress-bar-striped").html(value+"%");
+    $(".progress-bar-space .progress-bar-striped").attr("aria-valuenow", value);
+    $(".progress-bar-space .progress-bar-striped").css("width",value+"%");
 }
 
 /**
-* Sets parameters for the histogram page and runs
-* the getHistoData function.
+* Sets parameters for the histogram page and runs the getHistoData function.
 */
 function getHistogramPage(){
     var toDisplay= "Internet Archive";
@@ -810,8 +822,7 @@ function getHistogramPage(){
 }
     
 /**
-* Retrieves the timemap to draw the histogram. 
-* Displays the histogram page.
+* Retrieves the timemap to draw the histogram and then displays the histogram page.
 */
 function getHistoData(toDisplay) {
     var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
@@ -1295,6 +1306,7 @@ $(function() {
         }
       });
 
+    // Toggles the 'Help' popup that explains the different types of URI inputs
     $(".toggleHelp").click(function(event) {
         if(document.getElementById("helpSection").style.display == "block") {
             document.getElementById("helpSection").style.display = "none";
@@ -1315,6 +1327,7 @@ $(function() {
         }
     });
     
+    // Submits the user input date range and passes the dates to getStats()
     $("#submitRange").click(function(event) {
         //localStorage.setItem("submitRangeClicked,"true");
 
@@ -1356,6 +1369,7 @@ $(function() {
         }
     });
     
+    // Toggles if the user wants all the mementos to be thumbnails
     $("#generateAllThumbnails").click(function(event) {
         generateAllClicked = true;
         getSummary(0,0);
@@ -1381,6 +1395,8 @@ $(function() {
         });
     });
 
+    // Sends a request to the back-end to retake the thumbnail
+    // Also sets the refresh button to spin while the new screenshot is being taken
     $(document).ready(function () {
         $(document).on("click",".refresh_button", function() {
             if(!($(this).find("i").hasClass('fa-spin'))) { //If refresh button is not spinning
@@ -1397,6 +1413,7 @@ $(function() {
         });
     });
 
+    // Updates the thumbnails displayed on the summary page
     $("#updateMementos").click(function(event) {
 
         // choose mementos from list of those currently displayed
@@ -1487,8 +1504,6 @@ function getUniqueUserSessionId() {
         return curUniqueUserSessionID;
     }
 }
-
-
 
 function generateDeepLinkState(curInputJsobObj) {
     return "/alsummarizedview/"+curInputJsobObj["primesource"]+"/"+curInputJsobObj["collectionIdentifer"]+"/"+curInputJsobObj["hammingDistance"]+"/"+curInputJsobObj["role"]+"/"+curInputJsobObj["urir"];
@@ -1587,7 +1602,10 @@ function refreshMemento(link, img, button) {
     });
 }
 
-// Validates that the input string is a valid date formatted as "mm/dd/yyyy"
+/** Validates that the input string is a valid date formatted as "yyyy-mm-dd"
+*
+* @param dateString - String input by the user, should be in "yyyy-mm-dd" format
+**/
 function isValidDate(dateString)
 {
     // First check for the pattern
@@ -1650,9 +1668,15 @@ function isValidDate(dateString)
         document.getElementById("date_error").innerHTML = "Invalid date, please enter in YYYY-MM-DD format";
 };
 
+/**
+* Generates a file listing the information for each of the currently displayed thumbnails
+*
+* @param object - The JSON object containing the currently displayed thumbnails
+**/
 function generateMementoURIList(object) {
     var URIM = [];
 
+    // for each thumbnail
     $.each(object,function(index,obj){
         if($(obj.event_html).attr("src").indexOf("notcaptured") < 0) {
             URIM.push(obj.event_link);
@@ -1666,6 +1690,11 @@ window.addEventListener('popstate', function(e) {
     location.reload();
 });
 
+/** 
+* Formats the date object in "yyyy-mm-dd" format
+*
+* @param date - The date object
+**/
 function formatDate(date) {
     var month = date.getMonth() + 1;
     if(month <= 9)
