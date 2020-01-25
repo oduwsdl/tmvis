@@ -823,6 +823,9 @@ function getHistogramPage(){
     
 /**
 * Retrieves the timemap to draw the histogram and then displays the histogram page.
+*
+* @param toDisplay - The archive type, selected before hitting "View Timemap". Will be either 
+*                    "Internet Archive" or "Archive-It" depending on what the user selected.
 */
 function getHistoData(toDisplay) {
     var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
@@ -893,18 +896,8 @@ function getHistoData(toDisplay) {
 
                     document.getElementById("histoWrapper").style.display = "block";
 
-                    var endPoint = histoData.length - 1;
-
-                    var fromYear = histoData[0].event_display_date.substring(0,4);
-                    var fromMonth = histoData[0].event_display_date.substring(5,7);
-                    var fromDate = histoData[0].event_display_date.substring(8,10);
-
-                    var toYear = histoData[endPoint].event_display_date.substring(0,4);
-                    var toMonth = histoData[endPoint].event_display_date.substring(5,7);
-                    var toDate = histoData[endPoint].event_display_date.substring(8,10);
-
-                    var fromDateStr= fromYear+"-"+fromMonth +"-"+fromDate;
-                    var toDateStr= toYear+"-"+toMonth +"-"+toDate;
+                    var fromDateStr = histoData[0].event_display_date.substring(0,10); // Get first date
+                    var toDateStr = histoData[histoData.length - 1].event_display_date.substring(0,10); // Get last date
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
                     $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
 
