@@ -25,7 +25,7 @@
     	<script src="/scripts/imageSliderScript.js"></script>
     	<script src="/scripts/imageGridScript.js"></script>
     	<script src="/scripts/timeline.js?version=1005"></script>
-	<script src="/scripts/histogram.js"></script>
+		<script src="/scripts/histogram.js"></script>
     	<script src="/scripts/waitforimages.js"></script>
     	<script src="/scripts/gifshot.min.js"></script>
     	<script src="/scripts/gif.js"></script>
@@ -42,15 +42,14 @@
 			<div class="well row attributesWrapper" style="margin-top: 1%;">
 
 				<div class = "Title">
-
-
 					<img src="/images/csODUTimeline.png" alt="graph">
 					<h1>TimeMap Visualization</h1>
-					</div>
-					<!--hack to fix formatting-->
-					<div style="clear: both;"></div>
-				<form action="#" class="argumentsForm">
+				</div>
 
+				<!--hack to fix formatting-->
+				<div style="clear: both;"></div>
+
+				<form action="#" class="argumentsForm">
 					<div class="row URIWrapper" >
 						<label for="uriIP">Enter URI-R <span class='uriexample'>(ex: http://4genderjustice.org)</span> or  URI-M <span class='uriexample'>(ex: http://wayback.archive-it.org/1068/20150701215641/http://4genderjustice.org/)</span> or URI-T <span class='uriexample'>(ex: http://web.archive.org/web/timemap/link/http://4genderjustice.org)</span>
 							<div id="helpBox">
@@ -80,9 +79,9 @@
 								</span>
 							</div>
 							<div class="form-group hidden">
-						    <label for="urirIP">Enter URI-R:</label>
-						    <input class="form-control" name="URI-R" id="urirIP" required placeholder="For example, http://4genderjustice.org/">
-						  </div>
+							    <label for="urirIP">Enter URI-R:</label>
+							    <input class="form-control" name="URI-R" id="urirIP" required placeholder="For example, http://4genderjustice.org/">
+						  	</div>
 					</div>
 
 					<div class="row orgAndCollNoWrapper form-inline" style="vertical-align:middle;" >
@@ -93,7 +92,7 @@
 								<label class="radio"><input type="radio" class ="form-control" name="primesource" id = "archiveit" value="archiveit" onclick="javascript:yesnoCheck();">Archive-It</label>
 								<!--label for="collectionNo">Collection Identifier</label-->
 
-							  <input class="form-control" type="number" min="0" class ="form-control" title="Collection Identifier"  name="ci"  id="collectionNo" placeholder="Collection Identifier" />
+							 	<input class="form-control" type="number" min="0" class ="form-control" title="Collection Identifier"  name="ci"  id="collectionNo" placeholder="Collection Identifier" />
 							</div>
 							<!-- THRESHOLD AND DELAY-->
 
@@ -101,16 +100,17 @@
 								<div class="col-md-3" style="text-align: center;" >
 										<label for="hammingDistance" >Webpage Difference: <span id="hammingdistanceValue">4</span> </label>
 										<br/>
-									   <div class="slidecontainer">
-									    <input  id="hammingDistance" name="hdt" class="slider" type="range" min="-10" max="10" step="1" value="4" oninput="javascript:updateTextH(value);" onclick="javascript:updateTextH(value);" />
+									  	<div class="slidecontainer">
+									    	<input  id="hammingDistance" name="hdt" class="slider" type="range" min="-10" max="10" step="1" value="4" oninput="javascript:updateTextH(value);" onclick="javascript:updateTextH(value);" />
 									    </div>
-									  <p>Larger difference means less thumbnails.</p>
+									  	<p>Larger difference means less thumbnails.</p>
 								</div>
 
 								<div class="col-md-3" style="text-align: center;">
 										<label for="screenshotDelta"  >Delay: <span id="screenshotValue">0</span> </label> <br/>
 										<div class="slidecontainer">
-											<input  id="screenshotDelta"  name="ssd" class="slider" type="range" min="0" max="10" step="1" value="0" oninput="javascript:updateTextS(value);" onclick="javascript:updateTextS(value);"/></div>
+											<input  id="screenshotDelta"  name="ssd" class="slider" type="range" min="0" max="10" step="1" value="0" oninput="javascript:updateTextS(value);" onclick="javascript:updateTextS(value);"/>
+										</div>
 										<p>Delay taking screenshot of webpage once it's loaded.</p>
 								</div>
 						</div>
@@ -122,8 +122,8 @@
 					<div class="col-lg-12">
 						<p class="Mementos_Considered"></p>
 						<div id="histogram_container">
-							<div id="histogram"></div>
-							<div style="visibility: hidden;" id="zoom_histogram"></div>
+							<div id="histogram"></div> <!-- Main histogram div -->
+							<div style="visibility: hidden;" id="zoom_histogram"></div> <!-- Zoom histogram div -->
 							<button class="btn" id="brush_clear">Clear Selection</button>
 							<div id="memento_limit" style="display: none;"> For timemaps with more than 5000 mementos, only the latest 5000 are analyzed. </div>
 						</div>
@@ -156,8 +156,9 @@
 								</p>
 							</div>
 							<div class="col-lg-8">
-								<h3 class="collection_stats_container"><span class="collection_stats"></span> &nbsp; <button class="btn btn-primary getSummary" title="Displays visualizations after screenshots are captured"> Generate Thumbnails </button>
-</h3>
+								<h3 class="collection_stats_container">
+									<span class="collection_stats"></span> &nbsp; <button class="btn btn-primary getSummary" title="Displays visualizations after screenshots are captured"> Generate Thumbnails </button>
+								</h3>
 								<div class="time_container">
 									<p>(estimated <span class="approxTimeShowingPTag"> </span> to generate)</p>
 								</div>
@@ -224,112 +225,110 @@
 					
 
 					<div id="imageSlider" class="tab-pane fade">
-				  	<div class="imageslider_wrapper content_focusedWrapper" style="margin-top: 1%;">
-				    	<h2>Swipe over the images to move through time</h2>
-						<h2>Click on an image to view the memento</h2>
-						<div class="buttonsWrapperSlider">
-						<button type="button" class="btn btn-primary" id='play'>Play</button>
-						<button type="button" class="btn btn-primary" id='pause'>Pause</button>
-						&nbsp;<label> <input type="checkbox" class="playinloop" value=""> Play In Loop</label>
-						</div>
+					  	<div class="imageslider_wrapper content_focusedWrapper" style="margin-top: 1%;">
+					    	<h2>Swipe over the images to move through time</h2>
+							<h2>Click on an image to view the memento</h2>
+							<div class="buttonsWrapperSlider">
+								<button type="button" class="btn btn-primary" id='play'>Play</button>
+								<button type="button" class="btn btn-primary" id='pause'>Pause</button>
+								&nbsp;<label> <input type="checkbox" class="playinloop" value=""> Play In Loop</label>
+							</div>
 							<div class="gridImagePlusContentWrapper">
 								<img id="myImage" class="heightSet"/>
 								<p id="myContent"></p>
 							</div>
-				    </div>
-				  </div>
+					    </div>
+					</div>
 
-				  <div id="timeLine" class="tab-pane fade">
-				   	<div class="timeline_Wrapper content_focusedWrapper">
-						<div class="article">
-							<div id="timeline">
-								<div id="timeline_top_matter_container">
-									<div class="timeline_controls">
-										<a href="#" class="timeline_zoom timeline_zoom_in"><span class="timeline_controls_inner_text zoom_inner_text">+</i></span></a>
-										<a href="#" class="timeline_zoom timeline_zoom_out"><span class="timeline_controls_inner_text zoom_inner_text">-</span></a>
-										&nbsp;&nbsp;&nbsp;&nbsp;
-										<a href="#" class="timeline_choose timeline_choose_prev"><span class="timeline_controls_inner_text" title="Previous">Prev</span></a>
-										<a href="#" class="timeline_choose timeline_choose_uniqueprev"><span class="timeline_controls_inner_text" title="Unique Previous">Unique Prev</span></a>
-										<a href="#" class="timeline_choose timeline_choose_uniquenext"><span class="timeline_controls_inner_text" title="Unique Next">Unique Next</span></a>
-										<a href="#" class="timeline_choose timeline_choose_next"><span class="timeline_controls_inner_text">Next</span></a>
+				 	<div id="timeLine" class="tab-pane fade">
+					   	<div class="timeline_Wrapper content_focusedWrapper">
+							<div class="article">
+								<div id="timeline">
+									<div id="timeline_top_matter_container">
+										<div class="timeline_controls">
+											<a href="#" class="timeline_zoom timeline_zoom_in"><span class="timeline_controls_inner_text zoom_inner_text">+</i></span></a>
+											<a href="#" class="timeline_zoom timeline_zoom_out"><span class="timeline_controls_inner_text zoom_inner_text">-</span></a>
+											&nbsp;&nbsp;&nbsp;&nbsp;
+											<a href="#" class="timeline_choose timeline_choose_prev"><span class="timeline_controls_inner_text" title="Previous">Prev</span></a>
+											<a href="#" class="timeline_choose timeline_choose_uniqueprev"><span class="timeline_controls_inner_text" title="Unique Previous">Unique Prev</span></a>
+											<a href="#" class="timeline_choose timeline_choose_uniquenext"><span class="timeline_controls_inner_text" title="Unique Next">Unique Next</span></a>
+											<a href="#" class="timeline_choose timeline_choose_next"><span class="timeline_controls_inner_text">Next</span></a>
+										</div>
+										<div class="series_nav_container"></div>
 									</div>
-									<div class="series_nav_container"></div>
-								</div>
 
-								<div class="timeline_notchbar_container">
-									<div class="timeline_notchbar"></div>
-								</div>
-								<div id="timeline_card_scroller">
-									<div id="timeline_card_scroller_inner">
+									<div class="timeline_notchbar_container">
+										<div class="timeline_notchbar"></div>
 									</div>
-								</div>
-							</div>
-						
-						
-
-							<script id="year_notch_tmpl" type="text/jst">
-									<div class="timeline_year_notch year_notch_<%= timestamp %>" data-timestamp="<%= timestamp %>">
-										<span class="timeline_year_notch_year_text"><%= year %></span>
-									</div>
-							</script>
-
-							<!-- ByMAhee Added another class that could tell what type of notch series it is  -->
-							<script id="notch_tmpl" type="text/jst">
-									<div style="background:<%= topcolor %>" data-notch-series="<%= event_series %>" class="timeline_notch notch_<%= timestamp %>  notch_<%= event_series %> " data-timestamp="<%= timestamp %>"></div>
-							</script>
-
-							<script id="series_legend_tmpl" type="text/jst">
-									<!-- <div class="series_legend_item" data-series="<%= name %>"><span class="series_legend_swatch" style="background-color:<%= color %>">&nbsp;</span> <span class="series_legend_text"><%= name %></span></div> -->
-								<div class="series_legend_item"><span class="series_legend_swatch" style="background-color:<%= color %>">&nbsp;</span> <span class="series_legend_text"><%= name %></span></div>
-							</script>
-							<script id="card_tmpl" type="text/jst">
-									<div class="timeline_card_container">
-										<div class="css_arrow css_arrow_up" style="border-bottom-color:<%= topcolor %>"></div>
-										<div class="item" data-timestamp="<%= timestamp %>" style="border-top:1px solid <%= topcolor %>">
-											<div class="item_label">
-												<!--  the following code is modfied to get the simillar to showing for the non-thumnail version -->
-												<!-- <% if (!_.isEmpty(event_html)){ %>
-													<div class="item_user_html">
-														<%= event_html %>
-													</div>
-												<% } %> -->
-												<% if (event_series=='Thumbnails'){%>
-				                                    <% if (!_.isEmpty(event_html)){ %>
-				                                        <div class="item_user_html">
-																									<h2> Unique Memento</h2>
-				                                            <%= event_html %>
-				                                        </div>
-				                                        <% } %>
-				                                <% } %>
-				                                <% if (event_series=='Non-Thumbnail Mementos'){%>
-				                                    <% if (!_.isEmpty(event_html_similarto)){ %>
-				                                        <div class="item_user_html similarToPictureEle">
-				                                        	<h2> Similar To </h2>
-				                                            <%= event_html_similarto %>
-				                                        </div>
-				                                        <% } %>
-				                                <% } %>
-												<%= event_description %>
-											</div>
-											<% if (!_.isEmpty(event_link)){ %>
-												<div class="read_btn"><a target="_blank" href="<%= event_link %>">Open Archived Page</a></div>
-												<% } %>
-													<div class="item_year">
-														<span class="series_legend_text">Datetime: </span> <%= event_display_date %>
-													</div>
+									<div id="timeline_card_scroller">
+										<div id="timeline_card_scroller_inner">
 										</div>
 									</div>
-							</script>
+								</div>
+							
+							
+
+								<script id="year_notch_tmpl" type="text/jst">
+										<div class="timeline_year_notch year_notch_<%= timestamp %>" data-timestamp="<%= timestamp %>">
+											<span class="timeline_year_notch_year_text"><%= year %></span>
+										</div>
+								</script>
+
+								<!-- ByMAhee Added another class that could tell what type of notch series it is  -->
+								<script id="notch_tmpl" type="text/jst">
+										<div style="background:<%= topcolor %>" data-notch-series="<%= event_series %>" class="timeline_notch notch_<%= timestamp %>  notch_<%= event_series %> " data-timestamp="<%= timestamp %>"></div>
+								</script>
+
+								<script id="series_legend_tmpl" type="text/jst">
+										<!-- <div class="series_legend_item" data-series="<%= name %>"><span class="series_legend_swatch" style="background-color:<%= color %>">&nbsp;</span> <span class="series_legend_text"><%= name %></span></div> -->
+									<div class="series_legend_item"><span class="series_legend_swatch" style="background-color:<%= color %>">&nbsp;</span> <span class="series_legend_text"><%= name %></span></div>
+								</script>
+								<script id="card_tmpl" type="text/jst">
+										<div class="timeline_card_container">
+											<div class="css_arrow css_arrow_up" style="border-bottom-color:<%= topcolor %>"></div>
+											<div class="item" data-timestamp="<%= timestamp %>" style="border-top:1px solid <%= topcolor %>">
+												<div class="item_label">
+													<!--  the following code is modfied to get the simillar to showing for the non-thumnail version -->
+													<!-- <% if (!_.isEmpty(event_html)){ %>
+														<div class="item_user_html">
+															<%= event_html %>
+														</div>
+													<% } %> -->
+													<% if (event_series=='Thumbnails'){%>
+					                                    <% if (!_.isEmpty(event_html)){ %>
+					                                        <div class="item_user_html">
+																										<h2> Unique Memento</h2>
+					                                            <%= event_html %>
+					                                        </div>
+					                                        <% } %>
+					                                <% } %>
+					                                <% if (event_series=='Non-Thumbnail Mementos'){%>
+					                                    <% if (!_.isEmpty(event_html_similarto)){ %>
+					                                        <div class="item_user_html similarToPictureEle">
+					                                        	<h2> Similar To </h2>
+					                                            <%= event_html_similarto %>
+					                                        </div>
+					                                        <% } %>
+					                                <% } %>
+													<%= event_description %>
+												</div>
+												<% if (!_.isEmpty(event_link)){ %>
+													<div class="read_btn"><a target="_blank" href="<%= event_link %>">Open Archived Page</a></div>
+													<% } %>
+														<div class="item_year">
+															<span class="series_legend_text">Datetime: </span> <%= event_display_date %>
+														</div>
+											</div>
+										</div>
+								</script>
+							</div>
 						</div>
 					</div>
-				  </div>
 
-					 <div id="logtab" class="tab-pane fade">
-						 <div class="logContainer logsContent">
-						 </div>
-					 </div>
-
-
+					<div id="logtab" class="tab-pane fade">
+						<div class="logContainer logsContent">
+						</div>
+					</div>
 				</div>
 			</div>
 
@@ -341,15 +340,15 @@
 
 		<!-- Modal -->
 		<div class="modal fade" id="serverStreamingModal" tabindex="-1" data-backdrop="static" role="dialog"  aria-hidden="true">
-		  <div class="modal-dialog modal-lg" role="document">
-		    <div class="modal-content">
-		      <!-- <div class="modal-header">
-		        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-		        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-		          <span aria-hidden="true">&times;</span>
-		        </button>
-		      </div> -->
-		      <div class="modal-body">
+			<div class="modal-dialog modal-lg" role="document">
+				<div class="modal-content">
+					<!-- <div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						  <span aria-hidden="true">&times;</span>
+						</button>
+					</div> -->
+					<div class="modal-body">
 						<button class="btn btn-primary cancelProcess" title="Cancel Process"> Cancel </button>
 						<div class="progress progress-bar-space">
 							<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="100" style="width:4%">
@@ -358,36 +357,36 @@
 						</div>
 						<div class="logsContent"></div>
 						<div id="bottomModal"></div>
-		      </div>
-		    </div>
-		  </div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</body>
 	<div  id="footer">
 		<div class="container-fluid">
-		<div class="well row attributesWrapper" style="margin-top: 1%;">
-			<div class="col-md-3 wsdlIcon" >
-				<img src="/images/odu-sig-noidea-fullcolor.png" alt="ODULogo">
-				<img src="/images/glider-trans.png" alt="ODUWDL">
-			</div>
-			<div class="col-md-6" >
-				<p> Created by the <a href ="https://ws-dl.cs.odu.edu/">Web Science and Digital Libraries Research Group</a> at <a href ="https://cs.odu.edu/">Old Dominion University</a>. </p>
-				<p>Funded by
-					<a href="https://securegrants.neh.gov/publicquery/main.aspx?f=1&gn=HAA-256368-17"> NEH/IMLS Digital Humanities Advancement Grant HAA-256368-17</a>
-				</p>
-				<p>With our partners
-					<a href="https://www.frick.org/research/library"> Frick Art Reference Library</a>,
-					<a href="http://www.nyarc.org/">New York Art Resources Consortium</a> and
-					<a href="http://library.columbia.edu/">Columbia University Libraries</a>
-				</p>
-				<br>
-				<a href= "http://ws-dl.blogspot.com/2017/10/2017-10-16-visualizing-webpage-changes.html">Full Description of the Project</a>
+			<div class="well row attributesWrapper" style="margin-top: 1%;">
+				<div class="col-md-3 wsdlIcon" >
+					<img src="/images/odu-sig-noidea-fullcolor.png" alt="ODULogo">
+					<img src="/images/glider-trans.png" alt="ODUWDL">
+				</div>
+				<div class="col-md-6" >
+					<p> Created by the <a href ="https://ws-dl.cs.odu.edu/">Web Science and Digital Libraries Research Group</a> at <a href ="https://cs.odu.edu/">Old Dominion University</a>. </p>
+					<p>Funded by
+						<a href="https://securegrants.neh.gov/publicquery/main.aspx?f=1&gn=HAA-256368-17"> NEH/IMLS Digital Humanities Advancement Grant HAA-256368-17</a>
+					</p>
+					<p>With our partners
+						<a href="https://www.frick.org/research/library"> Frick Art Reference Library</a>,
+						<a href="http://www.nyarc.org/">New York Art Resources Consortium</a> and
+						<a href="http://library.columbia.edu/">Columbia University Libraries</a>
+					</p>
+					<br>
+					<a href= "http://ws-dl.blogspot.com/2017/10/2017-10-16-visualizing-webpage-changes.html">Full Description of the Project</a>
 
-			</div>
-			<div class="col-md-3" >
-				<a href="https://twitter.com/WebSciDL?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-size="large" data-show-count="false">Follow @WebSciDL</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+				</div>
+				<div class="col-md-3" >
+					<a href="https://twitter.com/WebSciDL?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-size="large" data-show-count="false">Follow @WebSciDL</a><script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+				</div>
 			</div>
 		</div>
-	</div>
 	</div>
 </html>
