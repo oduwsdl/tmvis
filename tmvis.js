@@ -236,7 +236,12 @@ function main () {
 
 }
 
-//retake screenshot
+/**
+* Handles request to retake the given screenshot
+*
+* @param request - http request that consists of parameters, query string, http headers and so on
+* @param response - http response sent after a request is acquired and evaluated
+*/
 function refreshMemento(request, response) {
     var headers = {}
     // IE8 does not allow domains to be specified, just the *
@@ -259,12 +264,12 @@ function refreshMemento(request, response) {
     console.log("URI: "+mementoURI);
 
     try{
-        fs.unlink(screenshotsLocation+file,function() {});
+        fs.unlink(screenshotsLocation+file,function() {}); //deleting old screenshot
         var tempTimemap = new TimeMap();
 
         async.series([
             function(callback) {
-                tempTimemap.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,true,callback);
+                tempTimemap.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,true,callback); // take new screenshot
             },
             function(callback) {
                 response.writeHead(200, headers);
@@ -300,7 +305,12 @@ function sendSSE(req, res) {
     }
 
 }
-
+/**
+* Constructs a server-sent event
+*
+* @param request  The request object from the client representing query information
+* @param response Currently active HTTP response to the client used to return information to the client based on the request
+*/
 function constructSSE(data,clientIdInCookie) {
     var id = Date.now();
     var streamObj = {};
@@ -611,6 +621,12 @@ function PublicEndpoint() {
     }
 }
 
+/**
+* Function that calculates and caches simhash of mementos from a full timemap
+* if the user requests a date range for a non cached URI
+*
+* @param curCookieClientId - current client cookie id
+*/
 function writeFullTimemapToCache(curCookieClientId) {
     async.series([
         function(callback) {
@@ -977,6 +993,9 @@ function createMementosFromJSONFile (fileContents) {
     return t;
 }
 
+/**
+* String representation of a timemap object
+*/
 TimeMap.prototype.toString = function () {
     return '{' +
         '"timemaps":[' + this.timemaps.join(',') + '],' +
@@ -1001,6 +1020,9 @@ Memento.prototype.simhashIndicatorForHTTP302 = '00000000';
 
 /**
 * Fetch URI-M HTML contents and generate a Simhash
+* 
+* @param theTimemap - the timemap object this memento belong to
+* @param notDateRange - a boolean variable that handles SSEs sent to the front-end
 */
 Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,notDateRange,callback) {
     // Retain the urir for reference in the promise (this context lost with async)
@@ -1112,7 +1134,18 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,notDateRan
 }
 
 
-
+/**
+* Grabs new mementos from appropriate archive,
+*                           calculates a simhash on each,
+*                           merges them with fullCachedTimemap and t objects,
+*                           responds to the request appropriately,
+*
+* This function is called based on if the numMementos request parameter matches 
+* the number of mementos from cache file
+*
+* @param fullCachedTimemap - timemap object that holds all mementos from cache file
+* @param t - timemap object that holds all cached mementos with a date range
+*/
 function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId) {
     ConsoleLogIfRequired("Inside updateCache()");
     var updatedTimemap = new TimeMap();
@@ -1200,7 +1233,11 @@ function updateCacheForMultipleURIs(uriList, query, response, curCookieClientId,
     });
 }
 
-//Removes mementos from the implicit object if they appear in cachedMementos array
+/**
+* Removes mementos from the implicit object if they appear in cachedMementos array
+*
+* @param cachedMementos - array holding the cached mementos
+*/
 TimeMap.prototype.deleteCachedMementos = function(cachedMementos, callback) {
     var allMementos = this.mementos;
     this.mementos = [];
@@ -1221,7 +1258,12 @@ TimeMap.prototype.deleteCachedMementos = function(cachedMementos, callback) {
     if(callback) {callback('')}
 }
 
-//remove duplicates from an array
+/**
+* remove duplicates from an array
+*
+* @param arr - array holding object elements
+* @param comp - value used ti check if object is duplicated
+*/
 function getUnique(arr, comp) {
     const unique = arr
         .map(e => e[comp])
@@ -1235,7 +1277,11 @@ function getUnique(arr, comp) {
     return unique;
 }
 
-//normalize url for cache naming
+/**
+* normalize url for cache naming
+*
+* @param url - URL to canonicalize
+*/
 function urlCanonicalize(url) {
     var options = {stripProtocol: true,
                 stripWWW: true,
@@ -1246,7 +1292,11 @@ function urlCanonicalize(url) {
     return normalizeUrl(url,options);
 }
 
-//Determines if the uri type is URI-R, URI-M, URI-TM in order set appropriate host and path
+/**
+* Determines if the uri type is URI-R, URI-M, URI-TM in order set appropriate host and path
+*
+* @param uri - uri obtained from the request
+*/
 function determineURIType (uri, response) {
     var returnValue = {};
 
@@ -1272,12 +1322,18 @@ function determineURIType (uri, response) {
     return returnValue; 
 }
 
+/**
+* Sort memento array in ascending order
+*/
 function dateSort(a,b) {
     var dateA = new Date(a["datetime"].split(",")[1]);
     var dateB = new Date(b["datetime"].split(",")[1]);
     return dateA - dateB;
 }
 
+/**
+* Fetch mementos from appropriate archive
+*/
 // TODO: define how this is different from the getTimemap() parent function (i.e., some name clarification is needed)
 // TODO: abstract this method to its callback form. Currently, this is reaching and populating the timemap out of scope and can't be simply isolated (I tried)
 TimeMap.prototype.fetchTimemap = function(uri, response, curCookieClientId, callback) {
@@ -1590,6 +1646,13 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 /*****************************************
    // SUPPLEMENTAL TIMEMAP FUNCTIONALITY
 ***************************************** */
+
+/**
+* Calculates a simhash on each memento from the implied timemap object
+*
+* @param notDateRange - boolean that handles SSEs sent to the front-end
+* @param callback - The next procedure to execution when this process concludes
+*/
 TimeMap.prototype.calculateSimhashes = function (curCookieClientId,notDateRange,callback) {
     //ConsoleLogIfRequired("--- By Mahee - For my understanding")
     //ConsoleLogIfRequired("Inside CalculateSimhashes")
@@ -1641,6 +1704,12 @@ TimeMap.prototype.calculateSimhashes = function (curCookieClientId,notDateRange,
     });
 }
 
+/**
+* Saves memento array to a cache file after simhash has been calculated
+* Cache file naming format: [primesource]_[colectionidentifier]_[canonicalizedURI]
+*
+* @param callback - The next procedure to execution when this process concludes
+*/
 TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
     // TODO: remove dependency on global timemap t
 
@@ -1666,7 +1735,12 @@ TimeMap.prototype.saveSimhashesToCache = function (callback,format) {
     }
 }
 
-
+/**
+* Saves memento array to a cache file after simhash has been calculated in JSON format
+* Cache file naming format: [primesource]_[colectionidentifier]_[canonicalizedURI].json
+*
+* @param callback - The next procedure to execution when this process concludes
+*/
 
 TimeMap.prototype.writeJSONToCache = function (callback) {
     var cacheFile = new SimhashCacheFile(this.primesource+"_"+this.collectionidentifier+"_"+this.originalURI,isDebugMode);
@@ -1685,6 +1759,12 @@ TimeMap.prototype.writeJSONToCache = function (callback) {
     }
 }
 
+/**
+* Extracts and assigns datetime to each memento appropriately
+* Responds to request with a JSON formatted object array consisting of memento datetime and uri
+*
+* @param callback - The next procedure to execution when this process concludes
+*/
 TimeMap.prototype.getDatesForHistogram = function (callback,response,curCookieClientId) {
     var month_names_short= ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     var mementoJObjArr=[];
@@ -1737,6 +1817,8 @@ TimeMap.prototype.filterMementosForDateRange = function(response) {
 
 /**
 * Constructs the JSON in the needed format and sends it over to Client, this method is called only if the request comes from a Cached mode
+*
+* @param callback - The next procedure to execution when this process concludes
 */
 TimeMap.prototype.SendThumbSumJSONCalledFromCache= function (response,callback) {
 
@@ -1809,6 +1891,8 @@ TimeMap.prototype.SendThumbSumJSONCalledFromCache= function (response,callback) 
 /**
 * Converts the JsonOutput from the current formate to the format required for timemap plugin
 * and saves in a json file
+*
+* @param callback - The next procedure to execution when this process concludes
 */
 TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
 
@@ -1882,7 +1966,12 @@ TimeMap.prototype.writeThumbSumJSONOPToCache = function (response,callback) {
 }
 
 
-
+/**
+* Converts the target URI to a safe semantic filename and attaches to relevant memento.
+* Selection based on passing a hamming distance threshold provided in request parameters 
+*
+* @param callback - The next procedure to execution when this process concludes
+*/
 TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary = function (callback) {
     // Assuming foreach is faster than for-i, this can be executed out-of-order
     var self = this;
@@ -1962,7 +2051,8 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSum
 /**
 * Converts the target URI to a safe semantic filename and attaches to relevant memento.
 * Selection based on passing a hamming distance threshold
-* @param callback The next procedure to execution when this process concludes
+*
+* @param callback - The next procedure to execution when this process concludes
 */
 TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = function (callback) {
 
@@ -2011,6 +2101,11 @@ TimeMap.prototype.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI = fun
     }
 }
 
+/**
+* Converts the filename of all mementos a valid image filename and associate
+*
+* @param callback - The next procedure to execution when this process concludes
+*/
 TimeMap.prototype.supplyAllMementosAScreenshotURI = function(callback) {
     for(var m in this.mementos) {
         var filename = 'timemapSum_' + this.mementos[m].uri.replace(/[^a-z0-9]/gi, '').toLowerCase() + '.png';
@@ -2021,8 +2116,9 @@ TimeMap.prototype.supplyAllMementosAScreenshotURI = function(callback) {
 }
 
 /**
-* Converts the filename of each previously selected memento a a valid image filename and associate
-* @param callback The next procedure to execution when this process concludes
+* Converts the filename of each previously selected memento a valid image filename and associate
+*
+* @param callback - The next procedure to execution when this process concludes
 */
 TimeMap.prototype.supplySelectedMementosAScreenshotURI = function (strategy,callback) {
     var ii = 0
@@ -2043,8 +2139,9 @@ TimeMap.prototype.supplySelectedMementosAScreenshotURI = function (strategy,call
 
 /**
 * Generate a screenshot with all mementos that pass the passed-in criteria test
-* @param callback The next procedure to execution when this process concludes
-* @param withCriteria Function to inclusively filter mementos, i.e. returned from criteria
+*
+* @param callback - The next procedure to execution when this process concludes
+* @param withCriteria - Function to inclusively filter mementos, i.e. returned from criteria
 *                     function means a screenshot should be generated for it.
 */
 TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,response,callback, withCriteria) {
@@ -2161,8 +2258,9 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
 
 /**
 * Generate a screenshot with all mementos that pass the passed-in criteria test
-* @param callback The next procedure to execution when this process concludes
-* @param withCriteria Function to inclusively filter mementos, i.e. returned from criteria
+*
+* @param callback - The next procedure to execution when this process concludes
+* @param withCriteria - Function to inclusively filter mementos, i.e. returned from criteria
 *                     function means a screenshot should be generated for it.
 */
 TimeMap.prototype.createScreenshotsForMementosFromCached = function (curCookieClientId,callback, withCriteria) {
@@ -2201,7 +2299,13 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (curCookieCl
 }
 
 
-// createScreenshotForMemento through puppeteer
+/**
+* CreateScreenshotForMemento through puppeteer
+*
+* @param memento - memento to load in puppeter
+* @param refreshMemento - boolean that handles screenshot wait time (waits longer if screenshot retake issued)
+* @param callback - The next procedure to execution when this process concludes
+*/
 TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieClientId,memento,refreshMemento,callback) {
     var uri = memento.uri
     ConsoleLogIfRequired('********** curCookieClientId in createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'***************');
@@ -2256,6 +2360,13 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieC
     });
 }
 
+/**
+* Loads given uri in a virtual google chrome browser using Puppeteer
+* 
+* @param uri - uri to load
+* @param filepath - path to store screenshot
+* @param refreshMemento - boolean variable that controls screenshot wait time (wait longer if called from refresh memento)
+*/
 async function headless(uri,filepath,refreshMemento) {
     const browser = await puppeteer.launch({
         ignoreHTTPSErrors: true,
@@ -2319,7 +2430,12 @@ async function headless(uri,filepath,refreshMemento) {
 
 
 
-
+/**
+* Take screenshot of given memento using Phantom
+* 
+* @param memento - memento to take screenshot of
+* @param callback - The next procedure to execution when this process concludes
+*/
 TimeMap.prototype.createScreenshotForMementoWithPhantom = function (curCookieClientId,memento, callback) {
     var uri = memento.uri;
     ConsoleLogIfRequired('********** curCookieClientId in createScreenshotForMementoWithPhantom -> '+curCookieClientId+'***************');
@@ -2393,7 +2509,11 @@ TimeMap.prototype.createScreenshotForMementoWithPhantom = function (curCookieCli
 
 
 
-
+/**
+* Calculates hamming distances between mementos and evaluates if unique or not based off of the hdt request parameter provided
+*
+* @param callback - The next procedure to execution when this process concludes
+*/
 TimeMap.prototype.calculateHammingDistancesWithOnlineFilteringForSummary = function (curCookieClientId,callback) {
     console.time('Hamming And Filtering, a synchronous operation');
     constructSSE('computing the Hamming Distance and Filtering synchronously...',curCookieClientId);
@@ -2463,7 +2583,13 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFilteringForSummary = funct
 
 
 
-
+/**
+* Calculates list of hamming distances to provide to the front-end
+* With each hamming distance calculated, number of mementos considered to be unique for that threshold are stored in a hashmap appropriately
+* Higher hamming distances mean less mementos but more unique and vice versa
+*
+* @param callback - The next procedure to execution when this process concludes
+*/
 TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCookieClientId,callback) {
     console.time('Hamming And Filtering, a synchronous operation')
     constructSSE('computing the Hamming Distance and Filtering synchronously...',curCookieClientId);
@@ -2593,6 +2719,10 @@ TimeMap.prototype.calculateHammingDistancesWithOnlineFiltering = function (curCo
     RELEVANT yet ABSTRACTED generic functions
 ********************************* */
 
+/**
+* Calculates number of characters different in each string
+* Both str1 and str2 MUST be of equal lengths
+*/
 function getHamming (str1, str2) {
     if (str1.length !== str2.length) {
         ConsoleLogIfRequired('Oh noes! Hamming went awry! The lengths are not equal!');
@@ -2615,6 +2745,11 @@ function getHamming (str1, str2) {
     return d;
 }
 
+/**
+* Checks how many screenshots exist in the screenshot directory
+*
+* @param selectedMementosList - array holding mementos to check
+*/
 function getNotExistingCapturesCount(selectedMementosList) {
     //console.log("------------------------inside getExistingCapturesCount ---------------")
     // console.log(selectedMementosList)
@@ -2633,8 +2768,9 @@ function getNotExistingCapturesCount(selectedMementosList) {
 
 
 
-// Fischer-Yates shuffle so we don't fetch the memento in-order but preserve
-// them as objects and associated attributes
+/**
+* Fischer-Yates shuffle so we don't fetch the memento in-order but preserve them as objects and associated attributes
+*/
 function shuffleArray (array) {
     for (var i = array.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
@@ -2646,25 +2782,37 @@ function shuffleArray (array) {
     return array;
 }
 
-/* *********************************
+/* 
+*********************************
     UTILITY FUNCTIONS
 *********************************
 TODO: break these out into a separate file
 */
 
-// Graceful exit
+/**
+* Graceful exit
+*/
 process.on('SIGINT', function () {
     ConsoleLogIfRequired('\nGracefully shutting down from SIGINT (Ctrl-C)');
     process.exit();
 })
 
-
+/**
+* Prevents program from crashing in event of an unhandledRejection from a promise
+* It handles such events by ending the response
+*/
 process.on('unhandledRejection', (reason, p) => {
     ConsoleLogIfRequired('Unhandled Rejection at: Promise');
     responseDup.end();
 });
 
 // Useful Functions
+
+/**
+* Checks if given number is binary
+*
+* @param n - given number
+*/
 function checkBin (n) {
     //  return /^[01]{1, 64}$/.test(n)
     // ByMahee -- the above statement is being changed to the following as we are checking 4 bits at a time
@@ -2672,25 +2820,52 @@ function checkBin (n) {
     return /^[01]{1,4}$/.test(n);
 }
 
+/**
+* Checks if given number is decimal
+*
+* @param n - given number
+*/
 function checkDec (n) {
     return /^[0-9]{1, 64}$/.test(n);
 }
 
+/**
+* Checks if given number is hex
+*
+* @param n - given number
+*/
 function checkHex (n) {
     return /^[0-9A-Fa-f]{1,64}$/.test(n);
 }
 
+/**
+* Pad binary string during conversion
+*
+* @param s - string to pad
+* @param z - padding size
+*/
 function pad (s, z) {
     s = '' + s;
     return s.length < z ? pad('0' + s, z):s;
 }
 
+/**
+* Unpad binary string during conversion by getting rid of all '0' occurances
+*
+* @param s - string to unpad
+*/
 function unpad (s) {
     s = '' + s;
     return s.replace(/^0+/, '');
 }
 
 // Decimal operations
+
+/**
+* Converts given number from decimal to binary
+*
+* @param n - given number
+*/
 function Dec2Bin (n) {
     if (!checkDec(n) || n < 0) {
         return 0;
@@ -2699,6 +2874,11 @@ function Dec2Bin (n) {
     return n.toString(2);
 }
 
+/**
+* Converts given number from decimal to hex
+*
+* @param n - given number
+*/
 function Dec2Hex (n) {
     if (!checkDec(n) || n < 0) {
         return 0;
@@ -2708,6 +2888,12 @@ function Dec2Hex (n) {
 }
 
 // Binary Operations
+
+/**
+* Converts given number from binary to decimal
+*
+* @param n - given number
+*/
 function Bin2Dec (n) {
     if (!checkBin(n)) {
         return 0;
@@ -2716,6 +2902,11 @@ function Bin2Dec (n) {
     return parseInt(n, 2).toString(10);
 }
 
+/**
+* Converts given number from binary to hex
+*
+* @param n - given number
+*/
 function Bin2Hex (n) {
     if (!checkBin(n)) {
         return 0;
@@ -2725,6 +2916,12 @@ function Bin2Hex (n) {
 }
 
 // Hexadecimal Operations
+
+/**
+* Converts given number from hex to binary
+*
+* @param n - given number
+*/
 function Hex2Bin (n) {
     if (!checkHex(n)) {
         return 0;
@@ -2733,6 +2930,11 @@ function Hex2Bin (n) {
     return parseInt(n, 16).toString(2);
 }
 
+/**
+* Converts given number from hex to decimal
+*
+* @param n - given number
+*/
 function Hex2Dec (n) {
     if (!checkHex(n)) {
         return 0;
@@ -2741,6 +2943,11 @@ function Hex2Dec (n) {
     return parseInt(n, 16).toString(10);
 }
 
+/**
+* Retrieves hex value for given binary string
+*
+* @param onesAndZeros - binary string
+*/
 function getHexString (onesAndZeros) {
     var str = '';
     for (var i = 0; i < onesAndZeros.length; i = i + 4) {
@@ -2750,6 +2957,12 @@ function getHexString (onesAndZeros) {
     return str;
 }
 
+/**
+* Removes "id_" string from given uri using the given regular expression
+*
+* @param regExpForDTStr - givven regular expression
+* @param uri - uri to modify
+*/
 function prependWithIDHelper(regExpForDTStr, uri) {
     var matchedString = uri.match(regExpForDTStr);
     if(matchedString != null) {
@@ -2758,7 +2971,11 @@ function prependWithIDHelper(regExpForDTStr, uri) {
     return uri;
 }
 
-
+/**
+* Logs messages to console if isDebugMode is set to true
+*
+* @param msg - message to log
+*/
 function ConsoleLogIfRequired(msg) {
     if(isDebugMode) {
         console.log(msg);
