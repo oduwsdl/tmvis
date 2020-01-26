@@ -2,6 +2,7 @@ var imagesData = [];
 var indexImage = 0;
 var timeoutId;
 
+
 $(document).ready(function () {
 	$('#myImage').mousemove(
 		function (event) {
@@ -18,6 +19,7 @@ $(document).ready(function () {
 		}
 	);
 
+	// When the user clicks on the thumbnail displayed by the image slider, it opens the Wayback Machine capture for that memento in a new tab
 	$('#myImage').click(function(event) {
 		var x = event.clientX - $(this).offset().left;
 		var columnWidth = $('#myImage').outerWidth() / imagesData.length;
@@ -43,7 +45,6 @@ $(document).ready(function () {
 	});*/
 
 	console.log(imagesData);
-
 
 	$('#play').click(function() {
 		slideImage(indexImage);
@@ -77,8 +78,12 @@ function drawImageSlider(data) {
 	});
 }
 
-
-
+/**
+* Displays the appropriate thumbnail in the slider. Called on page load to display the thumbnail at index of 0
+* Also called whenever the user moves the slider to a different thumbmail.
+*
+* @param step - Index of the thumbnail to be displayed. 
+**/
 var slideImage = function(step) {
 	if ( step == undefined ) {
 		//console.log("step is undefied now");
