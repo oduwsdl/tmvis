@@ -1358,43 +1358,6 @@ TimeMap.prototype.fetchTimemap = function(uri, response, curCookieClientId, call
                             return;
                         }
                                
-                        var originalMemetosLengthFromTM = t.mementos.length;
-                        // code segment to consider only last 5000 mementos for the huge TimeMaps
-                        if(t.mementos.length > 5000) {
-                            var tempMemetoArr=[];
-                            var tempStackOfMementos = new Stack();
-                            var numOfMementosToConsider = 5000; // only latest 1000 mementos are considered
-                            for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--) {
-                                tempStackOfMementos.push(t.mementos[i]);
-                            }
-                            for(var i=0;i< numOfMementosToConsider; i++) {
-                                tempMemetoArr.push(tempStackOfMementos.pop());
-                            }
-                            constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']',curCookieClientId);
-                            ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']');
-                            tempMemetoArr[0]["rel"] = "first memento";
-                            t.mementos = tempMemetoArr;
-                            ConsoleLogIfRequired("-----------Mementos under consideration, Length -> "+t.mementos.length +"  -------");
-                            ConsoleLogIfRequired(JSON.stringify(t.mementos));
-                            ConsoleLogIfRequired("---------------------------------------------------");
-                        }
-                        if(uri.split(',').length > 1 && t.role == "histogram") {
-                            t.mementos.sort(dateSort);
-                        }
-
-                        /*if(response.thumbnails['from'] != 0) // if from date was given, filter mementos
-                        {
-                            fullTimemap = new TimeMap(buffer);
-                            fullTimemap.originalURI = urlCanonicalize(uri);
-                            fullTimemap.primesource = response.thumbnails['primesource'];
-                            fullTimemap.collectionidentifier = response.thumbnails['collectionidentifier'];
-                            fullTimemap.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
-                            fullTimemap.role = response.thumbnails['role'];   
-                            fullTimemap.createMementos();
-
-                            t.mementos = t.filterMementosForDateRange(response);
-                        }*/
-                               
                         if (t.mementos.length == 0) {
                             ConsoleLogIfRequired('There were no mementos in this date range:(');
                             response.write('There were no mementos in this date range');
@@ -1444,6 +1407,35 @@ TimeMap.prototype.fetchTimemap = function(uri, response, curCookieClientId, call
         req.end();
     }
 }
+
+TimeMap.prototype.filterMementos = function(uri, curCookieClientId) {
+    var t = this;
+
+    var originalMemetosLengthFromTM = t.mementos.length;
+    // code segment to consider only last 1000 mementos for the huge TimeMaps
+    if(t.mementos.length > 1000 && t.role != "histogram") {
+        var tempMemetoArr=[];
+        var tempStackOfMementos = new Stack();
+        var numOfMementosToConsider = 1000; // only latest 1000 mementos are considered
+        for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--) {
+            tempStackOfMementos.push(t.mementos[i]);
+        }
+        for(var i=0;i< numOfMementosToConsider; i++) {
+            tempMemetoArr.push(tempStackOfMementos.pop());
+        }
+        constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']',curCookieClientId);
+        ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']');
+        tempMemetoArr[0]["rel"] = "first memento";
+        t.mementos = tempMemetoArr;
+        ConsoleLogIfRequired("-----------Mementos under consideration, Length -> "+t.mementos.length +"  -------");
+        ConsoleLogIfRequired(JSON.stringify(t.mementos));
+        ConsoleLogIfRequired("---------------------------------------------------");
+    }
+    if(uri.split(',').length > 1 && t.role == "histogram") {
+        t.mementos.sort(dateSort);
+    }
+}
+
 /**
 * Given a URI, return a TimeMap from the Memento Aggregator
 * TODO: God function that does WAY more than simply getting a timemap
@@ -1471,6 +1463,12 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
         function(callback) {
             if(response.thumbnails['from'] != 0) {
                 t.mementos = t.filterMementosForDateRange(response);
+            }
+            callback('');
+        },
+        function(callback) {
+            if(response.thumbnails['from'] != 0) {
+                t.filterMementos(uri, curCookieClientId);
             }
             callback('');
         },
@@ -1529,7 +1527,6 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
                 if ( t.role == "histogram") {
                     callback('');
                 } else {
-                    //if(dateRange) {writeFullTimemapToCache(curCookieClientId);}
                     t.createScreenshotsForMementos(curCookieClientId,response,callback);
                 }
             } else if (callback) {
