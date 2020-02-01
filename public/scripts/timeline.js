@@ -1634,8 +1634,8 @@ function isValidDate(dateString)
 
     // Adjust dates to histogram domain
     from = new Date(from.getFullYear(), from.getMonth(), 1);
-    toDays = new Date(to.getFullYear(), to.getMonth()+1, 0).getDate();
-    to = new Date(to.getFullYear(), to.getMonth(), toDays);
+    toDays = new Date(to.getFullYear(), to.getMonth()+2, 0).getDate();
+    to = new Date(to.getFullYear(), to.getMonth()+2, toDays);
 
     // Adjust month for date string
     var fromMonth = from.getMonth()+1;
@@ -1649,7 +1649,7 @@ function isValidDate(dateString)
     month = month - 1;
     
     // Check if input within possible range of mementos
-    if(compareDate < from || compareDate > to) {
+    if(compareDate <= from || compareDate >= to) {
         document.getElementById("date_error").innerHTML = "Please enter dates between " + fromDateStr + " and " + toDateStr;
         return false;
     }
