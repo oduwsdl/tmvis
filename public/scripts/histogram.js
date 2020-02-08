@@ -12,26 +12,21 @@ function drawHistogram(dateArray){
 	
 	// get the data
 	for(i = 0; i < data.length; i++){
-		data[i].event_display_date = data[i].event_display_date.substring(0, 10);
+		data[i] = formatDate(new Date(data[i]));
 	}
 
-	// format the data
-	data.forEach(function(d) {
-	    d.date = parseDate(d.event_display_date);
-	});
-
 	// grab to and from dates
-	var fromDateString = data[0].event_display_date.substring(0,10);
-	var toDateString = data[data.length - 1].event_display_date.substring(0,10);
+	var fromDateString = data[0]
+	var toDateString = data[data.length - 1]
 
 	// get the domain
-	var from = new Date(fromDateString);
-	var to = new Date(toDateString);
+	var from = new Date(data[0]);
+	var to = new Date(data[data.length - 1]);
 
 	// create brush snapped versoin of domain
 	var fromDateSnapped = new Date(from.getFullYear(), from.getMonth(), 1);
 	var toDays = new Date(to.getFullYear(), (to.getMonth() + 1), 0).getDate();
-	var toDateSnapped = new Date(to.getFullYear(), to.getMonth(), toDays); 
+	var toDateSnapped = new Date(to.getFullYear(), to.getMonth() + 1, toDays); 
 	
 	// set the ranges
 
@@ -51,7 +46,7 @@ function drawHistogram(dateArray){
 
 	// set the parameters for the histogram
 	var histogram = d3.histogram()
-	    .value(function(d) { return d.date; })
+	    .value(function(d) { return parseDate(d); })
 	    .domain(x.domain())
 	    .thresholds(x.ticks(d3.timeMonth));
 
@@ -369,8 +364,8 @@ function drawHistogram(dateArray){
 	    var endPoint = data.length - 1;
 	    
 	    // Create date objects
-	    var from = new Date(data[0].event_display_date.substring(0,10));
-	    var to = new Date(data[endPoint].event_display_date.substring(0,10));
+	    var from = new Date(data[0]);
+	    var to = new Date(data[endPoint]);
 
 	    // Adjust dates to histogram domain
 	    from = new Date(from.getFullYear(), from.getMonth(), 1);
