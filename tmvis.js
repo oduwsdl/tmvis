@@ -138,7 +138,8 @@ function main () {
     next();
     });
 
-
+    app.enable('trust proxy');
+    
     // all the common  requests are logged via here
     app.use(morgan('common',{
         skip: function (req, res) {
@@ -910,7 +911,7 @@ function processWithFileContents (uri, fileContents, response,curCookieClientId)
         t.mementos = t.filterMementosForDateRange(response);
     }
 
-    if(t.mementos.length != response.thumbnails['numMementos']) {
+    if(t.mementos.length < response.thumbnails['numMementos']) {
         var fullCachedTimemap = createMementosFromJSONFile(fileContents);
         fullCachedTimemap.curClientId = curCookieClientId;
         fullCachedTimemap.originalURI = urlCanonicalize(response.thumbnails['urir']);
@@ -919,6 +920,9 @@ function processWithFileContents (uri, fileContents, response,curCookieClientId)
         fullCachedTimemap.hammingdistancethreshold = response.thumbnails['hammingdistancethreshold'];
         fullCachedTimemap.role = response.thumbnails['role'];
         updateCache(fullCachedTimemap, t, uri,response, curCookieClientId);
+    } else if(t.mementos.length > response.thumbnails['numMementos']) {
+        matchMementosToArchive(t, uri, response, curCookieClientId);
+
     } else {
         if(t.mementos.simhash === 'undefined') {
             getTimemapGodFunctionForAlSummarization(uri, response,curCookieClientId);
@@ -1146,7 +1150,7 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,notDateRan
 * @param fullCachedTimemap - timemap object that holds all mementos from cache file
 * @param t - timemap object that holds all cached mementos with a date range
 */
-function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId) {
+function updateCache(fullCachedTimemap, t, uri, response, curCookieClientId) {
     ConsoleLogIfRequired("Inside updateCache()");
     var updatedTimemap = new TimeMap();
     async.series([
@@ -1214,6 +1218,47 @@ function updateCache(fullCachedTimemap, t, uri,response, curCookieClientId) {
 }
 
 /**
+* Executes if number of cached mementos are less that the number of mementos in the archives
+*
+* @param callback - The next procedure to execution when this process concludes
+*/
+function matchMementosToArchive(t, uri, response, curCookieClientId) {
+    ConsoleLogIfRequired("Inside matchMementosToArchive()");
+    async.series([
+        function(callback) {
+            t.deleteExtraMementos(callback);
+        },
+        function (callback) {
+            if(t.role == "stats") {
+                t.calculateHammingDistancesWithOnlineFiltering(curCookieClientId,callback);
+            }else{
+                t.calculateHammingDistancesWithOnlineFilteringForSummary(curCookieClientId,callback);
+            }
+        },
+        function (callback) {
+            if(t.role == "stats") {
+                t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURI(callback);
+            }else{
+                t.supplyChosenMementosBasedOnHammingDistanceAScreenshotURIForSummary(callback);
+            }
+        },
+        function (callback) {
+            t.createScreenshotsForMementos(curCookieClientId,response,callback);
+        },
+        function (callback) {
+            t.SendThumbSumJSONCalledFromCache(response,callback);
+        }],
+        function (err, result) {
+            if (err) {
+                ConsoleLogIfRequired('ERROR!');
+                ConsoleLogIfRequired(err);
+            } else {
+                ConsoleLogIfRequired('There were no errors executing the callback chain');
+            }
+    });
+}
+
+/**
 * Updates the cache files for multiple URI input.
 * 
 * @param uriList - The user input URIs
@@ -1255,6 +1300,32 @@ TimeMap.prototype.deleteCachedMementos = function(cachedMementos, callback) {
             this.mementos.push(allMementos[i]);
         }
     }
+    if(callback) {callback('')}
+}
+
+/**
+* Removes a mementos if its datetime does not appear in the histogram cache file
+* This is done to match the number of mementos that are in the archive
+* 
+* @param callback - The next procedure to execution when this process concludes
+*/
+TimeMap.prototype.deleteExtraMementos = function(callback) {
+    var cacheFile = new SimhashCacheFile(this.primesource+"_"+this.collectionidentifier+"_"+this.originalURI,isDebugMode);
+    cacheFile.path = cacheFile.path.replace("simhashes","histogram");
+    cacheFile.path += ".json";
+    var archiveMementos = JSON.parse(cacheFile.readFileContentsSync());
+    
+    if(archiveMementos != null) {
+        for(var i = 0; i < this.mementos.length; ++i) {
+            var cachedDate = new Date(this.mementos[i].datetime);
+            var archiveDate = new Date(archiveMementos[i]);
+            if(cachedDate.getTime() != archiveDate.getTime() || isNaN(archiveDate.getTime())) {
+                this.mementos.splice(i,1);
+                --i;
+            }
+        }
+    }
+
     if(callback) {callback('')}
 }
 
@@ -1767,10 +1838,10 @@ TimeMap.prototype.writeJSONToCache = function (callback) {
 */
 TimeMap.prototype.getDatesForHistogram = function (callback,response,curCookieClientId) {
     var month_names_short= ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    var mementoJObjArr=[];
+    var mementoDates=[];
     var length = this.mementos.length -1;
     this.mementos.forEach(function(memento, m) {
-        var mementoJObj ={};
+        /*var mementoJObj ={};
         var dt =  new Date(memento["datetime"].split(",")[1]);
         var date = dt.getDate();
         var month = dt.getMonth() + 1;
@@ -1782,19 +1853,19 @@ TimeMap.prototype.getDatesForHistogram = function (callback,response,curCookieCl
             month = "0"+month;
         }
 
-        var eventDisplayDate = dt.getUTCFullYear()+"-"+ month+"-"+date+", "+ memento["datetime"].split(" ")[4];
+        var eventDisplayDate = dt.getUTCFullYear()+"-"+ month+"-"+date+", "+ memento["datetime"].split(" ")[4];*/
 
 
-        mementoJObj["event_display_date"] = eventDisplayDate;
-        mementoJObjArr.push(mementoJObj);
+        mementoDates.push(memento["datetime"]);
     });
-    ConsoleLogIfRequired(mementoJObjArr);
+    ConsoleLogIfRequired(mementoDates);
     ConsoleLogIfRequired("-------------------------------------------------------------------------");
 
-    //var cacheFile = new SimhashCacheFile(this.primesource+"_"+this.collectionidentifier+"_"+this.originalURI,isDebugMode)
-    //cacheFile.writeThumbSumJSONOPContentToFile(mementoJObjArr);
+    var cacheFile = new SimhashCacheFile(this.primesource+"_"+this.collectionidentifier+"_"+this.originalURI,isDebugMode);
+    cacheFile.path = cacheFile.path.replace("simhashes", "histogram");
+    cacheFile.writeFileContentsAsJSON(JSON.stringify(mementoDates));
     constructSSE("histoDataSent",curCookieClientId);
-    response.write(JSON.stringify(mementoJObjArr));
+    response.write(JSON.stringify(mementoDates));
     response.end();
     callback('');
 }
