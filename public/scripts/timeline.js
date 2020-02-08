@@ -896,8 +896,8 @@ function getHistoData(toDisplay) {
 
                     document.getElementById("histoWrapper").style.display = "block";
 
-                    var fromDateStr = histoData[0].event_display_date.substring(0,10); // Get first date
-                    var toDateStr = histoData[histoData.length - 1].event_display_date.substring(0,10); // Get last date
+                    var fromDateStr = formatDate(new Date(histoData[0]))// Get first date
+                    var toDateStr = formatDate(new Date(histoData[histoData.length - 1])) // Get last date
                     var dateRangeStr= fromDateStr + " - " + toDateStr;
                     $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
 
@@ -913,7 +913,7 @@ function getHistoData(toDisplay) {
                     document.getElementById("selected_mementos").innerHTML = histoData.length;
                 }
                 catch(err){
-                    alert("Some problem fetching the response, Please refresh and try again.");
+                    alert("Some problem fetching the response, Please refresh and try again."+err);
                     $("#busy-loader").hide();
                     $('#serverStreamingModal').modal('hide');
                     $(".tabContentWrapper").hide();
@@ -1629,8 +1629,8 @@ function isValidDate(dateString)
     var endPoint = histoData.length - 1;
     
     // Create date objects
-    var from = new Date(histoData[0].event_display_date.substring(0,10));
-    var to = new Date(histoData[endPoint].event_display_date.substring(0,10));
+    var from = new Date(histoData[0]);
+    var to = new Date(histoData[endPoint]);
 
     // Adjust dates to histogram domain
     from = new Date(from.getFullYear(), from.getMonth(), 1);
