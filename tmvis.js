@@ -1543,7 +1543,7 @@ TimeMap.prototype.filterMementos = function(curCookieClientId) {
 
     var originalMemetosLengthFromTM = t.mementos.length;
     // code segment to consider only last 1000 mementos for the huge TimeMaps
-    if(t.mementos.length > 5000 && t.role != "histogram") {
+    if(t.mementos.length > 5000) {
         var tempMemetoArr=[];
         var tempStackOfMementos = new Stack();
         var numOfMementosToConsider = 5000; // only latest 5000 mementos are considered
