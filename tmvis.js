@@ -1486,7 +1486,7 @@ TimeMap.prototype.fetchTimemap = function(uri, response, curCookieClientId, call
                         }
                        
                        if(t.mementos.length > 5000)
-                          t.filermementos(curCookieClientId);
+                          t.filtermementos(curCookieClientId);
                                
                         if (t.mementos.length == 0) {
                             ConsoleLogIfRequired('There were no mementos in this date range:(');
