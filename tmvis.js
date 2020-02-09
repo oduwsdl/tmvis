@@ -1561,9 +1561,6 @@ TimeMap.prototype.filterMementos = function(curCookieClientId) {
         ConsoleLogIfRequired(JSON.stringify(t.mementos));
         ConsoleLogIfRequired("---------------------------------------------------");
     }
-    if(uri.split(',').length > 1 && t.role == "histogram") {
-        t.mementos.sort(dateSort);
-    }
 }
 
 /**
