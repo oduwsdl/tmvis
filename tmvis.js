@@ -1484,6 +1484,9 @@ TimeMap.prototype.fetchTimemap = function(uri, response, curCookieClientId, call
                             response.end();
                             return;
                         }
+                       
+                       if(t.mementos.length > 5000)
+                          t.filermementos(curCookieClientId);
                                
                         if (t.mementos.length == 0) {
                             ConsoleLogIfRequired('There were no mementos in this date range:(');
@@ -1535,15 +1538,15 @@ TimeMap.prototype.fetchTimemap = function(uri, response, curCookieClientId, call
     }
 }
 
-TimeMap.prototype.filterMementos = function(uri, curCookieClientId) {
+TimeMap.prototype.filterMementos = function(curCookieClientId) {
     var t = this;
 
     var originalMemetosLengthFromTM = t.mementos.length;
     // code segment to consider only last 1000 mementos for the huge TimeMaps
-    if(t.mementos.length > 1000 && t.role != "histogram") {
+    if(t.mementos.length > 5000 && t.role != "histogram") {
         var tempMemetoArr=[];
         var tempStackOfMementos = new Stack();
-        var numOfMementosToConsider = 1000; // only latest 1000 mementos are considered
+        var numOfMementosToConsider = 5000; // only latest 5000 mementos are considered
         for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--) {
             tempStackOfMementos.push(t.mementos[i]);
         }
@@ -1590,12 +1593,6 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
         function(callback) {
             if(response.thumbnails['from'] != 0) {
                 t.mementos = t.filterMementosForDateRange(response);
-            }
-            callback('');
-        },
-        function(callback) {
-            if(response.thumbnails['from'] != 0) {
-                t.filterMementos(uri, curCookieClientId);
             }
             callback('');
         },
