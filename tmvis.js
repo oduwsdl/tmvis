@@ -226,7 +226,7 @@ function main () {
     // this is the actually place that hit the main server logic
     //app.get('/alsummarizedtimemap/:primesource/:ci/:urir', endpoint.respondToClient)
 
-    app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/:role/:from/:to/:numMementos/*', endpoint.respondToClient);
+    app.get('/alsummarizedtimemap/:primesource/:ci/:hdt/:role/:from/:to/*', endpoint.respondToClient);
 
 
     app.listen(port, '0.0.0.0', (err) => {
@@ -428,8 +428,6 @@ function PublicEndpoint() {
             query['from'] = 0;
             query['to'] = 0;
         }
-      
-        query['numMementos'] = request.params.numMementos;
 
         query['ssd']=request.params.ssd;
 
@@ -558,7 +556,6 @@ function PublicEndpoint() {
             response.thumbnails['to'] = 0;
         }
 
-        response.thumbnails['numMementos'] = parseInt(query.numMementos);
         /*TODO: include consideration for strategy parameter supplied here
                 If we consider the strategy, we can simply use the TimeMap instead of the cache file
                 Either way, the 'response' should be passed to the function representing the chosen strategy
@@ -1143,8 +1140,6 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,notDateRan
 *                           merges them with fullCachedTimemap and t objects,
 *                           responds to the request appropriately,
 *
-* This function is called based on if the numMementos request parameter matches 
-* the number of mementos from cache file
 *
 * @param fullCachedTimemap - timemap object that holds all mementos from cache file
 * @param t - timemap object that holds all cached mementos with a date range
