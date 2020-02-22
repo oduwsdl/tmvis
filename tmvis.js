@@ -770,7 +770,7 @@ function checkIfCachedForMultipleURIs(uriList, query, response, curCookieClientI
         var cacheFile = new SimhashCacheFile(query.primesource+"_"+query.ci+"_"+originalURI,isDebugMode);
         cacheFile.path += ".json";
         if (!(fs.existsSync(cacheFile.path)) || query['role'] == "histogram") {
-            getTimemapForMultipleURIs(uri, query, response, curCookieClientId, callback, false);
+            getTimemapForMultipleURIs(uri, query, response, curCookieClientId, callback);
         } else {
             var histogramFile = new SimhashCacheFile(query.primesource+"_"+query.ci+"_"+originalURI,isDebugMode);
             histogramFile.path = histogramFile.path.replace("simhashes","histogram");
@@ -830,7 +830,7 @@ function checkIfCachedForMultipleURIs(uriList, query, response, curCookieClientI
 * @param update - If true, the cache file for the URI has less mementos than requested by the user
 * and needs updated.
 */
-function getTimemapForMultipleURIs (uri, query, response, curCookieClientId, callback, update) {
+function getTimemapForMultipleURIs (uri, query, response, curCookieClientId, callback) {
 
     var t = new TimeMap();
     var retStr = '';
