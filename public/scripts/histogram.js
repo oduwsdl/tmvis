@@ -369,8 +369,8 @@ function drawHistogram(dateArray){
 
 	    // Adjust dates to histogram domain
 	    from = new Date(from.getFullYear(), from.getMonth(), 1);
-	    toDays = new Date(to.getFullYear(), to.getMonth()+1, 0).getDate();
-	    to = new Date(to.getFullYear(), to.getMonth(), toDays);
+	    toDays = new Date(to.getFullYear(), to.getMonth()+2, 0).getDate();
+	    to = new Date(to.getFullYear(), to.getMonth()+1, toDays);
 
 	    // Adjust month for date string
 	    var fromMonth = from.getMonth()+1;

@@ -845,11 +845,7 @@ function getHistoData(toDisplay) {
         $(".time_container").hide();
         $(".Explain_Threshold").hide();
 
-        var numOfMementos = $("#selected_mementos").text();
-        if(numOfMementos.length == 0) {
-            numOfMementos = -1;
-        }
-        var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0" +"/" + numOfMementos + "/" +$('.argumentsForm #urirIP').val().trim();
+        var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0" +"/"+$('.argumentsForm #urirIP').val().trim();
 
         startEventNotification();
 
@@ -955,19 +951,15 @@ function getStats(from, to) {
     if($("body").find("form")[0].checkValidity()) {
         startEventNotification();
         var ENDPOINT = "/alsummarizedtimemap";
-        var numOfMementos = $("#selected_mementos").text();
-        if(numOfMementos.length == 0){
-            numOfMementos = -1;
-        }
         if(from == 0 && to == 0) { // If no dates were passed
-            var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0"+"/" + numOfMementos + "/"+$('.argumentsForm #urirIP').val();
+            var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0"+"/"+$('.argumentsForm #urirIP').val();
             var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+$('.argumentsForm #urirIP').val();
         }
         else {
             inputDates = from + "," + to;
             var fromFormatted = from.substring(0,4)+from.substring(5,7)+from.substring(8,10);
             var toFormatted = to.substring(0,4)+to.substring(5,7)+to.substring(8,10);
-            var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+from+"/"+to+"/"+ numOfMementos + "/"+$('.argumentsForm #urirIP').val();
+            var address= ENDPOINT+"/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+from+"/"+to+"/"+$('.argumentsForm #urirIP').val();
             var path = "/alsummarizedview" + "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+fromFormatted+"/"+toFormatted+"/"+$('.argumentsForm #urirIP').val();
         }
 
@@ -1094,18 +1086,14 @@ function getSummary(from, to) {
     if($("body").find("form")[0].checkValidity()) {
         $(".time_container").hide();
         $(".Explain_Threshold").hide();
-        var numOfMementos = $("#selected_mementos").text();
-        if(numOfMementos.length == 0) {
-            numOfMementos = -1;
-        }
         if(from == 0 && to == 0) {
-            var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0"+"/" + numOfMementos + "/"+ $('.argumentsForm #urirIP').val().trim();
+            var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+"0"+"/"+"0"+"/"+ $('.argumentsForm #urirIP').val().trim();
             var summaryPath = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role +"/"+ $('.argumentsForm #urirIP').val().trim();
         }
         else {
             var fromFormatted = from.substring(0,4)+from.substring(5,7)+from.substring(8,10);
             var toFormatted = to.substring(0,4)+to.substring(5,7)+to.substring(8,10);
-            var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+from+"/"+to+"/" + numOfMementos + "/"+ $('.argumentsForm #urirIP').val().trim();
+            var pathForAjaxCall = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+from+"/"+to+"/"+ $('.argumentsForm #urirIP').val().trim();
             var summaryPath = "/"+$('.argumentsForm input[name=primesource]:checked').val()+"/"+collectionIdentifer+"/"+hammingDistance+"/"+role+"/"+fromFormatted+"/"+toFormatted+"/" +$('.argumentsForm #urirIP').val().trim();
         }
 
@@ -1634,8 +1622,8 @@ function isValidDate(dateString)
 
     // Adjust dates to histogram domain
     from = new Date(from.getFullYear(), from.getMonth(), 1);
-    toDays = new Date(to.getFullYear(), to.getMonth()+1, 0).getDate();
-    to = new Date(to.getFullYear(), to.getMonth(), toDays);
+    toDays = new Date(to.getFullYear(), to.getMonth()+2, 0).getDate();
+    to = new Date(to.getFullYear(), to.getMonth()+2, toDays);
 
     // Adjust month for date string
     var fromMonth = from.getMonth()+1;
@@ -1649,7 +1637,7 @@ function isValidDate(dateString)
     month = month - 1;
     
     // Check if input within possible range of mementos
-    if(compareDate < from || compareDate > to) {
+    if(compareDate <= from || compareDate >= to) {
         document.getElementById("date_error").innerHTML = "Please enter dates between " + fromDateStr + " and " + toDateStr;
         return false;
     }
