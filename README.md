@@ -12,7 +12,7 @@ Archives"](http://www.cs.odu.edu/~mln/pubs/ecir-2014/ecir-2014.pdf) for the Web 
 
 To execute the code, run `node tmvis.js`.
 
-To query the server instance generated using your browser visit `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/[histogram | stats | summary]/[from]/[to]/[numMementos]/http://4genderjustice.org/`, which has the attributes path as `primesource/ci/role/from/to/numMementos/URI-R` substitute the URI-R to request a different site's summarization.
+To query the server instance generated using your browser visit `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/[histogram | stats | summary]/[from]/[to]/http://4genderjustice.org/`, which has the attributes path as `primesource/ci/role/from/to/URI-R` substitute the URI-R to request a different site's summarization.
 
 ### Parameter Definitions:
 - `primesource` gets the value of 'archiveIt' or 'internetarchive' as to let the service know which is the primary source.
@@ -22,21 +22,18 @@ To query the server instance generated using your browser visit `http://localhos
     - stats: for getting the no of unique mementos.
     - summary: to get the the unique mementos along with the screenshots captured.
 - `from` and `to`: These parameters are used to specify the date range of the timemap to be loaded (`/0/0/` for full timemap or `/YYYY-MM-DD/YYYY-MM-DD` format for a specific date range).
-- `numMementos`: This is used to specify the number of mementos expected(use -1 if no preference).
-    - The front-end gets this value by counting the number of mementos in the histogram since it is always fetched from the archive.
-    - This value is used to match the cached mementos with those in the archive.
 
 ### Example URIs
 
 #### Full timemaps
-* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/histogram/0/0/-1/http://4genderjustice.org/`
-* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/stats/0/0/407/http://4genderjustice.org/`
-* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/summary/0/0/407/http://4genderjustice.org/`
+* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/histogram/0/0/http://4genderjustice.org/`
+* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/stats/0/0/http://4genderjustice.org/`
+* `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/summary/0/0/http://4genderjustice.org/`
 
 #### Date range (Format: YYYY-MM-DD)
-* `http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/histogram/2016-08-01/2017-07-23/-1/http://4genderjustice.org/`
-* `http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/stats/2016-08-01/2017-07-23/91/http://4genderjustice.org/`
-* `http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/summary/2016-08-01/2017-07-23/91/http://4genderjustice.org/`
+* `http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/histogram/2016-08-01/2017-07-23/http://4genderjustice.org/`
+* `http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/stats/2016-08-01/2017-07-23/http://4genderjustice.org/`
+* `http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/summary/2016-08-01/2017-07-23/http://4genderjustice.org/`
 
 
 ## Running as a Docker Container (Non development mode: Recommended for naive users)
@@ -114,7 +111,7 @@ Running this service provides a user with the array of JSON object as the respon
 
 ## Request format (Role -> histogram)
 ```
-curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/histogram/0/0/-1/http://4genderjustice.org/
+curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/histogram/0/0/http://4genderjustice.org/
 
 Mapping of attributes of URI to the values are as follows:
   primesource -> archiveIt
@@ -123,7 +120,6 @@ Mapping of attributes of URI to the values are as follows:
   role -> histogram
   from date -> 0
   to date -> 0
-  number of mementos expected -> -1
   URI-R under request -> http://4genderjustice.org/
 ```
 
@@ -154,7 +150,7 @@ Mapping of attributes of URI to the values are as follows:
 
 ## Request format (Role -> stats)
 ```
-curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/stats/0/0/407/http://4genderjustice.org/
+curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/stats/0/0/http://4genderjustice.org/
 
 Mapping of attributes of URI to the values are as follows:
   primesource -> archiveIt
@@ -163,7 +159,6 @@ Mapping of attributes of URI to the values are as follows:
   role -> stats
   from date -> 0
   to date -> 0
-  number of mementos expected -> 407
   URI-R under request -> http://4genderjustice.org/
 ```
 
@@ -192,7 +187,7 @@ Mapping of attributes of URI to the values are as follows:
 
 ## Request format (Role -> summary)
 ```
-curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/summary/0/0/407/http://4genderjustice.org/
+curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/summary/0/0/http://4genderjustice.org/
 
 Mapping of attributes of URI to the values are as follows:
   primesource -> archiveIt
@@ -201,7 +196,6 @@ Mapping of attributes of URI to the values are as follows:
   role -> summary
   from date -> 0
   to date -> 0
-  number of mementos expected -> 407
   URI-R under request -> http://4genderjustice.org/
 ```
 
@@ -232,7 +226,7 @@ Mapping of attributes of URI to the values are as follows:
 
 ## Request format (Role -> histogram) (Date range)
 ```
-curl -il http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/histogram/2016-08-01/2017-07-23/-1/http://4genderjustice.org/
+curl -il http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/histogram/2016-08-01/2017-07-23/http://4genderjustice.org/
 
 Mapping of attributes of URI to the values are as follows:
   primesource -> internetarchive
@@ -241,7 +235,6 @@ Mapping of attributes of URI to the values are as follows:
   role -> histogram
   from date -> 2016-08-01
   to date -> 2017-07-23
-  number of mementos expected -> -1
   URI-R under request -> http://4genderjustice.org/
 ```
 
@@ -272,7 +265,7 @@ Mapping of attributes of URI to the values are as follows:
 
 ## Request format (Role -> stats) (Date range)
 ```
-curl -il http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/stats/2016-08-01/2017-07-23/91/http://4genderjustice.org/
+curl -il http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/stats/2016-08-01/2017-07-23/http://4genderjustice.org/
 
 Mapping of attributes of URI to the values are as follows:
   primesource -> internetarchive
@@ -281,7 +274,6 @@ Mapping of attributes of URI to the values are as follows:
   role -> stats
   from date -> 2016-08-01
   to date -> 2017-07-23
-  number of mementos expected -> 91
   URI-R under request -> http://4genderjustice.org/
 ```
 
@@ -310,7 +302,7 @@ Mapping of attributes of URI to the values are as follows:
 
 ## Request format (Role -> summary) (Date range)
 ```
-curl -il http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/summary/2016-08-01/2017-07-23/91/http://4genderjustice.org/
+curl -il http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/summary/2016-08-01/2017-07-23/http://4genderjustice.org/
 
 Mapping of attributes of URI to the values are as follows:
   primesource -> internetarchive
@@ -319,7 +311,6 @@ Mapping of attributes of URI to the values are as follows:
   role -> summary
   from date -> 2016-08-01
   to date -> 2017-07-23
-  number of mementos expected -> 91
   URI-R under request -> http://4genderjustice.org/
 ```
 
