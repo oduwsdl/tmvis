@@ -1176,11 +1176,9 @@ TimeMap.prototype.updateCache = function(fullCachedTimemap, uri, response, curCo
             fullCachedTimemap.mementos = fullCachedTimemap.mementos.concat(updatedTimemap.mementos);
             fullCachedTimemap.mementos.sort(dateSort);
             fullCachedTimemap.mementos = getUnique(fullCachedTimemap.mementos,"uri");
-            console.log("\n*******************************"+t.mementos.length)
             t.mementos = t.mementos.concat(updatedTimemap.mementos);
             t.mementos.sort(dateSort);
             t.mementos = getUnique(t.mementos,"uri");
-            console.log(t.mementos.length)
             callback('');
         },
         function(callback) {
