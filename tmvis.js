@@ -90,7 +90,7 @@ var Stack = require('stackjs');
 var dateRange = false;
 var mementosFromMultipleURIs = [];
 var archivedMementos = [];
-var maxMementos = 1000;
+var maxMementos = 200;
 //var fullTimemap = new TimeMap(); 
 //return
 /* *******************************
@@ -1806,37 +1806,39 @@ TimeMap.prototype.filterMementos = function(response, curCookieClientId, callbac
 
     // code segment to consider only last 1000 mementos for the huge TimeMaps
     var tempMemetoArr=[];
+    var tempArchivedArr=[];
     var tempStackOfMementos = new Stack();
     var tempStackArchived = new Stack();
     var numOfMementosToConsider = maxMementos; // only latest 1000 mementos are considered
 
-    for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--) {
+    var count = 0;
+    var parts = 1;
+    for(var i = originalMemetosLengthFromTM-1; i>=0; i--){
         tempStackOfMementos.push(t.mementos[i]);
+        if(archivedMementos != null)
+            tempStackArchived.push(archivedMementos[i]);
+        count++;
+        if(count == 4) {
+            if(parts == 50)
+                break;
+            i = (originalMemetosLengthFromTM-1) - (Math.floor(originalMemetosLengthFromTM/50)*parts);
+            count = 0;
+            parts++;
+        }
     }
-    for(var i=0;i< numOfMementosToConsider; i++) {
+    for(var i=0;i< numOfMementosToConsider; i++){
         tempMemetoArr.push(tempStackOfMementos.pop());
+        if(archivedMementos != null)
+            tempArchivedArr.push(tempStackArchived.pop());
     }
-
-    constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']',curCookieClientId);
-    ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']');
+    constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']',curCookieClientId)
+    ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']')
     tempMemetoArr[0]["rel"] = "first memento";
     t.mementos = tempMemetoArr;
-    ConsoleLogIfRequired("-----------Mementos under consideration, Length -> "+t.mementos.length +"  -------");
-    ConsoleLogIfRequired(JSON.stringify(t.mementos));
-    ConsoleLogIfRequired("---------------------------------------------------");
-
-    tempMemetoArr=[];
-    if(response.thumbnails["from"] == 0 && archivedMementos != null) {
-        var originalMemetosLengthFromArchive = archivedMementos.length;
-        for(var i = originalMemetosLengthFromArchive-1; i>(originalMemetosLengthFromArchive-numOfMementosToConsider-1); i--) {
-            tempStackArchived.push(archivedMementos[i]);
-        }
-        for(var i=0;i< numOfMementosToConsider; i++) {
-            tempMemetoArr.push(tempStackArchived.pop());
-        }
-        //tempMemetoArr[0]["rel"] = "first memento";
-        archivedMementos = tempMemetoArr;
-    }
+    archivedMementos = tempArchivedArr;
+    ConsoleLogIfRequired("-----------Mementos under consideration, Length -> "+t.mementos.length +"  -------")
+    ConsoleLogIfRequired(JSON.stringify(t.mementos))
+    ConsoleLogIfRequired("---------------------------------------------------")
 
     if(callback)
         callback('');
