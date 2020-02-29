@@ -371,7 +371,6 @@ function PublicEndpoint() {
         ConsoleLogIfRequired(request.headers["x-my-curuniqueusersessionid"]);
         ConsoleLogIfRequired("############################################");
 
-
         responseDup = response;
         ConsoleLogIfRequired("Cookies------------------>"+request.headers["x-my-curuniqueusersessionid"]);
         constructSSE("streamingStarted",request.headers["x-my-curuniqueusersessionid"]);
@@ -633,7 +632,7 @@ function PublicEndpoint() {
 *
 * @param curCookieClientId - current client cookie id
 */
-function writeFullTimemapToCache(curCookieClientId) {
+/*function writeFullTimemapToCache(curCookieClientId) {
     async.series([
         function(callback) {
             fullTimemap.calculateSimhashes(curCookieClientId,false,callback);
@@ -659,7 +658,7 @@ function writeFullTimemapToCache(curCookieClientId) {
             }
         }
     );
-}
+}*/
 
 /**
 * Delete all derived data including caching and screenshot - namely for testing
@@ -852,7 +851,7 @@ function getTimemapForMultipleURIs (uri, query, response, curCookieClientId, cal
             if ((t.hammingdistancethreshold == '0' && t.role == "summary") || t.mementos.length == 0 || t.role == "histogram") {
                 callback('');
             } else {
-                t.calculateSimhashes(curCookieClientId,true,callback);
+                t.calculateSimhashes(curCookieClientId,true,response,callback);
             }
         },
         function (callback) {
@@ -1024,7 +1023,7 @@ Memento.prototype.simhashIndicatorForHTTP302 = '00000000';
 * @param theTimemap - the timemap object this memento belong to
 * @param notDateRange - a boolean variable that handles SSEs sent to the front-end
 */
-Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,notDateRange,callback) {
+Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,notDateRange,response,callback) {
     // Retain the urir for reference in the promise (this context lost with async)
     var thaturi = this.uri;
     var thatmemento = this;
@@ -1105,6 +1104,9 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,notDateRan
                 if(theTimeMap.prevCompletionVal > 100) {
                     theTimeMap.prevCompletionVal = 95;
                 }
+
+                response.write("")
+
                 console.log("theTimeMap completedSimhashedMementoCount -> "+theTimeMap.completedSimhashedMementoCount);
                 if(!notDateRange) {constructSSE("percentagedone-"+Math.ceil(theTimeMap.prevCompletionVal),curCookieClientId);}
 
@@ -1169,7 +1171,7 @@ TimeMap.prototype.updateCache = function(fullCachedTimemap, uri, response, curCo
             updatedTimemap.deleteCachedMementos(t.mementos,callback);
         },
         function(callback) {
-            updatedTimemap.calculateSimhashes(curCookieClientId, true, callback);
+            updatedTimemap.calculateSimhashes(curCookieClientId, true, response, callback);
         },
         function(callback) {
             //merge new mementos new and sort
@@ -1501,7 +1503,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
             if (t.role == "histogram" || (t.hammingdistancethreshold == '0' && t.role == "summary")) {
                 callback('');
             } else {
-                t.calculateSimhashes(curCookieClientId,true,callback);
+                t.calculateSimhashes(curCookieClientId,true,response,callback);
             }
         },
         function (callback) {
@@ -1619,7 +1621,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 * @param notDateRange - boolean that handles SSEs sent to the front-end
 * @param callback - The next procedure to execution when this process concludes
 */
-TimeMap.prototype.calculateSimhashes = function (curCookieClientId,notDateRange,callback) {
+TimeMap.prototype.calculateSimhashes = function (curCookieClientId,notDateRange,response,callback) {
     //ConsoleLogIfRequired("--- By Mahee - For my understanding")
     //ConsoleLogIfRequired("Inside CalculateSimhashes")
     var theTimeMap = this;
@@ -1630,7 +1632,7 @@ TimeMap.prototype.calculateSimhashes = function (curCookieClientId,notDateRange,
     // the way to get a damper, just 7 requests at a time.
     async.eachLimit(this.mementos,5, function(curMemento, callback) {
 
-        curMemento.setSimhash(theTimeMap,curCookieClientId,notDateRange,callback);
+        curMemento.setSimhash(theTimeMap,curCookieClientId,notDateRange,response,callback);
         //ConsoleLogIfRequired(curMemento)
     }, function(err) {
         //  ConsoleLogIfRequired("length of arr ayOfSetSimhashFunctions: -> " + arrayOfSetSimhashFunctions.length);
@@ -1806,37 +1808,39 @@ TimeMap.prototype.filterMementos = function(response, curCookieClientId, callbac
 
     // code segment to consider only last 1000 mementos for the huge TimeMaps
     var tempMemetoArr=[];
+    var tempArchivedArr=[];
     var tempStackOfMementos = new Stack();
     var tempStackArchived = new Stack();
     var numOfMementosToConsider = maxMementos; // only latest 1000 mementos are considered
 
-    for(var i = originalMemetosLengthFromTM-1; i>(originalMemetosLengthFromTM-numOfMementosToConsider-1); i--) {
+    var count = 0;
+    var parts = 1;
+    for(var i = originalMemetosLengthFromTM-1; i>=0; i--){
         tempStackOfMementos.push(t.mementos[i]);
+        if(archivedMementos != null)
+            tempStackArchived.push(archivedMementos[i]);
+        count++;
+        if(count == 4) {
+            if(parts == 250)
+                break;
+            i = (originalMemetosLengthFromTM-1) - (Math.floor(originalMemetosLengthFromTM/250)*parts);
+            count = 0;
+            parts++;
+        }
     }
-    for(var i=0;i< numOfMementosToConsider; i++) {
+    for(var i=0;i< numOfMementosToConsider; i++){
         tempMemetoArr.push(tempStackOfMementos.pop());
+        if(archivedMementos != null)
+            tempArchivedArr.push(tempStackArchived.pop());
     }
-
-    constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']',curCookieClientId);
-    ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']');
+    constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']',curCookieClientId)
+    ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']')
     tempMemetoArr[0]["rel"] = "first memento";
     t.mementos = tempMemetoArr;
-    ConsoleLogIfRequired("-----------Mementos under consideration, Length -> "+t.mementos.length +"  -------");
-    ConsoleLogIfRequired(JSON.stringify(t.mementos));
-    ConsoleLogIfRequired("---------------------------------------------------");
-
-    tempMemetoArr=[];
-    if(response.thumbnails["from"] == 0 && archivedMementos != null) {
-        var originalMemetosLengthFromArchive = archivedMementos.length;
-        for(var i = originalMemetosLengthFromArchive-1; i>(originalMemetosLengthFromArchive-numOfMementosToConsider-1); i--) {
-            tempStackArchived.push(archivedMementos[i]);
-        }
-        for(var i=0;i< numOfMementosToConsider; i++) {
-            tempMemetoArr.push(tempStackArchived.pop());
-        }
-        //tempMemetoArr[0]["rel"] = "first memento";
-        archivedMementos = tempMemetoArr;
-    }
+    archivedMementos = tempArchivedArr;
+    ConsoleLogIfRequired("-----------Mementos under consideration, Length -> "+t.mementos.length +"  -------")
+    ConsoleLogIfRequired(JSON.stringify(t.mementos))
+    ConsoleLogIfRequired("---------------------------------------------------")
 
     if(callback)
         callback('');
