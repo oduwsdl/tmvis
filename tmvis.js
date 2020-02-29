@@ -625,39 +625,6 @@ function PublicEndpoint() {
     }
 }
 
-/**
-* Function that calculates and caches simhash of mementos from a full timemap
-* if the user requests a date range for a non cached URI
-*
-* @param curCookieClientId - current client cookie id
-*/
-/*function writeFullTimemapToCache(curCookieClientId) {
-    async.series([
-        function(callback) {
-            fullTimemap.calculateSimhashes(curCookieClientId,false,callback);
-        },
-        function(callback) {
-            var cacheFile = new SimhashCacheFile(fullTimemap.primesource+"_"+fullTimemap.collectionidentifier+"_"+fullTimemap.originalURI,isDebugMode);
-            cacheFile.deleteCacheFile();
-            fullTimemap.saveSimhashesToCache(callback);
-        },
-        function(callback) {
-            var cacheFile = new SimhashCacheFile(fullTimemap.primesource+"_"+fullTimemap.collectionidentifier+"_"+fullTimemap.originalURI+".json",isDebugMode);
-            cacheFile.deleteCacheFile();
-            fullTimemap.writeJSONToCache(callback);
-        }],
-        function (err, result) {
-            if (err) {
-                console.log('ERROR!');
-                console.log(err);
-            } else {
-                dateRange = false;
-                console.log('There were no errors executing the callback chain');
-                ConsoleLogIfRequired(fullTimemap);
-            }
-        }
-    );
-}*/
 
 /**
 * Delete all derived data including caching and screenshot - namely for testing
@@ -850,7 +817,7 @@ function getTimemapForMultipleURIs (uri, query, response, curCookieClientId, cal
             if ((t.hammingdistancethreshold == '0' && t.role == "summary") || t.mementos.length == 0 || t.role == "histogram") {
                 callback('');
             } else {
-                t.calculateSimhashes(curCookieClientId,true,response,callback);
+                t.calculateSimhashes(curCookieClientId,response,callback);
             }
         },
         function (callback) {
@@ -1020,16 +987,15 @@ Memento.prototype.simhashIndicatorForHTTP302 = '00000000';
 * Fetch URI-M HTML contents and generate a Simhash
 * 
 * @param theTimemap - the timemap object this memento belong to
-* @param notDateRange - a boolean variable that handles SSEs sent to the front-end
 */
-Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,notDateRange,response,callback) {
+Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,response,callback) {
     // Retain the urir for reference in the promise (this context lost with async)
     var thaturi = this.uri;
     var thatmemento = this;
     var buffer2 = '';
     var memento = this ;// Potentially unused? The 'this' reference will be relative to the promise here
     var mOptions = url.parse(thaturi);
-    if(notDateRange) {constructSSE('Memento under processing -> '+thaturi, curCookieClientId);}
+    constructSSE('Memento under processing -> '+thaturi, curCookieClientId);
     ConsoleLogIfRequired('Starting a simhash: ' + mOptions.host + mOptions.path);
     var req = http.request({
         'host': mOptions.host,
@@ -1077,7 +1043,7 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,notDateRan
                 ConsoleLogIfRequired("ByMahee -- computed simhash for "+mOptions.host+mOptions.path+" -> "+ sh);
                 //constructSSE('computed simhash for '+mOptions.host+mOptions.path +' -> '+ sh,curCookieClientId)
                 var retStr = getHexString(sh)
-                if(notDateRange) {constructSSE('computed simhash for '+mOptions.host+mOptions.path +' -> '+ retStr,curCookieClientId);}
+                constructSSE('computed simhash for '+mOptions.host+mOptions.path +' -> '+ retStr,curCookieClientId);
                 //|| (retStr == null)
                 //if (!retStr || retStr === Memento.prototype.simhashIndicatorForHTTP302 || retStr == null || (retStr.match(/0/g) || []).length === 32) {
 
@@ -1107,7 +1073,7 @@ Memento.prototype.setSimhash = function (theTimeMap,curCookieClientId,notDateRan
                 response.write("")
 
                 console.log("theTimeMap completedSimhashedMementoCount -> "+theTimeMap.completedSimhashedMementoCount);
-                if(!notDateRange) {constructSSE("percentagedone-"+Math.ceil(theTimeMap.prevCompletionVal),curCookieClientId);}
+                constructSSE("percentagedone-"+Math.ceil(theTimeMap.prevCompletionVal),curCookieClientId);
 
                 callback();
                 //resolve(retStr)
@@ -1170,7 +1136,7 @@ TimeMap.prototype.updateCache = function(fullCachedTimemap, uri, response, curCo
             updatedTimemap.deleteCachedMementos(t.mementos,callback);
         },
         function(callback) {
-            updatedTimemap.calculateSimhashes(curCookieClientId, true, response, callback);
+            updatedTimemap.calculateSimhashes(curCookieClientId, response, callback);
         },
         function(callback) {
             //merge new mementos new and sort
@@ -1502,7 +1468,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
             if (t.role == "histogram" || (t.hammingdistancethreshold == '0' && t.role == "summary")) {
                 callback('');
             } else {
-                t.calculateSimhashes(curCookieClientId,true,response,callback);
+                t.calculateSimhashes(curCookieClientId,response,callback);
             }
         },
         function (callback) {
@@ -1617,10 +1583,9 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
 /**
 * Calculates a simhash on each memento from the implied timemap object
 *
-* @param notDateRange - boolean that handles SSEs sent to the front-end
 * @param callback - The next procedure to execution when this process concludes
 */
-TimeMap.prototype.calculateSimhashes = function (curCookieClientId,notDateRange,response,callback) {
+TimeMap.prototype.calculateSimhashes = function (curCookieClientId,response,callback) {
     //ConsoleLogIfRequired("--- By Mahee - For my understanding")
     //ConsoleLogIfRequired("Inside CalculateSimhashes")
     var theTimeMap = this;
@@ -1631,7 +1596,7 @@ TimeMap.prototype.calculateSimhashes = function (curCookieClientId,notDateRange,
     // the way to get a damper, just 7 requests at a time.
     async.eachLimit(this.mementos,5, function(curMemento, callback) {
 
-        curMemento.setSimhash(theTimeMap,curCookieClientId,notDateRange,response,callback);
+        curMemento.setSimhash(theTimeMap,curCookieClientId,response,callback);
         //ConsoleLogIfRequired(curMemento)
     }, function(err) {
         //  ConsoleLogIfRequired("length of arr ayOfSetSimhashFunctions: -> " + arrayOfSetSimhashFunctions.length);
@@ -1663,7 +1628,7 @@ TimeMap.prototype.calculateSimhashes = function (curCookieClientId,notDateRange,
         // console.timeEnd('simhashing')
         ConsoleLogIfRequired(mementosRemoved + ' mementos removed due to Wayback "soft 3xxs"')
 
-        if(!notDateRange) {constructSSE("percentagedone-"+Math.ceil(90),curCookieClientId);}
+        constructSSE("percentagedone-"+Math.ceil(90),curCookieClientId);
 
         if (callback) {
             callback('');
