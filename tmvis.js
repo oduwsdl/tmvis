@@ -87,10 +87,9 @@ var streamedHashMapObj = new HashMap();
 var responseDup = null;
 var Stack = require('stackjs');
 
-var dateRange = false;
 var mementosFromMultipleURIs = [];
 var archivedMementos = [];
-var maxMementos = 1000;
+var maxMementos = argv.maxMementos? argv.maxMementos: 1000;
 //var fullTimemap = new TimeMap(); 
 //return
 /* *******************************
