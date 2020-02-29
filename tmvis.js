@@ -271,7 +271,7 @@ function refreshMemento(request, response) {
 
         async.series([
             function(callback) {
-                tempTimemap.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,true,callback); // take new screenshot
+                tempTimemap.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,response,true,callback); // take new screenshot
             },
             function(callback) {
                 response.writeHead(200, headers);
@@ -2276,7 +2276,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
         shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
         1,function( memento,callback) {
             ConsoleLogIfRequired('************curCookieClientId just before calling  createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'************');
-            self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,false,callback);
+            self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,response,false,callback);
             //self.createScreenshotForMementoWithPhantom(curCookieClientId,memento,callback)
             completedScreenshotCaptures++;
             var value = ((completedScreenshotCaptures/noOfThumbnailsSelectedToBeCaptured)*80)+5;
@@ -2315,7 +2315,7 @@ TimeMap.prototype.createScreenshotsForMementos = function (curCookieClientId,res
 * @param withCriteria - Function to inclusively filter mementos, i.e. returned from criteria
 *                     function means a screenshot should be generated for it.
 */
-TimeMap.prototype.createScreenshotsForMementosFromCached = function (curCookieClientId,callback, withCriteria) {
+TimeMap.prototype.createScreenshotsForMementosFromCached = function (curCookieClientId,response,callback, withCriteria) {
     ConsoleLogIfRequired('Creating screenshots...');
 
     function hasScreenshot (e) {
@@ -2334,7 +2334,7 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (curCookieCl
         shuffleArray(self.mementos.filter(criteria)), // Array of mementos to randomly // shuffleArray(self.mementos.filter(hasScreenshot))
         1,
         function( memento,callback) {
-            self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,false,callback);
+            self.createScreenshotForMementoWithPuppeteer(curCookieClientId,memento,response,false,callback);
             //self.createScreenshotForMementoWithPhantom(curCookieClientId,memento,callback)
     },
         function doneCreatingScreenshots (err) {      // When finished, check for errors
@@ -2358,7 +2358,7 @@ TimeMap.prototype.createScreenshotsForMementosFromCached = function (curCookieCl
 * @param refreshMemento - boolean that handles screenshot wait time (waits longer if screenshot retake issued)
 * @param callback - The next procedure to execution when this process concludes
 */
-TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieClientId,memento,refreshMemento,callback) {
+TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieClientId,memento,response,refreshMemento,callback) {
     var uri = memento.uri
     ConsoleLogIfRequired('********** curCookieClientId in createScreenshotForMementoWithPuppeteer -> '+curCookieClientId+'***************');
 
@@ -2408,6 +2408,7 @@ TimeMap.prototype.createScreenshotForMementoWithPuppeteer = function (curCookieC
         });
 
         ConsoleLogIfRequired('t=' + (new Date()).getTime() + ' ' + 'Screenshot created for ' + uri);
+        response.write("");
         if(callback) {callback();}
     });
 }
