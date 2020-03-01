@@ -758,6 +758,10 @@ function checkIfCachedForMultipleURIs(uriList, query, response, curCookieClientI
                         callback('');
                 },
                 function (callback) {
+                    var histogramFile = new SimhashCacheFile(response.thumbnails["primesource"]+"_"+response.thumbnails["collectionidentifier"]+"_"+urlCanonicalize(uri),isDebugMode);
+                    histogramFile.path = histogramFile.path.replace("simhashes","histogram");
+                    histogramFile.path += ".json";
+                    archivedMementos = JSON.parse(histogramFile.readFileContentsSync());
                     curTimeMap.matchMementosToArchive(originalURI, response, curCookieClientId, data, callback);
                 },
                 function (callback) {
@@ -860,6 +864,11 @@ function getTimemapForMultipleURIs (uri, query, response, curCookieClientId, cal
 * @param response handler to client's browser interface
 */
 function processWithFileContents (uri, fileContents, response, curCookieClientId) {
+    var histogramFile = new SimhashCacheFile(response.thumbnails["primesource"]+"_"+response.thumbnails["collectionidentifier"]+"_"+urlCanonicalize(uri),isDebugMode);
+    histogramFile.path = histogramFile.path.replace("simhashes","histogram");
+    histogramFile.path += ".json";
+    archivedMementos = JSON.parse(histogramFile.readFileContentsSync());
+
     var t = createMementosFromJSONFile(fileContents);
     t.curClientId = curCookieClientId;
     t.originalURI = urlCanonicalize(response.thumbnails['urir']);
@@ -1769,38 +1778,46 @@ TimeMap.prototype.filterMementosForDateRange = function(response, callback) {
 TimeMap.prototype.filterMementos = function(response, curCookieClientId, callback) {
     var t = this;
     var originalMemetosLengthFromTM = t.mementos.length;
-
-    // code segment to consider only last 1000 mementos for the huge TimeMaps
-    var tempMemetoArr=[];
+    var tempMementoArr = [];
     var tempArchivedArr=[];
-    var tempStackOfMementos = new Stack();
-    var tempStackArchived = new Stack();
-    var numOfMementosToConsider = maxMementos; // only latest 1000 mementos are considered
+    var sections = 250, count = 0, left = 4;
+    var lastTime = 0, currentTime = 0, daysBetween = 0;
 
-    var count = 0;
-    var parts = 1;
-    for(var i = originalMemetosLengthFromTM-1; i>=0; i--){
-        tempStackOfMementos.push(t.mementos[i]);
-        if(archivedMementos != null)
-            tempStackArchived.push(archivedMementos[i]);
-        count++;
-        if(count == 4) {
-            if(parts == 250)
-                break;
-            i = (originalMemetosLengthFromTM-1) - (Math.floor(originalMemetosLengthFromTM/250)*parts);
-            count = 0;
-            parts++;
+    var interval = Math.floor(originalMemetosLengthFromTM / sections);
+    var nextSection = interval;
+
+    for(var i = 0; i < originalMemetosLengthFromTM; i++) {
+        if(i == 0) { // Always take first memento
+            tempMementoArr.push(t.mementos[i]);
+            tempMementoArr[0]["rel"] = "first memento";
+            if(archivedMementos != null)
+                tempArchivedArr.push(archivedMementos[i]);
+            lastTime = new Date(t.mementos[i]["datetime"].split(",")[1]).getTime();
+            left--;
+        } else if (left == 0 || i == nextSection) {
+            left += 4;
+            i = nextSection;
+            nextSection += interval;
+        }
+        else {
+            currentTime = new Date(t.mementos[i]["datetime"].split(",")[1]).getTime();
+            daysBetween = (currentTime - lastTime) / (1000*60*60*24);
+            if(daysBetween >= 3) { //If mementos are at least 7 days apart
+                console.log("Found one --------------------------------------------------- ");
+                console.log(i);
+                tempMementoArr.push(t.mementos[i]);
+                if(archivedMementos != null)
+                    tempArchivedArr.push(archivedMementos[i])
+                lastTime = currentTime;
+                left--;
+            }
         }
     }
-    for(var i=0;i< numOfMementosToConsider; i++){
-        tempMemetoArr.push(tempStackOfMementos.pop());
-        if(archivedMementos != null)
-            tempArchivedArr.push(tempStackArchived.pop());
-    }
-    constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']',curCookieClientId)
-    ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMemetoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMemetoArr[tempMemetoArr.length-1]))["datetime"] + ']')
-    tempMemetoArr[0]["rel"] = "first memento";
-    t.mementos = tempMemetoArr;
+
+    constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMementoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMementoArr[tempMementoArr.length-1]))["datetime"] + ']',curCookieClientId)
+    ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMementoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMementoArr[tempMementoArr.length-1]))["datetime"] + ']')
+    tempMementoArr[0]["rel"] = "first memento";
+    t.mementos = tempMementoArr;
     archivedMementos = tempArchivedArr;
     ConsoleLogIfRequired("-----------Mementos under consideration, Length -> "+t.mementos.length +"  -------")
     ConsoleLogIfRequired(JSON.stringify(t.mementos))
@@ -1811,11 +1828,6 @@ TimeMap.prototype.filterMementos = function(response, curCookieClientId, callbac
 }
 
 TimeMap.prototype.matchMementosToArchive = function(uri, response, curCookieClientId, fileContents, callback) {
-    var histogramFile = new SimhashCacheFile(response.thumbnails["primesource"]+"_"+response.thumbnails["collectionidentifier"]+"_"+urlCanonicalize(uri),isDebugMode);
-    histogramFile.path = histogramFile.path.replace("simhashes","histogram");
-    histogramFile.path += ".json";
-    archivedMementos = JSON.parse(histogramFile.readFileContentsSync());
-
     if(this.mementos.length < archivedMementos.length) {
         var fullCachedTimemap = createMementosFromJSONFile(fileContents);
         fullCachedTimemap.curClientId = curCookieClientId;
