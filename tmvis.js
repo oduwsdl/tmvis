@@ -1805,7 +1805,7 @@ TimeMap.prototype.filterMementos = function(response, curCookieClientId, callbac
         else {
             currentTime = new Date(t.mementos[i]["datetime"].split(",")[1]).getTime();
             daysBetween = (currentTime - lastTime) / (1000*60*60*24);
-            if(daysBetween >= 3) { //If mementos are at least 7 days apart
+            if(daysBetween >= 3) { //If mementos are at least 3 days apart
                 console.log("Found one --------------------------------------------------- ");
                 console.log(i);
                 tempMementoArr.push(t.mementos[i]);
