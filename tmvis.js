@@ -1212,15 +1212,10 @@ TimeMap.prototype.deleteCachedMementos = function(cachedMementos, callback) {
 * @param callback - The next procedure to execution when this process concludes
 */
 TimeMap.prototype.deleteExtraMementos = function(callback) {
-    var cacheFile = new SimhashCacheFile(this.primesource+"_"+this.collectionidentifier+"_"+this.originalURI,isDebugMode);
-    cacheFile.path = cacheFile.path.replace("simhashes","histogram");
-    cacheFile.path += ".json";
-    var archiveMementos = JSON.parse(cacheFile.readFileContentsSync());
-    
-    if(archiveMementos != null) {
+    if(archivedMementos != null || archivedMementos.length > 0) {
         for(var i = 0; i < this.mementos.length; ++i) {
             var cachedDate = new Date(this.mementos[i].datetime);
-            var archiveDate = new Date(archiveMementos[i]);
+            var archiveDate = new Date(archivedMementos[i]);
             if(cachedDate.getTime() != archiveDate.getTime() || isNaN(archiveDate.getTime())) {
                 this.mementos.splice(i,1);
                 --i;
@@ -1461,6 +1456,13 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
         function (callback) {t.printMementoInformation(response, callback, false);}, // Return blank UI ASAP */
 
         // -- ByMahee -- Uncomment one by one for CLI_JSON
+        function(callback){
+        	if(t.role == "histogram") {
+        		t.getDatesForHistogram(callback,response,curCookieClientId, false);
+        	} else {
+        		t.getDatesForHistogram(callback,response,curCookieClientId, true);
+        	}
+        },
         function(callback) {
             if(response.thumbnails['from'] != 0) {
                 t.filterMementosForDateRange(response, callback);
@@ -1516,7 +1518,7 @@ function getTimemapGodFunctionForAlSummarization (uri, response,curCookieClientI
         },
         function (callback) {
             if(t.role == "histogram") {
-                t.getDatesForHistogram(callback,response,curCookieClientId, false);
+                callback('');
             } else if(t.hammingdistancethreshold == '0' && t.role == "summary") {
                 t.supplyAllMementosAScreenshotURI(callback);
             } else {
@@ -1767,7 +1769,8 @@ TimeMap.prototype.filterMementosForDateRange = function(response, callback) {
 
     if(archivedMementos != null) {
         archivedMementos = archivedMementos.filter(function (curDate) {
-            return curDate >= theFromDate && curDate <= theToDate;
+        	var tryDate = new Date(curDate);
+            return tryDate >= theFromDate && tryDate <= theToDate;
         });   
     }
 
