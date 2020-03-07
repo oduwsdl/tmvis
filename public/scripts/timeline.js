@@ -886,7 +886,7 @@ function getHistoData(toDisplay) {
                     if(histoData.length > 12) { // Do not allow the user to generate a thumbnail for each memento
                       document.getElementById('generateAllThumbnails').style.display = "none";
                     }
-                    if(histoData.length == 5000) { // Mementos were truncated in the back-end, tell the user 
+                    if(histoData.length > 1000) { // If timemap has more than 1000 mementos, tell user up to 1000 will be analyzed 
                         document.getElementById("memento_limit").style.display = "block";
                     }
 
