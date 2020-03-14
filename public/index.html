@@ -165,6 +165,7 @@
 					<div class="col-lg-12">
 						<p class="Mementos_Considered"></p>
 						<div id="histogram_container">
+							<p style="margin-bottom: 30px;">Click and drag over the histogram to zoom in and select a date range, or type in a date range in the boxes below and click the update button.</p>
 							<div id="histogram"></div> <!-- Main histogram div -->
 							<div style="visibility: hidden;" id="zoom_histogram"></div> <!-- Zoom histogram div -->
 							<button class="btn" id="brush_clear">Clear Selection</button>
@@ -179,6 +180,13 @@
 							</div>
 							<button class="btn btn-primary" id="generateAllThumbnails"> Generate All Thumbnails </button>
 							<button type="button" class="btn btn-primary" name="option" id="submitRange"> Calculate Unique </button>
+							<div id="helpBox">
+								<button type="button" class="toggleHelp" id="helpLink"><p>&#9432;</p></button>
+								<div id="helpSection" style="display:none;">
+									<button type="button" class="toggleHelp" id="closeHelp">x</button>
+									Calculates which mementos show significant changes in the web page. Some mementos may look the same or very similar, our service picks the ones that best represent the changes in the web page over time.
+								</div>
+							</div>
 							<p id="date_error" style="display:none;"></p>
 						</div>
 					</div>

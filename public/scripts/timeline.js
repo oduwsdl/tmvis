@@ -828,6 +828,9 @@ function getHistogramPage(){
 *                    "Internet Archive" or "Archive-It" depending on what the user selected.
 */
 function getHistoData(toDisplay) {
+
+    document.getElementById('info').style.display = "none";
+
     var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
     if(collectionIdentifer == "") {
       collectionIdentifer = "all";
@@ -898,8 +901,6 @@ function getHistoData(toDisplay) {
                     $(".histoWrapper .Mementos_Considered").html("TimeMap from "+ toDisplay +": "+ histoData.length +" mementos | "+dateRangeStr);
 
                     drawHistogram(histoData);
-
-                    document.getElementById('info').style.display = "none";
 
                     // Remove loading screen
                     $(".modal-backdrop").remove();

@@ -161,7 +161,7 @@ summary {
 	font-weight: bold;
 	padding-bottom: 10px;
 	margin-bottom: 10px;
-	outline:none;
+	outline: none;
 }
 
 summary:hover {
@@ -670,6 +670,7 @@ ul.rig li img {
 	display: inline-block;
 	position: relative;
 	margin-left: 10px;
+	text-align: left;
 }
 
 #helpLink {
@@ -677,11 +678,13 @@ ul.rig li img {
 	border: none;
 	background-color: whitesmoke;
 	font-weight: 750;
-	font-size: 21px;
+	font-size: 17px;
+	outline: none;
 }
 
 #helpLink p {
-	margin-top: 3px;
+	position: relative;
+	transform: translate(0px, 14px)
 }
 
 #helpImage {
@@ -705,13 +708,13 @@ ul.rig li img {
 	border: groove;
 	border-color: #efefef;
 	border-radius: 3px;
-	transform: translate(-20%, 4%);
+	transform: translate(6%, -5%);
 }
 
 #closeHelp {
 	position: absolute;
 	margin-left: 94.75%;
-	margin-top: -1.45%;
+	margin-top: -2%;
 	border: none;
 	background-color: #bdbdbd;
 	padding: 0px 7px 2px 7px;
