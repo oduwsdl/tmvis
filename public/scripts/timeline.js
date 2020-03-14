@@ -899,6 +899,8 @@ function getHistoData(toDisplay) {
 
                     drawHistogram(histoData);
 
+                    document.getElementById('info').style.display = "none";
+
                     // Remove loading screen
                     $(".modal-backdrop").remove();
                     $('#serverStreamingModal').modal('hide');

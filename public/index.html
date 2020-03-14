@@ -44,14 +44,17 @@
 				<div class = "Title">
 					<img src="/images/csODUTimeline.png" alt="graph">
 					<h1>TimeMap Visualization</h1>
+					<h4>An archival thumbnail visualization server</h4>
 				</div>
 
 				<!--hack to fix formatting-->
 				<div style="clear: both;"></div>
 
 				<form action="#" class="argumentsForm">
+
 					<div class="row URIWrapper" >
-						<label for="uriIP">Enter URI-R <span class='uriexample'>(ex: http://4genderjustice.org)</span> or  URI-M <span class='uriexample'>(ex: http://wayback.archive-it.org/1068/20150701215641/http://4genderjustice.org/)</span> or URI-T <span class='uriexample'>(ex: http://web.archive.org/web/timemap/link/http://4genderjustice.org)</span>
+
+						<!--label for="uriIP">Enter URI-R <span class='uriexample'>(ex: http://4genderjustice.org)</span> or  URI-M <span class='uriexample'>(ex: http://wayback.archive-it.org/1068/20150701215641/http://4genderjustice.org/)</span> or URI-T <span class='uriexample'>(ex: http://web.archive.org/web/timemap/link/http://4genderjustice.org)</span>
 							<div id="helpBox">
 								<button type="button" class="toggleHelp" id="helpLink"><p>&#9432;</p></button>
 								<div id="helpSection" style="display:none;">
@@ -63,30 +66,33 @@
 									URI-T - <span class="uriHelp">This is the URI of a timemap, the list of all mementos for a URI-R in an archive. The URI-T contains the name of the archive or Archive-It collection, so as with the URI-M, so there is no need to choose between Internet Archive or Archive-It. Our service will analyze all of the mementos listed in the URI-T.</span>
 								</div>
 							</div>
-						</label>
-							<div class="input-group">
+						</label-->
 
-								<input class="form-control" name="URI" id="uriIP" required placeholder="For example, http://4genderjustice.org/">
+						<label for="uriIP" id="uri-label">Enter URI-R, URI-M, or URI-T:</label>
 
-								<div id="inputURI_error">Required field! Enter a URI-R, URI-M, or URI-T</div>
+						<div class="input-group">
 
-								<!-- GET STATS -->
-								<span id="statsbtn" class="input-group-btn">
-										<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
-								    <!-- <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
-									-->
-										<button class="btn btn-primary getJSONFromServer form-control" title="Get number of unique mementos"> View TimeMap </button>
-								</span>
-							</div>
-							<div class="form-group hidden">
-							    <label for="urirIP">Enter URI-R:</label>
-							    <input class="form-control" name="URI-R" id="urirIP" required placeholder="For example, http://4genderjustice.org/">
-						  	</div>
+							<input class="form-control" name="URI" id="uriIP" required placeholder="For example, http://4genderjustice.org/">
+
+							<div id="inputURI_error">Required field! Enter a URI-R, URI-M, or URI-T</div>
+
+							<!-- GET STATS -->
+							<span id="statsbtn" class="input-group-btn">
+									<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
+							    <!-- <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
+								-->
+									<button class="btn btn-primary getJSONFromServer form-control" title="Get number of unique mementos"> View TimeMap </button>
+							</span>
+						</div>
+						<div class="form-group hidden">
+						    <label for="urirIP">Enter URI-R:</label>
+						    <input class="form-control" name="URI-R" id="urirIP" required placeholder="For example, http://4genderjustice.org/">
+					  	</div>
 					</div>
 
 					<div class="row orgAndCollNoWrapper form-inline" style="vertical-align:middle;" >
 
-						<!--ARCHIVE OPTIONS -->
+							<!--ARCHIVE OPTIONS -->
 							<div class="pull-left primesrcsection" style="min-width:25%; margin-left:40%">
 								<label class="radio"><input type="radio" class ="form-control" checked="checked" name="primesource"  id = "internetarchive" value="internetarchive" onclick="javascript:yesnoCheck();">Internet Archive</label>&nbsp;
 								<label class="radio"><input type="radio" class ="form-control" name="primesource" id = "archiveit" value="archiveit" onclick="javascript:yesnoCheck();">Archive-It</label>
@@ -95,6 +101,42 @@
 							 	<input class="form-control" type="number" min="0" class ="form-control" title="Collection Identifier"  name="ci"  id="collectionNo" placeholder="Collection Identifier" />
 							</div>
 							<!-- THRESHOLD AND DELAY-->
+
+							<div id="info">
+
+								<div class="input-info-container" style="display: inline-block; width: 50%;">
+									<h2 class="input-info-title">What are the types of input?</h2>
+									<details>
+									  <summary>
+									  	URI-R (ex: http://4genderjustice.org)
+									  </summary>
+									  <p>This is the URI of the live webpage. After entering the URI-R, you may choose to analyze mementos from the Internet Archive or a specific collection in Archive-It.</p>
+									</details>
+									<details>
+									  <summary>
+									  	URI-M (ex: http://wayback.archive-it.org/1068/20150701215641/http://4genderjustice.org/)
+									  </summary>
+									  <p>This is the URI of a memento, a webpage archived at a specific datetime. The URI-M contains the name of the archive or Archive-It collection, so there is no need to choose between Internet Archive or Archive-It. Our service will analyze all of the mementos of that URI-R in the specified archive or Archive-It collection.</p>
+									</details>
+									<details>
+									  <summary>
+									  	URI-T (ex: http://web.archive.org/web/timemap/link/http://4genderjustice.org)
+									  </summary>
+									  <p>This is the URI of a timemap, the list of all mementos for a URI-R in an archive. The URI-T contains the name of the archive or Archive-It collection, so as with the URI-M, so there is no need to choose between Internet Archive or Archive-It. Our service will analyze all of the mementos listed in the URI-T.</p>
+									</details>
+								</div>
+
+								<div class="input-info-container" style="display: inline-block; width: 40%;">
+									<h2 class="input-info-title">What is a TimeMap?</h2>
+									<div>
+										A TimeMap is a list of all of the mementos for a single webpage. Having a visual representation, or thumbnail, of each of the mementos is helpful in quickly determining both the overall focus of the webpage and also how the design of that webpage has changed over time.
+									</div>
+									<h2 class="input-info-title">What is a Memento?</h2>
+									<div>
+										Web archives preserve versions of web pages, and these archived web pages are called mementos. Every memento has additional information, such as the datetime the memento was captured, which archive it belongs to, and what other versions, if any, that are available.
+									</div>
+								</div>
+							</div>
 
 							<div class="slidersection hidden">
 								<div class="col-md-3" style="text-align: center;" >
@@ -115,6 +157,7 @@
 								</div>
 						</div>
 					</div>
+
 				</form>
 				
 				<!--HISTOGRAM-->
@@ -182,7 +225,7 @@
 					<li ><a data-toggle="tab" href="#timeLine">TimeLine</a></li>
 					<li ><a data-toggle="tab" href="#gif">GIF</a></li>
 					<li id="updateLI"><button type="button" id="updateMementos" title="Update the displayed mementos.">Update</button></li>
-					<li id="revertLI"><button type="button" id="revertMementos" title="Revert to orignal displayed mementos.">Revert</button></li>
+					<li id="revertLI"><button type="button" id="revertMementos" title="Revert to original displayed mementos.">Revert</button></li>
 					<li id="downloadLI">
 						<a download="URI-M.txt" id="downloadMementoURI" title="Download a list of memento URI-Ms.">Download URI-M List</a>
 					</li>
