@@ -21,8 +21,8 @@ function embedImageGrid() {
     iframe.width = "100%";
     iframe.height = "35%";
 
-    $("embed").val(new XMLSerializer().serializeToString(iframe));
-    $("embed").select();
+    $("#embed").val(new XMLSerializer().serializeToString(iframe));
+    $("#embed").select();
 }
 
 function embedImageSlider() {
