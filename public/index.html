@@ -30,6 +30,7 @@
     	<script src="/scripts/gifshot.min.js"></script>
     	<script src="/scripts/gif.js"></script>
     	<script src="/scripts/formatting.js"></script>
+    	<script src="/scripts/embedded.js"></script>
 
 			<!-- Priorirty is to stabilise the current single step build -->
 			<!-- <script src="./scripts/embedded.js"></script> -->
@@ -191,7 +192,7 @@
 				</ul>
 
 				<div class="tab-content" style="z-index: auto; margin-bottom:1%;" >
-
+					<textarea id="embed" style="height: 100px; width: 420px; resize: none;" readonly></textarea>
 					<div id="imageGrid" class="tab-pane fade in active">
 						<div class="grid-container">
 							<ul class="rig columns-3">
@@ -235,7 +236,7 @@
 							</div>
 							<div class="gridImagePlusContentWrapper">
 								<img id="myImage" class="heightSet"/>
-								<p id="myContent"></p>
+								<div id="myContent"></div>
 							</div>
 					    </div>
 					</div>
