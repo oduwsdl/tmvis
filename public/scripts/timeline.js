@@ -940,7 +940,10 @@ function getHistoData(toDisplay) {
 * @param to - The ending date, 0 if full timemap requested. 
 */
 function getStats(from, to) {
+
+    // Remove histogram and info divs
     document.getElementById("histoWrapper").style.display = "none";
+    document.getElementById('info').style.display = "none";
     var collectionIdentifer = $('.argumentsForm #collectionNo').val();
     if(collectionIdentifer == "") {
         collectionIdentifer = "all";
@@ -1067,8 +1070,9 @@ function getStats(from, to) {
 */
 function getSummary(from, to) {
     
-    // Remove histogram
+    // Remove histogram and info divs
     document.getElementById("histoWrapper").style.display = "none";
+    document.getElementById('info').style.display = "none";
 
     var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
     if(collectionIdentifer == "") {

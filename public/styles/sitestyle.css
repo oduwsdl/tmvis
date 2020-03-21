@@ -657,6 +657,34 @@ ul.rig li img {
 	margin-left: 3%;
 }
 
+#embeddable {
+    border: outset;
+    border-width: 2.5px;
+    border-color: #4690d0;
+    color: #ffffff;
+    padding: 3px 6px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    border-radius: 4px;
+    background-color: #337ab7;
+    display: block;
+    margin: 10px 0px 10px 70px;
+}
+
+#embeddable:hover {
+    background-color: #286090;
+}
+
+#embedGrid {
+	margin: 0px 50px;
+}
+
+#embedSlider {
+	margin: 0px 50px;
+}
+
 #inputURI_error {
 	display: none;
 	color: #da0000;

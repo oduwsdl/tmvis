@@ -243,8 +243,10 @@
 				</ul>
 
 				<div class="tab-content" style="z-index: auto; margin-bottom:1%;" >
-					<textarea id="embed" style="height: 100px; width: 420px; resize: none;" readonly></textarea>
+
 					<div id="imageGrid" class="tab-pane fade in active">
+						<button type="button" id="embeddable" title="Generate HTML to embed the Image Grid." onclick="embedImageGrid()">Embed Image Grid</button>
+						<textarea id="embedGrid" style="height: 100px; width: 420px; resize: none; display: none;" readonly></textarea>
 						<div class="grid-container">
 							<ul class="rig columns-3">
 							</ul>
@@ -275,8 +277,9 @@
 						</div>
 					</div>
 					
-
 					<div id="imageSlider" class="tab-pane fade">
+						<button type="button" id="embeddable" title="Generate HTML to embed the Image Grid." onclick="embedImageSlider()">Embed Image Slider</button>
+						<textarea id="embedSlider" style="height: 100px; width: 420px; resize: none; display: none;" readonly></textarea>
 					  	<div class="imageslider_wrapper content_focusedWrapper" style="margin-top: 1%;">
 					    	<h2>Swipe over the images to move through time</h2>
 							<h2>Click on an image to view the memento</h2>
@@ -293,6 +296,27 @@
 					</div>
 
 				 	<div id="timeLine" class="tab-pane fade">
+
+				 		<div id="timeline-info">
+				 			<ul>
+					 			<li>
+					 				<div style="margin: 15px 0px;">
+						 				<div style="background-color: rgb(237, 192, 71);" id="yellow"></div> Each yellow bar represents a unique memento. Click one of the yellow bars to view the unique memento at a particular datetime.
+						 			</div>
+						 		</li>
+						 		<li>
+						 			<div style="margin: 15px 0px;">
+						 				<div style="background-color: rgb(148, 137, 137);" id="gray"></div> Some mementos are not considered unique, but are considered similar to a unique memento. Each gray bar represents one of these similar mementos. Click one of the gray bars to view which unique memento it is similar to.
+						 			</div>
+						 		</li>
+						 		<li>
+						 			<div style="margin: 15px 0px;">
+						 				Use the Prev and Next buttons below to go to the next bar. Click Unique Prev and Unique Next to jump to the next unique memento. Change the date range shown by zooming in or out. 
+						 			</div>
+						 		</li>
+				 			</ul>
+				 		</div>
+
 					   	<div class="timeline_Wrapper content_focusedWrapper">
 							<div class="article">
 								<div id="timeline">
