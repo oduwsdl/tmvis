@@ -828,6 +828,9 @@ function getHistogramPage(){
 *                    "Internet Archive" or "Archive-It" depending on what the user selected.
 */
 function getHistoData(toDisplay) {
+
+    document.getElementById('info').style.display = "none";
+
     var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
     if(collectionIdentifer == "") {
       collectionIdentifer = "all";
@@ -886,7 +889,7 @@ function getHistoData(toDisplay) {
                     if(histoData.length > 12) { // Do not allow the user to generate a thumbnail for each memento
                       document.getElementById('generateAllThumbnails').style.display = "none";
                     }
-                    if(histoData.length == 5000) { // Mementos were truncated in the back-end, tell the user 
+                    if(histoData.length > 1000) { // If timemap has more than 1000 mementos, tell user up to 1000 will be analyzed 
                         document.getElementById("memento_limit").style.display = "block";
                     }
 
@@ -937,7 +940,10 @@ function getHistoData(toDisplay) {
 * @param to - The ending date, 0 if full timemap requested. 
 */
 function getStats(from, to) {
+
+    // Remove histogram and info divs
     document.getElementById("histoWrapper").style.display = "none";
+    document.getElementById('info').style.display = "none";
     var collectionIdentifer = $('.argumentsForm #collectionNo').val();
     if(collectionIdentifer == "") {
         collectionIdentifer = "all";
@@ -1064,8 +1070,9 @@ function getStats(from, to) {
 */
 function getSummary(from, to) {
     
-    // Remove histogram
+    // Remove histogram and info divs
     document.getElementById("histoWrapper").style.display = "none";
+    document.getElementById('info').style.display = "none";
 
     var collectionIdentifer = $('.argumentsForm #collectionNo').val().trim();
     if(collectionIdentifer == "") {
