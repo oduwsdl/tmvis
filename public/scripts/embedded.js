@@ -1,11 +1,14 @@
 function embedImageGrid() {
     $("#embedGrid").css("display", "block");
 
-    var imageGridEmbed = $("#imageGrid").html();
+    var imageGridEmbed = $("#imageGrid .grid-container").html();
     var regex = /<button\b[^>]*>(.*?)<\/button>/g;
     imageGridEmbed = imageGridEmbed.replace(regex, "");
     imageGridEmbed += `<link href="http://`+window.location.host+`/styles/sitestyle.css" rel="stylesheet"/>
     <style>
+        body{
+            padding-bottom: 0px;
+        }
         ul.rig li {
             padding-bottom: 20px;
         }
@@ -21,7 +24,7 @@ function embedImageGrid() {
     var iframe = document.createElement('iframe');
     iframe.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(imageGridEmbed);
     iframe.width = "100%";
-    iframe.height = "35%";
+    iframe.height = "25%";
 
     $("#embedGrid").val(new XMLSerializer().serializeToString(iframe));
     $("#embedGrid").select();
@@ -30,7 +33,7 @@ function embedImageGrid() {
 function embedImageSlider() {
     $("#embedSlider").css("display", "block");
 
-    var imageSliderEmbed = $("#imageSlider").html();
+    var imageSliderEmbed = $("#imageSlider .imageslider_wrapper").html();
     imageSliderEmbed += `<link href="http://`+window.location.host+`/styles/sitestyle.css" rel="stylesheet"/>
     <link href='http://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
     <style>
