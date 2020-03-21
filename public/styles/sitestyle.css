@@ -698,7 +698,7 @@ ul.rig li img {
 }
 
 #helpSection {
-	width: 550px;
+	width: 350px;
 	display: block;
 	z-index: 10;
 	position: absolute;
@@ -713,8 +713,8 @@ ul.rig li img {
 
 #closeHelp {
 	position: absolute;
-	margin-left: 94.75%;
-	margin-top: -2%;
+	margin-left: 92.1%;
+	margin-top: -2.6%;
 	border: none;
 	background-color: #bdbdbd;
 	padding: 0px 7px 2px 7px;
