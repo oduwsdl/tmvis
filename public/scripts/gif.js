@@ -4,7 +4,10 @@ var URIStampedImages =[];
 var timeAndURIStampedImages = [];
 
 function getImageArray(){
+	var loaderImg = `<img src="/styles/ajax-loader.gif">`;
+	$('#gifApp').attr('onclick', '');
 	$("#gif #gifContent #gifApp").empty();
+	$("#gif #gifContent #gifApp").append(loaderImg);
 	imageLinks = [];
 	timeStampedImages = [];
 	URIStampedImages = [];
@@ -19,12 +22,13 @@ function getImageArray(){
 
 	watermark();
 	createGif(imageLinks, interval);
-
-	document.getElementById("gifButton").addEventListener("click", updateGif);
 }
 
 function updateGif(){
+	var loaderImg = `<img src="/styles/ajax-loader.gif">`;
+	$('#gifApp').attr('onclick', '');
 	$("#gifApp").empty();
+	$("#gif #gifContent #gifApp").append(loaderImg);
 	var interval = document.getElementById("interval").value;
 	var timeWatermarkOption = document.getElementById("timeWatermarkOption");
 	var URIWatermarkOption = document.getElementById("URIWatermarkOption");
@@ -148,8 +152,10 @@ function createGif(image, interval)
 		animatedImage.style.border = "1px solid black";
 		animatedImage.style.width = "400px";
 		animatedImage.style.height = "300px";
+
+		$("#gifApp").empty();
 		document.getElementById("gifApp").appendChild(animatedImage);
-		
+		$('#gifApp').attr('onclick', 'updateGif()');
 		document.getElementById("gifDownload").href = image;
 		}
 	});
