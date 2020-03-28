@@ -25,6 +25,7 @@ function embedImageGrid() {
     iframe.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(imageGridEmbed);
     iframe.width = "100%";
     iframe.height = "25%";
+    iframe.frameBorder = "0";
 
     $("#embedGrid").val(new XMLSerializer().serializeToString(iframe));
     $("#embedGrid").select();
@@ -34,14 +35,11 @@ function embedImageSlider() {
     $("#embedSlider").css("display", "block");
 
     var imageSliderEmbed = $("#imageSlider .imageslider_wrapper").html();
+    var regex = /<h2>(.*?)<\/h2>/gm;
+    imageSliderEmbed = imageSliderEmbed.replace(regex,"")
     imageSliderEmbed += `<link href="http://`+window.location.host+`/styles/sitestyle.css" rel="stylesheet"/>
     <link href='http://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
     <style>
-    h2{
-        font-size: 30px;
-        font-weight: 500;
-        font-family: 'Oswald',sans-serif !important;
-    }
     button{
         color: #fff;
         background-color: #337ab7;
@@ -64,9 +62,10 @@ function embedImageSlider() {
     
     var iframe = document.createElement('iframe');
     iframe.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(imageSliderEmbed);
-    iframe.width = "650px";
-    iframe.height = "550px";
+    iframe.width = "600px";
+    iframe.height = "450px";
     iframe.scrolling = "no";
+    iframe.frameBorder = "0";
 
     $("#embedSlider").val(new XMLSerializer().serializeToString(iframe));
     $("#embedSlider").select();
