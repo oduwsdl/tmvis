@@ -1817,8 +1817,8 @@ TimeMap.prototype.filterMementos = function(response, curCookieClientId, callbac
         }
     }
 
-    constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMementoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMementoArr[tempMementoArr.length-1]))["datetime"] + ']',curCookieClientId)
-    ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider only the mementos from date: [ '+JSON.parse(JSON.stringify(tempMementoArr[0]))["datetime"] +' ] to date ['+JSON.parse(JSON.stringify(tempMementoArr[tempMementoArr.length-1]))["datetime"] + ']')
+    constructSSE('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider a sample of up to 1000',curCookieClientId)
+    ConsoleLogIfRequired('The page you requested original has '+originalMemetosLengthFromTM +' Mementos, processing to consider a sample of up to 1000')
     tempMementoArr[0]["rel"] = "first memento";
     t.mementos = tempMementoArr;
     archivedMementos = tempArchivedArr;
