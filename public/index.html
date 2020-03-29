@@ -107,19 +107,19 @@
 
 								<div class="input-info-container" style="display: inline-block; width: 50%;">
 									<h2 class="input-info-title">What are the types of input?</h2>
-									<details>
+									<details open>
 									  <summary>
 									  	URI-R (ex: http://4genderjustice.org)
 									  </summary>
 									  <p>This is the URI of the live webpage. After entering the URI-R, you may choose to analyze mementos from the Internet Archive or a specific collection in Archive-It.</p>
 									</details>
-									<details>
+									<details open>
 									  <summary>
 									  	URI-M (ex: http://wayback.archive-it.org/1068/20150701215641/http://4genderjustice.org/)
 									  </summary>
 									  <p>This is the URI of a memento, a webpage archived at a specific datetime. The URI-M contains the name of the archive or Archive-It collection, so there is no need to choose between Internet Archive or Archive-It. Our service will analyze all of the mementos of that URI-R in the specified archive or Archive-It collection.</p>
 									</details>
-									<details>
+									<details open>
 									  <summary>
 									  	URI-T (ex: http://web.archive.org/web/timemap/link/http://4genderjustice.org)
 									  </summary>
@@ -130,11 +130,11 @@
 								<div class="input-info-container" style="display: inline-block; width: 40%;">
 									<h2 class="input-info-title">What is a TimeMap?</h2>
 									<div>
-										A TimeMap is a list of all of the mementos for a single webpage. Having a visual representation, or thumbnail, of each of the mementos is helpful in quickly determining both the overall focus of the webpage and also how the design of that webpage has changed over time.
+										Web archives capture and preserve webpages at different points in time. These archived webpages are called <i>mementos</i>, and the time the memento was captured is called its <i>datetime</i>. A TimeMap is a list of all of mementos for a single webpage, ordered by datetime.
 									</div>
-									<h2 class="input-info-title">What is a Memento?</h2>
+									<h2 class="input-info-title">What is a TimeMap Visualization?</h2>
 									<div>
-										Web archives preserve versions of web pages, and these archived web pages are called mementos. Every memento has additional information, such as the datetime the memento was captured, which archive it belongs to, and what other versions, if any, that are available.
+										Having a small visual representation, or <i>thumbnail</i>, of a sample of the mementos for a single webpage may be helpful in quickly determining both the overall focus of the webpage and also how the design of that webpage has changed over time. Some webpages have thousands of mementos captured over a long period of time. Our tool attempts to select only those mementos that contain significant changes (i.e., the most unique) for display.
 									</div>
 								</div>
 							</div>
@@ -301,23 +301,15 @@
 				 	<div id="timeLine" class="tab-pane fade">
 
 				 		<div id="timeline-info">
-				 			<ul>
-					 			<li>
-					 				<div style="margin: 15px 0px;">
-						 				<div style="background-color: rgb(237, 192, 71);" id="yellow"></div> Each yellow bar represents a unique memento. Click one of the yellow bars to view the unique memento at a particular datetime.
-						 			</div>
-						 		</li>
-						 		<li>
-						 			<div style="margin: 15px 0px;">
-						 				<div style="background-color: rgb(148, 137, 137);" id="gray"></div> Some mementos are not considered unique, but are considered similar to a unique memento. Each gray bar represents one of these similar mementos. Click one of the gray bars to view which unique memento it is similar to.
-						 			</div>
-						 		</li>
-						 		<li>
-						 			<div style="margin: 15px 0px;">
-						 				Use the Prev and Next buttons below to go to the next bar. Click Unique Prev and Unique Next to jump to the next unique memento. Change the date range shown by zooming in or out. 
-						 			</div>
-						 		</li>
-				 			</ul>
+			 				<div style="margin: 15px 0px;">
+				 				<div style="background-color: rgb(237, 192, 71);" id="yellow"></div> Each yellow bar represents a unique memento. Click one of the yellow bars to view the unique memento at a particular datetime.
+				 			</div>
+				 			<div style="margin: 15px 0px;">
+				 				<div style="background-color: rgb(148, 137, 137);" id="gray"></div> Some mementos are not considered unique, but are considered similar to a unique memento. Each gray bar represents one of these similar mementos. Click one of the gray bars to view which unique memento it is similar to.
+				 			</div>
+				 			<div style="margin: 15px 0px;">
+				 				Use the Prev and Next buttons below to go to the next bar. Click Unique Prev and Unique Next to jump to the next unique memento. Change the date range shown by zooming in or out. 
+				 			</div>
 				 		</div>
 
 					   	<div class="timeline_Wrapper content_focusedWrapper">
