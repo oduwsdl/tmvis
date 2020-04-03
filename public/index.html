@@ -30,6 +30,7 @@
     	<script src="/scripts/gifshot.min.js"></script>
     	<script src="/scripts/gif.js"></script>
     	<script src="/scripts/formatting.js"></script>
+    	<script src="/scripts/embedded.js"></script>
 
 			<!-- Priorirty is to stabilise the current single step build -->
 			<!-- <script src="./scripts/embedded.js"></script> -->
@@ -44,14 +45,17 @@
 				<div class = "Title">
 					<img src="/images/csODUTimeline.png" alt="graph">
 					<h1>TimeMap Visualization</h1>
+					<h4>An archival thumbnail visualization server</h4>
 				</div>
 
 				<!--hack to fix formatting-->
 				<div style="clear: both;"></div>
 
 				<form action="#" class="argumentsForm">
+
 					<div class="row URIWrapper" >
-						<label for="uriIP">Enter URI-R <span class='uriexample'>(ex: http://4genderjustice.org)</span> or  URI-M <span class='uriexample'>(ex: http://wayback.archive-it.org/1068/20150701215641/http://4genderjustice.org/)</span> or URI-T <span class='uriexample'>(ex: http://web.archive.org/web/timemap/link/http://4genderjustice.org)</span>
+
+						<!--label for="uriIP">Enter URI-R <span class='uriexample'>(ex: http://4genderjustice.org)</span> or  URI-M <span class='uriexample'>(ex: http://wayback.archive-it.org/1068/20150701215641/http://4genderjustice.org/)</span> or URI-T <span class='uriexample'>(ex: http://web.archive.org/web/timemap/link/http://4genderjustice.org)</span>
 							<div id="helpBox">
 								<button type="button" class="toggleHelp" id="helpLink"><p>&#9432;</p></button>
 								<div id="helpSection" style="display:none;">
@@ -63,30 +67,33 @@
 									URI-T - <span class="uriHelp">This is the URI of a timemap, the list of all mementos for a URI-R in an archive. The URI-T contains the name of the archive or Archive-It collection, so as with the URI-M, so there is no need to choose between Internet Archive or Archive-It. Our service will analyze all of the mementos listed in the URI-T.</span>
 								</div>
 							</div>
-						</label>
-							<div class="input-group">
+						</label-->
 
-								<input class="form-control" name="URI" id="uriIP" required placeholder="For example, http://4genderjustice.org/">
+						<label for="uriIP" id="uri-label">Enter URI-R, URI-M, or URI-T:</label>
 
-								<div id="inputURI_error">Required field! Enter a URI-R, URI-M, or URI-T</div>
+						<div class="input-group">
 
-								<!-- GET STATS -->
-								<span id="statsbtn" class="input-group-btn">
-										<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
-								    <!-- <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
-									-->
-										<button class="btn btn-primary getJSONFromServer form-control" title="Get number of unique mementos"> View TimeMap </button>
-								</span>
-							</div>
-							<div class="form-group hidden">
-							    <label for="urirIP">Enter URI-R:</label>
-							    <input class="form-control" name="URI-R" id="urirIP" required placeholder="For example, http://4genderjustice.org/">
-						  	</div>
+							<input class="form-control" name="URI" id="uriIP" required placeholder="For example, http://4genderjustice.org/">
+
+							<div id="inputURI_error">Required field! Enter a URI-R, URI-M, or URI-T</div>
+
+							<!-- GET STATS -->
+							<span id="statsbtn" class="input-group-btn">
+									<!-- uncomment the folloing button and comment the one following, to enable the two step process -->
+							    <!-- <button class="btn getJSONFromServer" title="Get number of unique mementos"> Get Stats </button>
+								-->
+									<button class="btn btn-primary getJSONFromServer form-control" title="Get number of unique mementos"> View TimeMap </button>
+							</span>
+						</div>
+						<div class="form-group hidden">
+						    <label for="urirIP">Enter URI-R:</label>
+						    <input class="form-control" name="URI-R" id="urirIP" required placeholder="For example, http://4genderjustice.org/">
+					  	</div>
 					</div>
 
 					<div class="row orgAndCollNoWrapper form-inline" style="vertical-align:middle;" >
 
-						<!--ARCHIVE OPTIONS -->
+							<!--ARCHIVE OPTIONS -->
 							<div class="pull-left primesrcsection" style="min-width:25%; margin-left:40%">
 								<label class="radio"><input type="radio" class ="form-control" checked="checked" name="primesource"  id = "internetarchive" value="internetarchive" onclick="javascript:yesnoCheck();">Internet Archive</label>&nbsp;
 								<label class="radio"><input type="radio" class ="form-control" name="primesource" id = "archiveit" value="archiveit" onclick="javascript:yesnoCheck();">Archive-It</label>
@@ -95,6 +102,42 @@
 							 	<input class="form-control" type="number" min="0" class ="form-control" title="Collection Identifier"  name="ci"  id="collectionNo" placeholder="Collection Identifier" />
 							</div>
 							<!-- THRESHOLD AND DELAY-->
+
+							<div id="info">
+
+								<div class="input-info-container" style="display: inline-block; width: 50%;">
+									<h2 class="input-info-title">What are the types of input?</h2>
+									<details open>
+									  <summary>
+									  	URI-R (ex: http://4genderjustice.org)
+									  </summary>
+									  <p>This is the URI of the live webpage. After entering the URI-R, you may choose to analyze mementos from the Internet Archive or a specific collection in Archive-It.</p>
+									</details>
+									<details open>
+									  <summary>
+									  	URI-M (ex: http://wayback.archive-it.org/1068/20150701215641/http://4genderjustice.org/)
+									  </summary>
+									  <p>This is the URI of a memento, a webpage archived at a specific datetime. The URI-M contains the name of the archive or Archive-It collection, so there is no need to choose between Internet Archive or Archive-It. Our service will analyze all of the mementos of that URI-R in the specified archive or Archive-It collection.</p>
+									</details>
+									<details open>
+									  <summary>
+									  	URI-T (ex: http://web.archive.org/web/timemap/link/http://4genderjustice.org)
+									  </summary>
+									  <p>This is the URI of a timemap, the list of all mementos for a URI-R in an archive. The URI-T contains the name of the archive or Archive-It collection, so as with the URI-M, so there is no need to choose between Internet Archive or Archive-It. Our service will analyze all of the mementos listed in the URI-T.</p>
+									</details>
+								</div>
+
+								<div class="input-info-container" style="display: inline-block; width: 40%;">
+									<h2 class="input-info-title">What is a TimeMap?</h2>
+									<div>
+										Web archives capture and preserve webpages at different points in time. These archived webpages are called <i>mementos</i>, and the time the memento was captured is called its <i>datetime</i>. A TimeMap is a list of all of mementos for a single webpage, ordered by datetime.
+									</div>
+									<h2 class="input-info-title">What is a TimeMap Visualization?</h2>
+									<div>
+										Having a small visual representation, or <i>thumbnail</i>, of a sample of the mementos for a single webpage may be helpful in quickly determining both the overall focus of the webpage and also how the design of that webpage has changed over time. Some webpages have thousands of mementos captured over a long period of time. Our tool attempts to select only those mementos that contain significant changes (i.e., the most unique) for display.
+									</div>
+								</div>
+							</div>
 
 							<div class="slidersection hidden">
 								<div class="col-md-3" style="text-align: center;" >
@@ -115,6 +158,7 @@
 								</div>
 						</div>
 					</div>
+
 				</form>
 				
 				<!--HISTOGRAM-->
@@ -122,10 +166,11 @@
 					<div class="col-lg-12">
 						<p class="Mementos_Considered"></p>
 						<div id="histogram_container">
+							<p style="margin-bottom: 30px;">Click and drag over the histogram to zoom in and select a date range, or type in a date range in the boxes below and click the update button.</p>
 							<div id="histogram"></div> <!-- Main histogram div -->
 							<div style="visibility: hidden;" id="zoom_histogram"></div> <!-- Zoom histogram div -->
 							<button class="btn" id="brush_clear">Clear Selection</button>
-							<div id="memento_limit" style="display: none;"> For timemaps with more than 5000 mementos, only the latest 5000 are analyzed. </div>
+							<div id="memento_limit" style="display: none;"> Of the mementos selected, a sample of up to 1000 will be analyzed. </div>
 						</div>
 						<div class="histogramOptions row">
 							<div id="dateBox">
@@ -136,6 +181,13 @@
 							</div>
 							<button class="btn btn-primary" id="generateAllThumbnails"> Generate All Thumbnails </button>
 							<button type="button" class="btn btn-primary" name="option" id="submitRange"> Calculate Unique </button>
+							<div id="helpBox">
+								<button type="button" class="toggleHelp" id="helpLink"><p>&#9432;</p></button>
+								<div id="helpSection" style="display:none;">
+									<button type="button" class="toggleHelp" id="closeHelp">x</button>
+									Calculates which mementos show significant changes in the web page. Some mementos may look the same or very similar, our service picks the ones that best represent the changes in the web page over time.
+								</div>
+							</div>
 							<p id="date_error" style="display:none;"></p>
 						</div>
 					</div>
@@ -182,7 +234,7 @@
 					<li ><a data-toggle="tab" href="#timeLine">TimeLine</a></li>
 					<li ><a data-toggle="tab" href="#gif">GIF</a></li>
 					<li id="updateLI"><button type="button" id="updateMementos" title="Update the displayed mementos.">Update</button></li>
-					<li id="revertLI"><button type="button" id="revertMementos" title="Revert to orignal displayed mementos.">Revert</button></li>
+					<li id="revertLI"><button type="button" id="revertMementos" title="Revert to original displayed mementos.">Revert</button></li>
 					<li id="downloadLI">
 						<a download="URI-M.txt" id="downloadMementoURI" title="Download a list of memento URI-Ms.">Download URI-M List</a>
 					</li>
@@ -193,6 +245,8 @@
 				<div class="tab-content" style="z-index: auto; margin-bottom:1%;" >
 
 					<div id="imageGrid" class="tab-pane fade in active">
+						<button type="button" id="embeddable" title="Generate HTML to embed the Image Grid." onclick="embedImageGrid()">Embed Image Grid</button>
+						<textarea id="embedGrid" style="height: 100px; width: 420px; resize: none; display: none;" readonly></textarea>
 						<div class="grid-container">
 							<ul class="rig columns-3">
 							</ul>
@@ -216,15 +270,19 @@
 									Add URI
 								</label>
 
-								<br><button class="btn btn-primary" id="gifButton">Update GIF</button>
+								<br><button class="btn btn-primary" id="gifButton" onclick="updateGif()">Update GIF</button>
 								<a class="btn btn-primary" id="gifDownload" download="download.gif">Download GIF</a>
 							</div>
 							<div id ="gifApp"></div>
+							<div id="gifDisclaimer" style="margin-top: 20px;font-size: 20px;">
+								<p>A higher load time will be experienced with a large number of thumbnails</p>
+							</div>
 						</div>
 					</div>
 					
-
 					<div id="imageSlider" class="tab-pane fade">
+						<button type="button" id="embeddable" title="Generate HTML to embed the Image Grid." onclick="embedImageSlider()">Embed Image Slider</button>
+						<textarea id="embedSlider" style="height: 100px; width: 420px; resize: none; display: none;" readonly></textarea>
 					  	<div class="imageslider_wrapper content_focusedWrapper" style="margin-top: 1%;">
 					    	<h2>Swipe over the images to move through time</h2>
 							<h2>Click on an image to view the memento</h2>
@@ -235,12 +293,22 @@
 							</div>
 							<div class="gridImagePlusContentWrapper">
 								<img id="myImage" class="heightSet"/>
-								<p id="myContent"></p>
+								<div id="myContent"></div>
 							</div>
 					    </div>
 					</div>
 
 				 	<div id="timeLine" class="tab-pane fade">
+
+				 		<div id="timeline-info">
+			 				<div style="margin: 15px 0px;">
+				 				 Each bar represents a memento. The yellow bars <div style="background-color: rgb(237, 192, 71);" id="yellow"></div> are mementos determined to be the most unique by our algorithm.  Click on a yellow bar to view the thumbnail of the memento at that datetime.  The gray bars <div style="background-color: rgb(148, 137, 137);" id="gray"></div> are mementos determined to be similar to a previous unique memento. Click on a gray bar to view the thumbnail of the unique memento it is similar to.
+				 			</div>
+				 			<div style="margin: 15px 0px;">
+				 				Use the Prev and Next buttons below to go to the next bar. Click Unique Prev and Unique Next to jump to the next unique memento. Change the date range shown by zooming in or out. 
+				 			</div>
+				 		</div>
+
 					   	<div class="timeline_Wrapper content_focusedWrapper">
 							<div class="article">
 								<div id="timeline">

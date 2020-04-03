@@ -82,7 +82,7 @@
     /*      -webkit-box-shadow: #CECECE 0px 0px 15px;
           -moz-box-shadow: #CECECE 0px 0px 15px;
           box-shadow: #CECECE 0px 0px 15px;
-    */    	color:#333;
+    */      color:#333;
 }
 .item_active {
     border-top:1px solid #7C93AF;
@@ -304,7 +304,7 @@
     margin-right:4px;
 }
 .zoom_inner_text {
-	display:none;
+    display:none;
     *display:inline;
 }
 .timeline_zoom_in {
@@ -364,4 +364,26 @@
 
 .gridimagedatetime{
     font-size: small;
-}       
+}
+
+#timeline-info {
+    padding: 20px;
+    width: 75%;
+    font-size: 18px;
+    margin: 0 auto;
+    font-family: 'Oswald';
+} 
+
+#yellow {
+    width: 8px;
+    height: 20px;
+    display: inline-block;
+    margin: 0px 3px;
+}
+
+#gray {
+    width: 8px;
+    height: 20px;
+    display: inline-block;
+    margin: 0px 3px;
+}
