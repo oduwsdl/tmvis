@@ -526,9 +526,9 @@ ul.rig li img {
 
 .refresh_button {
 	float: right;
-	transform: translate(-140%, -955%);
 	font-size: 15px;
-	padding: .2px 4.5px .8px 4.5px;
+	padding: .8px 4.5px .8px 4.5px;
+	margin: 3px;
 	border: none;
 	cursor: pointer;
 	border-radius: 30px;
@@ -543,13 +543,11 @@ ul.rig li img {
 
 .button_container .on {
 	opacity: .8;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(580%, -580%);
+    float: right;
 	font-size: 16px;
 	font-weight: bolder;
-	padding: 0px 6px .8px 6.9px;
+	padding: 0px 7px 0px 7px;
+	margin: 3px;
 	border: none;
 	cursor: pointer;
 	border-radius: 30px;
@@ -564,13 +562,11 @@ ul.rig li img {
 
 .button_container .off {
 	opacity: .8;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(580%, -580%);
+    float: right;
 	font-size: 16px;
 	font-weight: bolder;
-	padding: 0px 6px .8px 6.9px;
+	padding: 0px 7px 0px 7px;
+	margin: 3px;
 	border: none;
 	cursor: pointer;
 	border-radius: 30px;
