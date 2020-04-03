@@ -37,7 +37,7 @@ function embedImageSlider() {
     var imageSliderEmbed = $("#imageSlider .imageslider_wrapper").html();
     var regex = /<h2>(.*?)<\/h2>/gm;
     imageSliderEmbed = imageSliderEmbed.replace(regex,"")
-    imageSliderEmbed += `<link href=`+window.location.origin+`/styles/sitestyle.css" rel="stylesheet"/>
+    imageSliderEmbed += `<link href="`+window.location.origin+`/styles/sitestyle.css" rel="stylesheet"/>
     <link href='http://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
     <style>
     button{
