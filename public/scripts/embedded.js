@@ -4,7 +4,7 @@ function embedImageGrid() {
     var imageGridEmbed = $("#imageGrid .grid-container").html();
     var regex = /<button\b[^>]*>(.*?)<\/button>/g;
     imageGridEmbed = imageGridEmbed.replace(regex, "");
-    imageGridEmbed += `<link href=`+window.location.origin+`/styles/sitestyle.css" rel="stylesheet"/>
+    imageGridEmbed += `<link href="`+window.location.origin+`/styles/sitestyle.css" rel="stylesheet"/>
     <style>
         body{
             padding-bottom: 0px;
@@ -55,7 +55,7 @@ function embedImageSlider() {
     }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src=`+window.location.origin+`/scripts/imageSliderScript.js"></script>
+    <script src="`+window.location.origin+`/scripts/imageSliderScript.js"></script>
     <script>
         imagesData=`+JSON.stringify(imagesData)+`
     </script>`;
