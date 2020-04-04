@@ -4,7 +4,7 @@ function embedImageGrid() {
     var imageGridEmbed = $("#imageGrid .grid-container").html();
     var regex = /<button\b[^>]*>(.*?)<\/button>/g;
     imageGridEmbed = imageGridEmbed.replace(regex, "");
-    imageGridEmbed += `<link href="http://`+window.location.host+`/styles/sitestyle.css" rel="stylesheet"/>
+    imageGridEmbed += `<link href="`+window.location.origin+`/styles/sitestyle.css" rel="stylesheet"/>
     <style>
         body{
             padding-bottom: 0px;
@@ -37,7 +37,7 @@ function embedImageSlider() {
     var imageSliderEmbed = $("#imageSlider .imageslider_wrapper").html();
     var regex = /<h2>(.*?)<\/h2>/gm;
     imageSliderEmbed = imageSliderEmbed.replace(regex,"")
-    imageSliderEmbed += `<link href="http://`+window.location.host+`/styles/sitestyle.css" rel="stylesheet"/>
+    imageSliderEmbed += `<link href="`+window.location.origin+`/styles/sitestyle.css" rel="stylesheet"/>
     <link href='http://fonts.googleapis.com/css?family=Oswald' rel='stylesheet' type='text/css'>
     <style>
     button{
@@ -55,7 +55,7 @@ function embedImageSlider() {
     }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script src="http://`+window.location.host+`/scripts/imageSliderScript.js"></script>
+    <script src="`+window.location.origin+`/scripts/imageSliderScript.js"></script>
     <script>
         imagesData=`+JSON.stringify(imagesData)+`
     </script>`;
@@ -70,4 +70,3 @@ function embedImageSlider() {
     $("#embedSlider").val(new XMLSerializer().serializeToString(iframe));
     $("#embedSlider").select();
 }
-
