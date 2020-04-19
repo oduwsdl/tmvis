@@ -57,7 +57,7 @@ Clone the repository and change working directory (if not already) then build th
 $ git clone https://github.com/oduwsdl/tmvis.git
 $ cd tmvis
 $ docker image build -t timemapvis .
-$ docker run --shm-size=1G -it --rm -v "$PWD":/app -v /app/node_modules -p 3000:3000 --user=$(id -u):$(id -g) timemapvis node tmvis.js
+$ docker run --shm-size=1G -it --rm -p 3000:3000 timemapvis
 ```
 
 
