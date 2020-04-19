@@ -57,47 +57,17 @@ Clone the repository and change working directory (if not already) then build th
 $ git clone https://github.com/oduwsdl/tmvis.git
 $ cd tmvis
 $ docker image build -t timemapvis .
-```
-
-In the above command `timemapvis` is the name of the image which can be anything, but the same needs to be used when running the container instance.
-
-### Running Docker Container
-
-```Running for the first time
-docker run -it --rm timemapvis bash
-```
-In another terminal
-```
-cd tmvis
-docker cp (CONTAINER ID CREATED ABOVE):/app/node_modules/ ./ 
-```
-
-```
-
-docker run --shm-size=1G -it --rm -v "$PWD":/app -p 3000:3000 --user=$(id -u):$(id -g) timemapvis bash
-node tmvis.js
-
+$ docker run --shm-size=1G -it --rm -v "$PWD":/app -v /app/node_modules -p 3000:3000 --user=$(id -u):$(id -g) timemapvis node tmvis.js
 ```
 
 
-In the above command the container is running in detached mode and can be accessed from outside on port `3000` at http://localhost:3000/. If you want to run the service on a different port, say `80` then change `-p 3000:3000` to `-p 80:3000`.
+In the above command the container is running and can be accessed from outside on port `3000` at http://localhost:3000/. If you want to run the service on a different port, say `80` then change `-p 3000:3000` to `-p 80:3000`.
 
 In order to persist generated thumbnails, mount a host directory as a volume inside the container by adding `-v /SOME/HOST/DIRECTORY:/app/assets/screenshots` flag when running the container.
 
 Container is completely transparent from the outside and it will be accessed as if the service is running in the host machine itself.
 
-In case if you want to make changes in the `tmvis` code itself, you might want to run it in the development mode by mounting the code from the host machine inside the container so that changes are reflected immediately, without requiring an image rebuild. Here is a possible workflow:
-
-```
-$ git clone https://github.com/oduwsdl/tmvis.git
-$ cd tmvis
-$ docker image build -t timemapvis .
-$ docker container run --shm-size=1G -it --rm -v "$PWD":/app --user=$(id -u):$(id -g) timemapvis npm install
-$ docker container run --shm-size=1G -it --rm -v "$PWD":/app -p 3000:3000 --user=$(id -u):$(id -g) timemapvis
-
-```
-
-Once the image is built and dependencies are installed locally under the `node_modules` directory of the local clone, only the last command would be needed for continuous development. Since the default container runs under the `root` user, there might be permission related issues on the `npm install` step. If so, then try to manually create the `node_modules` directory and change its permissions to world writable (`chmod -R a+w node_modules`) then run the command to install dependencies again.
+In case if you want to make changes in the `tmvis` code itself, you might want to run it in the development mode by mounting the code from the host machine inside the container so that changes are reflected immediately, without requiring an image rebuild.
 
 
 ### Regarding License
