@@ -6,9 +6,14 @@ Archives"](http://www.cs.odu.edu/~mln/pubs/ecir-2014/ecir-2014.pdf) for the Web 
 
 ## Running as a Docker Container
 
-Running the server in a [Docker](https://www.docker.com/) container can make the process of dependency management easier. The code is shipped with a `Dockerfile` to build a Docker image that will run the service when started. This document assumes that you have Docker setup already, if not then follow the [official guide](https://docs.docker.com/installation/).
+Running the server in a [Docker](https://www.docker.com/) container can make the process of dependency management easier. This document assumes that you have Docker setup already, if not then follow the [official guide](https://docs.docker.com/installation/).
 
-Clone the repository and change the working directory then build and run the image as the following:
+A published Docker image can be used as shown below:
+```
+$ docker pull oduwsdl/tmvis
+$ docker run --shm-size=1G -it --rm -p 3000:3000 oduwsdl/tmvis
+```
+Alternatively, a custom Docker image can be built from the source. In order to do this, clone the repository and change the working directory then build and run the image as the following:
 ```
 $ git clone https://github.com/oduwsdl/tmvis.git
 $ cd tmvis
