@@ -4,13 +4,57 @@ A web service for ArchiveThumbnails visualization based on Mat's (@machawk1) htt
 Archives"](http://www.cs.odu.edu/~mln/pubs/ecir-2014/ecir-2014.pdf) for the Web Archiving Incentive Program for Columbia University Libraries' grant, "Visualizing Digital Collections of Web Archives".
 
 
-## Requirements
+## Running as a Docker Container
 
-[Node.js](https://nodejs.org/) is required to run the service. Once Node is installed, the packages required to use the service can be installed by running `npm install -g` in the root of the project directory. [PhantomJS](http://phantomjs.org/) may also additionally be required depending on your system configuration.
+Running the server in a [Docker](https://www.docker.com/) container can make the process of dependency management easier. This document assumes that you have Docker setup already, if not then follow the [official guide](https://docs.docker.com/installation/).
 
-## Running
+A Docker image from the current version of the code is built and published on Docker Hub at [oduwsdl/tmvis](https://hub.docker.com/r/oduwsdl/tmvis). Pull the image and run the service in a container as shown below:
+
+```
+$ docker pull oduwsdl/tmvis
+$ docker run --shm-size=1G -it --rm -p 3000:3000 oduwsdl/tmvis
+```
+Alternatively, a custom Docker image can be built from the source. In order to do this, clone the repository and change the working directory then build and run the image as the following:
+```
+$ git clone https://github.com/oduwsdl/tmvis.git
+$ cd tmvis
+$ docker image build -t timemapvis .
+$ docker run --shm-size=1G -it --rm -p 3000:3000 timemapvis
+```
+
+
+In the above command the container is running and can be accessed from outside on port `3000` at http://localhost:3000/. If you want to run the service on a different port, say `80` then change `-p 3000:3000` to `-p 80:3000`.
+
+In order to persist generated thumbnails, mount a host directory as a volume inside the container by adding `-v /SOME/HOST/DIRECTORY:/app/assets/screenshots` flag when running the container.
+
+Container is completely transparent from the outside and it will be accessed as if the service is running in the host machine itself.
+
+In case if you want to make changes in the `tmvis` code itself, you might want to run it in the development mode by mounting the code from the host machine inside the container so that changes are reflected immediately, without requiring an image rebuild. Use the following comand to mount the code from the host:
+```
+$ docker run --shm-size=1G -it --rm -v "$PWD":/app -v /app/node_modules -p 3000:3000 timemapvis
+```
+
+
+## Running Locally
+
+[Node.js](https://nodejs.org/) is required to run the service. Once Node is installed, the packages required to use the service can be installed by running `npm install -g` in the root of the project directory.
 
 To execute the code, run `node tmvis.js`.
+
+
+## Usage of the service
+
+Running this service provides a user with the array of JSON object as the response (webservice model), which then has to be visualized with the UI tool deployed at http://tmvis.cs.odu.edu/ for which the code is available at https://github.com/oduwsdl/tmvis/ under the public folder.
+
+Supported server arguments are as follows:
+- `host` is used to specify server's hostname, default `localhost`
+- `port` is used to specify server's port, default `3000`
+- `proxy` is used to specify proxy, generated using `host` and `port` if not provided
+- `debug` is used to add logs to server's console, useful for development
+- `ssd` is used to specify the amount of time to wait before taking a screenshot of a memento in seconds, default `2`
+- `oes` overrides the usage of cache files, default `false`
+- `os` computes both simhash and hamming distance, default `true`
+- `maxMementos` is used to specify the maximum number of mementos to be analyzed, default `1000`
 
 To query the server instance generated using your browser visit `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/[histogram | stats | summary]/[from]/[to]/http://4genderjustice.org/`, which has the attributes path as `primesource/ci/role/from/to/URI-R` substitute the URI-R to request a different site's summarization.
 
@@ -36,80 +80,7 @@ To query the server instance generated using your browser visit `http://localhos
 * `http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/summary/2016-08-01/2017-07-23/http://4genderjustice.org/`
 
 
-## Running as a Docker Container (Non development mode: Recommended for naive users)
-Follow the following steps:
-```
-$ git clone https://github.com/oduwsdl/tmvis.git
-$ cd tmvis
-$ docker image build -t timemapvis .
-$ docker container run --shm-size=1G -it --rm -p 3000:3000 timemapvis node tmvis.js
-```
-
-
-## Running as a Docker Container (experimental)
-
-Running the server in a [Docker](https://www.docker.com/) container can make the process of dependency management easier. The code is shipped with a `Dockerfile` to build a Docker image that will run the service when started. This document assumes that you have Docker setup already, if not then follow the [official guide](https://docs.docker.com/installation/).
-
-### Building Docker Image
-Clone the repository and change working directory (if not already) then build the image.
-
-```
-$ git clone https://github.com/oduwsdl/tmvis.git
-$ cd tmvis
-$ docker image build -t timemapvis .
-```
-
-In the above command `timemapvis` is the name of the image which can be anything, but the same needs to be used when running the container instance.
-
-### Running Docker Container
-
-```Running for the first time
-docker run -it --rm timemapvis bash
-```
-In another terminal
-```
-cd tmvis
-docker cp (CONTAINER ID CREATED ABOVE):/app/node_modules/ ./ 
-```
-
-```
-
-docker run --shm-size=1G -it --rm -v "$PWD":/app -p 3000:3000 --user=$(id -u):$(id -g) timemapvis bash
-node tmvis.js
-
-```
-
-
-In the above command the container is running in detached mode and can be accessed from outside on port `3000` at http://localhost:3000/. If you want to run the service on a different port, say `80` then change `-p 3000:3000` to `-p 80:3000`.
-
-In order to persist generated thumbnails, mount a host directory as a volume inside the container by adding `-v /SOME/HOST/DIRECTORY:/app/assets/screenshots` flag when running the container.
-
-Container is completely transparent from the outside and it will be accessed as if the service is running in the host machine itself.
-
-In case if you want to make changes in the `tmvis` code itself, you might want to run it in the development mode by mounting the code from the host machine inside the container so that changes are reflected immediately, without requiring an image rebuild. Here is a possible workflow:
-
-```
-$ git clone https://github.com/oduwsdl/tmvis.git
-$ cd tmvis
-$ docker image build -t timemapvis .
-$ docker container run --shm-size=1G -it --rm -v "$PWD":/app --user=$(id -u):$(id -g) timemapvis npm install
-$ docker container run --shm-size=1G -it --rm -v "$PWD":/app -p 3000:3000 --user=$(id -u):$(id -g) timemapvis
-
-```
-
-Once the image is built and dependencies are installed locally under the `node_modules` directory of the local clone, only the last command would be needed for continuous development. Since the default container runs under the `root` user, there might be permission related issues on the `npm install` step. If so, then try to manually create the `node_modules` directory and change its permissions to world writable (`chmod -R a+w node_modules`) then run the command to install dependencies again.
-
-
-### Regarding License
-
-Though GPL Licensing was used for base (https://github.com/machawk1/ArchiveThumbnails) of this repository, but for this current one MIT license is in place and is changed with the permission from the original author @machawk1.
-
-
-### Usage of the service
-
-Running this service provides a user with the array of JSON object as the response (webservice model), which then has to be visualized with the UI tool deployed at http://tmvis.cs.odu.edu/ for which the code is available at https://github.com/oduwsdl/tmvis/ under the public folder.
-
-## Request format (Role -> histogram)
+### Request format (Role -> histogram)
 ```
 curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/histogram/0/0/http://4genderjustice.org/
 
@@ -123,7 +94,7 @@ Mapping of attributes of URI to the values are as follows:
   URI-R under request -> http://4genderjustice.org/
 ```
 
-## Response format
+### Response format
 ```
 [
   {
@@ -148,7 +119,7 @@ Mapping of attributes of URI to the values are as follows:
 ]
 ```
 
-## Request format (Role -> stats)
+### Request format (Role -> stats)
 ```
 curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/stats/0/0/http://4genderjustice.org/
 
@@ -162,7 +133,7 @@ Mapping of attributes of URI to the values are as follows:
   URI-R under request -> http://4genderjustice.org/
 ```
 
-## Response format
+### Response format
 ```
 [
   {
@@ -185,7 +156,7 @@ Mapping of attributes of URI to the values are as follows:
 ]
 ```
 
-## Request format (Role -> summary)
+### Request format (Role -> summary)
 ```
 curl -il http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/summary/0/0/http://4genderjustice.org/
 
@@ -199,7 +170,7 @@ Mapping of attributes of URI to the values are as follows:
   URI-R under request -> http://4genderjustice.org/
 ```
 
-## Response format
+### Response format
 ```
 [
   {
@@ -224,7 +195,7 @@ Mapping of attributes of URI to the values are as follows:
 ]
 ```
 
-## Request format (Role -> histogram) (Date range)
+### Request format (Role -> histogram) (Date range)
 ```
 curl -il http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/histogram/2016-08-01/2017-07-23/http://4genderjustice.org/
 
@@ -238,7 +209,7 @@ Mapping of attributes of URI to the values are as follows:
   URI-R under request -> http://4genderjustice.org/
 ```
 
-## Response format
+### Response format
 ```
 [
   {
@@ -263,7 +234,7 @@ Mapping of attributes of URI to the values are as follows:
 ]
 ```
 
-## Request format (Role -> stats) (Date range)
+### Request format (Role -> stats) (Date range)
 ```
 curl -il http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/stats/2016-08-01/2017-07-23/http://4genderjustice.org/
 
@@ -277,7 +248,7 @@ Mapping of attributes of URI to the values are as follows:
   URI-R under request -> http://4genderjustice.org/
 ```
 
-## Response format
+### Response format
 ```
 [
   {
@@ -300,7 +271,7 @@ Mapping of attributes of URI to the values are as follows:
 ]
 ```
 
-## Request format (Role -> summary) (Date range)
+### Request format (Role -> summary) (Date range)
 ```
 curl -il http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/summary/2016-08-01/2017-07-23/http://4genderjustice.org/
 
@@ -314,7 +285,7 @@ Mapping of attributes of URI to the values are as follows:
   URI-R under request -> http://4genderjustice.org/
 ```
 
-## Response format
+### Response format
 ```
 [
   {
@@ -339,3 +310,8 @@ Mapping of attributes of URI to the values are as follows:
   }
 ]
 ```
+
+
+## Regarding License
+
+Though GPL Licensing was used for base (https://github.com/machawk1/ArchiveThumbnails) of this repository, but for this current one MIT license is in place and is changed with the permission from the original author @machawk1.
