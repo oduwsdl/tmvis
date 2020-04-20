@@ -8,7 +8,8 @@ Archives"](http://www.cs.odu.edu/~mln/pubs/ecir-2014/ecir-2014.pdf) for the Web 
 
 Running the server in a [Docker](https://www.docker.com/) container can make the process of dependency management easier. This document assumes that you have Docker setup already, if not then follow the [official guide](https://docs.docker.com/installation/).
 
-A published Docker image can be used as shown below:
+A Docker image from the current version of the code is built and published on Docker Hub at [oduwsdl/tmvis](https://hub.docker.com/r/oduwsdl/tmvis). Pull the image and run the service in a container as shown below:
+
 ```
 $ docker pull oduwsdl/tmvis
 $ docker run --shm-size=1G -it --rm -p 3000:3000 oduwsdl/tmvis
