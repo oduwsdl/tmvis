@@ -78,7 +78,6 @@ To query the server instance generated using your browser visit `http://localhos
 * `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/summary/0/0/http://4genderjustice.org/`
 
 #### Date range (Format: YYYY-MM-DD)
-* `http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/histogram/2016-08-01/2017-07-23/http://4genderjustice.org/`
 * `http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/stats/2016-08-01/2017-07-23/http://4genderjustice.org/`
 * `http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/summary/2016-08-01/2017-07-23/http://4genderjustice.org/`
 
@@ -100,25 +99,13 @@ Mapping of attributes of URI to the values are as follows:
 ### Response format
 ```
 [
-  {
-    "event_display_date":"2015-07-01, 21:56:41"
-  },
-  {
-    "event_display_date":"2015-07-01, 22:32:40"
-  },
-  {
-    "event_display_date":"2015-10-01, 21:17:52"
-  },
+  "Jul 01, 2015 21:56:41",
+  "Jul 01, 2015 22:32:40",
+  "Oct 01, 2015 21:17:52",
   ....
-  {
-    "event_display_date":"2019-06-19, 14:49:52"
-  },
-  {
-    "event_display_date":"2019-07-23, 18:40:14"
-  },
-  {
-    "event_display_date":"2019-07-24, 02:42:08"
-  }
+  "Oct 24, 2019 00:52:02",
+  "Jan 23, 2020 23:10:05",
+  "Jan 23, 2020 23:10:25"
 ]
 ```
 
@@ -195,45 +182,6 @@ Mapping of attributes of URI to the values are as follows:
     "event_description": "",
     "event_link": "http://wayback.archive-it.org/1068/20150701223240/http://4genderjustice.org/"
   },....
-]
-```
-
-### Request format (Role -> histogram) (Date range)
-```
-curl -il http://localhost:3000/alsummarizedtimemap/internetarchive/all/4/histogram/2016-08-01/2017-07-23/http://4genderjustice.org/
-
-Mapping of attributes of URI to the values are as follows:
-  primesource -> internetarchive
-  collection Identifier -> all
-  hammingdistance -> 4
-  role -> histogram
-  from date -> 2016-08-01
-  to date -> 2017-07-23
-  URI-R under request -> http://4genderjustice.org/
-```
-
-### Response format
-```
-[
-  {
-    "event_display_date":"2016-08-02, 16:39:55"
-  },
-  {
-    "event_display_date":"2016-08-08, 16:01:06"
-  },
-  {
-    "event_display_date":"2016-08-08, 16:17:51"
-  },
-  ....
-  {
-    "event_display_date":"2017-07-19, 06:47:29"
-  },
-  {
-    "event_display_date":"2017-07-21, 12:59:30"
-  },
-  {
-    "event_display_date":"2017-07-22, 06:49:56"
-  }
 ]
 ```
 
