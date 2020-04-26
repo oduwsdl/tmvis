@@ -1709,26 +1709,12 @@ TimeMap.prototype.writeJSONToCache = function (callback) {
 * @param callback - The next procedure to execution when this process concludes
 */
 TimeMap.prototype.getDatesForHistogram = function (callback,response,curCookieClientId, isMultipleURIs) {
-    var month_names_short= ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     var mementoDates=[];
     var length = this.mementos.length -1;
     this.mementos.forEach(function(memento, m) {
-        /*var mementoJObj ={};
-        var dt =  new Date(memento["datetime"].split(",")[1]);
-        var date = dt.getDate();
-        var month = dt.getMonth() + 1;
-        if(date <10) {
-            date = "0"+date;
-        }
-
-        if(month < 10) {
-            month = "0"+month;
-        }
-
-        var eventDisplayDate = dt.getUTCFullYear()+"-"+ month+"-"+date+", "+ memento["datetime"].split(" ")[4];*/
-
-
-        mementoDates.push(JSON.stringify(memento["datetime"]));
+        var date = JSON.stringify(memento["datetime"]);
+        var newDateString = date.substring(9,13) + date.substring(6,8) + ", " + date.substring(13,26);
+        mementoDates.push(newDateString);
     });
     ConsoleLogIfRequired(mementoDates);
     ConsoleLogIfRequired("-------------------------------------------------------------------------");
