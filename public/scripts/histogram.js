@@ -252,8 +252,8 @@ function drawHistogram(dateArray){
 		if(isValidDate(fromDate) && isValidDate(toDate))
 		{
 			// Create date objects
-			fromDate = new Date(fromDate);
-			toDate = new Date (toDate);
+			fromDate = new Date(fromDate.replace(/\-/g, "/"));
+			toDate = new Date (toDate.replace(/\-/g, "/"));
 
 			if(fromDate < toDate)
 			{
