@@ -37,10 +37,13 @@ $ docker run --shm-size=1G -it --rm -v "$PWD":/app -v /app/node_modules -p 3000:
 
 ## Running Locally
 
-[Node.js](https://nodejs.org/) is required to run the service. Once Node is installed, the packages required to use the service can be installed by running `npm install -g` in the root of the project directory.
-
-To execute the code, run `node tmvis.js`.
-
+[Node.js](https://nodejs.org/) is required to run the service. In order to run this program locally, clone the repository and change the working directory then install dependencies and run the server file as the following:
+```
+$ git clone https://github.com/oduwsdl/tmvis.git
+$ cd tmvis
+$ npm install -g
+$ node tmvis.js
+```
 
 ## Usage of the service
 
