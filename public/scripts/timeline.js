@@ -1329,10 +1329,10 @@ $(function() {
         if(selectedMementos > 0) {
             if(isValidDate(from) && isValidDate(to)) {
                 // Create date objects for comparison
-                fromBox = new Date(fromBox);
-                toBox = new Date(toBox);
-                var fromDate = new Date(from);
-                var toDate = new Date(to);
+                fromBox = new Date(fromBox.replace(/\-/g, "/"));
+                toBox = new Date(toBox.replace(/\-/g, "/"));
+                var fromDate = new Date(from.replace(/\-/g, "/"));
+                var toDate = new Date(to.replace(/\-/g, "/"));
                 if(fromDate < toDate) { // Check that dates are in the proper order
                     if(fromDate > fromBox || toDate < toBox) { // Check if dates differ from full range
                         var theDateRange = "Requested Date Range: " + from + " - " + to;
