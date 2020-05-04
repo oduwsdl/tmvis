@@ -1,6 +1,5 @@
 var imagesData = [];
 var indexImage = 0;
-var timeoutId;
 
 
 $(document).ready(function () {
@@ -46,13 +45,12 @@ $(document).ready(function () {
 
 	console.log(imagesData);
 
-	$('#play').click(function() {
-		slideImage(indexImage);
-		timeoutId = setInterval ( slideImage, 1000 );
+	$('#sliderNext').click(function() {
+		slideImage(1)
 	});
 
-	$('#pause').click(function() {
-		clearInterval(timeoutId);
+	$('#sliderPrev').click(function() {
+		slideImage(-1)
 	});
 });
 
@@ -86,10 +84,9 @@ function drawImageSlider(data) {
 **/
 var slideImage = function(step) {
 	if ( step == undefined ) {
-		//console.log("step is undefied now");
+		//console.log("step is undefined now");
 		step = 1;
 	}
-	clearTimeout ( timeoutId );
 	var indx = $('#myImage:visible').index('#myImage');
 
 
@@ -101,11 +98,6 @@ var slideImage = function(step) {
 
 	if ( indexImage >= imagesData.length ) {
 		indexImage = 0;
-		if(!$(".playinloop").prop("checked")) {
-			// added the below two lines in this if block to stop the re-looping of images that was happening on play click
-			clearInterval(timeoutId);
-			return;
-		}
 
 	} else if ( indexImage < 0 ) {
 		indexImage = imagesData.length - 1;
@@ -113,13 +105,12 @@ var slideImage = function(step) {
 	//If step == 0, we don't need to do any fadein our fadeout
 	if ( step != 0 ) {
 		$('#myImage:eq(' + indx + ')').show();
-		timeoutId = setTimeout ( slideImage, 1000 );
 	}
 
 	console.log(indexImage);
 	$('#myImage').attr('src', $(imagesData[indexImage].event_html).attr("src"));
 	$.each(imagesData[indexImage], function(i) {
 		$('#myContent').empty();
-		$('#myContent').append("<p><br><b> Datetime: " + (imagesData[indexImage].event_display_date).split(",")[0] + ", " + (imagesData[indexImage].event_display_date).split(",")[1] + "</b></a>");
+		$('#myContent').append("<p><br><b> Datetime: " + (imagesData[indexImage].event_display_date).split(",")[0] + ", " + (imagesData[indexImage].event_display_date).split(",")[1] + "</b></p>");
 	});
 };
