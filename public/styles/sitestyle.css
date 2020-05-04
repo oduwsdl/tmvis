@@ -325,11 +325,6 @@ p {
 	/*margin-left: 38%;*/
 }
 
-.buttonsWrapperSlider{
-	/*margin-left: 10%;*/
-	text-align: center;
-}
-
 h2 {
 	font-family: 'Oswald',sans-serif !important;
 	font-size: 1em;
@@ -363,18 +358,21 @@ h1 {
 	cursor : pointer;
 }*/
 
-#play, #pause {
-	display : inline-block;
-	font-family: 'Oswald', sans-serif !important;
-	font-size: 1em;
-	padding : 5px;
-	cursor : pointer;
-	text-align: center;
-	margin: 0 0 10px;
+#sliderPrev, #sliderNext {
+	border-radius: 50%;
+	position: relative;
 }
 
-#play {
-	//margin-left: 37%;
+#sliderPrev:focus, #sliderNext:focus {
+	outline-style: none;
+}
+
+#sliderPrev {
+	transform: translate(-10%,-10%);
+}
+
+#sliderNext {
+	transform: translate(10%,-10%);
 }
 
 .heightSet {
