@@ -159,6 +159,10 @@ function drawHistogram(dateArray){
 		var total_selected = selectedBars(d0[0], d0[1], total_selected);
 
 		d3.select("#selected_mementos").text(total_selected);
+		if(total_selected > 1000) // If more than 1000 mementos selected, tell user up to 1000 will be analyzed 
+            document.getElementById("memento_limit").style.visibility = "visible";
+        else
+        	document.getElementById("memento_limit").style.visibility = "hidden";
 
 		// Prevent range from going past possible domain
 		if(d0[0] < from)
@@ -207,6 +211,10 @@ function drawHistogram(dateArray){
 		var total_selected = selectedBars(d1[0], d1[1], total_selected);
 
 		d3.select("#selected_mementos").text(total_selected);
+		if(total_selected > 1000) // If more than 1000 mementos selected, tell user up to 1000 will be analyzed 
+            document.getElementById("memento_limit").style.visibility = "visible";
+        else
+        	document.getElementById("memento_limit").style.visibility = "hidden";
 
 		// Prevent range from going past possible domain
 		if(d1[0] < from)
@@ -270,6 +278,10 @@ function drawHistogram(dateArray){
 				var total_selected = selectedBars(fromDate, toDate, total_selected);
 
 				d3.select("#selected_mementos").text(total_selected);
+				if(total_selected > 1000) // If more than 1000 mementos selected, tell user up to 1000 will be analyzed 
+		            document.getElementById("memento_limit").style.visibility = "visible";
+		        else
+		        	document.getElementById("memento_limit").style.visibility = "hidden";
 
 				// Append tooltips on mouseover
 				zoomsvg.selectAll("rect")
@@ -412,6 +424,10 @@ function drawHistogram(dateArray){
 
 		// Reset selected mementos
         d3.select("#selected_mementos").text(data.length);
+        if(data.length > 1000) // If more than 1000 mementos selected, tell user up to 1000 will be analyzed 
+            document.getElementById("memento_limit").style.visibility = "visible";
+        else
+        	document.getElementById("memento_limit").style.visibility = "hidden";
 		// Remove brush
 		d3.select("g.brush").call(gBrush.move, null);
 
