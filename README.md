@@ -261,7 +261,22 @@ Mapping of attributes of URI to the values are as follows:
   }
 ]
 ```
+## Citing Project
 
+A tech report related to this project is available in arXiv.org ([pdf](https://arxiv.org/abs/2006.02487)). Please cite it as below:
+
+> Abigail Mabe, Dhruv Patel, Maheedhar Gunnam, Surbhi Shankar, Mat Kelly, Sawood Alam, Michael L. Nelson, and Michele C. Weigle. __Visualizing Webpage Changes Over Time__. Technical report arXiv:2006.02487, June 2020.
+
+```latex
+@techreport{tmvis-arxiv-2020,
+  author    = {Abigail Mabe and Dhruv Patel and Maheedhar Gunnam and Surbhi Shankar and Mat Kelly and Sawood Alam and Michael L. Nelson and Michele C. Weigle},
+  title     = {Visualizing Webpage Changes Over Time},
+  year      = {2020},
+  month     = jun,
+  number =  {arXiv:2006.02487},
+  url       = {https://arxiv.org/abs/2006.02487}
+}
+```
 
 ## Regarding License
 
