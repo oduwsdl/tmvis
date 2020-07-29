@@ -674,21 +674,23 @@ function uriAnalysisForAttributes(uri) {
     }
     var urir;
     if(uri.match(/\/[0-9]{14}\//g) == null) {
-        if(uri.match(/\/\*\//g) != null) { // incase the given URI is timemap URI-TM
-            tmIndicator = uri.match(/\/\*\//g)[0];
+        if(uri.indexOf("/timemap/link/") > -1) { // incase the given URI is timemap URI-TM
+            tmIndicator = "/timemap/link/";//uri.match(/\/\*\//g)[0];
             urir = uri.split(tmIndicator)[1]; // uri is here now
             var prePartToURIR = uri.split(tmIndicator)[0];
             var hdt = 4; // set hamming distance to default
             var primesource = "";
             var ci = "all";
             if(prePartToURIR.indexOf("archive-it") > -1){
-            primesource = "archiveit";
-            ci = parseInt(prePartToURIR.match(/org\/[0-9]*/g)[0].split("/")[1]); // checking for a numerical valuef or COllection Identifier
-            if(isNaN(ci)) {
-                ci = "all";
-            }
+                primesource = "archiveit";
+                ci = parseInt(prePartToURIR.match(/org\/[0-9]*/g)[0].split("/")[1]); // checking for a numerical valuef or COllection Identifier
+                if(isNaN(ci)) {
+                    ci = "all";
+                }
             } else if (prePartToURIR.indexOf("archive.org") > -1) {
                 primesource = "internetarchive";
+            } else if (prePartToURIR.indexOf("arquivo.pt") > -1) {
+                primesource = "arquivopt";
             } else {
                 alert("not a valid input for URI, pass a valid URI-R || URI-M || URI-T");
                 return false;
@@ -715,6 +717,8 @@ function uriAnalysisForAttributes(uri) {
             }
         } else if (prePartToURIR.indexOf("archive.org") > -1) {
             primesource = "internetarchive";
+        } else if (prePartToURIR.indexOf("arquivo.pt") > -1) {
+            primesource = "arquivopt";
         } else {
             alert("not a valid input for URI, pass a valid URI-R or URI-M");
             return false;
@@ -816,6 +820,8 @@ function getHistogramPage(){
     inputDates = "";
     if($("input[name='primesource']:checked").val() == "archiveit" ){
         toDisplay= "Archive-It";
+    } else if ($("input[name='primesource']:checked").val() == "archiveit" ) {
+        toDisplay= "Arquivo.pt";
     }
     getHistoData(toDisplay);
     $(".modal-backdrop").remove();
@@ -828,6 +834,8 @@ function getHistogramPage(){
 *                    "Internet Archive" or "Archive-It" depending on what the user selected.
 */
 function getHistoData(toDisplay) {
+
+    //uriAnalysisForAttributes($("#uriIP").val().trim());
 
     document.getElementById('info').style.display = "none";
 
@@ -1514,7 +1522,7 @@ function updateDeepLinkStateArr() {
     var pathname = window.location.pathname;
     var deepLinkStr = pathname.slice(1);
     var deepLinkParts = deepLinkStr.split("/");
-    if(deepLinkParts[0] == "alsummarizedview" && (deepLinkParts[1].toLowerCase()=="archiveit" || deepLinkParts[1].toLowerCase()=="internetarchive"  )  && (deepLinkParts[4]=="stats" || deepLinkParts[4]=="summary" || deepLinkParts[4]=="histogram")){
+    if(deepLinkParts[0] == "alsummarizedview" && (deepLinkParts[1].toLowerCase()=="archiveit" || deepLinkParts[1].toLowerCase()=="internetarchive" || deepLinkParts[1].toLowerCase()=="arquivopt" )  && (deepLinkParts[4]=="stats" || deepLinkParts[4]=="summary" || deepLinkParts[4]=="histogram")){
         curDeepLinkStateArr[0] = deepLinkParts[0];
         curDeepLinkStateArr[1] = deepLinkParts[1];
         curDeepLinkStateArr[4]= deepLinkParts[4];
