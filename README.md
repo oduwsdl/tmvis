@@ -68,7 +68,7 @@ Supported server arguments are as follows:
 To query the server instance generated using your browser visit `http://localhost:3000/alsummarizedtimemap/archiveIt/1068/4/[histogram | stats | summary]/[from]/[to]/http://4genderjustice.org/`, which has the attributes path as `primesource/ci/role/from/to/URI-R` substitute the URI-R to request a different site's summarization.
 
 ### Parameter Definitions:
-- `primesource` gets the value of 'archiveIt' or 'internetarchive' as to let the service know which is the primary source.
+- `primesource` gets the value of 'archiveIt', 'arquivopt', or 'internetarchive' as to let the service know which is the primary source.
 - `ci` is used to specify the collection identifier if not specified the argument 'all' is used
 - `role`: This is used to specify the values 'histogram', 'stats' or 'summary'.
     - histogram: to get dates and times of a timemap in the specified date range.
