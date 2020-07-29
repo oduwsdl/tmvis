@@ -1,8 +1,14 @@
-# Timemap Visualization
+# Timemap Visualization (TMVis)
 
-A web service for ArchiveThumbnails visualization based on Mat's (@machawk1) https://github.com/machawk1/ArchiveThumbnails which itself is an implementation of Ahmed AlSum's 2014 ECIR paper titled ["Thumbnail Summarization Techniques for Web
-Archives"](http://www.cs.odu.edu/~mln/pubs/ecir-2014/ecir-2014.pdf) for the Web Archiving Incentive Program for Columbia University Libraries' grant, "Visualizing Digital Collections of Web Archives".
+<img src="tmvis-main-page.png" width="500">
 
+TMVis is a web service to provide visualizations of how individual webpages have changed over time. We offer four visualizations: Image Grid, Image Slider, Timeline, and Animated GIF. 
+
+This work has been supported by a [NEH/IMLS Digital Humanities Advancement Grant](https://ws-dl.blogspot.com/2017/10/2017-10-16-visualizing-webpage-changes.html) ([HAA-256368-17](https://securegrants.neh.gov/publicquery/main.aspx?f=1&gn=HAA-256368-17)). We are grateful for the support of [NEH](https://www.neh.gov/divisions/odh) and [IMLS](https://www.imls.gov), and for the input from our partners, Deborah Kempe and Sumitra Duncan from the [Frick Art Reference Library](https://www.frick.org/research/library) and [New York Art Resources Consortium](http://www.nyarc.org/) and Pamela Graham and Alex Thurman from [Columbia University Libraries](https://library.columbia.edu/). This project is an extension of AlSum and Nelson’s ECIR 2014 work, [“Thumbnail Summarization Techniques for Web Archives”](http://www.cs.odu.edu/~mln/pubs/ecir-2014/ecir-2014.pdf), and Mat Kelly's ([@machawk1](https://github.com/machawk1)) [ArchiveThumbnails project](https://github.com/machawk1/ArchiveThumbnails), funded by an incentive grant from Columbia University Libraries and the Andrew W. Mellon Foundation.
+
+For more details, including a system walk-through and demo video, see https://ws-dl.blogspot.com/2020/05/2020-05-21-visualizing-webpage-changes.html
+
+Please cite this project as indicated in the [Citing Project](#citing-project) section.
 
 ## Running as a Docker Container
 
@@ -262,6 +268,22 @@ Mapping of attributes of URI to the values are as follows:
 ]
 ```
 
+## Citing Project
+
+A tech report related to this project is available in arXiv.org ([pdf](https://arxiv.org/abs/2006.02487)). Please cite it as below:
+
+> Abigail Mabe, Dhruv Patel, Maheedhar Gunnam, Surbhi Shankar, Mat Kelly, Sawood Alam, Michael L. Nelson, and Michele C. Weigle. __Visualizing Webpage Changes Over Time__. Technical report arXiv:2006.02487, June 2020.
+
+```latex
+@techreport{tmvis-arxiv-2020,
+  author    = {Abigail Mabe and Dhruv Patel and Maheedhar Gunnam and Surbhi Shankar and Mat Kelly and Sawood Alam and Michael L. Nelson and Michele C. Weigle},
+  title     = {Visualizing Webpage Changes Over Time},
+  year      = {2020},
+  month     = jun,
+  number =  {arXiv:2006.02487},
+  url       = {https://arxiv.org/abs/2006.02487}
+}
+```
 
 ## Regarding License
 
