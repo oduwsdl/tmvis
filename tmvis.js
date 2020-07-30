@@ -354,7 +354,7 @@ function doesBelongInCollection(yearsArry,memento) {
 function PublicEndpoint() {
     var theEndPoint = this;
     // Parameters supplied for means of access:
-    this.validSource = ['archiveit', 'internetarchive'];
+    this.validSource = ['archiveit', 'internetarchive', 'arquivopt'];
 
     this.isAValidSourceParameter = function (accessParameter) {
         return theEndPoint.validSource.indexOf(accessParameter) > -1;
@@ -1261,25 +1261,22 @@ function urlCanonicalize(url) {
 }
 
 /**
-* Determines if the uri type is URI-R, URI-M, URI-TM in order set appropriate host and path
+* Determines host and path based on selected archive
 *
 * @param uri - uri obtained from the request
 */
-function determineURIType (uri, response) {
+function determineHostPath (uri, response) {
     var returnValue = {};
 
-    if(uri.indexOf('web.archive.org/web/timemap/link/') > -1) {
+    if(response.thumbnails['primesource']=="internetarchive") {
         returnValue.host = 'web.archive.org';
-        returnValue.path = uri;
-    } else if(uri.indexOf('wayback.archive-it.org') > -1 && uri.indexOf('/timemap/link/') > -1) {
-        returnValue.host = 'wayback.archive-it.org';
-        returnValue.path = uri.split("wayback.archive-it.org")[1];
+        returnValue.path = '/web/timemap/link/' + uri;
     } else if(response.thumbnails['primesource']=="archiveit") {
         returnValue.host = 'wayback.archive-it.org';
         returnValue.path = '/'+response.thumbnails['collectionidentifier']+'/timemap/link/' + uri;
-    } else if(response.thumbnails['primesource']=="internetarchive") {
-        returnValue.host = 'web.archive.org';
-        returnValue.path = '/web/timemap/link/' + uri;
+    } else if(response.thumbnails['primesource']=="arquivopt") {
+        returnValue.host = 'arquivo.pt';
+        returnValue.path = '/wayback/timemap/link/' + uri;
     } else { // must contain the Host and Path for Memento Aggregator
         ConsoleLogIfRequired("Haven't given the Memgators Host and Path yet");
         returnValue.host = "";
@@ -1287,7 +1284,7 @@ function determineURIType (uri, response) {
         return;
     }
 
-    return returnValue; 
+    return returnValue;
 }
 
 /**
@@ -1327,7 +1324,7 @@ TimeMap.prototype.fetchTimemap = function(uri, response, curCookieClientId, call
     var buffer = ''; // An out-of-scope string to save the Timemap string, TODO: better documentation
 
     for(var i in URIs) {
-        var returnVal = determineURIType(URIs[i], response);
+        var returnVal = determineHostPath(URIs[i], response);
         timemapHost = returnVal.host;
         timemapPath = returnVal.path;
 
