@@ -4,7 +4,7 @@
 
 TMVis is a web service to provide visualizations of how individual webpages have changed over time. We offer four visualizations: Image Grid, Image Slider, Timeline, and Animated GIF. 
 
-See <https://ws-dl.cs.odu.edu/vis/tmvis/embed-examples.html> for examples of embedding the Image Grid, Image Slider, and Animated GIF in a webpage.
+See <https://www.cs.odu.edu/~mweigle/tmvis-embed/> for examples of embedding the Image Grid, Image Slider, and Animated GIF in a webpage.
 
 For more details, including a system walk-through and demo video, see [Visualizing Webpage Changes Over Time With TMVis](https://ws-dl.blogspot.com/2020/05/2020-05-21-visualizing-webpage-changes.html) from May 2020 on the [ODU WS-DL Blog](https://ws-dl.blogspot.com/).
 
