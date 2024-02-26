@@ -4,9 +4,11 @@
 
 TMVis is a web service to provide visualizations of how individual webpages have changed over time. We offer four visualizations: Image Grid, Image Slider, Timeline, and Animated GIF. 
 
-This work has been supported by a [NEH/IMLS Digital Humanities Advancement Grant](https://ws-dl.blogspot.com/2017/10/2017-10-16-visualizing-webpage-changes.html) ([HAA-256368-17](https://securegrants.neh.gov/publicquery/main.aspx?f=1&gn=HAA-256368-17)). We are grateful for the support of [NEH](https://www.neh.gov/divisions/odh) and [IMLS](https://www.imls.gov), and for the input from our partners, Deborah Kempe and Sumitra Duncan from the [Frick Art Reference Library](https://www.frick.org/research/library) and [New York Art Resources Consortium](http://www.nyarc.org/) and Pamela Graham and Alex Thurman from [Columbia University Libraries](https://library.columbia.edu/). This project is an extension of AlSum and Nelson’s ECIR 2014 work, [“Thumbnail Summarization Techniques for Web Archives”](http://www.cs.odu.edu/~mln/pubs/ecir-2014/ecir-2014.pdf), and Mat Kelly's ([@machawk1](https://github.com/machawk1)) [ArchiveThumbnails project](https://github.com/machawk1/ArchiveThumbnails), funded by an incentive grant from Columbia University Libraries and the Andrew W. Mellon Foundation.
+See <https://ws-dl.cs.odu.edu/vis/tmvis/embed-examples.html> for examples of embedding the Image Grid, Image Slider, and Animated GIF in a webpage.
 
-For more details, including a system walk-through and demo video, see https://ws-dl.blogspot.com/2020/05/2020-05-21-visualizing-webpage-changes.html
+For more details, including a system walk-through and demo video, see [Visualizing Webpage Changes Over Time With TMVis](https://ws-dl.blogspot.com/2020/05/2020-05-21-visualizing-webpage-changes.html) from May 2020 on the [ODU WS-DL Blog](https://ws-dl.blogspot.com/).
+
+This work has been supported by a [NEH/IMLS Digital Humanities Advancement Grant](https://ws-dl.blogspot.com/2017/10/2017-10-16-visualizing-webpage-changes.html) ([HAA-256368-17](https://securegrants.neh.gov/publicquery/main.aspx?f=1&gn=HAA-256368-17)). We are grateful for the support of [NEH](https://www.neh.gov/divisions/odh) and [IMLS](https://www.imls.gov), and for the input from our partners, Deborah Kempe and Sumitra Duncan from the [Frick Art Reference Library](https://www.frick.org/research/library) and [New York Art Resources Consortium](http://www.nyarc.org/) and Pamela Graham and Alex Thurman from [Columbia University Libraries](https://library.columbia.edu/). This project is an extension of AlSum and Nelson’s ECIR 2014 work, [“Thumbnail Summarization Techniques for Web Archives”](http://www.cs.odu.edu/~mln/pubs/ecir-2014/ecir-2014.pdf), and Mat Kelly's ([@machawk1](https://github.com/machawk1)) [ArchiveThumbnails project](https://github.com/machawk1/ArchiveThumbnails), funded by an incentive grant from Columbia University Libraries and the Andrew W. Mellon Foundation.
 
 Please cite this project as indicated in the [Citing Project](#citing-project) section.
 
@@ -53,7 +55,7 @@ $ node tmvis.js
 
 ## Usage of the service
 
-Running this service provides a user with the array of JSON object as the response (webservice model), which then has to be visualized with the UI tool deployed at http://tmvis.cs.odu.edu/ for which the code is available at https://github.com/oduwsdl/tmvis/ under the public folder.
+Running this service provides a user with the array of JSON object as the response (webservice model), which then has to be visualized with the UI tool deployed at <http://tmvis.cs.odu.edu/> for which the code is available at <https://github.com/oduwsdl/tmvis/> under the [public folder](https://github.com/oduwsdl/tmvis/tree/master/public).
 
 Supported server arguments are as follows:
 - `host` is used to specify server's hostname, default `localhost`
