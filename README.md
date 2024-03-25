@@ -37,7 +37,7 @@ In order to persist generated thumbnails, mount a host directory as a volume ins
 
 Container is completely transparent from the outside and it will be accessed as if the service is running in the host machine itself.
 
-In case if you want to make changes in the `tmvis` code itself, you might want to run it in the development mode by mounting the code from the host machine inside the container so that changes are reflected immediately, without requiring an image rebuild. Use the following comand to mount the code from the host:
+In case if you want to make changes in the `tmvis` code itself, you might want to run it in the development mode by mounting the code from the host machine inside the container so that changes are reflected immediately, without requiring an image rebuild. Use the following command to mount the code from the host:
 ```
 $ docker run --shm-size=1G -it --rm -v "$PWD":/app -v /app/node_modules -p 3000:3000 timemapvis
 ```
