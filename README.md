@@ -4,7 +4,9 @@
 
 TMVis was a research project that provided visualizations of how individual webpages have changed over time. We developed four visualizations: Image Grid, Image Slider, Timeline, and Animated GIF. The code is available (without support) in this repository. We previously had a live demo site, but that is no longer available.
 
-See <https://www.cs.odu.edu/~mweigle/tmvis-embed/> for examples of embedding the Image Grid, Image Slider, and Animated GIF in a webpage.
+See <https://www.cs.odu.edu/~mweigle/tmvis-embed/> for examples of embedding the Image Grid, Image Slider, and Animated GIF in a webpage. The source and files needed for this are available here in the [tmvis-embed/](tmvis-embed/) folder.  As an example, see the animated GIF built from mementos of <https://tncc.edu/>. 
+
+<img src="tmvis-embed/tmvis-watermark-gif.gif" alt="isolated" width="450"/> 
 
 For more details, see [Visualizing Webpage Changes Over Time With TMVis](https://ws-dl.blogspot.com/2020/05/2020-05-21-visualizing-webpage-changes.html) from May 2020 on the [ODU WS-DL Blog](https://ws-dl.blogspot.com/).
 
